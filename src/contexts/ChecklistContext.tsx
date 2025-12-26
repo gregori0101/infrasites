@@ -80,12 +80,16 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
         } else if (targetCount < currentCount) {
           // Remove excess gabinetes
           newData.gabinetes = prev.gabinetes.slice(0, targetCount);
+          // Reset currentGabinete if it's out of bounds
+          if (currentGabinete >= targetCount) {
+            setCurrentGabinete(Math.max(0, targetCount - 1));
+          }
         }
       }
       
       return newData;
     });
-  }, []);
+  }, [currentGabinete]);
 
   const updateGabinete = useCallback((index: number, gabinete: Partial<GabineteData>) => {
     setData(prev => {

@@ -54,6 +54,15 @@ export function ChecklistWizard() {
   // Steps 1-5 are per-gabinete (except step 0 which is site data)
   const isGabineteStep = currentStep >= 1 && currentStep <= 5;
   const maxGabinetes = data.qtdGabinetes;
+  
+  // Ensure currentGabinete is always within bounds
+  const safeCurrentGabinete = Math.min(currentGabinete, Math.max(0, data.gabinetes.length - 1));
+  
+  React.useEffect(() => {
+    if (currentGabinete !== safeCurrentGabinete) {
+      setCurrentGabinete(safeCurrentGabinete);
+    }
+  }, [currentGabinete, safeCurrentGabinete, setCurrentGabinete]);
 
   const handleNext = () => {
     if (isGabineteStep && currentGabinete < maxGabinetes - 1) {
