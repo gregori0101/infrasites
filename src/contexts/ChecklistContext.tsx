@@ -58,11 +58,33 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateData = useCallback(<K extends keyof ChecklistData>(key: K, value: ChecklistData[K]) => {
-    setData(prev => ({
-      ...prev,
-      [key]: value,
-      updatedAt: new Date().toISOString(),
-    }));
+    setData(prev => {
+      let newData = {
+        ...prev,
+        [key]: value,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // Sync gabinetes array when qtdGabinetes changes
+      if (key === 'qtdGabinetes' && typeof value === 'number') {
+        const targetCount = value as number;
+        const currentCount = prev.gabinetes.length;
+        
+        if (targetCount > currentCount) {
+          // Add new gabinetes
+          const newGabinetes = [...prev.gabinetes];
+          for (let i = currentCount; i < targetCount; i++) {
+            newGabinetes.push({ ...INITIAL_GABINETE });
+          }
+          newData.gabinetes = newGabinetes;
+        } else if (targetCount < currentCount) {
+          // Remove excess gabinetes
+          newData.gabinetes = prev.gabinetes.slice(0, targetCount);
+        }
+      }
+      
+      return newData;
+    });
   }, []);
 
   const updateGabinete = useCallback((index: number, gabinete: Partial<GabineteData>) => {
