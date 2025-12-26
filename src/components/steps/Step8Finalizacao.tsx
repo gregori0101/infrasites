@@ -11,10 +11,15 @@ import {
   Download, CheckCircle, Loader2, AlertCircle 
 } from "lucide-react";
 import { toast } from "sonner";
+import { generatePDF, downloadPDF } from "@/lib/generatePDF";
+import { generateExcel, downloadExcel } from "@/lib/generateExcel";
+import { format } from "date-fns";
 
 export function Step8Finalizacao() {
   const { data, updateData, saveToLocal, calculateProgress } = useChecklist();
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
+  const [isGeneratingExcel, setIsGeneratingExcel] = React.useState(false);
+  const [isSendingEmail, setIsSendingEmail] = React.useState(false);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
@@ -84,60 +89,124 @@ export function Step8Finalizacao() {
   };
 
   const handleGeneratePDF = async () => {
-    if (progress < 50) {
+    if (progress < 30) {
       toast.error('Checklist incompleto', {
-        description: 'Preencha pelo menos 50% dos campos obrigatórios.'
+        description: 'Preencha mais campos antes de gerar o PDF.'
       });
       return;
     }
 
-    setIsGenerating(true);
-    // Simulate PDF generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsGenerating(false);
-    toast.success('PDF gerado com sucesso!', {
-      description: `Checklist_${data.siglaSite}_${data.uf}.pdf`
-    });
+    setIsGeneratingPDF(true);
+    try {
+      updateData('dataHora', new Date().toISOString());
+      const pdfBlob = await generatePDF(data);
+      const filename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+      downloadPDF(pdfBlob, filename);
+      toast.success('PDF gerado com sucesso!', {
+        description: filename
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Erro ao gerar PDF', {
+        description: 'Tente novamente.'
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const handleGenerateExcel = async () => {
-    if (progress < 50) {
+    if (progress < 30) {
       toast.error('Checklist incompleto', {
-        description: 'Preencha pelo menos 50% dos campos obrigatórios.'
+        description: 'Preencha mais campos antes de gerar o Excel.'
       });
       return;
     }
 
-    setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsGenerating(false);
-    toast.success('Excel gerado com sucesso!', {
-      description: `Checklist_${data.siglaSite}_${data.uf}.xlsx`
-    });
+    setIsGeneratingExcel(true);
+    try {
+      updateData('dataHora', new Date().toISOString());
+      const excelBlob = generateExcel(data);
+      const filename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
+      downloadExcel(excelBlob, filename);
+      toast.success('Excel gerado com sucesso!', {
+        description: filename
+      });
+    } catch (error) {
+      console.error('Error generating Excel:', error);
+      toast.error('Erro ao gerar Excel', {
+        description: 'Tente novamente.'
+      });
+    } finally {
+      setIsGeneratingExcel(false);
+    }
   };
 
   const handleSendEmail = async () => {
-    if (progress < 80) {
+    if (progress < 50) {
       toast.error('Checklist incompleto', {
-        description: 'Preencha pelo menos 80% dos campos para enviar.'
+        description: 'Preencha pelo menos 50% dos campos para enviar.'
       });
       return;
     }
 
-    if (!data.assinaturaDigital) {
-      toast.error('Assinatura obrigatória', {
-        description: 'Assine o checklist antes de enviar.'
-      });
-      return;
-    }
+    setIsSendingEmail(true);
+    
+    try {
+      // Generate both files first
+      updateData('dataHora', new Date().toISOString());
+      const pdfBlob = await generatePDF(data);
+      const excelBlob = generateExcel(data);
+      
+      const dateStr = format(new Date(), 'dd/MM/yyyy HH:mm');
+      const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
+      
+      // Download both files
+      downloadPDF(pdfBlob, pdfFilename);
+      downloadExcel(excelBlob, excelFilename);
 
-    setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setIsGenerating(false);
-    toast.success('Relatório enviado!', {
-      description: 'Enviado para gregori.jose@telefonica.com'
-    });
+      // Build email body with checklist summary
+      const emailBody = `
+Checklist Sites Telecom
+
+Site: ${data.siglaSite} - ${data.uf}
+Data: ${dateStr}
+Técnico: ${data.tecnico || 'N/A'}
+
+Gabinetes: ${data.qtdGabinetes}
+${data.gabinetes.map((g, i) => `  • Gabinete ${i + 1}: ${g.tipo} - ${g.tecnologiasAcesso.join(', ') || 'N/A'}`).join('\n')}
+
+GMG: ${data.gmg.informar ? 'Sim' : 'Não'}
+Aterramento: ${data.torre.aterramento}
+Zeladoria: ${data.torre.zeladoria}
+
+Observações: ${data.observacoes || 'Nenhuma'}
+
+---
+Arquivos PDF e Excel foram baixados automaticamente.
+Por favor, anexe-os a este email.
+      `.trim();
+
+      const subject = `Checklist ${data.siglaSite || 'NOVO'} – ${data.uf} – ${dateStr}`;
+      const mailtoLink = `mailto:gregori.jose@telefonica.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+      
+      window.open(mailtoLink, '_blank');
+      
+      toast.success('Email preparado!', {
+        description: 'Anexe os arquivos baixados e envie.'
+      });
+    } catch (error) {
+      console.error('Error preparing email:', error);
+      toast.error('Erro ao preparar email', {
+        description: 'Tente novamente.'
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
+
+  const isGenerating = isGeneratingPDF || isGeneratingExcel || isSendingEmail;
 
   return (
     <div className="space-y-4 animate-slide-up">
@@ -230,7 +299,7 @@ export function Step8Finalizacao() {
           onClick={handleGeneratePDF}
           disabled={isGenerating}
         >
-          {isGenerating ? (
+          {isGeneratingPDF ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <Download className="w-5 h-5 text-primary" />
@@ -244,7 +313,7 @@ export function Step8Finalizacao() {
           onClick={handleGenerateExcel}
           disabled={isGenerating}
         >
-          {isGenerating ? (
+          {isGeneratingExcel ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <FileSpreadsheet className="w-5 h-5 text-success" />
@@ -256,9 +325,9 @@ export function Step8Finalizacao() {
       <Button
         className="w-full h-14 text-lg font-semibold gap-2 bg-accent hover:bg-accent/90"
         onClick={handleSendEmail}
-        disabled={isGenerating || progress < 80}
+        disabled={isGenerating || progress < 50}
       >
-        {isGenerating ? (
+        {isSendingEmail ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           <Send className="w-5 h-5" />
