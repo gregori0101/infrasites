@@ -6,8 +6,10 @@ import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Fan, Thermometer, Plus, Trash2, Camera } from "lucide-react";
+import { Fan, Thermometer, Plus, Trash2, Camera, AlertCircle } from "lucide-react";
 import { ClimatizacaoTipo, ACModelo, StatusFuncionamento, ArCondicionado, ClimatizacaoData } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const CLIMATIZACAO_TIPOS: ClimatizacaoTipo[] = ['AR CONDICIONADO', 'FAN', 'NA'];
 const AC_MODELOS: ACModelo[] = [
@@ -21,11 +23,18 @@ const EMPTY_AC: ArCondicionado = {
   funcionamento: 'OK'
 };
 
-export function Step5Climatizacao() {
+interface Step5Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step5Climatizacao({ showErrors = false, validationErrors = [] }: Step5Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
   if (!gabinete) return null;
+
+  const tipoError = showErrors && getFieldError(validationErrors, 'climatizacao.tipo');
 
   const updateClimatizacao = (updates: Partial<ClimatizacaoData>) => {
     updateGabinete(currentGabinete, {

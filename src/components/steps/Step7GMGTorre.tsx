@@ -5,8 +5,10 @@ import { PhotoCapture } from "@/components/ui/photo-capture";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Fuel, Radio, Shield, Wrench } from "lucide-react";
+import { Fuel, Radio, Shield, AlertCircle } from "lucide-react";
 import { StatusFuncionamento, GMGData, TorreData, FCCFabricante } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK', 'NA'];
 const FCC_FABRICANTES: FCCFabricante[] = [
@@ -14,7 +16,13 @@ const FCC_FABRICANTES: FCCFabricante[] = [
   'EMERSON', 'HUAWEI', 'INTERGY', 'VERTIV', 'ZTE', 'OUTRA'
 ];
 
-export function Step7GMGTorre() {
+interface Step7Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step7GMGTorre({ showErrors = false, validationErrors = [] }: Step7Props) {
+  const fotoNinhosError = showErrors && getFieldError(validationErrors, 'fotoNinhos');
   const { data, updateData } = useChecklist();
 
   const updateGMG = (updates: Partial<GMGData>) => {

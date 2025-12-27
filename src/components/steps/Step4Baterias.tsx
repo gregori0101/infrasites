@@ -3,13 +3,14 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
 import { PhotoCapture } from "@/components/ui/photo-capture";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { ChipSelect } from "@/components/ui/chip-select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Battery, Plus, Trash2 } from "lucide-react";
+import { Battery, Plus, Trash2, AlertCircle } from "lucide-react";
 import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BancoBateria, BateriasData } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO 100A', 'POLÍMERO 200A', 'MONOBLOCO 2V', 'NA'];
 const BATERIA_FABRICANTES: BateriaFabricante[] = [
@@ -27,11 +28,18 @@ const EMPTY_BANCO: BancoBateria = {
   estado: 'OK'
 };
 
-export function Step4Baterias() {
+interface Step4Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step4Baterias({ showErrors = false, validationErrors = [] }: Step4Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
   if (!gabinete) return null;
+
+  const fotoError = showErrors && getFieldError(validationErrors, 'fotoBanco');
 
   const updateBaterias = (updates: Partial<BateriasData>) => {
     updateGabinete(currentGabinete, {

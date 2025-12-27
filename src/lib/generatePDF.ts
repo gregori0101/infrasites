@@ -14,12 +14,22 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   const accentColor: [number, number, number] = [255, 107, 53]; // Vivo Orange
 
   const addHeader = () => {
-    doc.setFillColor(...primaryColor);
+    // Vivo purple gradient header
+    doc.setFillColor(102, 0, 153); // Vivo Purple
     doc.rect(0, 0, pageWidth, 25, 'F');
+    
+    // Vivo Logo text (simulated)
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('CHECKLIST SITES TELECOM', margin, 15);
+    doc.text('vivo', margin, 14);
+    
+    // Orange accent dot
+    doc.setFillColor(255, 107, 53);
+    doc.circle(margin + 25, 10, 3, 'F');
+    
+    doc.setFontSize(12);
+    doc.text('CHECKLIST SITES TELECOM', margin + 35, 14);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`${data.siglaSite} - ${data.uf}`, pageWidth - margin, 15, { align: 'right' });

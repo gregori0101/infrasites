@@ -6,8 +6,10 @@ import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, Settings, Camera } from "lucide-react";
+import { Zap, Settings, Camera, AlertCircle } from "lucide-react";
 import { FCCFabricante, TensaoDC, FCCData } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const FCC_FABRICANTES: FCCFabricante[] = [
   'ALCATEL', 'ALFA', 'ASCOM', 'DELTA', 'ELTEK', 'EFACEC',
@@ -17,11 +19,20 @@ const FCC_FABRICANTES: FCCFabricante[] = [
 const TENSAO_OPTIONS: TensaoDC[] = ['24V', '48V'];
 const UR_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'Outra'] as const;
 
-export function Step3FCC() {
+interface Step3Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
   if (!gabinete) return null;
+
+  const fabricanteError = showErrors && getFieldError(validationErrors, 'fabricante');
+  const tensaoError = showErrors && getFieldError(validationErrors, 'tensaoDC');
+  const fotoError = showErrors && getFieldError(validationErrors, 'fcc.fotoPanoramica');
 
   const updateFCC = (updates: Partial<FCCData>) => {
     updateGabinete(currentGabinete, {

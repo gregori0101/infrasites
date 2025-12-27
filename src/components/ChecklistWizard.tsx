@@ -14,10 +14,13 @@ import { Step8Finalizacao } from "@/components/steps/Step8Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Radio, 
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, Menu, History
+  Moon, Sun, History, AlertCircle
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { VivoLogo } from "@/components/ui/vivo-logo";
+import { useStepValidation } from "@/hooks/use-validation";
+import { toast } from "sonner";
 
 const STEPS = [
   { label: 'Site', icon: <MapPin /> },
@@ -64,7 +67,22 @@ export function ChecklistWizard() {
     }
   }, [currentGabinete, safeCurrentGabinete, setCurrentGabinete]);
 
+  const validation = useStepValidation(data, currentStep, currentGabinete);
+  const [showValidationErrors, setShowValidationErrors] = React.useState(false);
+
   const handleNext = () => {
+    // Validate current step before proceeding
+    if (!validation.isValid) {
+      setShowValidationErrors(true);
+      toast.error("Preencha os campos obrigatórios", {
+        description: validation.errors[0]?.message,
+        icon: <AlertCircle className="w-4 h-4" />
+      });
+      return;
+    }
+    
+    setShowValidationErrors(false);
+    
     if (isGabineteStep && currentGabinete < maxGabinetes - 1) {
       setCurrentGabinete(currentGabinete + 1);
     } else if (currentStep < STEPS.length - 1) {
@@ -112,14 +130,14 @@ export function ChecklistWizard() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0: return <Step1DadosSite />;
-      case 1: return <Step2Gabinete />;
-      case 2: return <Step3FCC />;
-      case 3: return <Step4Baterias />;
-      case 4: return <Step5Climatizacao />;
-      case 5: return <Step6Equipamentos />;
-      case 6: return <Step7GMGTorre />;
-      case 7: return <Step8Finalizacao />;
+      case 0: return <Step1DadosSite showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 1: return <Step2Gabinete showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 2: return <Step3FCC showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 3: return <Step4Baterias showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 4: return <Step5Climatizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 5: return <Step6Equipamentos showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 6: return <Step7GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 7: return <Step8Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
       default: return null;
     }
   };
@@ -129,10 +147,9 @@ export function ChecklistWizard() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Radio className="w-4 h-4 text-primary-foreground" />
-            </div>
+          <div className="flex items-center gap-3">
+            <VivoLogo size="md" />
+            <div className="h-6 w-px bg-border" />
             <div>
               <h1 className="font-bold text-sm leading-tight">Checklist Telecom</h1>
               <p className="text-[10px] text-muted-foreground">

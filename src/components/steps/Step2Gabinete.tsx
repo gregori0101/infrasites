@@ -5,8 +5,10 @@ import { ChipSelect } from "@/components/ui/chip-select";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Server, Radio, Wifi } from "lucide-react";
+import { Server, Radio, Wifi, AlertCircle } from "lucide-react";
 import { GabineteType, TecnologiaAcesso, TecnologiaTransporte } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const GABINETE_TYPES: GabineteType[] = [
   'CONTAINER', 'SHARING', 'HUAWEI 3012', 'HUAWEI APM30', 'HUAWEI APM5930',
@@ -16,11 +18,19 @@ const GABINETE_TYPES: GabineteType[] = [
 const TECNOLOGIAS_ACESSO: TecnologiaAcesso[] = ['2G', '3G', '4G', '5G'];
 const TECNOLOGIAS_TRANSPORTE: TecnologiaTransporte[] = ['DWDM', 'GPON', 'HL4', 'HL5D', 'HL5G', 'PDH', 'SDH', 'GWS', 'GWD', 'SWA'];
 
-export function Step2Gabinete() {
+interface Step2Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Step2Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
   if (!gabinete) return null;
+
+  const tipoError = showErrors && getFieldError(validationErrors, 'tipo');
+  const acessoError = showErrors && getFieldError(validationErrors, 'tecnologiasAcesso');
 
   return (
     <div className="space-y-4 animate-slide-up">

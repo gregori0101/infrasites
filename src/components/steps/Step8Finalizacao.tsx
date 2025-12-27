@@ -14,8 +14,16 @@ import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
 import { format } from "date-fns";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
-export function Step8Finalizacao() {
+interface Step8Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step8Finalizacao({ showErrors = false, validationErrors = [] }: Step8Props) {
+  const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, saveToLocal, calculateProgress } = useChecklist();
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = React.useState(false);

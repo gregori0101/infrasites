@@ -2,13 +2,23 @@ import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
 import { PhotoCapture } from "@/components/ui/photo-capture";
-import { Server, Radio, Camera } from "lucide-react";
+import { Server, Radio, Camera, AlertCircle } from "lucide-react";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
-export function Step6Equipamentos() {
+interface Step6Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step6Equipamentos({ showErrors = false, validationErrors = [] }: Step6Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
   if (!gabinete) return null;
+
+  const transmissaoError = showErrors && getFieldError(validationErrors, 'fotoTransmissao');
+  const acessoError = showErrors && getFieldError(validationErrors, 'fotoAcesso');
 
   return (
     <div className="space-y-4 animate-slide-up">
