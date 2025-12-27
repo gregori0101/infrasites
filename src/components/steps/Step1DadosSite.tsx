@@ -5,13 +5,20 @@ import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Building2, Hash, Image } from "lucide-react";
+import { MapPin, Building2, Image, AlertCircle } from "lucide-react";
 import { UF, AbrigoType } from "@/types/checklist";
+import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { cn } from "@/lib/utils";
 
 const UF_OPTIONS: UF[] = ['PA', 'AM', 'MA', 'RR', 'AP'];
 const ABRIGO_OPTIONS: AbrigoType[] = ['SHARING', 'GABINETE 1', 'GABINETE 2', 'GABINETE 3', 'GABINETE 4', 'GABINETE 5', 'GABINETE 6', 'GABINETE 7'];
 
-export function Step1DadosSite() {
+interface Step1Props {
+  showErrors?: boolean;
+  validationErrors?: ValidationError[];
+}
+
+export function Step1DadosSite({ showErrors = false, validationErrors = [] }: Step1Props) {
   const { data, updateData } = useChecklist();
 
   const handleSiglaChange = (value: string) => {
@@ -20,6 +27,10 @@ export function Step1DadosSite() {
   };
 
   const isSiglaValid = data.siglaSite.length === 5;
+  const siglaError = showErrors && getFieldError(validationErrors, 'siglaSite');
+  const ufError = showErrors && getFieldError(validationErrors, 'uf');
+  const abrigoError = showErrors && getFieldError(validationErrors, 'abrigoSelecionado');
+  const fotoError = showErrors && getFieldError(validationErrors, 'fotoPanoramica');
 
   return (
     <div className="space-y-4 animate-slide-up">
