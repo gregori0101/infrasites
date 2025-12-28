@@ -8,14 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, PenTool, Send, FileSpreadsheet, 
-  Download, CheckCircle, Loader2, AlertCircle 
+  Download, CheckCircle, Loader2, AlertCircle, History 
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
+import { saveReportToDatabase, updateReportEmailSent } from "@/lib/reportDatabase";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface Step8Props {
   showErrors?: boolean;
@@ -24,10 +26,12 @@ interface Step8Props {
 
 export function Step8Finalizacao({ showErrors = false, validationErrors = [] }: Step8Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
-  const { data, updateData, saveToLocal, calculateProgress } = useChecklist();
+  const { data, updateData, saveToLocal, calculateProgress, resetChecklist } = useChecklist();
+  const navigate = useNavigate();
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = React.useState(false);
   const [isSendingEmail, setIsSendingEmail] = React.useState(false);
+  const [savedReportId, setSavedReportId] = React.useState<string | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
@@ -174,6 +178,22 @@ export function Step8Finalizacao({ showErrors = false, validationErrors = [] }: 
       downloadPDF(pdfBlob, pdfFilename);
       downloadExcel(excelBlob, excelFilename);
 
+      // Save to database (even if email fails)
+      let reportId = savedReportId;
+      if (!reportId) {
+        const result = await saveReportToDatabase(data, pdfFilename, excelFilename);
+        if (result.success && result.id) {
+          reportId = result.id;
+          setSavedReportId(result.id);
+          toast.success('Relatório salvo no banco de dados!');
+        } else {
+          console.error('Failed to save report:', result.error);
+          toast.warning('Relatório não foi salvo no banco', {
+            description: result.error
+          });
+        }
+      }
+
       // Build email body with checklist summary
       const emailBody = `
 Checklist Sites Telecom
@@ -201,6 +221,11 @@ Por favor, anexe-os a este email.
       
       window.open(mailtoLink, '_blank');
       
+      // Update email_sent status if we have a report ID
+      if (reportId) {
+        await updateReportEmailSent(reportId);
+      }
+      
       toast.success('Email preparado!', {
         description: 'Anexe os arquivos baixados e envie.'
       });
@@ -212,6 +237,10 @@ Por favor, anexe-os a este email.
     } finally {
       setIsSendingEmail(false);
     }
+  };
+
+  const handleViewHistory = () => {
+    navigate('/historico');
   };
 
   const isGenerating = isGeneratingPDF || isGeneratingExcel || isSendingEmail;
@@ -343,13 +372,24 @@ Por favor, anexe-os a este email.
         Enviar por Email
       </Button>
 
-      <Button
-        variant="secondary"
-        className="w-full"
-        onClick={handleSave}
-      >
-        Salvar Localmente
-      </Button>
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          variant="secondary"
+          className="h-12"
+          onClick={handleSave}
+        >
+          Salvar Localmente
+        </Button>
+
+        <Button
+          variant="outline"
+          className="h-12"
+          onClick={handleViewHistory}
+        >
+          <History className="w-4 h-4 mr-2" />
+          Ver Histórico
+        </Button>
+      </div>
 
       <p className="text-xs text-center text-muted-foreground">
         Data/Hora: {new Date().toLocaleString('pt-BR')}
