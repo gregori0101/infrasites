@@ -5,8 +5,11 @@ import { ptBR } from "date-fns/locale";
 import { 
   ArrowLeft, Search, Filter, Mail, MailCheck, 
   FileText, FileSpreadsheet, Eye, RefreshCw, X,
-  Calendar, MapPin, User, Building2
+  Calendar, MapPin, User, Building2, Download, Loader2
 } from "lucide-react";
+import { generatePDF, downloadPDF } from "@/lib/generatePDF";
+import { generateExcel, downloadExcel } from "@/lib/generateExcel";
+import { reportToChecklist } from "@/lib/reportToChecklist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +38,8 @@ export default function ReportsHistory() {
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   
   // Filters
   const [siteCodeFilter, setSiteCodeFilter] = useState("");
@@ -77,27 +82,82 @@ export default function ReportsHistory() {
     }
   };
 
-  const handleResendEmail = () => {
+  const handleDownloadPDF = async () => {
     if (!selectedReport) return;
     
-    const dateStr = selectedReport.created_date + ' ' + selectedReport.created_time;
-    const emailBody = `
-Checklist Sites Telecom - Reenvio
+    setIsGeneratingPDF(true);
+    try {
+      const checklistData = reportToChecklist(selectedReport);
+      const pdfBlob = await generatePDF(checklistData);
+      const filename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.pdf`;
+      downloadPDF(pdfBlob, filename);
+      toast.success('PDF baixado com sucesso!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Erro ao gerar PDF');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
+  const handleDownloadExcel = async () => {
+    if (!selectedReport) return;
+    
+    setIsGeneratingExcel(true);
+    try {
+      const checklistData = reportToChecklist(selectedReport);
+      const excelBlob = generateExcel(checklistData);
+      const filename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.xlsx`;
+      downloadExcel(excelBlob, filename);
+      toast.success('Excel baixado com sucesso!');
+    } catch (error) {
+      console.error('Error generating Excel:', error);
+      toast.error('Erro ao gerar Excel');
+    } finally {
+      setIsGeneratingExcel(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!selectedReport) return;
+    
+    // Generate and download files first
+    try {
+      const checklistData = reportToChecklist(selectedReport);
+      const pdfBlob = await generatePDF(checklistData);
+      const excelBlob = generateExcel(checklistData);
+      
+      const pdfFilename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.pdf`;
+      const excelFilename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.xlsx`;
+      
+      downloadPDF(pdfBlob, pdfFilename);
+      downloadExcel(excelBlob, excelFilename);
+      
+      const dateStr = selectedReport.created_date + ' ' + selectedReport.created_time;
+      const emailBody = `
+Checklist Sites Telecom
+  
 Site: ${selectedReport.site_code} - ${selectedReport.state_uf}
-Data Original: ${dateStr}
+Data: ${dateStr}
 Técnico: ${selectedReport.technician_name || 'N/A'}
 Gabinetes: ${selectedReport.total_cabinets}
-
+  
 ---
-Este é um reenvio do relatório original.
-    `.trim();
+Os arquivos PDF e Excel foram baixados automaticamente.
+Por favor, anexe-os a este email antes de enviar.
+      `.trim();
 
-    const subject = `[Reenvio] Checklist ${selectedReport.site_code} – ${selectedReport.state_uf} – ${dateStr}`;
-    const mailtoLink = `mailto:gregori.jose@telefonica.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-    
-    window.open(mailtoLink, '_blank');
-    toast.success('Email preparado para reenvio!');
+      const subject = `Checklist ${selectedReport.site_code} – ${selectedReport.state_uf} – ${dateStr}`;
+      const mailtoLink = `mailto:gregori.jose@telefonica.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+      
+      window.open(mailtoLink, '_blank');
+      toast.success('Arquivos baixados e email preparado!', {
+        description: 'Anexe os arquivos baixados ao email.'
+      });
+    } catch (error) {
+      console.error('Error preparing email:', error);
+      toast.error('Erro ao preparar email');
+    }
   };
 
   const formatDateTime = (createdAt: string | undefined) => {
@@ -360,25 +420,39 @@ Este é um reenvio do relatório original.
               
               {/* Actions */}
               <div className="border-t p-4 flex gap-2">
-                {selectedReport.pdf_file_path && (
-                  <Button variant="outline" className="flex-1" asChild>
-                    <a href={selectedReport.pdf_file_path} target="_blank" rel="noopener noreferrer">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Ver PDF
-                    </a>
-                  </Button>
-                )}
-                {selectedReport.excel_file_path && (
-                  <Button variant="outline" className="flex-1" asChild>
-                    <a href={selectedReport.excel_file_path} target="_blank" rel="noopener noreferrer">
-                      <FileSpreadsheet className="w-4 h-4 mr-2" />
-                      Ver Excel
-                    </a>
-                  </Button>
-                )}
-                <Button onClick={handleResendEmail} className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF || isGeneratingExcel}
+                >
+                  {isGeneratingPDF ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Baixar PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={handleDownloadExcel}
+                  disabled={isGeneratingPDF || isGeneratingExcel}
+                >
+                  {isGeneratingExcel ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Baixar Excel
+                </Button>
+                <Button 
+                  onClick={handleResendEmail} 
+                  className="flex-1"
+                  disabled={isGeneratingPDF || isGeneratingExcel}
+                >
                   <Mail className="w-4 h-4 mr-2" />
-                  Reenviar Email
+                  Enviar Email
                 </Button>
               </div>
             </Card>
