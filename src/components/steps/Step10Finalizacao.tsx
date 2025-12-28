@@ -19,12 +19,12 @@ import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
-interface Step9Props {
+interface Step10Props {
   showErrors?: boolean;
   validationErrors?: ValidationError[];
 }
 
-export function Step9Finalizacao({ showErrors = false, validationErrors = [] }: Step9Props) {
+export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, saveToLocal, calculateProgress, resetChecklist } = useChecklist();
   const navigate = useNavigate();

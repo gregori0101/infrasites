@@ -9,11 +9,12 @@ import { Step3FCC } from "@/components/steps/Step3FCC";
 import { Step4Baterias } from "@/components/steps/Step4Baterias";
 import { Step5Climatizacao } from "@/components/steps/Step5Climatizacao";
 import { Step6Fibra } from "@/components/steps/Step6Fibra";
-import { Step7Equipamentos } from "@/components/steps/Step7Equipamentos";
-import { Step8GMGTorre } from "@/components/steps/Step8GMGTorre";
-import { Step9Finalizacao } from "@/components/steps/Step9Finalizacao";
+import { Step7Energia } from "@/components/steps/Step7Energia";
+import { Step8Equipamentos } from "@/components/steps/Step8Equipamentos";
+import { Step9GMGTorre } from "@/components/steps/Step9GMGTorre";
+import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
-  MapPin, Server, Zap, Battery, Fan, Cable, Radio, 
+  MapPin, Server, Zap, Battery, Fan, Cable, Plug, Radio, 
   Fuel, FileCheck, ChevronLeft, ChevronRight,
   Moon, Sun, History, AlertCircle
 } from "lucide-react";
@@ -30,6 +31,7 @@ const STEPS = [
   { label: 'Baterias', icon: <Battery /> },
   { label: 'Clima', icon: <Fan /> },
   { label: 'Fibra', icon: <Cable /> },
+  { label: 'Energia', icon: <Plug /> },
   { label: 'Equip.', icon: <Radio /> },
   { label: 'GMG/Torre', icon: <Fuel /> },
   { label: 'Finalizar', icon: <FileCheck /> },
@@ -56,8 +58,8 @@ export function ChecklistWizard() {
   const progress = calculateProgress();
   const savedChecklists = getAllLocal();
 
-  // Steps 1-6 are per-gabinete (except step 0 which is site data, step 5 is fibra)
-  const isGabineteStep = currentStep >= 1 && currentStep <= 4 || currentStep === 6;
+  // Steps 1-4, 6, 7 are per-gabinete (step 0 = site, step 5 = fibra, step 6 = energia)
+  const isGabineteStep = (currentStep >= 1 && currentStep <= 4) || currentStep === 7;
   const maxGabinetes = data.qtdGabinetes;
   
   // Ensure currentGabinete is always within bounds
@@ -89,7 +91,7 @@ export function ChecklistWizard() {
       setCurrentGabinete(currentGabinete + 1);
     } else if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
-      if (currentStep === 0 || currentStep >= 5) {
+      if (currentStep === 0 || currentStep === 5 || currentStep === 6) {
         setCurrentGabinete(0);
       }
     }
@@ -102,7 +104,7 @@ export function ChecklistWizard() {
       setCurrentStep(currentStep - 1);
       if (currentStep === 1) {
         setCurrentGabinete(0);
-      } else if (currentStep > 5) {
+      } else if (currentStep === 8) {
         setCurrentGabinete(maxGabinetes - 1);
       }
     }
@@ -138,9 +140,10 @@ export function ChecklistWizard() {
       case 3: return <Step4Baterias showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 4: return <Step5Climatizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 5: return <Step6Fibra showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 6: return <Step7Equipamentos showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 7: return <Step8GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 8: return <Step9Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 6: return <Step7Energia showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 7: return <Step8Equipamentos showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 8: return <Step9GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 9: return <Step10Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
       default: return null;
     }
   };
