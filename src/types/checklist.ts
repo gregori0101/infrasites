@@ -49,6 +49,40 @@ export type CapacidadeDGO = '12FO' | '24FO' | '48FO' | '72FO' | '144FO' | '144+F
 export type FormatoDGO = 'SLIDE' | 'FRONTAL' | 'ARTICULADO' | 'MÓDULO';
 export type EstadoFisico = 'OK' | 'NOK';
 
+// Energia types
+export type TipoQuadro = 'QDCA' | 'QGBT' | 'SUBQUADRO';
+export type FabricanteQuadro = 'SIEMENS' | 'SCHNEIDER' | 'ABB' | 'WEG' | 'OUTRA';
+export type TensaoEntrada = '127V' | '220V' | '380V' | '440V';
+export type StatusPlaca = 'OK' | 'NOK' | 'AUSENTE';
+
+export interface ProtecoesData {
+  drOK: boolean;
+  dpsOK: boolean;
+  disjuntoresOK: boolean;
+  termomagneticosOK: boolean;
+  chaveGeralOK: boolean;
+}
+
+export interface CabosData {
+  terminaisApertados: boolean;
+  isolacaoOK: boolean;
+  fotoCabos: string | null;
+}
+
+export interface EnergiaData {
+  tipoQuadro: TipoQuadro;
+  fabricante: FabricanteQuadro;
+  potenciaKVA: number;
+  tensaoEntrada: TensaoEntrada;
+  transformadorOK: boolean;
+  fotoTransformador: string | null;
+  fotoQuadroGeral: string | null;
+  protecoes: ProtecoesData;
+  cabos: CabosData;
+  placaStatus: StatusPlaca;
+  fotoPlaca: string | null;
+}
+
 export interface AbordagemData {
   tipo: AbordagemFibra;
   fotoCaixasSubterraneas: string[];
@@ -163,6 +197,7 @@ export interface ChecklistData {
   fotoPanoramica: string | null;
   gabinetes: GabineteData[];
   fibra: FibraData;
+  energia: EnergiaData;
   gmg: GMGData;
   torre: TorreData;
   observacoes: string;
@@ -243,6 +278,30 @@ export const INITIAL_FIBRA: FibraData = {
   fotoObservacoesDGOs: null,
 };
 
+export const INITIAL_ENERGIA: EnergiaData = {
+  tipoQuadro: 'QDCA',
+  fabricante: 'SCHNEIDER',
+  potenciaKVA: 75,
+  tensaoEntrada: '220V',
+  transformadorOK: true,
+  fotoTransformador: null,
+  fotoQuadroGeral: null,
+  protecoes: {
+    drOK: true,
+    dpsOK: true,
+    disjuntoresOK: true,
+    termomagneticosOK: true,
+    chaveGeralOK: true,
+  },
+  cabos: {
+    terminaisApertados: true,
+    isolacaoOK: true,
+    fotoCabos: null,
+  },
+  placaStatus: 'OK',
+  fotoPlaca: null,
+};
+
 export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'updatedAt'> = {
   siglaSite: '',
   uf: 'PA',
@@ -251,6 +310,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   fotoPanoramica: null,
   gabinetes: [{ ...INITIAL_GABINETE }],
   fibra: { ...INITIAL_FIBRA },
+  energia: { ...INITIAL_ENERGIA },
   gmg: {
     informar: false,
   },

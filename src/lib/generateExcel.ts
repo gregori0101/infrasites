@@ -184,6 +184,21 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   }
   row['Fibra_Observacoes'] = data.fibra.observacoesDGOs || '';
   
+  // GRUPO ENERGIA
+  row['Energia_Tipo'] = data.energia.tipoQuadro;
+  row['Energia_Fabricante'] = data.energia.fabricante;
+  row['Energia_kVA'] = data.energia.potenciaKVA;
+  row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada;
+  row['Energia_Transformador_OK'] = data.energia.transformadorOK ? 'SIM' : 'NÃO';
+  row['Energia_DR_OK'] = data.energia.protecoes.drOK ? 'SIM' : 'NÃO';
+  row['Energia_DPS_OK'] = data.energia.protecoes.dpsOK ? 'SIM' : 'NÃO';
+  row['Energia_Disjuntores_OK'] = data.energia.protecoes.disjuntoresOK ? 'SIM' : 'NÃO';
+  row['Energia_Termomagneticos_OK'] = data.energia.protecoes.termomagneticosOK ? 'SIM' : 'NÃO';
+  row['Energia_Chave_Geral_OK'] = data.energia.protecoes.chaveGeralOK ? 'SIM' : 'NÃO';
+  row['Energia_Terminais_OK'] = data.energia.cabos.terminaisApertados ? 'SIM' : 'NÃO';
+  row['Energia_Isolacao_OK'] = data.energia.cabos.isolacaoOK ? 'SIM' : 'NÃO';
+  row['Energia_Cabos_OK'] = (data.energia.cabos.terminaisApertados && data.energia.cabos.isolacaoOK) ? 'SIM' : 'NÃO';
+  row['Energia_Placa_Status'] = data.energia.placaStatus;
   // GRUPO FINAL: GMG E TORRE
   row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
   row['GMG_Fabricante'] = data.gmg.fabricante || '';

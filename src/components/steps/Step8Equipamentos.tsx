@@ -6,12 +6,12 @@ import { Server, Radio, Camera, AlertCircle } from "lucide-react";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 
-interface Step7Props {
+interface Step8Props {
   showErrors?: boolean;
   validationErrors?: ValidationError[];
 }
 
-export function Step7Equipamentos({ showErrors = false, validationErrors = [] }: Step7Props) {
+export function Step8Equipamentos({ showErrors = false, validationErrors = [] }: Step8Props) {
   const { data, currentGabinete, updateGabinete } = useChecklist();
   const gabinete = data.gabinetes[currentGabinete];
 
