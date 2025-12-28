@@ -5,10 +5,7 @@ import { format } from 'date-fns';
 const TECNOLOGIAS_ACESSO = ['2G', '3G', '4G', '5G'];
 const TECNOLOGIAS_TRANSPORTE = ['DWDM', 'GPON', 'HL4', 'HL5D', 'HL5G', 'PDH', 'SDH', 'GWS', 'GWD', 'SWA'];
 
-export function generateExcel(data: ChecklistData): Blob {
-  const workbook = XLSX.utils.book_new();
-  
-  // Build the row data - one complete row per checklist
+function buildRowFromChecklist(data: ChecklistData): Record<string, string | number | boolean> {
   const row: Record<string, string | number | boolean> = {};
   
   // GRUPO 1: IDENTIFICAÇÃO
@@ -179,6 +176,13 @@ export function generateExcel(data: ChecklistData): Blob {
   row['Assinatura_Digital'] = data.assinaturaDigital ? 'SIM' : 'NÃO';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
   
+  return row;
+}
+
+export function generateExcel(data: ChecklistData): Blob {
+  const workbook = XLSX.utils.book_new();
+  const row = buildRowFromChecklist(data);
+  
   // Create worksheet
   const worksheet = XLSX.utils.json_to_sheet([row]);
   
@@ -188,6 +192,29 @@ export function generateExcel(data: ChecklistData): Blob {
   
   // Add worksheet to workbook
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Checklist');
+  
+  // Generate blob
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+export function generateConsolidatedExcel(dataList: ChecklistData[]): Blob {
+  const workbook = XLSX.utils.book_new();
+  
+  // Build all rows
+  const rows = dataList.map(data => buildRowFromChecklist(data));
+  
+  // Create worksheet with all rows
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  
+  // Set column widths based on headers
+  if (rows.length > 0) {
+    const cols = Object.keys(rows[0]).map(key => ({ wch: Math.max(key.length, 15) }));
+    worksheet['!cols'] = cols;
+  }
+  
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatorios_Consolidados');
   
   // Generate blob
   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
