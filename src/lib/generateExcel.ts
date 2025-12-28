@@ -159,6 +159,31 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
     }
   }
   
+  // GRUPO FIBRA
+  row['Fibra_Abordagens'] = data.fibra.numAbordagens;
+  row['Fibra_Ab1_Tipo'] = data.fibra.abordagem1.tipo;
+  row['Fibra_Ab1_Subida_OK'] = data.fibra.abordagem1.subidaLateralOK ? 'SIM' : 'NÃO';
+  if (data.fibra.numAbordagens === 2 && data.fibra.abordagem2) {
+    row['Fibra_Ab2_Tipo'] = data.fibra.abordagem2.tipo;
+    row['Fibra_Ab2_Subida_OK'] = data.fibra.abordagem2.subidaLateralOK ? 'SIM' : 'NÃO';
+    row['Fibra_Convergencia'] = data.fibra.convergencia || '';
+  }
+  row['Fibra_Caixas_Passagem'] = data.fibra.caixasPassagemExistem ? 'SIM' : 'NÃO';
+  row['Fibra_Caixas_Padrao'] = data.fibra.caixasPassagemPadrao ? 'SIM' : 'NÃO';
+  row['Fibra_DGOs_Total'] = data.fibra.numDGOs;
+  
+  // DGOs individuais
+  for (let i = 0; i < 10; i++) {
+    const dgo = data.fibra.dgos[i];
+    if (dgo) {
+      row[`Fibra_DGO${i + 1}_Capacidade`] = dgo.capacidade;
+      row[`Fibra_DGO${i + 1}_Formato`] = dgo.formatos.join(', ');
+      row[`Fibra_DGO${i + 1}_Estado`] = dgo.estadoFisico;
+      row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.organizacaoCordoes;
+    }
+  }
+  row['Fibra_Observacoes'] = data.fibra.observacoesDGOs || '';
+  
   // GRUPO FINAL: GMG E TORRE
   row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
   row['GMG_Fabricante'] = data.gmg.fabricante || '';

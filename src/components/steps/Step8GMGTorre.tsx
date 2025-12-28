@@ -16,12 +16,12 @@ const FCC_FABRICANTES: FCCFabricante[] = [
   'EMERSON', 'HUAWEI', 'INTERGY', 'VERTIV', 'ZTE', 'OUTRA'
 ];
 
-interface Step7Props {
+interface Step8Props {
   showErrors?: boolean;
   validationErrors?: ValidationError[];
 }
 
-export function Step7GMGTorre({ showErrors = false, validationErrors = [] }: Step7Props) {
+export function Step8GMGTorre({ showErrors = false, validationErrors = [] }: Step8Props) {
   const fotoNinhosError = showErrors && getFieldError(validationErrors, 'fotoNinhos');
   const { data, updateData } = useChecklist();
 

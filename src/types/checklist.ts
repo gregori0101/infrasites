@@ -41,6 +41,45 @@ export type ACModelo =
 
 export type StatusFuncionamento = 'OK' | 'NOK' | 'NA';
 
+// Fibra types
+export type AbordagemFibra = 'AÉREA' | 'SUBTERRÂNEA';
+export type NumAbordagens = 1 | 2;
+export type ConvergenciaFibra = 'CONVERGENTES' | 'SEM CONVERGÊNCIA';
+export type CapacidadeDGO = '12FO' | '24FO' | '48FO' | '72FO' | '144FO' | '144+FO';
+export type FormatoDGO = 'SLIDE' | 'FRONTAL' | 'ARTICULADO' | 'MÓDULO';
+export type EstadoFisico = 'OK' | 'NOK';
+
+export interface AbordagemData {
+  tipo: AbordagemFibra;
+  fotoCaixasSubterraneas: string[];
+  subidaLateralOK: boolean;
+  fotoSubidaLateral: string[];
+}
+
+export interface DGOData {
+  fotoExterno: string | null;
+  capacidade: CapacidadeDGO;
+  formatos: FormatoDGO[];
+  estadoFisico: EstadoFisico;
+  organizacaoCordoes: EstadoFisico;
+  fotoCordoes: string | null;
+}
+
+export interface FibraData {
+  numAbordagens: NumAbordagens;
+  abordagem1: AbordagemData;
+  abordagem2?: AbordagemData;
+  convergencia?: ConvergenciaFibra;
+  fotoGeralAbordagens: string | null;
+  caixasPassagemExistem: boolean;
+  caixasPassagemPadrao: boolean;
+  fotosCaixasPassagem: string[];
+  numDGOs: number;
+  dgos: DGOData[];
+  observacoesDGOs: string;
+  fotoObservacoesDGOs: string | null;
+}
+
 export interface BancoBateria {
   tipo: BateriaTipo;
   fabricante: BateriaFabricante;
@@ -123,6 +162,7 @@ export interface ChecklistData {
   abrigoSelecionado: AbrigoType;
   fotoPanoramica: string | null;
   gabinetes: GabineteData[];
+  fibra: FibraData;
   gmg: GMGData;
   torre: TorreData;
   observacoes: string;
@@ -174,6 +214,35 @@ export const INITIAL_GABINETE: GabineteData = {
   fotoAcesso: null,
 };
 
+export const INITIAL_ABORDAGEM: AbordagemData = {
+  tipo: 'AÉREA',
+  fotoCaixasSubterraneas: [],
+  subidaLateralOK: true,
+  fotoSubidaLateral: [],
+};
+
+export const INITIAL_DGO: DGOData = {
+  fotoExterno: null,
+  capacidade: '12FO',
+  formatos: [],
+  estadoFisico: 'OK',
+  organizacaoCordoes: 'OK',
+  fotoCordoes: null,
+};
+
+export const INITIAL_FIBRA: FibraData = {
+  numAbordagens: 1,
+  abordagem1: { ...INITIAL_ABORDAGEM },
+  fotoGeralAbordagens: null,
+  caixasPassagemExistem: false,
+  caixasPassagemPadrao: true,
+  fotosCaixasPassagem: [],
+  numDGOs: 0,
+  dgos: [],
+  observacoesDGOs: '',
+  fotoObservacoesDGOs: null,
+};
+
 export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'updatedAt'> = {
   siglaSite: '',
   uf: 'PA',
@@ -181,6 +250,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   abrigoSelecionado: 'GABINETE 1',
   fotoPanoramica: null,
   gabinetes: [{ ...INITIAL_GABINETE }],
+  fibra: { ...INITIAL_FIBRA },
   gmg: {
     informar: false,
   },
