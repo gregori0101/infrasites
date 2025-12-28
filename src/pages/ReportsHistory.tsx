@@ -152,12 +152,12 @@ Este é um reenvio do relatório original.
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Estado (UF)</Label>
-                <Select value={stateFilter} onValueChange={setStateFilter}>
+                <Select value={stateFilter || "all"} onValueChange={(val) => setStateFilter(val === "all" ? "" : val)}>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {ESTADOS_BR.map(uf => (
                       <SelectItem key={uf} value={uf}>{uf}</SelectItem>
                     ))}
