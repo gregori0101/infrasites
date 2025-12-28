@@ -73,7 +73,21 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 5: // Step6Equipamentos
+      case 5: // Step6Fibra
+        if (!data.fibra.fotoGeralAbordagens) {
+          errors.push({ field: 'fibra.fotoGeralAbordagens', message: 'Foto geral das abordagens é obrigatória' });
+        }
+        data.fibra.dgos.forEach((dgo, idx) => {
+          if (!dgo.fotoExterno) {
+            errors.push({ field: `fibra.dgo${idx}.fotoExterno`, message: `Foto externa do DGO ${idx + 1} é obrigatória` });
+          }
+          if (dgo.organizacaoCordoes === 'NOK' && !dgo.fotoCordoes) {
+            errors.push({ field: `fibra.dgo${idx}.fotoCordoes`, message: `Foto dos cordões do DGO ${idx + 1} é obrigatória` });
+          }
+        });
+        break;
+
+      case 6: // Step7Equipamentos
         if (!gabinete) break;
         if (!gabinete.fotoTransmissao) {
           errors.push({ field: 'fotoTransmissao', message: 'Foto de equipamentos de transmissão é obrigatória' });
@@ -83,7 +97,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 6: // Step7GMGTorre
+      case 7: // Step8GMGTorre
         // GMG fields are optional based on "informar" toggle
         // Torre validation
         if (data.torre.ninhos && !data.torre.fotoNinhos) {
@@ -91,7 +105,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 7: // Step8Finalizacao
+      case 8: // Step9Finalizacao
         if (!data.tecnico || data.tecnico.trim() === '') {
           errors.push({ field: 'tecnico', message: 'Nome do técnico é obrigatório' });
         }

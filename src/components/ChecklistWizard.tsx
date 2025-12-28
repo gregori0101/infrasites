@@ -8,11 +8,12 @@ import { Step2Gabinete } from "@/components/steps/Step2Gabinete";
 import { Step3FCC } from "@/components/steps/Step3FCC";
 import { Step4Baterias } from "@/components/steps/Step4Baterias";
 import { Step5Climatizacao } from "@/components/steps/Step5Climatizacao";
-import { Step6Equipamentos } from "@/components/steps/Step6Equipamentos";
-import { Step7GMGTorre } from "@/components/steps/Step7GMGTorre";
-import { Step8Finalizacao } from "@/components/steps/Step8Finalizacao";
+import { Step6Fibra } from "@/components/steps/Step6Fibra";
+import { Step7Equipamentos } from "@/components/steps/Step7Equipamentos";
+import { Step8GMGTorre } from "@/components/steps/Step8GMGTorre";
+import { Step9Finalizacao } from "@/components/steps/Step9Finalizacao";
 import { 
-  MapPin, Server, Zap, Battery, Fan, Radio, 
+  MapPin, Server, Zap, Battery, Fan, Cable, Radio, 
   Fuel, FileCheck, ChevronLeft, ChevronRight,
   Moon, Sun, History, AlertCircle
 } from "lucide-react";
@@ -28,6 +29,7 @@ const STEPS = [
   { label: 'FCC', icon: <Zap /> },
   { label: 'Baterias', icon: <Battery /> },
   { label: 'Clima', icon: <Fan /> },
+  { label: 'Fibra', icon: <Cable /> },
   { label: 'Equip.', icon: <Radio /> },
   { label: 'GMG/Torre', icon: <Fuel /> },
   { label: 'Finalizar', icon: <FileCheck /> },
@@ -54,8 +56,8 @@ export function ChecklistWizard() {
   const progress = calculateProgress();
   const savedChecklists = getAllLocal();
 
-  // Steps 1-5 are per-gabinete (except step 0 which is site data)
-  const isGabineteStep = currentStep >= 1 && currentStep <= 5;
+  // Steps 1-6 are per-gabinete (except step 0 which is site data, step 5 is fibra)
+  const isGabineteStep = currentStep >= 1 && currentStep <= 4 || currentStep === 6;
   const maxGabinetes = data.qtdGabinetes;
   
   // Ensure currentGabinete is always within bounds
@@ -135,9 +137,10 @@ export function ChecklistWizard() {
       case 2: return <Step3FCC showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 3: return <Step4Baterias showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 4: return <Step5Climatizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 5: return <Step6Equipamentos showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 6: return <Step7GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 7: return <Step8Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 5: return <Step6Fibra showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 6: return <Step7Equipamentos showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 7: return <Step8GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 8: return <Step9Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
       default: return null;
     }
   };
