@@ -8,7 +8,7 @@ import {
   Calendar, MapPin, User, Building2, Download, Loader2
 } from "lucide-react";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
-import { generateExcel, downloadExcel } from "@/lib/generateExcel";
+import { generateExcel, generateConsolidatedExcel, downloadExcel } from "@/lib/generateExcel";
 import { reportToChecklist } from "@/lib/reportToChecklist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ export default function ReportsHistory() {
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
+  const [isExportingAll, setIsExportingAll] = useState(false);
   
   // Filters
   const [siteCodeFilter, setSiteCodeFilter] = useState("");
@@ -160,6 +161,31 @@ Por favor, anexe-os a este email antes de enviar.
     }
   };
 
+  const handleExportAllReports = async () => {
+    if (reports.length === 0) {
+      toast.error('Nenhum relatório para exportar');
+      return;
+    }
+    
+    setIsExportingAll(true);
+    try {
+      // Convert all reports to ChecklistData
+      const allChecklistData = reports.map(report => reportToChecklist(report));
+      
+      // Generate consolidated Excel
+      const excelBlob = generateConsolidatedExcel(allChecklistData);
+      const filename = `Relatorios_Consolidados_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xlsx`;
+      downloadExcel(excelBlob, filename);
+      
+      toast.success(`${reports.length} relatório(s) exportado(s) com sucesso!`);
+    } catch (error) {
+      console.error('Error exporting all reports:', error);
+      toast.error('Erro ao exportar relatórios');
+    } finally {
+      setIsExportingAll(false);
+    }
+  };
+
   const formatDateTime = (createdAt: string | undefined) => {
     if (!createdAt) return '-';
     try {
@@ -271,7 +297,22 @@ Por favor, anexe-os a este email antes de enviar.
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{reports.length} relatório(s) encontrado(s)</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{reports.length} relatório(s) encontrado(s)</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExportAllReports}
+                disabled={isExportingAll}
+              >
+                {isExportingAll ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                )}
+                Exportar Todos
+              </Button>
+            </div>
             {reports.map((report) => (
               <Card 
                 key={report.id} 
