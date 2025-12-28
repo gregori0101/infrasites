@@ -176,12 +176,21 @@ export function ChecklistWizard() {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>Histórico</SheetTitle>
+                  <SheetTitle>Histórico Local</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full mb-4"
+                    onClick={() => window.location.href = '/historico'}
+                  >
+                    <History className="w-4 h-4 mr-2" />
+                    Ver Histórico Completo (Banco)
+                  </Button>
+                  
                   {savedChecklists.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
-                      Nenhum checklist salvo
+                      Nenhum checklist salvo localmente
                     </p>
                   ) : (
                     savedChecklists.map((checklist) => (
