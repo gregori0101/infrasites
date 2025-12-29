@@ -96,6 +96,8 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
       row[`${prefix}_Alarmistica`] = gab.climatizacao.alarmistica;
       row[`${prefix}_Foto_AR1`] = gab.climatizacao.fotoAR1 ? 'SIM' : 'NÃO';
       row[`${prefix}_Foto_AR2`] = gab.climatizacao.fotoAR2 ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_AR3`] = gab.climatizacao.fotoAR3 ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_AR4`] = gab.climatizacao.fotoAR4 ? 'SIM' : 'NÃO';
       row[`${prefix}_Foto_Condensador`] = gab.climatizacao.fotoCondensador ? 'SIM' : 'NÃO';
       row[`${prefix}_Foto_Evaporador`] = gab.climatizacao.fotoEvaporador ? 'SIM' : 'NÃO';
       row[`${prefix}_Foto_Controlador`] = gab.climatizacao.fotoControlador ? 'SIM' : 'NÃO';
@@ -151,6 +153,8 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
       row[`${prefix}_Alarmistica`] = '';
       row[`${prefix}_Foto_AR1`] = '';
       row[`${prefix}_Foto_AR2`] = '';
+      row[`${prefix}_Foto_AR3`] = '';
+      row[`${prefix}_Foto_AR4`] = '';
       row[`${prefix}_Foto_Condensador`] = '';
       row[`${prefix}_Foto_Evaporador`] = '';
       row[`${prefix}_Foto_Controlador`] = '';

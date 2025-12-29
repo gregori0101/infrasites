@@ -82,19 +82,48 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     y += 6;
   };
 
+  const getImageFormat = (dataUrlOrMime: string): 'JPEG' | 'PNG' => {
+    const s = dataUrlOrMime.toLowerCase();
+    if (s.includes('png')) return 'PNG';
+    return 'JPEG';
+  };
+
+  const toDataUrl = async (input: string): Promise<{ dataUrl: string; format: 'JPEG' | 'PNG' }> => {
+    // Already a data URL
+    if (input.startsWith('data:image/')) {
+      return { dataUrl: input, format: getImageFormat(input) };
+    }
+
+    // Remote/local URL (from backend storage)
+    const res = await fetch(input);
+    const blob = await res.blob();
+    const mime = blob.type || 'image/jpeg';
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    return { dataUrl, format: getImageFormat(mime) };
+  };
+
   const addPhoto = async (photo: string | null, label: string) => {
     if (!photo) return;
     checkNewPage(55);
-    
+
     try {
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
       doc.text(label, margin, y);
       y += 3;
-      
+
+      const { dataUrl, format } = await toDataUrl(photo);
+
       const imgWidth = 60;
       const imgHeight = 45;
-      doc.addImage(photo, 'JPEG', margin, y, imgWidth, imgHeight);
+      doc.addImage(dataUrl, format, margin, y, imgWidth, imgHeight);
       y += imgHeight + 5;
     } catch (error) {
       console.error('Error adding image:', error);
@@ -103,36 +132,41 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   };
 
   const addPhotosGrid = async (photos: (string | null)[], labels: string[]) => {
-    const validPhotos = photos.filter((p, i) => p && labels[i]).map((p, i) => ({ photo: p, label: labels[i] }));
+    const validPhotos: { photo: string; label: string }[] = [];
+    photos.forEach((p, idx) => {
+      if (p && labels[idx]) validPhotos.push({ photo: p, label: labels[idx] });
+    });
     if (validPhotos.length === 0) return;
 
     for (let i = 0; i < validPhotos.length; i += 2) {
       checkNewPage(55);
-      
+
       // First photo
       if (validPhotos[i]) {
         try {
           doc.setFontSize(8);
           doc.setTextColor(100, 100, 100);
           doc.text(validPhotos[i].label, margin, y);
-          doc.addImage(validPhotos[i].photo!, 'JPEG', margin, y + 3, 55, 40);
+          const { dataUrl, format } = await toDataUrl(validPhotos[i].photo);
+          doc.addImage(dataUrl, format, margin, y + 3, 55, 40);
         } catch (e) {
           console.error('Error adding image:', e);
         }
       }
-      
+
       // Second photo (side by side)
       if (validPhotos[i + 1]) {
         try {
           doc.setFontSize(8);
           doc.setTextColor(100, 100, 100);
           doc.text(validPhotos[i + 1].label, margin + 65, y);
-          doc.addImage(validPhotos[i + 1].photo!, 'JPEG', margin + 65, y + 3, 55, 40);
+          const { dataUrl, format } = await toDataUrl(validPhotos[i + 1].photo);
+          doc.addImage(dataUrl, format, margin + 65, y + 3, 55, 40);
         } catch (e) {
           console.error('Error adding image:', e);
         }
       }
-      
+
       y += 48;
     }
   };
@@ -227,8 +261,11 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
 
     await addPhoto(gab.climatizacao.fotoAR1, 'Ar Condicionado 1');
     await addPhoto(gab.climatizacao.fotoAR2, 'Ar Condicionado 2');
+    await addPhoto(gab.climatizacao.fotoAR3, 'Ar Condicionado 3');
+    await addPhoto(gab.climatizacao.fotoAR4, 'Ar Condicionado 4');
     await addPhoto(gab.climatizacao.fotoCondensador, 'Condensador');
     await addPhoto(gab.climatizacao.fotoEvaporador, 'Evaporador');
+    await addPhoto(gab.climatizacao.fotoControlador, 'Controlador');
 
     // Equipamentos
     checkNewPage(60);
