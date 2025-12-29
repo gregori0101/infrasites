@@ -55,6 +55,18 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     doc.setTextColor(0, 0, 0);
   };
 
+  const addSubSectionTitle = (title: string) => {
+    checkNewPage(15);
+    doc.setFillColor(220, 220, 220);
+    doc.rect(margin, y, pageWidth - 2 * margin, 6, 'F');
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, margin + 3, y + 4.5);
+    y += 10;
+    doc.setTextColor(0, 0, 0);
+  };
+
   const addField = (label: string, value: string | number | boolean | null | undefined) => {
     checkNewPage(10);
     doc.setFontSize(9);
@@ -87,6 +99,41 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     } catch (error) {
       console.error('Error adding image:', error);
       y += 5;
+    }
+  };
+
+  const addPhotosGrid = async (photos: (string | null)[], labels: string[]) => {
+    const validPhotos = photos.filter((p, i) => p && labels[i]).map((p, i) => ({ photo: p, label: labels[i] }));
+    if (validPhotos.length === 0) return;
+
+    for (let i = 0; i < validPhotos.length; i += 2) {
+      checkNewPage(55);
+      
+      // First photo
+      if (validPhotos[i]) {
+        try {
+          doc.setFontSize(8);
+          doc.setTextColor(100, 100, 100);
+          doc.text(validPhotos[i].label, margin, y);
+          doc.addImage(validPhotos[i].photo!, 'JPEG', margin, y + 3, 55, 40);
+        } catch (e) {
+          console.error('Error adding image:', e);
+        }
+      }
+      
+      // Second photo (side by side)
+      if (validPhotos[i + 1]) {
+        try {
+          doc.setFontSize(8);
+          doc.setTextColor(100, 100, 100);
+          doc.text(validPhotos[i + 1].label, margin + 65, y);
+          doc.addImage(validPhotos[i + 1].photo!, 'JPEG', margin + 65, y + 3, 55, 40);
+        } catch (e) {
+          console.error('Error adding image:', e);
+        }
+      }
+      
+      y += 48;
     }
   };
 
@@ -188,6 +235,153 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     addSectionTitle(`Gabinete ${i + 1} - Equipamentos`);
     await addPhoto(gab.fotoTransmissao, 'Equipamentos de Transmissão');
     await addPhoto(gab.fotoAcesso, 'Equipamentos de Acesso');
+  }
+
+  // === SEÇÃO FIBRA ===
+  doc.addPage();
+  addHeader();
+
+  addSectionTitle('Fibra Óptica');
+  
+  // Acesso da Fibra
+  addSubSectionTitle('Acesso da Fibra');
+  addField('Número de Abordagens', data.fibra.numAbordagens);
+  
+  // Abordagem 1
+  addField('Abordagem 1 - Tipo', data.fibra.abordagem1.tipo);
+  if (data.fibra.abordagem1.tipo === 'SUBTERRÂNEA') {
+    addField('Abordagem 1 - Subida Lateral OK', data.fibra.abordagem1.subidaLateralOK);
+    
+    // Fotos caixas subterrâneas
+    if (data.fibra.abordagem1.fotoCaixasSubterraneas && data.fibra.abordagem1.fotoCaixasSubterraneas.length > 0) {
+      for (let i = 0; i < data.fibra.abordagem1.fotoCaixasSubterraneas.length; i++) {
+        await addPhoto(data.fibra.abordagem1.fotoCaixasSubterraneas[i], `Abordagem 1 - Caixa Subterrânea ${i + 1}`);
+      }
+    }
+    
+    // Fotos subida lateral NOK
+    if (!data.fibra.abordagem1.subidaLateralOK && data.fibra.abordagem1.fotoSubidaLateral && data.fibra.abordagem1.fotoSubidaLateral.length > 0) {
+      for (let i = 0; i < data.fibra.abordagem1.fotoSubidaLateral.length; i++) {
+        await addPhoto(data.fibra.abordagem1.fotoSubidaLateral[i], `Abordagem 1 - Subida Lateral NOK ${i + 1}`);
+      }
+    }
+  }
+
+  // Abordagem 2 (se existir)
+  if (data.fibra.numAbordagens === 2 && data.fibra.abordagem2) {
+    addField('Abordagem 2 - Tipo', data.fibra.abordagem2.tipo);
+    if (data.fibra.abordagem2.tipo === 'SUBTERRÂNEA') {
+      addField('Abordagem 2 - Subida Lateral OK', data.fibra.abordagem2.subidaLateralOK);
+      
+      if (data.fibra.abordagem2.fotoCaixasSubterraneas && data.fibra.abordagem2.fotoCaixasSubterraneas.length > 0) {
+        for (let i = 0; i < data.fibra.abordagem2.fotoCaixasSubterraneas.length; i++) {
+          await addPhoto(data.fibra.abordagem2.fotoCaixasSubterraneas[i], `Abordagem 2 - Caixa Subterrânea ${i + 1}`);
+        }
+      }
+      
+      if (!data.fibra.abordagem2.subidaLateralOK && data.fibra.abordagem2.fotoSubidaLateral && data.fibra.abordagem2.fotoSubidaLateral.length > 0) {
+        for (let i = 0; i < data.fibra.abordagem2.fotoSubidaLateral.length; i++) {
+          await addPhoto(data.fibra.abordagem2.fotoSubidaLateral[i], `Abordagem 2 - Subida Lateral NOK ${i + 1}`);
+        }
+      }
+    }
+    addField('Convergência', data.fibra.convergencia);
+  }
+
+  // Foto geral abordagens
+  await addPhoto(data.fibra.fotoGeralAbordagens, 'Foto Geral das Abordagens');
+
+  // Caixas de Passagem
+  checkNewPage(30);
+  addSubSectionTitle('Caixas de Passagem');
+  addField('Existem Caixas de Passagem', data.fibra.caixasPassagemExistem);
+  if (data.fibra.caixasPassagemExistem) {
+    addField('Padrão Correto', data.fibra.caixasPassagemPadrao);
+    if (data.fibra.fotosCaixasPassagem && data.fibra.fotosCaixasPassagem.length > 0) {
+      for (let i = 0; i < data.fibra.fotosCaixasPassagem.length; i++) {
+        await addPhoto(data.fibra.fotosCaixasPassagem[i], `Caixa de Passagem ${i + 1}`);
+      }
+    }
+  }
+
+  // DGOs
+  checkNewPage(30);
+  addSubSectionTitle('DGOs');
+  addField('Quantidade de DGOs', data.fibra.numDGOs);
+
+  for (let i = 0; i < data.fibra.dgos.length; i++) {
+    const dgo = data.fibra.dgos[i];
+    checkNewPage(60);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...accentColor);
+    doc.text(`DGO ${i + 1}:`, margin, y);
+    y += 5;
+    doc.setTextColor(0, 0, 0);
+    
+    addField('  Capacidade', dgo.capacidade);
+    addField('  Formatos', dgo.formatos.join(', ') || '-');
+    addField('  Estado Físico', dgo.estadoFisico);
+    addField('  Organização Cordões', dgo.organizacaoCordoes);
+    
+    await addPhoto(dgo.fotoExterno, `DGO ${i + 1} - Foto Externa`);
+    
+    if (dgo.organizacaoCordoes === 'NOK' && dgo.fotoCordoes) {
+      await addPhoto(dgo.fotoCordoes, `DGO ${i + 1} - Cordões NOK`);
+    }
+  }
+
+  // Observações DGOs
+  if (data.fibra.observacoesDGOs) {
+    checkNewPage(20);
+    addField('Observações DGOs', data.fibra.observacoesDGOs);
+    await addPhoto(data.fibra.fotoObservacoesDGOs, 'Foto Observação DGOs');
+  }
+
+  // === SEÇÃO ENERGIA ===
+  doc.addPage();
+  addHeader();
+
+  addSectionTitle('Energia');
+  
+  addField('Tipo de Quadro', data.energia.tipoQuadro);
+  addField('Fabricante', data.energia.fabricante);
+  addField('Potência (kVA)', data.energia.potenciaKVA);
+  addField('Tensão de Entrada', data.energia.tensaoEntrada);
+  addField('Transformador', data.energia.transformadorOK ? 'OK' : 'NOK');
+  
+  if (!data.energia.transformadorOK) {
+    await addPhoto(data.energia.fotoTransformador, 'Transformador NOK');
+  }
+  await addPhoto(data.energia.fotoQuadroGeral, 'Quadro Geral');
+
+  // Proteções
+  checkNewPage(50);
+  addSubSectionTitle('Proteções');
+  addField('DR OK', data.energia.protecoes.drOK);
+  addField('DPS OK', data.energia.protecoes.dpsOK);
+  addField('Disjuntores OK', data.energia.protecoes.disjuntoresOK);
+  addField('Termomagnéticos OK', data.energia.protecoes.termomagneticosOK);
+  addField('Chave Geral OK', data.energia.protecoes.chaveGeralOK);
+
+  // Cabos
+  checkNewPage(30);
+  addSubSectionTitle('Cabos');
+  addField('Terminais Apertados', data.energia.cabos.terminaisApertados);
+  addField('Isolação OK', data.energia.cabos.isolacaoOK);
+  
+  if (!data.energia.cabos.terminaisApertados || !data.energia.cabos.isolacaoOK) {
+    await addPhoto(data.energia.cabos.fotoCabos, 'Cabos NOK');
+  }
+
+  // Placa
+  checkNewPage(30);
+  addSubSectionTitle('Placa');
+  addField('Status', data.energia.placaStatus);
+  
+  if (data.energia.placaStatus !== 'OK') {
+    await addPhoto(data.energia.fotoPlaca, 'Placa NOK');
   }
 
   // === GMG E TORRE ===

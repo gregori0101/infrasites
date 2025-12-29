@@ -7,17 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
-  FileText, Camera, PenTool, Send, FileSpreadsheet, 
-  Download, CheckCircle, Loader2, AlertCircle, History 
+  FileText, Camera, PenTool, Send, 
+  CheckCircle, Loader2, AlertCircle 
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
-import { saveReportToDatabase, updateReportEmailSent } from "@/lib/reportDatabase";
+import { saveReportToDatabase } from "@/lib/reportDatabase";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 
 interface Step10Props {
   showErrors?: boolean;
@@ -26,12 +25,8 @@ interface Step10Props {
 
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
-  const { data, updateData, saveToLocal, calculateProgress, resetChecklist } = useChecklist();
-  const navigate = useNavigate();
-  const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
-  const [isGeneratingExcel, setIsGeneratingExcel] = React.useState(false);
-  const [isSendingEmail, setIsSendingEmail] = React.useState(false);
-  const [savedReportId, setSavedReportId] = React.useState<string | null>(null);
+  const { data, updateData, calculateProgress, resetChecklist } = useChecklist();
+  const [isSending, setIsSending] = React.useState(false);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
@@ -92,69 +87,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     updateData('assinaturaDigital', null);
   };
 
-  const handleSave = () => {
-    updateData('dataHora', new Date().toISOString());
-    saveToLocal();
-    toast.success('Checklist salvo localmente!', {
-      description: 'Os dados foram armazenados no dispositivo.'
-    });
-  };
-
-  const handleGeneratePDF = async () => {
-    if (progress < 30) {
-      toast.error('Checklist incompleto', {
-        description: 'Preencha mais campos antes de gerar o PDF.'
-      });
-      return;
-    }
-
-    setIsGeneratingPDF(true);
-    try {
-      updateData('dataHora', new Date().toISOString());
-      const pdfBlob = await generatePDF(data);
-      const filename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
-      downloadPDF(pdfBlob, filename);
-      toast.success('PDF gerado com sucesso!', {
-        description: filename
-      });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Erro ao gerar PDF', {
-        description: 'Tente novamente.'
-      });
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
-
-  const handleGenerateExcel = async () => {
-    if (progress < 30) {
-      toast.error('Checklist incompleto', {
-        description: 'Preencha mais campos antes de gerar o Excel.'
-      });
-      return;
-    }
-
-    setIsGeneratingExcel(true);
-    try {
-      updateData('dataHora', new Date().toISOString());
-      const excelBlob = generateExcel(data);
-      const filename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
-      downloadExcel(excelBlob, filename);
-      toast.success('Excel gerado com sucesso!', {
-        description: filename
-      });
-    } catch (error) {
-      console.error('Error generating Excel:', error);
-      toast.error('Erro ao gerar Excel', {
-        description: 'Tente novamente.'
-      });
-    } finally {
-      setIsGeneratingExcel(false);
-    }
-  };
-
-  const handleSendEmail = async () => {
+  const handleSendReport = async () => {
     if (progress < 50) {
       toast.error('Checklist incompleto', {
         description: 'Preencha pelo menos 50% dos campos para enviar.'
@@ -162,88 +95,54 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       return;
     }
 
-    setIsSendingEmail(true);
+    if (!data.tecnico) {
+      toast.error('Nome do técnico obrigatório', {
+        description: 'Preencha o nome do técnico antes de enviar.'
+      });
+      return;
+    }
+
+    setIsSending(true);
     
     try {
-      // Generate both files first
+      // Atualizar data/hora
       updateData('dataHora', new Date().toISOString());
+      
+      // Gerar arquivos
       const pdfBlob = await generatePDF(data);
       const excelBlob = generateExcel(data);
       
-      const dateStr = format(new Date(), 'dd/MM/yyyy HH:mm');
       const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
       const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
       
-      // Download both files
+      // Download dos arquivos
       downloadPDF(pdfBlob, pdfFilename);
       downloadExcel(excelBlob, excelFilename);
 
-      // Save to database (even if email fails)
-      let reportId = savedReportId;
-      if (!reportId) {
-        const result = await saveReportToDatabase(data, pdfFilename, excelFilename);
-        if (result.success && result.id) {
-          reportId = result.id;
-          setSavedReportId(result.id);
-          toast.success('Relatório salvo no banco de dados!');
-        } else {
-          console.error('Failed to save report:', result.error);
-          toast.warning('Relatório não foi salvo no banco', {
-            description: result.error
-          });
-        }
+      // Salvar no banco de dados
+      const result = await saveReportToDatabase(data, pdfFilename, excelFilename);
+      
+      if (result.success) {
+        toast.success('Relatório enviado com sucesso!', {
+          description: 'Os dados foram salvos e os arquivos foram baixados.'
+        });
+        
+        // Reset do formulário após envio bem-sucedido
+        setTimeout(() => {
+          resetChecklist();
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'Erro ao salvar no banco');
       }
-
-      // Build email body with checklist summary
-      const emailBody = `
-Checklist Sites Telecom
-
-Site: ${data.siglaSite} - ${data.uf}
-Data: ${dateStr}
-Técnico: ${data.tecnico || 'N/A'}
-
-Gabinetes: ${data.qtdGabinetes}
-${data.gabinetes.map((g, i) => `  • Gabinete ${i + 1}: ${g.tipo} - ${g.tecnologiasAcesso.join(', ') || 'N/A'}`).join('\n')}
-
-GMG: ${data.gmg.informar ? 'Sim' : 'Não'}
-Aterramento: ${data.torre.aterramento}
-Zeladoria: ${data.torre.zeladoria}
-
-Observações: ${data.observacoes || 'Nenhuma'}
-
----
-Arquivos PDF e Excel foram baixados automaticamente.
-Por favor, anexe-os a este email.
-      `.trim();
-
-      const subject = `Checklist ${data.siglaSite || 'NOVO'} – ${data.uf} – ${dateStr}`;
-      const mailtoLink = `mailto:gregori.jose@telefonica.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-      
-      window.open(mailtoLink, '_blank');
-      
-      // Update email_sent status if we have a report ID
-      if (reportId) {
-        await updateReportEmailSent(reportId);
-      }
-      
-      toast.success('Email preparado!', {
-        description: 'Anexe os arquivos baixados e envie.'
-      });
     } catch (error) {
-      console.error('Error preparing email:', error);
-      toast.error('Erro ao preparar email', {
-        description: 'Tente novamente.'
+      console.error('Error sending report:', error);
+      toast.error('Erro ao enviar relatório', {
+        description: 'Tente novamente. Os arquivos foram baixados.'
       });
     } finally {
-      setIsSendingEmail(false);
+      setIsSending(false);
     }
   };
-
-  const handleViewHistory = () => {
-    navigate('/historico');
-  };
-
-  const isGenerating = isGeneratingPDF || isGeneratingExcel || isSendingEmail;
 
   return (
     <div className="space-y-4 animate-slide-up">
@@ -273,12 +172,18 @@ Por favor, anexe-os a este email.
       <FormCard title="Informações do Técnico" icon={<FileText className="w-4 h-4" />}>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Nome do Técnico</Label>
+            <Label className={cn(tecnicoError && "text-destructive")}>
+              Nome do Técnico *
+            </Label>
             <Input
               value={data.tecnico}
               onChange={(e) => updateData('tecnico', e.target.value)}
               placeholder="Seu nome completo"
+              className={cn(tecnicoError && "border-destructive")}
             />
+            {tecnicoError && (
+              <p className="text-xs text-destructive">Campo obrigatório</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -329,67 +234,27 @@ Por favor, anexe-os a este email.
         </div>
       </FormCard>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          className="h-14 flex-col gap-1"
-          onClick={handleGeneratePDF}
-          disabled={isGenerating}
-        >
-          {isGeneratingPDF ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Download className="w-5 h-5 text-primary" />
-          )}
-          <span className="text-xs">Gerar PDF</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          className="h-14 flex-col gap-1"
-          onClick={handleGenerateExcel}
-          disabled={isGenerating}
-        >
-          {isGeneratingExcel ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <FileSpreadsheet className="w-5 h-5 text-success" />
-          )}
-          <span className="text-xs">Gerar Excel</span>
-        </Button>
-      </div>
-
       <Button
-        className="w-full h-14 text-lg font-semibold gap-2 bg-accent hover:bg-accent/90"
-        onClick={handleSendEmail}
-        disabled={isGenerating || progress < 50}
+        className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
+        onClick={handleSendReport}
+        disabled={isSending || progress < 50}
       >
-        {isSendingEmail ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+        {isSending ? (
+          <>
+            <Loader2 className="w-6 h-6 animate-spin" />
+            Enviando...
+          </>
         ) : (
-          <Send className="w-5 h-5" />
+          <>
+            <Send className="w-6 h-6" />
+            Enviar Relatório
+          </>
         )}
-        Enviar por Email
       </Button>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          variant="secondary"
-          className="h-12"
-          onClick={handleSave}
-        >
-          Salvar Localmente
-        </Button>
-
-        <Button
-          variant="outline"
-          className="h-12"
-          onClick={handleViewHistory}
-        >
-          <History className="w-4 h-4 mr-2" />
-          Ver Histórico
-        </Button>
-      </div>
+      <p className="text-xs text-center text-muted-foreground">
+        O relatório será salvo no banco de dados e os arquivos PDF e Excel serão baixados automaticamente.
+      </p>
 
       <p className="text-xs text-center text-muted-foreground">
         Data/Hora: {new Date().toLocaleString('pt-BR')}
