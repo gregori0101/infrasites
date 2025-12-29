@@ -389,7 +389,7 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   addHeader();
 
   addSectionTitle('GMG - Grupo Motor Gerador');
-  addField('Informar GMG', data.gmg.informar);
+  addField('Informar GMG', data.gmg.informar ? 'Sim' : 'Não');
   if (data.gmg.informar) {
     addField('Fabricante', data.gmg.fabricante);
     addField('Potência (kVA)', data.gmg.potencia);
@@ -398,15 +398,20 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   }
 
   addSectionTitle('Torre e Zeladoria');
-  addField('Ninhos na Torre', data.torre.ninhos);
-  addField('Fibras Protegidas', data.torre.fibrasProtegidas);
+  addField('Ninhos na Torre', data.torre.ninhos ? 'Sim' : 'Não');
+  addField('Fibras Protegidas', data.torre.fibrasProtegidas ? 'Sim' : 'Não');
   addField('Aterramento', data.torre.aterramento);
   addField('Zeladoria', data.torre.zeladoria);
   
-  await addPhoto(data.torre.fotoNinhos, 'Foto Ninhos');
+  if (data.torre.ninhos) {
+    await addPhoto(data.torre.fotoNinhos || null, 'Foto Ninhos na Torre');
+  }
 
   // === OBSERVAÇÕES ===
-  addSectionTitle('Observações');
+  doc.addPage();
+  addHeader();
+  
+  addSectionTitle('Observações Gerais');
   checkNewPage(30);
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
@@ -415,6 +420,16 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   y += splitObs.length * 5 + 5;
 
   await addPhoto(data.fotoObservacao, 'Foto Observação');
+
+  // === RESUMO FINAL ===
+  checkNewPage(40);
+  addSectionTitle('Resumo do Checklist');
+  addField('Sigla do Site', data.siglaSite);
+  addField('UF', data.uf);
+  addField('Abrigo Selecionado', data.abrigoSelecionado);
+  addField('Quantidade de Gabinetes', data.qtdGabinetes);
+  addField('Técnico Responsável', data.tecnico);
+  addField('Data/Hora do Checklist', data.dataHora ? format(new Date(data.dataHora), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : '-');
 
   // === ASSINATURA ===
   if (data.assinaturaDigital) {

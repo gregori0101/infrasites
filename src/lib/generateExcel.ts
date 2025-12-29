@@ -163,16 +163,30 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   row['Fibra_Abordagens'] = data.fibra.numAbordagens;
   row['Fibra_Ab1_Tipo'] = data.fibra.abordagem1.tipo;
   row['Fibra_Ab1_Subida_OK'] = data.fibra.abordagem1.subidaLateralOK ? 'SIM' : 'NÃO';
+  row['Fibra_Ab1_Caixas_Subterraneas'] = data.fibra.abordagem1.fotoCaixasSubterraneas?.length || 0;
+  row['Fibra_Ab1_Fotos_Subida_Lateral'] = data.fibra.abordagem1.fotoSubidaLateral?.length || 0;
+  
   if (data.fibra.numAbordagens === 2 && data.fibra.abordagem2) {
     row['Fibra_Ab2_Tipo'] = data.fibra.abordagem2.tipo;
     row['Fibra_Ab2_Subida_OK'] = data.fibra.abordagem2.subidaLateralOK ? 'SIM' : 'NÃO';
+    row['Fibra_Ab2_Caixas_Subterraneas'] = data.fibra.abordagem2.fotoCaixasSubterraneas?.length || 0;
+    row['Fibra_Ab2_Fotos_Subida_Lateral'] = data.fibra.abordagem2.fotoSubidaLateral?.length || 0;
     row['Fibra_Convergencia'] = data.fibra.convergencia || '';
+  } else {
+    row['Fibra_Ab2_Tipo'] = '';
+    row['Fibra_Ab2_Subida_OK'] = '';
+    row['Fibra_Ab2_Caixas_Subterraneas'] = '';
+    row['Fibra_Ab2_Fotos_Subida_Lateral'] = '';
+    row['Fibra_Convergencia'] = '';
   }
+  
+  row['Fibra_Foto_Geral_Abordagens'] = data.fibra.fotoGeralAbordagens ? 'SIM' : 'NÃO';
   row['Fibra_Caixas_Passagem'] = data.fibra.caixasPassagemExistem ? 'SIM' : 'NÃO';
-  row['Fibra_Caixas_Padrao'] = data.fibra.caixasPassagemPadrao ? 'SIM' : 'NÃO';
+  row['Fibra_Caixas_Padrao'] = data.fibra.caixasPassagemExistem ? (data.fibra.caixasPassagemPadrao ? 'SIM' : 'NÃO') : 'N/A';
+  row['Fibra_Fotos_Caixas_Passagem'] = data.fibra.fotosCaixasPassagem?.length || 0;
   row['Fibra_DGOs_Total'] = data.fibra.numDGOs;
   
-  // DGOs individuais
+  // DGOs individuais (1-10)
   for (let i = 0; i < 10; i++) {
     const dgo = data.fibra.dgos[i];
     if (dgo) {
@@ -180,40 +194,58 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
       row[`Fibra_DGO${i + 1}_Formato`] = dgo.formatos.join(', ');
       row[`Fibra_DGO${i + 1}_Estado`] = dgo.estadoFisico;
       row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.organizacaoCordoes;
+      row[`Fibra_DGO${i + 1}_Foto_Externo`] = dgo.fotoExterno ? 'SIM' : 'NÃO';
+      row[`Fibra_DGO${i + 1}_Foto_Cordoes`] = dgo.fotoCordoes ? 'SIM' : 'NÃO';
+    } else {
+      row[`Fibra_DGO${i + 1}_Capacidade`] = '';
+      row[`Fibra_DGO${i + 1}_Formato`] = '';
+      row[`Fibra_DGO${i + 1}_Estado`] = '';
+      row[`Fibra_DGO${i + 1}_Cordoes`] = '';
+      row[`Fibra_DGO${i + 1}_Foto_Externo`] = '';
+      row[`Fibra_DGO${i + 1}_Foto_Cordoes`] = '';
     }
   }
   row['Fibra_Observacoes'] = data.fibra.observacoesDGOs || '';
+  row['Fibra_Foto_Observacoes'] = data.fibra.fotoObservacoesDGOs ? 'SIM' : 'NÃO';
   
   // GRUPO ENERGIA
-  row['Energia_Tipo'] = data.energia.tipoQuadro;
+  row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro;
   row['Energia_Fabricante'] = data.energia.fabricante;
   row['Energia_kVA'] = data.energia.potenciaKVA;
   row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada;
   row['Energia_Transformador_OK'] = data.energia.transformadorOK ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Transformador'] = data.energia.fotoTransformador ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Quadro_Geral'] = data.energia.fotoQuadroGeral ? 'SIM' : 'NÃO';
   row['Energia_DR_OK'] = data.energia.protecoes.drOK ? 'SIM' : 'NÃO';
   row['Energia_DPS_OK'] = data.energia.protecoes.dpsOK ? 'SIM' : 'NÃO';
   row['Energia_Disjuntores_OK'] = data.energia.protecoes.disjuntoresOK ? 'SIM' : 'NÃO';
   row['Energia_Termomagneticos_OK'] = data.energia.protecoes.termomagneticosOK ? 'SIM' : 'NÃO';
   row['Energia_Chave_Geral_OK'] = data.energia.protecoes.chaveGeralOK ? 'SIM' : 'NÃO';
-  row['Energia_Terminais_OK'] = data.energia.cabos.terminaisApertados ? 'SIM' : 'NÃO';
+  row['Energia_Terminais_Apertados'] = data.energia.cabos.terminaisApertados ? 'SIM' : 'NÃO';
   row['Energia_Isolacao_OK'] = data.energia.cabos.isolacaoOK ? 'SIM' : 'NÃO';
-  row['Energia_Cabos_OK'] = (data.energia.cabos.terminaisApertados && data.energia.cabos.isolacaoOK) ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Cabos'] = data.energia.cabos.fotoCabos ? 'SIM' : 'NÃO';
   row['Energia_Placa_Status'] = data.energia.placaStatus;
-  // GRUPO FINAL: GMG E TORRE
+  row['Energia_Foto_Placa'] = data.energia.fotoPlaca ? 'SIM' : 'NÃO';
+  // GRUPO GMG
   row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
-  row['GMG_Fabricante'] = data.gmg.fabricante || '';
-  row['GMG_Potencia'] = data.gmg.potencia || '';
-  row['GMG_Autonomia'] = data.gmg.autonomia || '';
-  row['GMG_Status'] = data.gmg.status || '';
-  row['Ninhos_Torre'] = data.torre.ninhos ? 'SIM' : 'NÃO';
-  row['Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
-  row['Aterramento'] = data.torre.aterramento;
-  row['Zeladoria'] = data.torre.zeladoria;
+  row['GMG_Fabricante'] = data.gmg.informar ? (data.gmg.fabricante || '') : '';
+  row['GMG_Potencia_kVA'] = data.gmg.informar ? (data.gmg.potencia || '') : '';
+  row['GMG_Autonomia_h'] = data.gmg.informar ? (data.gmg.autonomia || '') : '';
+  row['GMG_Status'] = data.gmg.informar ? (data.gmg.status || '') : '';
   
-  // GRUPO FINAL: OBSERVAÇÕES
-  row['Observacoes_Site'] = data.observacoes || '';
+  // GRUPO TORRE
+  row['Torre_Ninhos'] = data.torre.ninhos ? 'SIM' : 'NÃO';
+  row['Torre_Foto_Ninhos'] = data.torre.fotoNinhos ? 'SIM' : 'NÃO';
+  row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
+  row['Torre_Aterramento'] = data.torre.aterramento;
+  row['Torre_Zeladoria'] = data.torre.zeladoria;
+  
+  // GRUPO OBSERVAÇÕES E FINALIZAÇÃO
+  row['Observacoes_Gerais'] = data.observacoes || '';
   row['Foto_Observacao'] = data.fotoObservacao ? 'SIM' : 'NÃO';
   row['Assinatura_Digital'] = data.assinaturaDigital ? 'SIM' : 'NÃO';
+  row['Abrigo_Selecionado'] = data.abrigoSelecionado;
+  row['Data_Hora_Checklist'] = data.dataHora ? format(new Date(data.dataHora), 'dd/MM/yyyy HH:mm:ss') : '';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
   
   return row;
