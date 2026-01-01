@@ -48,20 +48,45 @@ export default function ReportsHistory() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const loadReports = async () => {
-    setLoading(true);
+  const firstLoadRef = React.useRef(true);
+
+  const loadReports = async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
+
     const data = await fetchReports({
       siteCode: siteCodeFilter || undefined,
       stateUf: stateFilter || undefined,
       startDate: dateFrom ? new Date(dateFrom).toISOString() : undefined,
       endDate: dateTo ? new Date(dateTo + 'T23:59:59').toISOString() : undefined,
     });
+
     setReports(data);
     setLoading(false);
+
+    // Se a primeira carga vier vazia (flutuação de rede/cache), tenta 1x automaticamente.
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false;
+      const noFilters = !siteCodeFilter && !stateFilter && !dateFrom && !dateTo;
+      if (noFilters && data.length === 0) {
+        setTimeout(() => {
+          loadReports({ silent: true });
+        }, 600);
+      }
+    }
   };
 
   useEffect(() => {
     loadReports();
+
+    const onFocus = () => loadReports({ silent: true });
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') loadReports({ silent: true });
+    });
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   const handleFilter = () => {
@@ -207,7 +232,7 @@ Por favor, anexe-os a este email antes de enviar.
           <div className="flex-1">
             <h1 className="font-bold text-foreground">Histórico de Relatórios</h1>
           </div>
-          <Button variant="outline" size="icon" onClick={loadReports} disabled={loading}>
+          <Button variant="outline" size="icon" onClick={() => loadReports()} disabled={loading}>
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
