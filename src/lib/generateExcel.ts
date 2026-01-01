@@ -5,6 +5,24 @@ import { format } from 'date-fns';
 const TECNOLOGIAS_ACESSO = ['2G', '3G', '4G', '5G'];
 const TECNOLOGIAS_TRANSPORTE = ['DWDM', 'GPON', 'HL4', 'HL5D', 'HL5G', 'PDH', 'SDH', 'GWS', 'GWD', 'SWA'];
 
+// Helper function to get photo value - returns link or empty string
+const getPhotoValue = (photo: string | null | undefined): string => {
+  if (!photo) return '';
+  // If it's a data URL, mark as embedded
+  if (photo.startsWith('data:')) return '[FOTO INCORPORADA]';
+  // Return the URL/link
+  return photo;
+};
+
+// Helper for array of photos
+const getPhotosValue = (photos: string[] | undefined): string => {
+  if (!photos || photos.length === 0) return '';
+  return photos.map((p, i) => {
+    if (p.startsWith('data:')) return `[FOTO ${i + 1} INCORPORADA]`;
+    return p;
+  }).join(' | ');
+};
+
 function buildRowFromChecklist(data: ChecklistData): Record<string, string | number | boolean> {
   const row: Record<string, string | number | boolean> = {};
   
@@ -18,7 +36,7 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   
   // GRUPO 2: SITE GERAL
   row['Qtd_Gabinetes_Total'] = data.qtdGabinetes;
-  row['Foto_Panoramica'] = data.fotoPanoramica ? 'SIM' : 'NÃO';
+  row['Foto_Panoramica'] = getPhotoValue(data.fotoPanoramica);
   
   // For each possible gabinete (1-7)
   for (let i = 0; i < 7; i++) {
@@ -48,8 +66,8 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
       row[`${prefix}_FCC_Gerenciavel`] = gab.fcc.gerenciavel ? 'SIM' : 'NÃO';
       row[`${prefix}_FCC_Consumo_W`] = gab.fcc.consumoDC;
       row[`${prefix}_FCC_QtdUR_Suportadas`] = gab.fcc.qtdURSuportadas;
-      row[`${prefix}_FCC_Foto_Panoramica`] = gab.fcc.fotoPanoramica ? 'SIM' : 'NÃO';
-      row[`${prefix}_FCC_Foto_Painel`] = gab.fcc.fotoPainel ? 'SIM' : 'NÃO';
+      row[`${prefix}_FCC_Foto_Panoramica`] = getPhotoValue(gab.fcc.fotoPanoramica);
+      row[`${prefix}_FCC_Foto_Painel`] = getPhotoValue(gab.fcc.fotoPainel);
       
       // GRUPO 6: BATERIAS
       row[`${prefix}_Num_Bancos`] = gab.baterias.numBancos;
@@ -73,7 +91,7 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
         }
       }
       
-      row[`${prefix}_Foto_Banco`] = gab.baterias.fotoBanco ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_Banco`] = getPhotoValue(gab.baterias.fotoBanco);
       
       // GRUPO 7: CLIMATIZAÇÃO
       row[`${prefix}_Clim_Tipo`] = gab.climatizacao.tipo;
@@ -94,17 +112,17 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
       
       row[`${prefix}_PLC_Lead_Lag`] = gab.climatizacao.plcLeadLag;
       row[`${prefix}_Alarmistica`] = gab.climatizacao.alarmistica;
-      row[`${prefix}_Foto_AR1`] = gab.climatizacao.fotoAR1 ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_AR2`] = gab.climatizacao.fotoAR2 ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_AR3`] = gab.climatizacao.fotoAR3 ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_AR4`] = gab.climatizacao.fotoAR4 ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_Condensador`] = gab.climatizacao.fotoCondensador ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_Evaporador`] = gab.climatizacao.fotoEvaporador ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_Controlador`] = gab.climatizacao.fotoControlador ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_AR1`] = getPhotoValue(gab.climatizacao.fotoAR1);
+      row[`${prefix}_Foto_AR2`] = getPhotoValue(gab.climatizacao.fotoAR2);
+      row[`${prefix}_Foto_AR3`] = getPhotoValue(gab.climatizacao.fotoAR3);
+      row[`${prefix}_Foto_AR4`] = getPhotoValue(gab.climatizacao.fotoAR4);
+      row[`${prefix}_Foto_Condensador`] = getPhotoValue(gab.climatizacao.fotoCondensador);
+      row[`${prefix}_Foto_Evaporador`] = getPhotoValue(gab.climatizacao.fotoEvaporador);
+      row[`${prefix}_Foto_Controlador`] = getPhotoValue(gab.climatizacao.fotoControlador);
       
       // GRUPO 8: FOTOS EQUIPAMENTOS
-      row[`${prefix}_Foto_Transmissao`] = gab.fotoTransmissao ? 'SIM' : 'NÃO';
-      row[`${prefix}_Foto_Acesso`] = gab.fotoAcesso ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_Transmissao`] = getPhotoValue(gab.fotoTransmissao);
+      row[`${prefix}_Foto_Acesso`] = getPhotoValue(gab.fotoAcesso);
     } else {
       // Empty gabinete
       row[`${prefix}_Selecionado`] = 'NÃO';
@@ -163,31 +181,47 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
     }
   }
   
-  // GRUPO FIBRA
-  row['Fibra_Abordagens'] = data.fibra.numAbordagens;
-  row['Fibra_Ab1_Tipo'] = data.fibra.abordagem1.tipo;
-  row['Fibra_Ab1_Subida_OK'] = data.fibra.abordagem1.subidaLateralOK ? 'SIM' : 'NÃO';
-  row['Fibra_Ab1_Caixas_Subterraneas'] = data.fibra.abordagem1.fotoCaixasSubterraneas?.length || 0;
-  row['Fibra_Ab1_Fotos_Subida_Lateral'] = data.fibra.abordagem1.fotoSubidaLateral?.length || 0;
+  // GRUPO FIBRA - Seção Completa
+  row['Fibra_Num_Abordagens'] = data.fibra.numAbordagens;
   
+  // Abordagem 1
+  row['Fibra_Ab1_Tipo'] = data.fibra.abordagem1.tipo;
+  row['Fibra_Ab1_Subida_Lateral_OK'] = data.fibra.abordagem1.subidaLateralOK ? 'SIM' : 'NÃO';
+  row['Fibra_Ab1_Fotos_Caixas_Subterraneas'] = getPhotosValue(data.fibra.abordagem1.fotoCaixasSubterraneas);
+  row['Fibra_Ab1_Qtd_Fotos_Caixas'] = data.fibra.abordagem1.fotoCaixasSubterraneas?.length || 0;
+  row['Fibra_Ab1_Fotos_Subida_Lateral'] = getPhotosValue(data.fibra.abordagem1.fotoSubidaLateral);
+  row['Fibra_Ab1_Qtd_Fotos_Subida'] = data.fibra.abordagem1.fotoSubidaLateral?.length || 0;
+  
+  // Abordagem 2 (se existir)
   if (data.fibra.numAbordagens === 2 && data.fibra.abordagem2) {
     row['Fibra_Ab2_Tipo'] = data.fibra.abordagem2.tipo;
-    row['Fibra_Ab2_Subida_OK'] = data.fibra.abordagem2.subidaLateralOK ? 'SIM' : 'NÃO';
-    row['Fibra_Ab2_Caixas_Subterraneas'] = data.fibra.abordagem2.fotoCaixasSubterraneas?.length || 0;
-    row['Fibra_Ab2_Fotos_Subida_Lateral'] = data.fibra.abordagem2.fotoSubidaLateral?.length || 0;
+    row['Fibra_Ab2_Subida_Lateral_OK'] = data.fibra.abordagem2.subidaLateralOK ? 'SIM' : 'NÃO';
+    row['Fibra_Ab2_Fotos_Caixas_Subterraneas'] = getPhotosValue(data.fibra.abordagem2.fotoCaixasSubterraneas);
+    row['Fibra_Ab2_Qtd_Fotos_Caixas'] = data.fibra.abordagem2.fotoCaixasSubterraneas?.length || 0;
+    row['Fibra_Ab2_Fotos_Subida_Lateral'] = getPhotosValue(data.fibra.abordagem2.fotoSubidaLateral);
+    row['Fibra_Ab2_Qtd_Fotos_Subida'] = data.fibra.abordagem2.fotoSubidaLateral?.length || 0;
     row['Fibra_Convergencia'] = data.fibra.convergencia || '';
   } else {
     row['Fibra_Ab2_Tipo'] = '';
-    row['Fibra_Ab2_Subida_OK'] = '';
-    row['Fibra_Ab2_Caixas_Subterraneas'] = '';
+    row['Fibra_Ab2_Subida_Lateral_OK'] = '';
+    row['Fibra_Ab2_Fotos_Caixas_Subterraneas'] = '';
+    row['Fibra_Ab2_Qtd_Fotos_Caixas'] = '';
     row['Fibra_Ab2_Fotos_Subida_Lateral'] = '';
+    row['Fibra_Ab2_Qtd_Fotos_Subida'] = '';
     row['Fibra_Convergencia'] = '';
   }
   
-  row['Fibra_Foto_Geral_Abordagens'] = data.fibra.fotoGeralAbordagens ? 'SIM' : 'NÃO';
-  row['Fibra_Caixas_Passagem'] = data.fibra.caixasPassagemExistem ? 'SIM' : 'NÃO';
-  row['Fibra_Caixas_Padrao'] = data.fibra.caixasPassagemExistem ? (data.fibra.caixasPassagemPadrao ? 'SIM' : 'NÃO') : 'N/A';
-  row['Fibra_Fotos_Caixas_Passagem'] = data.fibra.fotosCaixasPassagem?.length || 0;
+  row['Fibra_Foto_Geral_Abordagens'] = getPhotoValue(data.fibra.fotoGeralAbordagens);
+  
+  // Caixas de passagem
+  row['Fibra_Caixas_Passagem_Existem'] = data.fibra.caixasPassagemExistem ? 'SIM' : 'NÃO';
+  row['Fibra_Caixas_Passagem_Padrao'] = data.fibra.caixasPassagemExistem 
+    ? (data.fibra.caixasPassagemPadrao ? 'SIM' : 'NÃO') 
+    : 'N/A';
+  row['Fibra_Fotos_Caixas_Passagem'] = getPhotosValue(data.fibra.fotosCaixasPassagem);
+  row['Fibra_Qtd_Fotos_Caixas_Passagem'] = data.fibra.fotosCaixasPassagem?.length || 0;
+  
+  // DGOs
   row['Fibra_DGOs_Total'] = data.fibra.numDGOs;
   
   // DGOs individuais (1-10)
@@ -195,31 +229,32 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
     const dgo = data.fibra.dgos[i];
     if (dgo) {
       row[`Fibra_DGO${i + 1}_Capacidade`] = dgo.capacidade;
-      row[`Fibra_DGO${i + 1}_Formato`] = dgo.formatos.join(', ');
-      row[`Fibra_DGO${i + 1}_Estado`] = dgo.estadoFisico;
-      row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.organizacaoCordoes;
-      row[`Fibra_DGO${i + 1}_Foto_Externo`] = dgo.fotoExterno ? 'SIM' : 'NÃO';
-      row[`Fibra_DGO${i + 1}_Foto_Cordoes`] = dgo.fotoCordoes ? 'SIM' : 'NÃO';
+      row[`Fibra_DGO${i + 1}_Formatos`] = dgo.formatos.join(', ');
+      row[`Fibra_DGO${i + 1}_Estado_Fisico`] = dgo.estadoFisico;
+      row[`Fibra_DGO${i + 1}_Organizacao_Cordoes`] = dgo.organizacaoCordoes;
+      row[`Fibra_DGO${i + 1}_Foto_Externo`] = getPhotoValue(dgo.fotoExterno);
+      row[`Fibra_DGO${i + 1}_Foto_Cordoes`] = getPhotoValue(dgo.fotoCordoes);
     } else {
       row[`Fibra_DGO${i + 1}_Capacidade`] = '';
-      row[`Fibra_DGO${i + 1}_Formato`] = '';
-      row[`Fibra_DGO${i + 1}_Estado`] = '';
-      row[`Fibra_DGO${i + 1}_Cordoes`] = '';
+      row[`Fibra_DGO${i + 1}_Formatos`] = '';
+      row[`Fibra_DGO${i + 1}_Estado_Fisico`] = '';
+      row[`Fibra_DGO${i + 1}_Organizacao_Cordoes`] = '';
       row[`Fibra_DGO${i + 1}_Foto_Externo`] = '';
       row[`Fibra_DGO${i + 1}_Foto_Cordoes`] = '';
     }
   }
-  row['Fibra_Observacoes'] = data.fibra.observacoesDGOs || '';
-  row['Fibra_Foto_Observacoes'] = data.fibra.fotoObservacoesDGOs ? 'SIM' : 'NÃO';
+  
+  row['Fibra_Observacoes_DGOs'] = data.fibra.observacoesDGOs || '';
+  row['Fibra_Foto_Observacoes_DGOs'] = getPhotoValue(data.fibra.fotoObservacoesDGOs);
   
   // GRUPO ENERGIA
   row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro;
   row['Energia_Fabricante'] = data.energia.fabricante;
-  row['Energia_kVA'] = data.energia.potenciaKVA;
+  row['Energia_Potencia_kVA'] = data.energia.potenciaKVA;
   row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada;
   row['Energia_Transformador_OK'] = data.energia.transformadorOK ? 'SIM' : 'NÃO';
-  row['Energia_Foto_Transformador'] = data.energia.fotoTransformador ? 'SIM' : 'NÃO';
-  row['Energia_Foto_Quadro_Geral'] = data.energia.fotoQuadroGeral ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Transformador'] = getPhotoValue(data.energia.fotoTransformador);
+  row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
   row['Energia_DR_OK'] = data.energia.protecoes.drOK ? 'SIM' : 'NÃO';
   row['Energia_DPS_OK'] = data.energia.protecoes.dpsOK ? 'SIM' : 'NÃO';
   row['Energia_Disjuntores_OK'] = data.energia.protecoes.disjuntoresOK ? 'SIM' : 'NÃO';
@@ -227,9 +262,10 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   row['Energia_Chave_Geral_OK'] = data.energia.protecoes.chaveGeralOK ? 'SIM' : 'NÃO';
   row['Energia_Terminais_Apertados'] = data.energia.cabos.terminaisApertados ? 'SIM' : 'NÃO';
   row['Energia_Isolacao_OK'] = data.energia.cabos.isolacaoOK ? 'SIM' : 'NÃO';
-  row['Energia_Foto_Cabos'] = data.energia.cabos.fotoCabos ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Cabos'] = getPhotoValue(data.energia.cabos.fotoCabos);
   row['Energia_Placa_Status'] = data.energia.placaStatus;
-  row['Energia_Foto_Placa'] = data.energia.fotoPlaca ? 'SIM' : 'NÃO';
+  row['Energia_Foto_Placa'] = getPhotoValue(data.energia.fotoPlaca);
+  
   // GRUPO GMG
   row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
   row['GMG_Fabricante'] = data.gmg.informar ? (data.gmg.fabricante || '') : '';
@@ -239,15 +275,15 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   
   // GRUPO TORRE
   row['Torre_Ninhos'] = data.torre.ninhos ? 'SIM' : 'NÃO';
-  row['Torre_Foto_Ninhos'] = data.torre.fotoNinhos ? 'SIM' : 'NÃO';
+  row['Torre_Foto_Ninhos'] = getPhotoValue(data.torre.fotoNinhos);
   row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
   row['Torre_Aterramento'] = data.torre.aterramento;
   row['Torre_Zeladoria'] = data.torre.zeladoria;
   
   // GRUPO OBSERVAÇÕES E FINALIZAÇÃO
   row['Observacoes_Gerais'] = data.observacoes || '';
-  row['Foto_Observacao'] = data.fotoObservacao ? 'SIM' : 'NÃO';
-  row['Assinatura_Digital'] = data.assinaturaDigital ? 'SIM' : 'NÃO';
+  row['Foto_Observacao'] = getPhotoValue(data.fotoObservacao);
+  row['Assinatura_Digital'] = getPhotoValue(data.assinaturaDigital);
   row['Abrigo_Selecionado'] = data.abrigoSelecionado;
   row['Data_Hora_Checklist'] = data.dataHora ? format(new Date(data.dataHora), 'dd/MM/yyyy HH:mm:ss') : '';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
@@ -263,7 +299,7 @@ export function generateExcel(data: ChecklistData): Blob {
   const worksheet = XLSX.utils.json_to_sheet([row]);
   
   // Set column widths
-  const cols = Object.keys(row).map(key => ({ wch: Math.max(key.length, 15) }));
+  const cols = Object.keys(row).map(key => ({ wch: Math.max(key.length, 20) }));
   worksheet['!cols'] = cols;
   
   // Add worksheet to workbook
@@ -285,7 +321,7 @@ export function generateConsolidatedExcel(dataList: ChecklistData[]): Blob {
   
   // Set column widths based on headers
   if (rows.length > 0) {
-    const cols = Object.keys(rows[0]).map(key => ({ wch: Math.max(key.length, 15) }));
+    const cols = Object.keys(rows[0]).map(key => ({ wch: Math.max(key.length, 20) }));
     worksheet['!cols'] = cols;
   }
   
