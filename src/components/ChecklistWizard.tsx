@@ -52,8 +52,8 @@ export function ChecklistWizard() {
     deleteLocal
   } = useChecklist();
 
-  const [touchStart, setTouchStart] = React.useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+  const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<{ x: number; y: number } | null>(null);
 
   const progress = calculateProgress();
   const savedChecklists = getAllLocal();
@@ -61,10 +61,10 @@ export function ChecklistWizard() {
   // Steps 1-4, 6, 7 are per-gabinete (step 0 = site, step 5 = fibra, step 6 = energia)
   const isGabineteStep = (currentStep >= 1 && currentStep <= 4) || currentStep === 7;
   const maxGabinetes = data.qtdGabinetes;
-  
+
   // Ensure currentGabinete is always within bounds
   const safeCurrentGabinete = Math.min(currentGabinete, Math.max(0, data.gabinetes.length - 1));
-  
+
   React.useEffect(() => {
     if (currentGabinete !== safeCurrentGabinete) {
       setCurrentGabinete(safeCurrentGabinete);
@@ -84,9 +84,9 @@ export function ChecklistWizard() {
       });
       return;
     }
-    
+
     setShowValidationErrors(false);
-    
+
     if (isGabineteStep && currentGabinete < maxGabinetes - 1) {
       setCurrentGabinete(currentGabinete + 1);
     } else if (currentStep < STEPS.length - 1) {
@@ -110,24 +110,45 @@ export function ChecklistWizard() {
     }
   };
 
-  // Swipe detection
-  const minSwipeDistance = 50;
+  // Swipe detection (avoid triggering while user is interacting with inputs)
+  const minSwipeDistance = 60;
+
+  const isInteractiveElement = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName.toLowerCase();
+    if (['input', 'textarea', 'select', 'button', 'label'].includes(tag)) return true;
+    return Boolean(target.closest('input, textarea, select, button, label, [role="combobox"], [data-radix-collection-item]'));
+  };
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (isInteractiveElement(e.target)) return;
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (!touchStart) return;
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
   };
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
+
+    const deltaX = touchStart.x - touchEnd.x;
+    const deltaY = touchStart.y - touchEnd.y;
+
+    // Ignore mostly-vertical gestures (scroll)
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    const isLeftSwipe = deltaX > minSwipeDistance;
+    const isRightSwipe = deltaX < -minSwipeDistance;
+
     if (isLeftSwipe) handleNext();
     if (isRightSwipe) handlePrev();
   };
