@@ -35,21 +35,21 @@ export function Step6Fibra({ showErrors = false, validationErrors = [] }: Step6P
     updateData('fibra', { ...fibra, ...updates });
   };
 
-  const updateAbordagem = (num: 1 | 2, updates: Partial<AbordagemData>) => {
-    const key = num === 1 ? 'abordagem1' : 'abordagem2';
-    const current = num === 1 ? fibra.abordagem1 : (fibra.abordagem2 || { ...INITIAL_ABORDAGEM });
+  const updateAbordagem = (num: 1 | 2 | 3, updates: Partial<AbordagemData>) => {
+    const key = num === 1 ? 'abordagem1' : num === 2 ? 'abordagem2' : 'abordagem3';
+    const current = num === 1 ? fibra.abordagem1 : (num === 2 ? fibra.abordagem2 : fibra.abordagem3) || { ...INITIAL_ABORDAGEM };
     updateFibra({ [key]: { ...current, ...updates } });
   };
 
-  const addPhotoToArray = (field: 'fotoCaixasSubterraneas' | 'fotoSubidaLateral', abordagemNum: 1 | 2, photo: string) => {
-    const abordagem = abordagemNum === 1 ? fibra.abordagem1 : fibra.abordagem2;
+  const addPhotoToArray = (field: 'fotoCaixasSubterraneas' | 'fotoSubidaLateral', abordagemNum: 1 | 2 | 3, photo: string) => {
+    const abordagem = abordagemNum === 1 ? fibra.abordagem1 : (abordagemNum === 2 ? fibra.abordagem2 : fibra.abordagem3);
     if (!abordagem) return;
     const newPhotos = [...abordagem[field], photo];
     updateAbordagem(abordagemNum, { [field]: newPhotos });
   };
 
-  const removePhotoFromArray = (field: 'fotoCaixasSubterraneas' | 'fotoSubidaLateral', abordagemNum: 1 | 2, index: number) => {
-    const abordagem = abordagemNum === 1 ? fibra.abordagem1 : fibra.abordagem2;
+  const removePhotoFromArray = (field: 'fotoCaixasSubterraneas' | 'fotoSubidaLateral', abordagemNum: 1 | 2 | 3, index: number) => {
+    const abordagem = abordagemNum === 1 ? fibra.abordagem1 : (abordagemNum === 2 ? fibra.abordagem2 : fibra.abordagem3);
     if (!abordagem) return;
     const newPhotos = abordagem[field].filter((_, i) => i !== index);
     updateAbordagem(abordagemNum, { [field]: newPhotos });
@@ -70,17 +70,20 @@ export function Step6Fibra({ showErrors = false, validationErrors = [] }: Step6P
     updateDGO(index, { formatos: newFormatos });
   };
 
-  const handleNumAbordagensChange = (value: string) => {
-    const num = parseInt(value) as NumAbordagens;
-    if (num === 2 && !fibra.abordagem2) {
-      updateFibra({ 
-        numAbordagens: num, 
-        abordagem2: { ...INITIAL_ABORDAGEM },
-        convergencia: 'SEM CONVERGÊNCIA'
-      });
-    } else {
-      updateFibra({ numAbordagens: num });
+  const handleNumAbordagensChange = (num: NumAbordagens) => {
+    const updates: Partial<FibraData> = { numAbordagens: num };
+    
+    if (num >= 2 && !fibra.abordagem2) {
+      updates.abordagem2 = { ...INITIAL_ABORDAGEM };
     }
+    if (num === 3 && !fibra.abordagem3) {
+      updates.abordagem3 = { ...INITIAL_ABORDAGEM };
+    }
+    if (num >= 2) {
+      updates.convergencia = fibra.convergencia || 'SEM CONVERGÊNCIA';
+    }
+    
+    updateFibra(updates);
   };
 
   const handleNumDGOsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,8 +105,8 @@ export function Step6Fibra({ showErrors = false, validationErrors = [] }: Step6P
     updateFibra({ numDGOs: num, dgos: newDGOs });
   };
 
-  const renderAbordagem = (num: 1 | 2) => {
-    const abordagem = num === 1 ? fibra.abordagem1 : fibra.abordagem2;
+  const renderAbordagem = (num: 1 | 2 | 3) => {
+    const abordagem = num === 1 ? fibra.abordagem1 : (num === 2 ? fibra.abordagem2 : fibra.abordagem3);
     if (!abordagem) return null;
 
     return (
@@ -208,25 +211,31 @@ export function Step6Fibra({ showErrors = false, validationErrors = [] }: Step6P
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Quantas abordagens de fibra?</Label>
-            <Select
-              value={String(fibra.numAbordagens)}
-              onValueChange={handleNumAbordagensChange}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 Abordagem</SelectItem>
-                <SelectItem value="2">2 Abordagens</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-3 gap-2">
+              {([1, 2, 3] as NumAbordagens[]).map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleNumAbordagensChange(num)}
+                  className={cn(
+                    "py-3 text-sm font-semibold rounded-lg border-2 transition-all",
+                    fibra.numAbordagens === num
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg"
+                      : "bg-card border-border hover:border-primary/50 hover:bg-muted/50"
+                  )}
+                >
+                  {num} {num === 1 ? 'Abordagem' : 'Abordagens'}
+                </button>
+              ))}
+            </div>
           </div>
 
           {renderAbordagem(1)}
 
-          {fibra.numAbordagens === 2 && (
+          {fibra.numAbordagens >= 2 && (
             <>
               {renderAbordagem(2)}
+              
+              {fibra.numAbordagens >= 3 && renderAbordagem(3)}
               
               <div className="space-y-2">
                 <Label>Convergência</Label>
@@ -252,7 +261,7 @@ export function Step6Fibra({ showErrors = false, validationErrors = [] }: Step6P
 
           <div className="pt-2">
             <PhotoCapture
-              label={fibra.numAbordagens === 1 ? "Foto Geral (obrigatória)" : "Foto Geral das 2 Abordagens (obrigatória)"}
+              label={fibra.numAbordagens === 1 ? "Foto Geral (obrigatória)" : `Foto Geral das ${fibra.numAbordagens} Abordagens (obrigatória)`}
               value={fibra.fotoGeralAbordagens}
               onChange={(value) => updateFibra({ fotoGeralAbordagens: value })}
               required

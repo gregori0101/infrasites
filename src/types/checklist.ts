@@ -43,7 +43,7 @@ export type StatusFuncionamento = 'OK' | 'NOK' | 'NA';
 
 // Fibra types
 export type AbordagemFibra = 'AÉREA' | 'SUBTERRÂNEA';
-export type NumAbordagens = 1 | 2;
+export type NumAbordagens = 1 | 2 | 3;
 export type ConvergenciaFibra = 'CONVERGENTES' | 'SEM CONVERGÊNCIA';
 export type CapacidadeDGO = '12FO' | '24FO' | '48FO' | '72FO' | '144FO' | '144+FO';
 export type FormatoDGO = 'SLIDE' | 'FRONTAL' | 'ARTICULADO' | 'MÓDULO';
@@ -103,6 +103,7 @@ export interface FibraData {
   numAbordagens: NumAbordagens;
   abordagem1: AbordagemData;
   abordagem2?: AbordagemData;
+  abordagem3?: AbordagemData;
   convergencia?: ConvergenciaFibra;
   fotoGeralAbordagens: string | null;
   caixasPassagemExistem: boolean;

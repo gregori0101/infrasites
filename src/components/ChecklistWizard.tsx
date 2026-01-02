@@ -16,7 +16,7 @@ import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Cable, Plug, Radio, 
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, History, AlertCircle
+  Moon, Sun, History, AlertCircle, LayoutDashboard
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -186,6 +186,15 @@ export function ChecklistWizard() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => window.location.href = '/dashboard'}
+              title="Dashboard"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
