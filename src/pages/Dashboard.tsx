@@ -105,7 +105,7 @@ export default function Dashboard() {
       ufCount[uf] = (ufCount[uf] || 0) + 1;
 
       // Check GMG
-      if (report.gmg_existe === "Sim") sitesWithGMG++;
+      if (report.gmg_existe === "SIM") sitesWithGMG++;
 
       let hasProblems = false;
 
