@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReports, ReportRow } from "@/lib/reportDatabase";
+import { fetchReportsForDashboard, ReportRow } from "@/lib/reportDatabase";
 
 interface BatteryIssue {
   siteCode: string;
@@ -84,11 +84,16 @@ export default function Dashboard() {
 
   const loadData = async () => {
     setLoading(true);
-    const data = await fetchReports({});
-    setReports(data);
-    setLastUpdate(new Date());
-    processStats(data);
-    setLoading(false);
+    try {
+      const data = await fetchReportsForDashboard({});
+      setReports(data);
+      setLastUpdate(new Date());
+      processStats(data);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const processStats = (data: ReportRow[]) => {

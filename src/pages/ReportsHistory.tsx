@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReports, fetchReportById, ReportRow } from "@/lib/reportDatabase";
+import { fetchReportsSummary, fetchReportById, ReportRow } from "@/lib/reportDatabase";
 
 const ESTADOS_BR = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -64,8 +64,8 @@ export default function ReportsHistory() {
     refetch,
     isFetching 
   } = useQuery({
-    queryKey: ['reports', appliedFilters],
-    queryFn: () => fetchReports({
+    queryKey: ['reports-summary', appliedFilters],
+    queryFn: () => fetchReportsSummary({
       siteCode: appliedFilters.siteCode || undefined,
       stateUf: appliedFilters.stateUf || undefined,
       startDate: appliedFilters.startDate ? new Date(appliedFilters.startDate).toISOString() : undefined,
