@@ -18,6 +18,106 @@ export interface ReportRow {
   [key: string]: any;
 }
 
+// --- Column builders (avoid fetching heavy photo columns) ---
+
+// Base columns needed for list display (lightweight)
+const SUMMARY_COLUMNS = `
+  id,
+  created_at,
+  created_date,
+  created_time,
+  technician_name,
+  site_code,
+  state_uf,
+  total_cabinets,
+  email_sent,
+  email_sent_at
+`.replace(/\s+/g, '');
+
+// Build columns for dashboard statistics (no photos, includes battery/AC status)
+function buildDashboardColumns(): string {
+  const cols: string[] = [
+    'id',
+    'created_at',
+    'created_date',
+    'created_time',
+    'technician_name',
+    'site_code',
+    'state_uf',
+    'total_cabinets',
+    'email_sent',
+    'email_sent_at',
+    'gmg_existe',
+    'gmg_fabricante',
+    'gmg_potencia',
+    'torre_ninhos',
+    'torre_protecao_fibra',
+    'torre_aterramento',
+    'torre_housekeeping',
+    'observacoes',
+  ];
+
+  // Add gabinete columns (no photos)
+  for (let g = 1; g <= 7; g++) {
+    const prefix = `gab${g}`;
+    cols.push(
+      `${prefix}_tipo`,
+      `${prefix}_protecao`,
+      `${prefix}_tecnologias_acesso`,
+      `${prefix}_tecnologias_transporte`,
+      `${prefix}_fcc_fabricante`,
+      `${prefix}_fcc_tensao`,
+      `${prefix}_fcc_gerenciado`,
+      `${prefix}_fcc_gerenciavel`,
+      `${prefix}_fcc_consumo`,
+      `${prefix}_fcc_qtd_ur`,
+      `${prefix}_bancos_interligados`,
+      `${prefix}_climatizacao_tipo`,
+      `${prefix}_ventiladores_status`,
+      `${prefix}_plc_status`,
+      `${prefix}_alarme_status`,
+    );
+
+    // Batteries (6 per gabinete)
+    for (let b = 1; b <= 6; b++) {
+      cols.push(
+        `${prefix}_bat${b}_tipo`,
+        `${prefix}_bat${b}_fabricante`,
+        `${prefix}_bat${b}_capacidade`,
+        `${prefix}_bat${b}_data_fabricacao`,
+        `${prefix}_bat${b}_estado`,
+      );
+    }
+
+    // ACs (4 per gabinete)
+    for (let a = 1; a <= 4; a++) {
+      cols.push(
+        `${prefix}_ac${a}_modelo`,
+        `${prefix}_ac${a}_status`,
+      );
+    }
+  }
+
+  return cols.join(',');
+}
+
+// Build columns for full detail view (no photos by default)
+function buildDetailColumns(): string {
+  // Same as dashboard + pdf/excel paths
+  return buildDashboardColumns() + ',pdf_file_path,excel_file_path,observacao_foto_url,panoramic_photo_url';
+}
+
+// Photo columns only
+function buildPhotoColumns(): string {
+  const cols: string[] = ['id', 'panoramic_photo_url', 'observacao_foto_url'];
+  for (let g = 1; g <= 7; g++) {
+    cols.push(`gab${g}_foto_transmissao`, `gab${g}_foto_acesso`);
+  }
+  return cols.join(',');
+}
+
+// --- Build report row from checklist data ---
+
 export function buildReportRow(data: ChecklistData): ReportRow {
   const now = new Date();
   const row: ReportRow = {
@@ -145,22 +245,25 @@ export async function updateReportEmailSent(reportId: string): Promise<boolean> 
   }
 }
 
-export async function fetchReports(filters?: {
+// --- Fetch functions (optimized to avoid photo columns) ---
+
+/**
+ * Fetch lightweight summary for list display (no photos, no gabinete details)
+ */
+export async function fetchReportsSummary(filters?: {
   siteCode?: string;
   stateUf?: string;
   startDate?: string;
   endDate?: string;
 }): Promise<ReportRow[]> {
-  // Paginação para trazer "base completa" (até o limite do backend)
   const pageSize = 1000;
   let page = 0;
   let all: ReportRow[] = [];
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     let query = supabase
       .from('reports')
-      .select('*')
+      .select(SUMMARY_COLUMNS)
       .order('created_at', { ascending: false });
 
     if (filters?.siteCode) {
@@ -182,27 +285,96 @@ export async function fetchReports(filters?: {
     const { data, error } = await query.range(from, to);
 
     if (error) {
-      console.error('Error fetching reports:', error);
+      console.error('Error fetching reports summary:', error);
       throw new Error(`Erro ao buscar relatórios: ${error.message}`);
     }
 
-    const batch = data || [];
+    const batch = (data || []) as unknown as ReportRow[];
     all = all.concat(batch);
 
     if (batch.length < pageSize) break;
     page += 1;
-
-    // Hard safety guard to avoid runaway loops
     if (page > 50) break;
   }
 
   return all;
 }
 
+/**
+ * Fetch reports with dashboard-needed columns (battery/AC status, no photos)
+ */
+export async function fetchReportsForDashboard(filters?: {
+  siteCode?: string;
+  stateUf?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<ReportRow[]> {
+  const pageSize = 1000;
+  let page = 0;
+  let all: ReportRow[] = [];
+  const columns = buildDashboardColumns();
+
+  while (true) {
+    let query = supabase
+      .from('reports')
+      .select(columns)
+      .order('created_at', { ascending: false });
+
+    if (filters?.siteCode) {
+      query = query.ilike('site_code', `%${filters.siteCode}%`);
+    }
+    if (filters?.stateUf) {
+      query = query.eq('state_uf', filters.stateUf);
+    }
+    if (filters?.startDate) {
+      query = query.gte('created_at', filters.startDate);
+    }
+    if (filters?.endDate) {
+      query = query.lte('created_at', filters.endDate);
+    }
+
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error } = await query.range(from, to);
+
+    if (error) {
+      console.error('Error fetching reports for dashboard:', error);
+      throw new Error(`Erro ao buscar relatórios: ${error.message}`);
+    }
+
+    const batch = (data || []) as unknown as ReportRow[];
+    all = all.concat(batch);
+
+    if (batch.length < pageSize) break;
+    page += 1;
+    if (page > 50) break;
+  }
+
+  return all;
+}
+
+/**
+ * Legacy fetchReports - now uses dashboard columns (no photos) for compatibility
+ */
+export async function fetchReports(filters?: {
+  siteCode?: string;
+  stateUf?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<ReportRow[]> {
+  return fetchReportsForDashboard(filters);
+}
+
+/**
+ * Fetch single report by ID (without photos by default for speed)
+ */
 export async function fetchReportById(id: string): Promise<ReportRow | null> {
+  const columns = buildDashboardColumns();
+  
   const { data, error } = await supabase
     .from('reports')
-    .select('*')
+    .select(columns)
     .eq('id', id)
     .maybeSingle();
 
@@ -211,5 +383,43 @@ export async function fetchReportById(id: string): Promise<ReportRow | null> {
     throw new Error(`Erro ao buscar relatório: ${error.message}`);
   }
 
-  return data;
+  return data as unknown as ReportRow | null;
+}
+
+/**
+ * Fetch photos only for a specific report (on-demand loading)
+ */
+export async function fetchReportPhotos(id: string): Promise<Partial<ReportRow> | null> {
+  const columns = buildPhotoColumns();
+  
+  const { data, error } = await supabase
+    .from('reports')
+    .select(columns)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching report photos:', error);
+    throw new Error(`Erro ao buscar fotos: ${error.message}`);
+  }
+
+  return data as Partial<ReportRow> | null;
+}
+
+/**
+ * Fetch full report with photos (use sparingly - only for exports)
+ */
+export async function fetchFullReportById(id: string): Promise<ReportRow | null> {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching full report:', error);
+    throw new Error(`Erro ao buscar relatório completo: ${error.message}`);
+  }
+
+  return data as ReportRow | null;
 }
