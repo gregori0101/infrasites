@@ -151,75 +151,65 @@ export async function fetchReports(filters?: {
   startDate?: string;
   endDate?: string;
 }): Promise<ReportRow[]> {
-  try {
-    // Paginação para trazer "base completa" (até o limite do backend), sem depender de refresh.
-    const pageSize = 1000;
-    let page = 0;
-    let all: ReportRow[] = [];
+  // Paginação para trazer "base completa" (até o limite do backend)
+  const pageSize = 1000;
+  let page = 0;
+  let all: ReportRow[] = [];
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      let query = supabase
-        .from('reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    let query = supabase
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (filters?.siteCode) {
-        query = query.ilike('site_code', `%${filters.siteCode}%`);
-      }
-      if (filters?.stateUf) {
-        query = query.eq('state_uf', filters.stateUf);
-      }
-      if (filters?.startDate) {
-        query = query.gte('created_at', filters.startDate);
-      }
-      if (filters?.endDate) {
-        query = query.lte('created_at', filters.endDate);
-      }
-
-      const from = page * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error } = await query.range(from, to);
-
-      if (error) {
-        console.error('Error fetching reports:', error);
-        return [];
-      }
-
-      const batch = data || [];
-      all = all.concat(batch);
-
-      if (batch.length < pageSize) break;
-      page += 1;
-
-      // Hard safety guard to avoid runaway loops if something changes upstream.
-      if (page > 50) break;
+    if (filters?.siteCode) {
+      query = query.ilike('site_code', `%${filters.siteCode}%`);
+    }
+    if (filters?.stateUf) {
+      query = query.eq('state_uf', filters.stateUf);
+    }
+    if (filters?.startDate) {
+      query = query.gte('created_at', filters.startDate);
+    }
+    if (filters?.endDate) {
+      query = query.lte('created_at', filters.endDate);
     }
 
-    return all;
-  } catch (err) {
-    console.error('Exception fetching reports:', err);
-    return [];
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error } = await query.range(from, to);
+
+    if (error) {
+      console.error('Error fetching reports:', error);
+      throw new Error(`Erro ao buscar relatórios: ${error.message}`);
+    }
+
+    const batch = data || [];
+    all = all.concat(batch);
+
+    if (batch.length < pageSize) break;
+    page += 1;
+
+    // Hard safety guard to avoid runaway loops
+    if (page > 50) break;
   }
+
+  return all;
 }
 
 export async function fetchReportById(id: string): Promise<ReportRow | null> {
-  try {
-    const { data, error } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('id', id)
-      .single();
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching report:', error);
-      return null;
-    }
-
-    return data;
-  } catch (err) {
-    console.error('Exception fetching report:', err);
-    return null;
+  if (error) {
+    console.error('Error fetching report:', error);
+    throw new Error(`Erro ao buscar relatório: ${error.message}`);
   }
+
+  return data;
 }
