@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
   ArrowLeft, Search, Filter, Mail, MailCheck, 
-  FileText, FileSpreadsheet, Eye, RefreshCw, X,
-  Calendar, MapPin, User, Building2, Download, Loader2
+  FileText, FileSpreadsheet, RefreshCw, X,
+  Calendar, User, Building2, Loader2, AlertCircle, Download
 } from "lucide-react";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, generateConsolidatedExcel, downloadExcel } from "@/lib/generateExcel";
@@ -35,8 +36,6 @@ const ESTADOS_BR = [
 
 export default function ReportsHistory() {
   const navigate = useNavigate();
-  const [reports, setReports] = useState<ReportRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
@@ -47,50 +46,45 @@ export default function ReportsHistory() {
   const [stateFilter, setStateFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  
+  // Applied filters (only update when user clicks "Filtrar")
+  const [appliedFilters, setAppliedFilters] = useState({
+    siteCode: "",
+    stateUf: "",
+    startDate: "",
+    endDate: "",
+  });
 
-  const firstLoadRef = React.useRef(true);
-
-  const loadReports = async (opts?: { silent?: boolean }) => {
-    if (!opts?.silent) setLoading(true);
-
-    const data = await fetchReports({
-      siteCode: siteCodeFilter || undefined,
-      stateUf: stateFilter || undefined,
-      startDate: dateFrom ? new Date(dateFrom).toISOString() : undefined,
-      endDate: dateTo ? new Date(dateTo + 'T23:59:59').toISOString() : undefined,
-    });
-
-    setReports(data);
-    setLoading(false);
-
-    // Se a primeira carga vier vazia (flutuação de rede/cache), tenta 1x automaticamente.
-    if (firstLoadRef.current) {
-      firstLoadRef.current = false;
-      const noFilters = !siteCodeFilter && !stateFilter && !dateFrom && !dateTo;
-      if (noFilters && data.length === 0) {
-        setTimeout(() => {
-          loadReports({ silent: true });
-        }, 600);
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadReports();
-
-    const onFocus = () => loadReports({ silent: true });
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') loadReports({ silent: true });
-    });
-
-    return () => {
-      window.removeEventListener('focus', onFocus);
-    };
-  }, []);
+  // TanStack Query for robust data fetching with retries
+  const { 
+    data: reports = [], 
+    isLoading, 
+    isError, 
+    error,
+    refetch,
+    isFetching 
+  } = useQuery({
+    queryKey: ['reports', appliedFilters],
+    queryFn: () => fetchReports({
+      siteCode: appliedFilters.siteCode || undefined,
+      stateUf: appliedFilters.stateUf || undefined,
+      startDate: appliedFilters.startDate ? new Date(appliedFilters.startDate).toISOString() : undefined,
+      endDate: appliedFilters.endDate ? new Date(appliedFilters.endDate + 'T23:59:59').toISOString() : undefined,
+    }),
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    staleTime: 15000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  });
 
   const handleFilter = () => {
-    loadReports();
+    setAppliedFilters({
+      siteCode: siteCodeFilter,
+      stateUf: stateFilter,
+      startDate: dateFrom,
+      endDate: dateTo,
+    });
   };
 
   const clearFilters = () => {
@@ -98,7 +92,12 @@ export default function ReportsHistory() {
     setStateFilter("");
     setDateFrom("");
     setDateTo("");
-    setTimeout(loadReports, 0);
+    setAppliedFilters({
+      siteCode: "",
+      stateUf: "",
+      startDate: "",
+      endDate: "",
+    });
   };
 
   const openReportDetails = async (report: ReportRow) => {
@@ -232,8 +231,8 @@ Por favor, anexe-os a este email antes de enviar.
           <div className="flex-1">
             <h1 className="font-bold text-foreground">Histórico de Relatórios</h1>
           </div>
-          <Button variant="outline" size="icon" onClick={() => loadReports()} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </header>
@@ -309,10 +308,22 @@ Por favor, anexe-os a este email antes de enviar.
         </Card>
 
         {/* Reports List */}
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-10 text-muted-foreground">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
             Carregando relatórios...
+          </div>
+        ) : isError ? (
+          <div className="text-center py-10">
+            <AlertCircle className="w-12 h-12 mx-auto mb-2 text-destructive" />
+            <p className="text-destructive font-medium">Erro ao buscar relatórios</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {error instanceof Error ? error.message : 'Tente novamente'}
+            </p>
+            <Button onClick={() => refetch()} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Tentar Novamente
+            </Button>
           </div>
         ) : reports.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
