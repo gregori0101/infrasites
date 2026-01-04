@@ -1,258 +1,106 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  Radio,
+  MapPin,
+  RefreshCw,
   Battery,
   Thermometer,
   Zap,
-  Radio,
   Trash2,
-  MapPin,
-  AlertTriangle,
-  Building2,
-  RefreshCw,
-  ChevronRight,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsForDashboard, ReportRow } from "@/lib/reportDatabase";
 
-interface BatteryIssue {
-  siteCode: string;
-  uf: string;
-  problem: string;
-  status: string;
-  fabricante: string;
-}
+// Dashboard components
+import { DashboardFiltersBar } from "@/components/dashboard/DashboardFilters";
+import { DashboardFilters } from "@/components/dashboard/types";
+import { useDashboardStats } from "@/components/dashboard/useDashboardStats";
+import { DrillDownModal } from "@/components/dashboard/DrillDownModal";
 
-interface DashboardStats {
-  totalSites: number;
-  sitesWithProblems: number;
-  batteriesWithDefects: number;
-  sitesWithGMG: number;
-  sitesWithoutGMG: number;
-  batteryIssues: BatteryIssue[];
-  ufDistribution: { name: string; count: number }[];
-  batteryStateChart: { name: string; value: number; color: string }[];
-  climatizationIssues: number;
-  fiberIssues: number;
-}
+// Panels
+import { DGOSPanel } from "@/components/dashboard/panels/DGOSPanel";
+import { EnergiaPanel } from "@/components/dashboard/panels/EnergiaPanel";
+import { ZeladoriaPanel } from "@/components/dashboard/panels/ZeladoriaPanel";
+import { BateriaPanel } from "@/components/dashboard/panels/BateriaPanel";
 
-const COLORS = {
-  estufada: "#f59e0b",
-  vazando: "#3b82f6",
-  trincada: "#ef4444",
-  primary: "hsl(206, 100%, 33%)",
-  success: "#22c55e",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-};
+type ActivePanel = "dgos" | "energia" | "zeladoria" | "bateria";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [reports, setReports] = useState<ReportRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [stats, setStats] = useState<DashboardStats>({
-    totalSites: 0,
-    sitesWithProblems: 0,
-    batteriesWithDefects: 0,
-    sitesWithGMG: 0,
-    sitesWithoutGMG: 0,
-    batteryIssues: [],
-    ufDistribution: [],
-    batteryStateChart: [],
-    climatizationIssues: 0,
-    fiberIssues: 0,
+  const [activePanel, setActivePanel] = useState<ActivePanel>("dgos");
+  const [filters, setFilters] = useState<DashboardFilters>({
+    dateRange: { from: undefined, to: undefined },
+    technician: "",
+    stateUf: "all",
+    status: "all",
   });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchReportsForDashboard({});
-      setReports(data);
-      setLastUpdate(new Date());
-      processStats(data);
-    } catch (err) {
-      console.error('Error loading dashboard data:', err);
-    } finally {
-      setLoading(false);
-    }
+  // Drill-down modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"sites" | "batteries" | "acs">("sites");
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalFilterFn, setModalFilterFn] = useState<(data: any) => any[]>(() => () => []);
+
+  // Fetch reports using React Query
+  const {
+    data: reports = [],
+    isLoading,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useQuery({
+    queryKey: ["dashboard-reports"],
+    queryFn: () => fetchReportsForDashboard({}),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: true,
+  });
+
+  // Process stats based on filters
+  const { stats, sites, batteries, acs } = useDashboardStats(reports, filters);
+
+  // Extract unique values for filter dropdowns
+  const uniqueUFs = useMemo(() => {
+    const ufs = new Set(reports.map((r) => r.state_uf).filter(Boolean));
+    return Array.from(ufs).sort() as string[];
+  }, [reports]);
+
+  const uniqueTechnicians = useMemo(() => {
+    const techs = new Set(reports.map((r) => r.technician_name).filter(Boolean));
+    return Array.from(techs).sort() as string[];
+  }, [reports]);
+
+  // Drill-down handlers
+  const openDrillDown = (
+    type: "sites" | "batteries" | "acs",
+    title: string,
+    filterFn?: (data: any[]) => any[]
+  ) => {
+    setModalType(type);
+    setModalTitle(title);
+    setModalFilterFn(() => filterFn || ((d: any[]) => d));
+    setModalOpen(true);
   };
 
-  const processStats = (data: ReportRow[]) => {
-    const batteryIssues: BatteryIssue[] = [];
-    const ufCount: Record<string, number> = {};
-    const batteryStates = { estufada: 0, vazando: 0, trincada: 0 };
-    let sitesWithProblems = 0;
-    let sitesWithGMG = 0;
-    let climatizationIssues = 0;
-
-    data.forEach((report) => {
-      // Count UF distribution
-      const uf = report.state_uf || "N/A";
-      ufCount[uf] = (ufCount[uf] || 0) + 1;
-
-      // Check GMG
-      if (report.gmg_existe === "SIM") sitesWithGMG++;
-
-      let hasProblems = false;
-
-      // Check batteries for each cabinet
-      for (let g = 1; g <= 7; g++) {
-        for (let b = 1; b <= 6; b++) {
-          const estadoKey = `gab${g}_bat${b}_estado` as keyof ReportRow;
-          const fabricanteKey = `gab${g}_bat${b}_fabricante` as keyof ReportRow;
-          const estado = report[estadoKey] as string | null;
-          const fabricante = report[fabricanteKey] as string | null;
-
-          if (estado && estado !== "OK" && estado !== "NA") {
-            hasProblems = true;
-            const estadoLower = estado.toLowerCase();
-
-            if (estadoLower.includes("estufada")) batteryStates.estufada++;
-            if (estadoLower.includes("vazando")) batteryStates.vazando++;
-            if (estadoLower.includes("trincada")) batteryStates.trincada++;
-
-            batteryIssues.push({
-              siteCode: report.site_code,
-              uf: uf,
-              problem: `Bateria ${fabricante || "N/A"}`,
-              status: estado,
-              fabricante: fabricante || "N/A",
-            });
-          }
-        }
-
-        // Check AC status
-        for (let a = 1; a <= 4; a++) {
-          const acStatusKey = `gab${g}_ac${a}_status` as keyof ReportRow;
-          const acStatus = report[acStatusKey] as string | null;
-          if (acStatus === "NOK") {
-            climatizationIssues++;
-            hasProblems = true;
-          }
-        }
-      }
-
-      if (hasProblems) sitesWithProblems++;
-    });
-
-    const ufDistribution = Object.entries(ufCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
-
-    const batteryStateChart = [
-      { name: "Estufada", value: batteryStates.estufada, color: COLORS.estufada },
-      { name: "Vazando", value: batteryStates.vazando, color: COLORS.vazando },
-      { name: "Trincada", value: batteryStates.trincada, color: COLORS.trincada },
-    ].filter((item) => item.value > 0);
-
-    const totalBatteryDefects =
-      batteryStates.estufada + batteryStates.vazando + batteryStates.trincada;
-
-    setStats({
-      totalSites: data.length,
-      sitesWithProblems,
-      batteriesWithDefects: totalBatteryDefects,
-      sitesWithGMG,
-      sitesWithoutGMG: data.length - sitesWithGMG,
-      batteryIssues: batteryIssues.slice(0, 10), // Limit to 10 most recent
-      ufDistribution,
-      batteryStateChart,
-      climatizationIssues,
-      fiberIssues: 0,
-    });
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const StatCard = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    iconBg,
-    onClick,
-  }: {
-    title: string;
-    value: number | string;
-    subtitle: string;
-    icon: React.ElementType;
-    iconBg: string;
-    onClick?: () => void;
-  }) => (
-    <Card
-      className={`cursor-pointer hover:border-primary/50 transition-all ${
-        onClick ? "hover:shadow-lg" : ""
-      }`}
-      onClick={onClick}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold">{value}</p>
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
-            {onClick && (
-              <p className="text-xs text-primary flex items-center gap-1 mt-1">
-                Clique para ver detalhes <ChevronRight className="w-3 h-3" />
-              </p>
-            )}
-          </div>
-          <div className={`p-3 rounded-xl ${iconBg}`}>
-            <Icon className="w-5 h-5" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const getStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
-    if (statusLower.includes("vazando"))
-      return (
-        <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-          VAZANDO
-        </Badge>
-      );
-    if (statusLower.includes("estufada"))
-      return (
-        <Badge className="bg-amber-500 text-white hover:bg-amber-600">
-          ESTUFADA
-        </Badge>
-      );
-    if (statusLower.includes("trincada"))
-      return (
-        <Badge className="bg-red-500 text-white hover:bg-red-600">
-          TRINCADA
-        </Badge>
-      );
-    return <Badge variant="secondary">{status}</Badge>;
-  };
+  // Panel navigation items
+  const panelItems = [
+    { id: "dgos" as const, label: "DGOS", icon: LayoutDashboard },
+    { id: "energia" as const, label: "Energia", icon: Zap },
+    { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
+    { id: "bateria" as const, label: "Baterias", icon: Battery },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-56 bg-card border-r border-border hidden lg:flex flex-col">
+      <aside className="fixed left-0 top-0 h-full w-56 bg-card border-r border-border hidden lg:flex flex-col z-40">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -260,51 +108,49 @@ export default function Dashboard() {
             </div>
             <div>
               <h1 className="font-bold text-foreground">InfraSites</h1>
-              <p className="text-xs text-muted-foreground">Dashboard Telecom</p>
+              <p className="text-xs text-muted-foreground">Dashboard Executivo</p>
             </div>
           </div>
         </div>
 
         <nav className="flex-1 p-3">
-          <p className="text-xs text-muted-foreground mb-2 px-2">Menu Principal</p>
+          <p className="text-xs text-muted-foreground mb-2 px-2">Painéis</p>
           <ul className="space-y-1">
-            <li>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
-                <MapPin className="w-4 h-4" />
-                Visão Geral
-              </button>
-            </li>
+            {panelItems.map((item) => (
+              <li key={item.id}>
+                <button
+                  onClick={() => setActivePanel(item.id)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activePanel === item.id
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-xs text-muted-foreground mb-2 px-2 mt-6">Ações</p>
+          <ul className="space-y-1">
             <li>
               <button
                 onClick={() => navigate("/historico")}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Battery className="w-4 h-4" />
+                <MapPin className="w-4 h-4" />
                 Relatórios
               </button>
             </li>
             <li>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Thermometer className="w-4 h-4" />
-                Climatização
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Zap className="w-4 h-4" />
-                Energia & GMG
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Radio className="w-4 h-4" />
-                DGOs & Fibra
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <Trash2 className="w-4 h-4" />
-                Zeladoria
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar
               </button>
             </li>
           </ul>
@@ -313,7 +159,9 @@ export default function Dashboard() {
         <div className="p-4 border-t border-border">
           <p className="text-xs text-muted-foreground">Última atualização</p>
           <p className="text-sm font-medium">
-            {format(lastUpdate, "dd/MM/yyyy HH:mm", { locale: ptBR })}
+            {dataUpdatedAt
+              ? format(new Date(dataUpdatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })
+              : "—"}
           </p>
         </div>
       </aside>
@@ -333,11 +181,29 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="icon"
-              onClick={loadData}
-              disabled={loading}
+              onClick={() => refetch()}
+              disabled={isLoading}
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
+          </div>
+
+          {/* Mobile Panel Tabs */}
+          <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+            {panelItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActivePanel(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                  activePanel === item.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <item.icon className="w-3 h-3" />
+                {item.label}
+              </button>
+            ))}
           </div>
         </header>
 
@@ -345,10 +211,10 @@ export default function Dashboard() {
         <header className="hidden lg:flex items-center justify-between px-6 py-4 border-b border-border bg-card">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              Dashboard de Infraestrutura
+              Dashboard Executivo
             </h1>
             <p className="text-muted-foreground">
-              Resumo executivo da infraestrutura de telecomunicações
+              Análise completa da infraestrutura de telecomunicações
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -359,200 +225,147 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="icon"
-              onClick={loadData}
-              disabled={loading}
+              onClick={() => refetch()}
+              disabled={isLoading}
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
           </div>
         </header>
 
         <div className="p-4 lg:p-6 space-y-6">
-          {loading ? (
+          {/* Global Filters */}
+          <DashboardFiltersBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            uniqueUFs={uniqueUFs}
+            uniqueTechnicians={uniqueTechnicians}
+          />
+
+          {/* Loading State */}
+          {isLoading && (
             <div className="flex items-center justify-center py-20">
               <RefreshCw className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : (
+          )}
+
+          {/* Error State */}
+          {error && !isLoading && (
+            <div className="text-center py-12">
+              <p className="text-destructive mb-4">Erro ao carregar dados</p>
+              <Button onClick={() => refetch()}>Tentar novamente</Button>
+            </div>
+          )}
+
+          {/* Content */}
+          {!isLoading && !error && (
             <>
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                  title="Total de Sites"
-                  value={stats.totalSites}
-                  subtitle="Sites inspecionados"
-                  icon={MapPin}
-                  iconBg="bg-primary/10 text-primary"
-                  onClick={() => navigate("/historico")}
+              {activePanel === "dgos" && (
+                <DGOSPanel
+                  stats={stats}
+                  sites={sites}
+                  onDrillDown={(type) => {
+                    if (type === "total") {
+                      openDrillDown("sites", "Todos os Sites", (s) => s);
+                    } else if (type === "ok") {
+                      openDrillDown("sites", "Sites sem Problemas", (s) =>
+                        s.filter((site: any) => !site.hasProblems)
+                      );
+                    } else {
+                      openDrillDown("sites", "Sites com Problemas", (s) =>
+                        s.filter((site: any) => site.hasProblems)
+                      );
+                    }
+                  }}
                 />
-                <StatCard
-                  title="Sites com Problemas"
-                  value={stats.sitesWithProblems}
-                  subtitle={`${
-                    stats.totalSites > 0
-                      ? Math.round(
-                          (stats.sitesWithProblems / stats.totalSites) * 100
-                        )
-                      : 0
-                  }% do total`}
-                  icon={AlertTriangle}
-                  iconBg="bg-warning/10 text-warning"
-                  onClick={() => navigate("/historico")}
-                />
-                <StatCard
-                  title="Baterias com Defeito"
-                  value={stats.batteriesWithDefects}
-                  subtitle="Requerem atenção"
-                  icon={Battery}
-                  iconBg="bg-destructive/10 text-destructive"
-                />
-                <StatCard
-                  title="Sites com GMG"
-                  value={stats.sitesWithGMG}
-                  subtitle={`${stats.sitesWithoutGMG} sem GMG`}
-                  icon={Zap}
-                  iconBg="bg-success/10 text-success"
-                />
-              </div>
+              )}
 
-              {/* Charts Row */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                {/* Battery State Chart */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <div className="w-1 h-5 bg-primary rounded-full" />
-                      Estado das Baterias
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {stats.batteryStateChart.length > 0 ? (
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={stats.batteryStateChart}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={90}
-                              paddingAngle={5}
-                              dataKey="value"
-                              label={({ name, value }) => `${name}: ${value}`}
-                            >
-                              {stats.batteryStateChart.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                    ) : (
-                      <div className="h-64 flex items-center justify-center text-muted-foreground">
-                        <div className="text-center">
-                          <Battery className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>Nenhum problema de bateria detectado</p>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+              {activePanel === "energia" && (
+                <EnergiaPanel
+                  stats={stats}
+                  acs={acs}
+                  onDrillDown={(type) => {
+                    if (type === "gmg") {
+                      openDrillDown("sites", "Sites com GMG", (s) =>
+                        s.filter((site: any) => site.gmgExists)
+                      );
+                    } else if (type === "ac-ok") {
+                      openDrillDown("acs", "ACs Funcionando", (a) =>
+                        a.filter((ac: any) => ac.status === "OK")
+                      );
+                    } else {
+                      openDrillDown("acs", "ACs com Defeito", (a) =>
+                        a.filter((ac: any) => ac.status === "NOK")
+                      );
+                    }
+                  }}
+                />
+              )}
 
-                {/* Critical Alerts Table */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-warning" />
-                      Alertas Críticos
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {stats.batteryIssues.length > 0 ? (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b text-muted-foreground">
-                              <th className="text-left py-2 font-medium">SITE</th>
-                              <th className="text-left py-2 font-medium">UF</th>
-                              <th className="text-left py-2 font-medium">
-                                PROBLEMA
-                              </th>
-                              <th className="text-left py-2 font-medium">
-                                STATUS
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {stats.batteryIssues.map((issue, idx) => (
-                              <tr
-                                key={idx}
-                                className="border-b border-border/50 hover:bg-muted/30"
-                              >
-                                <td className="py-2 font-medium">
-                                  {issue.siteCode}
-                                </td>
-                                <td className="py-2">{issue.uf}</td>
-                                <td className="py-2">{issue.problem}</td>
-                                <td className="py-2">
-                                  {getStatusBadge(issue.status)}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="h-40 flex items-center justify-center text-muted-foreground">
-                        <div className="text-center">
-                          <AlertTriangle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>Nenhum alerta crítico</p>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              {activePanel === "zeladoria" && (
+                <ZeladoriaPanel
+                  stats={stats}
+                  sites={sites}
+                  onDrillDown={(type) => {
+                    if (type === "zeladoria") {
+                      openDrillDown("sites", "Zeladoria OK", (s) =>
+                        s.filter((site: any) => site.zeladoriaOk)
+                      );
+                    } else if (type === "fibra") {
+                      openDrillDown("sites", "Fibra Protegida", (s) => s);
+                    } else {
+                      openDrillDown("sites", "Aterramento OK", (s) => s);
+                    }
+                  }}
+                />
+              )}
 
-              {/* UF Distribution Chart */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    Distribuição por UF
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {stats.ufDistribution.length > 0 ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={stats.ufDistribution}
-                          layout="vertical"
-                          margin={{ left: 30 }}
-                        >
-                          <XAxis type="number" />
-                          <YAxis type="category" dataKey="name" width={40} />
-                          <Tooltip />
-                          <Bar
-                            dataKey="count"
-                            fill="hsl(206, 100%, 45%)"
-                            radius={[0, 4, 4, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <div className="h-64 flex items-center justify-center text-muted-foreground">
-                      <p>Nenhum dado disponível</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {activePanel === "bateria" && (
+                <BateriaPanel
+                  stats={stats}
+                  batteries={batteries}
+                  onDrillDown={(type) => {
+                    if (type === "all") {
+                      openDrillDown("batteries", "Todas as Baterias", (b) => b);
+                    } else if (type === "ok") {
+                      openDrillDown("batteries", "Baterias OK", (b) =>
+                        b.filter((bat: any) => bat.estado === "OK")
+                      );
+                    } else if (type === "nok") {
+                      openDrillDown("batteries", "Baterias com Defeito", (b) =>
+                        b.filter((bat: any) => bat.estado !== "OK")
+                      );
+                    } else if (type === "obsolete-warning") {
+                      openDrillDown("batteries", "Baterias 5-8 anos", (b) =>
+                        b.filter((bat: any) => bat.obsolescencia === "warning")
+                      );
+                    } else {
+                      openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) =>
+                        b.filter((bat: any) => bat.obsolescencia === "critical")
+                      );
+                    }
+                  }}
+                />
+              )}
             </>
           )}
         </div>
       </main>
+
+      {/* Drill-Down Modal */}
+      <DrillDownModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={modalTitle}
+        type={modalType}
+        sites={modalType === "sites" ? modalFilterFn(sites) : undefined}
+        batteries={modalType === "batteries" ? modalFilterFn(batteries) : undefined}
+        acs={modalType === "acs" ? modalFilterFn(acs) : undefined}
+        onSiteClick={(id) => {
+          setModalOpen(false);
+          navigate(`/historico?reportId=${id}`);
+        }}
+      />
     </div>
   );
 }
