@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,10 +13,11 @@ import {
   Zap,
   Trash2,
   LayoutDashboard,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReportsForDashboard, ReportRow } from "@/lib/reportDatabase";
+import { fetchReportsForDashboard } from "@/lib/reportDatabase";
 
 // Dashboard components
 import { DashboardFiltersBar } from "@/components/dashboard/DashboardFilters";
@@ -25,16 +26,18 @@ import { useDashboardStats } from "@/components/dashboard/useDashboardStats";
 import { DrillDownModal } from "@/components/dashboard/DrillDownModal";
 
 // Panels
+import { OverviewPanel } from "@/components/dashboard/panels/OverviewPanel";
 import { DGOSPanel } from "@/components/dashboard/panels/DGOSPanel";
 import { EnergiaPanel } from "@/components/dashboard/panels/EnergiaPanel";
 import { ZeladoriaPanel } from "@/components/dashboard/panels/ZeladoriaPanel";
 import { BateriaPanel } from "@/components/dashboard/panels/BateriaPanel";
+import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPanel";
 
-type ActivePanel = "dgos" | "energia" | "zeladoria" | "bateria";
+type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [activePanel, setActivePanel] = useState<ActivePanel>("dgos");
+  const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: { from: undefined, to: undefined },
     technician: "",
@@ -58,13 +61,13 @@ export default function Dashboard() {
   } = useQuery({
     queryKey: ["dashboard-reports"],
     queryFn: () => fetchReportsForDashboard({}),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 3,
     refetchOnWindowFocus: true,
   });
 
   // Process stats based on filters
-  const { stats, sites, batteries, acs } = useDashboardStats(reports, filters);
+  const { stats, sites, batteries, acs, climatizacao } = useDashboardStats(reports, filters);
 
   // Extract unique values for filter dropdowns
   const uniqueUFs = useMemo(() => {
@@ -91,8 +94,10 @@ export default function Dashboard() {
 
   // Panel navigation items
   const panelItems = [
+    { id: "overview" as const, label: "Visão Geral", icon: Home },
     { id: "dgos" as const, label: "DGOS", icon: LayoutDashboard },
     { id: "energia" as const, label: "Energia", icon: Zap },
+    { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
     { id: "bateria" as const, label: "Baterias", icon: Battery },
   ];
@@ -101,14 +106,14 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-56 bg-card border-r border-border hidden lg:flex flex-col z-40">
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border bg-gradient-to-r from-[#003366] to-[#004d99]">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Radio className="w-5 h-5 text-primary" />
+            <div className="p-2 bg-white/10 rounded-lg">
+              <Radio className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-foreground">InfraSites</h1>
-              <p className="text-xs text-muted-foreground">Dashboard Executivo</p>
+              <h1 className="font-bold text-white">InfraSites</h1>
+              <p className="text-xs text-white/70">Dashboard Executivo</p>
             </div>
           </div>
         </div>
@@ -122,7 +127,7 @@ export default function Dashboard() {
                   onClick={() => setActivePanel(item.id)}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activePanel === item.id
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-[#003366]/10 text-[#003366] border-l-2 border-[#003366]"
                       : "hover:bg-muted text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -169,20 +174,21 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="lg:ml-56">
         {/* Header Mobile */}
-        <header className="lg:hidden sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border shadow-sm">
+        <header className="lg:hidden sticky top-0 z-50 bg-[#003366] text-white shadow-sm">
           <div className="px-4 py-3 flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="text-white hover:bg-white/10">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <VivoLogo className="h-6" />
             <div className="flex-1">
-              <h1 className="font-bold text-foreground">Dashboard</h1>
+              <h1 className="font-bold">Dashboard</h1>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={() => refetch()}
               disabled={isLoading}
+              className="text-white hover:bg-white/10"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
@@ -196,8 +202,8 @@ export default function Dashboard() {
                 onClick={() => setActivePanel(item.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                   activePanel === item.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-white text-[#003366]"
+                    : "bg-white/20 text-white/80"
                 }`}
               >
                 <item.icon className="w-3 h-3" />
@@ -210,24 +216,15 @@ export default function Dashboard() {
         {/* Desktop Header */}
         <header className="hidden lg:flex items-center justify-between px-6 py-4 border-b border-border bg-card">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Dashboard Executivo
-            </h1>
-            <p className="text-muted-foreground">
-              Análise completa da infraestrutura de telecomunicações
-            </p>
+            <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
+            <p className="text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate("/")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch()}
-              disabled={isLoading}
-            >
+            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
           </div>
@@ -245,7 +242,7 @@ export default function Dashboard() {
           {/* Loading State */}
           {isLoading && (
             <div className="flex items-center justify-center py-20">
-              <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+              <RefreshCw className="w-8 h-8 animate-spin text-[#003366]" />
             </div>
           )}
 
@@ -260,22 +257,26 @@ export default function Dashboard() {
           {/* Content */}
           {!isLoading && !error && (
             <>
+              {activePanel === "overview" && (
+                <OverviewPanel
+                  stats={stats}
+                  sites={sites}
+                  onDrillDown={(type) => {
+                    if (type === "total") openDrillDown("sites", "Todos os Sites", (s) => s);
+                    else if (type === "ok") openDrillDown("sites", "Sites OK", (s) => s.filter((site: any) => !site.hasProblems));
+                    else openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
+                  }}
+                />
+              )}
+
               {activePanel === "dgos" && (
                 <DGOSPanel
                   stats={stats}
                   sites={sites}
                   onDrillDown={(type) => {
-                    if (type === "total") {
-                      openDrillDown("sites", "Todos os Sites", (s) => s);
-                    } else if (type === "ok") {
-                      openDrillDown("sites", "Sites sem Problemas", (s) =>
-                        s.filter((site: any) => !site.hasProblems)
-                      );
-                    } else {
-                      openDrillDown("sites", "Sites com Problemas", (s) =>
-                        s.filter((site: any) => site.hasProblems)
-                      );
-                    }
+                    if (type === "total") openDrillDown("sites", "Todos os Sites", (s) => s);
+                    else if (type === "ok") openDrillDown("sites", "Sites sem Problemas", (s) => s.filter((site: any) => !site.hasProblems));
+                    else openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
                   }}
                 />
               )}
@@ -285,19 +286,23 @@ export default function Dashboard() {
                   stats={stats}
                   acs={acs}
                   onDrillDown={(type) => {
-                    if (type === "gmg") {
-                      openDrillDown("sites", "Sites com GMG", (s) =>
-                        s.filter((site: any) => site.gmgExists)
-                      );
-                    } else if (type === "ac-ok") {
-                      openDrillDown("acs", "ACs Funcionando", (a) =>
-                        a.filter((ac: any) => ac.status === "OK")
-                      );
-                    } else {
-                      openDrillDown("acs", "ACs com Defeito", (a) =>
-                        a.filter((ac: any) => ac.status === "NOK")
-                      );
-                    }
+                    if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
+                    else if (type === "ac-ok") openDrillDown("acs", "ACs Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
+                    else openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                  }}
+                />
+              )}
+
+              {activePanel === "climatizacao" && (
+                <ClimatizacaoPanel
+                  stats={stats}
+                  climatizacao={climatizacao}
+                  acs={acs}
+                  onDrillDown={(type) => {
+                    if (type === "all") openDrillDown("sites", "Todos Gabinetes", (s) => s);
+                    else if (type === "ac-ok") openDrillDown("acs", "ACs OK", (a) => a.filter((ac: any) => ac.status === "OK"));
+                    else if (type === "ac-nok") openDrillDown("acs", "ACs NOK", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else openDrillDown("sites", "Sites", (s) => s);
                   }}
                 />
               )}
@@ -307,15 +312,9 @@ export default function Dashboard() {
                   stats={stats}
                   sites={sites}
                   onDrillDown={(type) => {
-                    if (type === "zeladoria") {
-                      openDrillDown("sites", "Zeladoria OK", (s) =>
-                        s.filter((site: any) => site.zeladoriaOk)
-                      );
-                    } else if (type === "fibra") {
-                      openDrillDown("sites", "Fibra Protegida", (s) => s);
-                    } else {
-                      openDrillDown("sites", "Aterramento OK", (s) => s);
-                    }
+                    if (type === "zeladoria") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
+                    else if (type === "fibra") openDrillDown("sites", "Fibra Protegida", (s) => s);
+                    else openDrillDown("sites", "Aterramento OK", (s) => s);
                   }}
                 />
               )}
@@ -325,25 +324,11 @@ export default function Dashboard() {
                   stats={stats}
                   batteries={batteries}
                   onDrillDown={(type) => {
-                    if (type === "all") {
-                      openDrillDown("batteries", "Todas as Baterias", (b) => b);
-                    } else if (type === "ok") {
-                      openDrillDown("batteries", "Baterias OK", (b) =>
-                        b.filter((bat: any) => bat.estado === "OK")
-                      );
-                    } else if (type === "nok") {
-                      openDrillDown("batteries", "Baterias com Defeito", (b) =>
-                        b.filter((bat: any) => bat.estado !== "OK")
-                      );
-                    } else if (type === "obsolete-warning") {
-                      openDrillDown("batteries", "Baterias 5-8 anos", (b) =>
-                        b.filter((bat: any) => bat.obsolescencia === "warning")
-                      );
-                    } else {
-                      openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) =>
-                        b.filter((bat: any) => bat.obsolescencia === "critical")
-                      );
-                    }
+                    if (type === "all") openDrillDown("batteries", "Todas as Baterias", (b) => b);
+                    else if (type === "ok") openDrillDown("batteries", "Baterias OK", (b) => b.filter((bat: any) => bat.estado === "BOA"));
+                    else if (type === "nok") openDrillDown("batteries", "Baterias com Defeito", (b) => b.filter((bat: any) => bat.estado !== "BOA"));
+                    else if (type === "obsolete-warning") openDrillDown("batteries", "Baterias 5-8 anos", (b) => b.filter((bat: any) => bat.obsolescencia === "warning"));
+                    else openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
                   }}
                 />
               )}

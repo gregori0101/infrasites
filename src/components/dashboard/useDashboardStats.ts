@@ -1,13 +1,19 @@
 import { useMemo } from "react";
 import { ReportRow } from "@/lib/reportDatabase";
-import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo } from "./types";
-import { format, parse, isValid, differenceInYears } from "date-fns";
+import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo, ClimatizacaoInfo, OverviewStats } from "./types";
+import { format, isValid, differenceInYears, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const CURRENT_YEAR = 2026;
 
 function parseManufactureDate(dateStr: string | null): Date | null {
   if (!dateStr) return null;
+  
+  // Try YYYY-MM-DD format
+  const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    return new Date(parseInt(isoMatch[1], 10), parseInt(isoMatch[2], 10) - 1, parseInt(isoMatch[3], 10));
+  }
   
   // Try MM/YYYY format
   const match = dateStr.match(/^(\d{2})\/(\d{4})$/);
@@ -43,7 +49,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     // Apply filters
     let filtered = reports;
     
-    if (filters.technician) {
+    if (filters.technician && filters.technician !== "all") {
       filtered = filtered.filter(r => 
         r.technician_name?.toLowerCase().includes(filters.technician.toLowerCase())
       );
@@ -69,6 +75,21 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
 
     // Initialize stats
     const stats: PanelStats = {
+      overview: {
+        totalSites: 0,
+        sitesOk: 0,
+        sitesNok: 0,
+        percentOk: 0,
+        totalBatteries: 0,
+        batteriesOk: 0,
+        batteriesCritical: 0,
+        totalACs: 0,
+        acsOk: 0,
+        acsNok: 0,
+        sitesWithGMG: 0,
+        zeladoriaOkCount: 0,
+        lastUpdate: "N/A"
+      },
       totalSites: filtered.length,
       sitesOk: 0,
       sitesNok: 0,
@@ -94,23 +115,36 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       batteriesOver8Years: 0,
       batteryStateChart: [],
       batteryAgeChart: [],
+      // Climatização
+      climatizacaoTotal: 0,
+      acTotal: 0,
+      fanTotal: 0,
+      naTotal: 0,
+      acsOkCount: 0,
+      acsNokCount: 0,
+      fanOkCount: 0,
+      fanNokCount: 0,
+      plcOkCount: 0,
+      plcNokCount: 0,
+      climatizacaoChart: []
     };
 
     const siteInfoList: SiteInfo[] = [];
     const batteryInfoList: BatteryInfo[] = [];
     const acInfoList: ACInfo[] = [];
+    const climatizacaoList: ClimatizacaoInfo[] = [];
     
     const ufMap: Record<string, { count: number; ok: number; nok: number }> = {};
     const monthMap: Record<string, number> = {};
     const batteryStates = { ok: 0, estufada: 0, vazando: 0, trincada: 0, semCarga: 0 };
     const batteryAges = { ok: 0, warning: 0, critical: 0 };
-    const climatizationTypes = { ac: 0, fan: 0, na: 0 };
 
     filtered.forEach((report) => {
       const uf = report.state_uf || "N/A";
       let hasProblems = false;
       let batteryIssues = 0;
       let acIssues = 0;
+      let climatizacaoIssues = 0;
       
       // UF Distribution
       if (!ufMap[uf]) ufMap[uf] = { count: 0, ok: 0, nok: 0 };
@@ -153,36 +187,82 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         
         // Climatization type
         const climaTipo = report[`${prefix}_climatizacao_tipo`] as string;
+        const fanStatus = report[`${prefix}_ventiladores_status`] as string;
+        const plcStatus = report[`${prefix}_plc_status`] as string;
+        const alarmeStatus = report[`${prefix}_alarme_status`] as string;
+        
         if (climaTipo) {
-          if (climaTipo.includes("AR CONDICIONADO")) climatizationTypes.ac++;
-          else if (climaTipo.includes("FAN")) climatizationTypes.fan++;
-          else climatizationTypes.na++;
+          stats.climatizacaoTotal++;
+          
+          if (climaTipo.includes("AR CONDICIONADO")) {
+            stats.acTotal++;
+          } else if (climaTipo.includes("FAN")) {
+            stats.fanTotal++;
+          } else if (climaTipo === "NA") {
+            stats.naTotal++;
+          }
+          
+          // Fan status
+          if (fanStatus === "OK") {
+            stats.fanOkCount++;
+          } else if (fanStatus === "NOK") {
+            stats.fanNokCount++;
+            climatizacaoIssues++;
+          }
+          
+          // PLC status
+          if (plcStatus === "OK") {
+            stats.plcOkCount++;
+          } else if (plcStatus === "NOK") {
+            stats.plcNokCount++;
+            climatizacaoIssues++;
+          }
         }
         
         // ACs (4 per gabinete)
+        const gabAcs: ACInfo[] = [];
         for (let a = 1; a <= 4; a++) {
           const modelo = report[`${prefix}_ac${a}_modelo`] as string;
           const status = report[`${prefix}_ac${a}_status`] as string;
           
           if (modelo && modelo !== "NA") {
             stats.totalACs++;
-            if (status === "OK") {
-              stats.acsOk++;
-            } else if (status === "NOK") {
-              stats.acsNok++;
-              acIssues++;
-              hasProblems = true;
-            }
-            
-            acInfoList.push({
+            const acInfo: ACInfo = {
               siteCode: report.site_code,
               uf,
               gabinete: g,
               acNum: a,
               modelo,
               status: status || "N/A",
-            });
+            };
+            
+            if (status === "OK") {
+              stats.acsOk++;
+              stats.acsOkCount++;
+            } else if (status === "NOK") {
+              stats.acsNok++;
+              stats.acsNokCount++;
+              acIssues++;
+              hasProblems = true;
+            }
+            
+            acInfoList.push(acInfo);
+            gabAcs.push(acInfo);
           }
+        }
+        
+        // Add climatizacao info
+        if (climaTipo) {
+          climatizacaoList.push({
+            siteCode: report.site_code,
+            uf,
+            gabinete: g,
+            tipo: climaTipo,
+            fanStatus: fanStatus || "N/A",
+            plcStatus: plcStatus || "N/A",
+            alarmeStatus: alarmeStatus || "N/A",
+            acs: gabAcs
+          });
         }
         
         // Batteries (6 per gabinete)
@@ -202,7 +282,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             if (obsolescencia === "critical") stats.batteriesOver8Years++;
             batteryAges[obsolescencia]++;
             
-            if (estado === "OK" || !estado) {
+            if (estado === "BOA" || !estado) {
               stats.batteriesOk++;
               batteryStates.ok++;
             } else {
@@ -226,13 +306,17 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               tipo,
               capacidade: capacidade || "N/A",
               dataFabricacao: dataFab || "N/A",
-              estado: estado || "OK",
+              estado: estado || "BOA",
               idade,
               obsolescencia,
             });
           }
         }
       }
+      
+      // Check zeladoria
+      const zeladoriaIsOk = report.torre_housekeeping === "OK" && report.torre_aterramento === "OK";
+      if (!zeladoriaIsOk) hasProblems = true;
       
       if (hasProblems) {
         stats.sitesNok++;
@@ -254,7 +338,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         gmgExists: report.gmg_existe === "SIM",
         batteryIssues,
         acIssues,
-        zeladoriaOk: report.torre_housekeeping === "OK",
+        climatizacaoIssues,
+        zeladoriaOk: zeladoriaIsOk,
       });
     });
 
@@ -262,6 +347,23 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     stats.percentOk = stats.totalSites > 0 
       ? Math.round((stats.sitesOk / stats.totalSites) * 100) 
       : 0;
+
+    // Build overview
+    stats.overview = {
+      totalSites: stats.totalSites,
+      sitesOk: stats.sitesOk,
+      sitesNok: stats.sitesNok,
+      percentOk: stats.percentOk,
+      totalBatteries: stats.totalBatteries,
+      batteriesOk: stats.batteriesOk,
+      batteriesCritical: stats.batteriesOver8Years,
+      totalACs: stats.totalACs,
+      acsOk: stats.acsOk,
+      acsNok: stats.acsNok,
+      sitesWithGMG: stats.sitesWithGMG,
+      zeladoriaOkCount: stats.zeladoriaOk,
+      lastUpdate: filtered[0]?.created_date || "N/A"
+    };
 
     // Build chart data
     stats.ufDistribution = Object.entries(ufMap)
@@ -273,7 +375,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       .slice(-6);
 
     stats.batteryStateChart = [
-      { name: "OK", value: batteryStates.ok, color: "hsl(var(--success))" },
+      { name: "BOA", value: batteryStates.ok, color: "#22c55e" },
       { name: "Estufada", value: batteryStates.estufada, color: "#f59e0b" },
       { name: "Vazando", value: batteryStates.vazando, color: "#3b82f6" },
       { name: "Trincada", value: batteryStates.trincada, color: "#ef4444" },
@@ -281,34 +383,42 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     ].filter(item => item.value > 0);
 
     stats.batteryAgeChart = [
-      { name: "<5 anos", value: batteryAges.ok, color: "hsl(var(--success))" },
+      { name: "<5 anos", value: batteryAges.ok, color: "#22c55e" },
       { name: "5-8 anos", value: batteryAges.warning, color: "#f59e0b" },
       { name: ">8 anos", value: batteryAges.critical, color: "#ef4444" },
     ].filter(item => item.value > 0);
 
     stats.energiaStatus = [
-      { name: "Com GMG", value: stats.sitesWithGMG, color: "hsl(var(--success))" },
-      { name: "Sem GMG", value: stats.sitesWithoutGMG, color: "hsl(var(--warning))" },
+      { name: "Com GMG", value: stats.sitesWithGMG, color: "#22c55e" },
+      { name: "Sem GMG", value: stats.sitesWithoutGMG, color: "#f59e0b" },
     ].filter(item => item.value > 0);
 
     stats.climatizacaoStatus = [
-      { name: "Ar Condicionado", value: climatizationTypes.ac, color: "hsl(var(--primary))" },
-      { name: "Ventilador", value: climatizationTypes.fan, color: "#8b5cf6" },
-      { name: "N/A", value: climatizationTypes.na, color: "hsl(var(--muted))" },
+      { name: "ACs OK", value: stats.acsOkCount, color: "#22c55e" },
+      { name: "ACs NOK", value: stats.acsNokCount, color: "#ef4444" },
+      { name: "Fan OK", value: stats.fanOkCount, color: "#3b82f6" },
+      { name: "Fan NOK", value: stats.fanNokCount, color: "#f97316" },
+    ].filter(item => item.value > 0);
+
+    stats.climatizacaoChart = [
+      { name: "Ar Condicionado", value: stats.acTotal, color: "#3b82f6" },
+      { name: "Fan", value: stats.fanTotal, color: "#22c55e" },
+      { name: "N/A", value: stats.naTotal, color: "#6b7280" },
     ].filter(item => item.value > 0);
 
     // Apply status filter
     let finalSites = siteInfoList;
     let finalBatteries = batteryInfoList;
     let finalACs = acInfoList;
+    let finalClimatizacao = climatizacaoList;
     
     if (filters.status === "ok") {
       finalSites = siteInfoList.filter(s => !s.hasProblems);
-      finalBatteries = batteryInfoList.filter(b => b.estado === "OK");
+      finalBatteries = batteryInfoList.filter(b => b.estado === "BOA");
       finalACs = acInfoList.filter(a => a.status === "OK");
     } else if (filters.status === "nok") {
       finalSites = siteInfoList.filter(s => s.hasProblems);
-      finalBatteries = batteryInfoList.filter(b => b.estado !== "OK");
+      finalBatteries = batteryInfoList.filter(b => b.estado !== "BOA");
       finalACs = acInfoList.filter(a => a.status === "NOK");
     }
 
@@ -317,6 +427,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       sites: finalSites,
       batteries: finalBatteries,
       acs: finalACs,
+      climatizacao: finalClimatizacao,
     };
   }, [reports, filters]);
 }
