@@ -30,6 +30,17 @@ export interface ACInfo {
   status: string;
 }
 
+export interface ClimatizacaoInfo {
+  siteCode: string;
+  uf: string;
+  gabinete: number;
+  tipo: string;
+  fanStatus: string;
+  plcStatus: string;
+  alarmeStatus: string;
+  acs: ACInfo[];
+}
+
 export interface SiteInfo {
   id: string;
   siteCode: string;
@@ -42,10 +53,30 @@ export interface SiteInfo {
   gmgExists: boolean;
   batteryIssues: number;
   acIssues: number;
+  climatizacaoIssues: number;
   zeladoriaOk: boolean;
 }
 
+export interface OverviewStats {
+  totalSites: number;
+  sitesOk: number;
+  sitesNok: number;
+  percentOk: number;
+  totalBatteries: number;
+  batteriesOk: number;
+  batteriesCritical: number;
+  totalACs: number;
+  acsOk: number;
+  acsNok: number;
+  sitesWithGMG: number;
+  zeladoriaOkCount: number;
+  lastUpdate: string;
+}
+
 export interface PanelStats {
+  // Overview Panel
+  overview: OverviewStats;
+  
   // DGOS Panel
   totalSites: number;
   sitesOk: number;
@@ -78,12 +109,26 @@ export interface PanelStats {
   batteriesOver8Years: number;
   batteryStateChart: { name: string; value: number; color: string }[];
   batteryAgeChart: { name: string; value: number; color: string }[];
+  
+  // Climatização Panel
+  climatizacaoTotal: number;
+  acTotal: number;
+  fanTotal: number;
+  naTotal: number;
+  acsOkCount: number;
+  acsNokCount: number;
+  fanOkCount: number;
+  fanNokCount: number;
+  plcOkCount: number;
+  plcNokCount: number;
+  climatizacaoChart: { name: string; value: number; color: string }[];
 }
 
 export interface DrillDownData {
-  type: "sites" | "batteries" | "acs" | "zeladoria";
+  type: "sites" | "batteries" | "acs" | "zeladoria" | "climatizacao" | "overview";
   title: string;
   sites?: SiteInfo[];
   batteries?: BatteryInfo[];
   acs?: ACInfo[];
+  climatizacao?: ClimatizacaoInfo[];
 }
