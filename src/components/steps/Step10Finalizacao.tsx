@@ -8,12 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, PenTool, Send, 
-  CheckCircle, Loader2, AlertCircle 
+  CheckCircle, Loader2, AlertCircle, Upload 
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
 import { saveReportToDatabase } from "@/lib/reportDatabase";
+import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist } = useChecklist();
   const [isSending, setIsSending] = React.useState(false);
+  const [uploadProgress, setUploadProgress] = React.useState<string>('');
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
@@ -106,21 +108,33 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     
     try {
       // Atualizar data/hora
-      updateData('dataHora', new Date().toISOString());
+      const updatedData = { ...data, dataHora: new Date().toISOString() };
+      updateData('dataHora', updatedData.dataHora);
       
-      // Gerar arquivos
-      const pdfBlob = await generatePDF(data);
-      const excelBlob = generateExcel(data);
+      // 1. Upload das fotos para o Storage
+      setUploadProgress('Fazendo upload das fotos...');
+      const siteCode = data.siglaSite || `site_${Date.now()}`;
+      const dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
+      
+      // 2. Gerar PDF com as URLs
+      setUploadProgress('Gerando PDF...');
+      const pdfBlob = await generatePDF(dataWithUrls);
+      
+      // 3. Gerar Excel
+      setUploadProgress('Gerando Excel...');
+      const excelBlob = generateExcel(dataWithUrls);
       
       const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
       const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
       
-      // Download dos arquivos
+      // 4. Download dos arquivos
+      setUploadProgress('Baixando arquivos...');
       downloadPDF(pdfBlob, pdfFilename);
       downloadExcel(excelBlob, excelFilename);
 
-      // Salvar no banco de dados
-      const result = await saveReportToDatabase(data, pdfFilename, excelFilename);
+      // 5. Salvar no banco de dados
+      setUploadProgress('Salvando no banco de dados...');
+      const result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
       
       if (result.success) {
         toast.success('Relatório enviado com sucesso!', {
@@ -137,10 +151,11 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     } catch (error) {
       console.error('Error sending report:', error);
       toast.error('Erro ao enviar relatório', {
-        description: 'Tente novamente. Os arquivos foram baixados.'
+        description: 'Tente novamente. Alguns arquivos podem ter sido baixados.'
       });
     } finally {
       setIsSending(false);
+      setUploadProgress('');
     }
   };
 
@@ -234,6 +249,13 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         </div>
       </FormCard>
 
+      {uploadProgress && (
+        <div className="rounded-lg p-3 bg-primary/10 border border-primary/30 flex items-center gap-3">
+          <Upload className="w-5 h-5 text-primary animate-pulse" />
+          <span className="text-sm font-medium text-primary">{uploadProgress}</span>
+        </div>
+      )}
+
       <Button
         className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
         onClick={handleSendReport}
@@ -242,7 +264,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         {isSending ? (
           <>
             <Loader2 className="w-6 h-6 animate-spin" />
-            Enviando...
+            {uploadProgress || 'Enviando...'}
           </>
         ) : (
           <>
@@ -254,6 +276,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
 
       <p className="text-xs text-center text-muted-foreground">
         O relatório será salvo no banco de dados e os arquivos PDF e Excel serão baixados automaticamente.
+        As fotos serão salvas no servidor para melhor qualidade no PDF.
       </p>
 
       <p className="text-xs text-center text-muted-foreground">
