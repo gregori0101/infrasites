@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { SiteInfo, BatteryInfo, ACInfo } from "./types";
 import { cn } from "@/lib/utils";
 
@@ -136,105 +137,120 @@ export function DrillDownModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto mt-4">
+        <div className="flex-1 overflow-hidden mt-4">
           {type === "sites" && paginatedSites && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site</TableHead>
-                  <TableHead>UF</TableHead>
-                  <TableHead>Técnico</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Gabinetes</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedSites.map((s) => (
-                  <TableRow
-                    key={s.id}
-                    className={cn(onSiteClick && "cursor-pointer hover:bg-muted/50")}
-                    onClick={() => onSiteClick?.(s.id)}
-                  >
-                    <TableCell className="font-medium">{s.siteCode}</TableCell>
-                    <TableCell>{s.uf}</TableCell>
-                    <TableCell>{s.technician}</TableCell>
-                    <TableCell>{s.date}</TableCell>
-                    <TableCell>{s.totalCabinets}</TableCell>
-                    <TableCell>
-                      {s.hasProblems ? (
-                        <Badge className="bg-destructive text-destructive-foreground">
-                          {s.batteryIssues + s.acIssues} problema(s)
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-success text-success-foreground">OK</Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="min-w-[600px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Site</TableHead>
+                      <TableHead className="min-w-[60px]">UF</TableHead>
+                      <TableHead className="min-w-[150px]">Técnico</TableHead>
+                      <TableHead className="min-w-[100px]">Data</TableHead>
+                      <TableHead className="min-w-[100px]">Gabinetes</TableHead>
+                      <TableHead className="min-w-[120px]">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSites.map((s) => (
+                      <TableRow
+                        key={s.id}
+                        className={cn(onSiteClick && "cursor-pointer hover:bg-muted/50")}
+                        onClick={() => onSiteClick?.(s.id)}
+                      >
+                        <TableCell className="font-medium">{s.siteCode}</TableCell>
+                        <TableCell>{s.uf}</TableCell>
+                        <TableCell>{s.technician}</TableCell>
+                        <TableCell>{s.date}</TableCell>
+                        <TableCell>{s.totalCabinets}</TableCell>
+                        <TableCell>
+                          {s.hasProblems ? (
+                            <Badge className="bg-destructive text-destructive-foreground">
+                              {s.batteryIssues + s.acIssues} problema(s)
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-success text-success-foreground">OK</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           )}
 
           {type === "batteries" && paginatedBatteries && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Gab</TableHead>
-                  <TableHead>Fabricante</TableHead>
-                  <TableHead>Capacidade</TableHead>
-                  <TableHead>Fabricação</TableHead>
-                  <TableHead>Idade</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedBatteries.map((b, idx) => (
-                  <TableRow key={`${b.siteCode}-${b.gabinete}-${b.banco}-${idx}`}>
-                    <TableCell className="font-medium">{b.siteCode}</TableCell>
-                    <TableCell>G{b.gabinete}</TableCell>
-                    <TableCell>{b.fabricante}</TableCell>
-                    <TableCell>{b.capacidade}Ah</TableCell>
-                    <TableCell>{b.dataFabricacao}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {b.idade > 0 ? `${b.idade} anos` : "N/A"}
-                        {getObsolescenceBadge(b.obsolescencia)}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(b.estado)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="min-w-[700px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Site</TableHead>
+                      <TableHead className="min-w-[60px]">Gab</TableHead>
+                      <TableHead className="min-w-[120px]">Fabricante</TableHead>
+                      <TableHead className="min-w-[100px]">Capacidade</TableHead>
+                      <TableHead className="min-w-[100px]">Fabricação</TableHead>
+                      <TableHead className="min-w-[120px]">Idade</TableHead>
+                      <TableHead className="min-w-[100px]">Estado</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedBatteries.map((b, idx) => (
+                      <TableRow key={`${b.siteCode}-${b.gabinete}-${b.banco}-${idx}`}>
+                        <TableCell className="font-medium">{b.siteCode}</TableCell>
+                        <TableCell>G{b.gabinete}</TableCell>
+                        <TableCell>{b.fabricante}</TableCell>
+                        <TableCell>{b.capacidade}Ah</TableCell>
+                        <TableCell>{b.dataFabricacao}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 flex-nowrap">
+                            {b.idade > 0 ? `${b.idade} anos` : "N/A"}
+                            {getObsolescenceBadge(b.obsolescencia)}
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(b.estado)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           )}
 
           {type === "acs" && paginatedACs && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site</TableHead>
-                  <TableHead>UF</TableHead>
-                  <TableHead>Gabinete</TableHead>
-                  <TableHead>AC #</TableHead>
-                  <TableHead>Modelo</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedACs.map((a, idx) => (
-                  <TableRow key={`${a.siteCode}-${a.gabinete}-${a.acNum}-${idx}`}>
-                    <TableCell className="font-medium">{a.siteCode}</TableCell>
-                    <TableCell>{a.uf}</TableCell>
-                    <TableCell>Gabinete {a.gabinete}</TableCell>
-                    <TableCell>AC {a.acNum}</TableCell>
-                    <TableCell>{a.modelo}</TableCell>
-                    <TableCell>{getStatusBadge(a.status)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="min-w-[600px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Site</TableHead>
+                      <TableHead className="min-w-[60px]">UF</TableHead>
+                      <TableHead className="min-w-[100px]">Gabinete</TableHead>
+                      <TableHead className="min-w-[60px]">AC #</TableHead>
+                      <TableHead className="min-w-[150px]">Modelo</TableHead>
+                      <TableHead className="min-w-[100px]">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedACs.map((a, idx) => (
+                      <TableRow key={`${a.siteCode}-${a.gabinete}-${a.acNum}-${idx}`}>
+                        <TableCell className="font-medium">{a.siteCode}</TableCell>
+                        <TableCell>{a.uf}</TableCell>
+                        <TableCell>Gabinete {a.gabinete}</TableCell>
+                        <TableCell>AC {a.acNum}</TableCell>
+                        <TableCell>{a.modelo}</TableCell>
+                        <TableCell>{getStatusBadge(a.status)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           )}
 
           {totalItems === 0 && (
