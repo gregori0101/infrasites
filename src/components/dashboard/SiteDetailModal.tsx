@@ -124,31 +124,56 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     if (acesso) allPhotos.push({ url: acesso, label: `Gabinete ${g} - Acesso` });
   }
 
-  // Calculate statistics
+  // Calculate statistics and critical issues
   const calcStats = () => {
     let batteriesOk = 0, batteriesNok = 0, acsOk = 0, acsNok = 0;
+    let oldBatteries: { gabinete: number; banco: number; dataFab: string; idade: number }[] = [];
+    let defectiveAcs: { gabinete: number; ac: number; modelo: string; status: string }[] = [];
+    const currentYear = new Date().getFullYear();
     
     for (let g = 1; g <= totalCabinets; g++) {
       for (let b = 1; b <= 6; b++) {
         const estado = report?.[`gab${g}_bat${b}_estado`];
+        const dataFab = report?.[`gab${g}_bat${b}_data_fabricacao`];
+        
         if (estado) {
           if (estado.toLowerCase() === "boa") batteriesOk++;
           else batteriesNok++;
         }
+        
+        // Check for old batteries (>5 years)
+        if (dataFab) {
+          const year = parseInt(dataFab.split("/").pop() || "0");
+          if (year > 0) {
+            const idade = currentYear - year;
+            if (idade > 5) {
+              oldBatteries.push({ gabinete: g, banco: b, dataFab, idade });
+            }
+          }
+        }
       }
       for (let a = 1; a <= 4; a++) {
         const status = report?.[`gab${g}_ac${a}_status`];
+        const modelo = report?.[`gab${g}_ac${a}_modelo`];
         if (status) {
           if (status.toLowerCase() === "ok") acsOk++;
-          else acsNok++;
+          else {
+            acsNok++;
+            defectiveAcs.push({ gabinete: g, ac: a, modelo: modelo || "N/A", status });
+          }
         }
       }
     }
 
-    return { batteriesOk, batteriesNok, acsOk, acsNok };
+    return { batteriesOk, batteriesNok, acsOk, acsNok, oldBatteries, defectiveAcs };
   };
 
   const statistics = report ? calcStats() : null;
+  const hasCriticalIssues = statistics && (
+    statistics.oldBatteries.length > 0 || 
+    statistics.defectiveAcs.length > 0 ||
+    statistics.batteriesNok > 0
+  );
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -176,6 +201,18 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {hasCriticalIssues && (
+                    <Badge className="bg-red-500/90 text-white animate-pulse gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Alertas Críticos
+                    </Badge>
+                  )}
+                  {!hasCriticalIssues && (
+                    <Badge className="bg-green-500/90 text-white gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      Site OK
+                    </Badge>
+                  )}
                   {report.pdf_file_path && (
                     <Button variant="secondary" size="sm" asChild>
                       <a href={report.pdf_file_path} target="_blank" rel="noopener noreferrer">
@@ -186,6 +223,59 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                   )}
                 </div>
               </div>
+              
+              {/* Critical Issues Indicators */}
+              {hasCriticalIssues && (
+                <div className="mt-3 space-y-2">
+                  {statistics?.oldBatteries && statistics.oldBatteries.length > 0 && (
+                    <div className="flex items-start gap-2 bg-amber-500/20 rounded-lg px-3 py-2">
+                      <Battery className="w-4 h-4 text-amber-300 mt-0.5 shrink-0" />
+                      <div className="text-xs">
+                        <span className="font-semibold text-amber-200">
+                          {statistics.oldBatteries.length} bateria(s) com mais de 5 anos:
+                        </span>
+                        <span className="text-white/80 ml-1">
+                          {statistics.oldBatteries.slice(0, 3).map(b => 
+                            `Gab${b.gabinete}/B${b.banco} (${b.idade} anos)`
+                          ).join(", ")}
+                          {statistics.oldBatteries.length > 3 && ` +${statistics.oldBatteries.length - 3} mais`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {statistics?.defectiveAcs && statistics.defectiveAcs.length > 0 && (
+                    <div className="flex items-start gap-2 bg-red-500/20 rounded-lg px-3 py-2">
+                      <Thermometer className="w-4 h-4 text-red-300 mt-0.5 shrink-0" />
+                      <div className="text-xs">
+                        <span className="font-semibold text-red-200">
+                          {statistics.defectiveAcs.length} AC(s) com defeito:
+                        </span>
+                        <span className="text-white/80 ml-1">
+                          {statistics.defectiveAcs.slice(0, 3).map(ac => 
+                            `Gab${ac.gabinete}/AC${ac.ac} (${ac.status})`
+                          ).join(", ")}
+                          {statistics.defectiveAcs.length > 3 && ` +${statistics.defectiveAcs.length - 3} mais`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {statistics?.batteriesNok && statistics.batteriesNok > 0 && (
+                    <div className="flex items-start gap-2 bg-red-500/20 rounded-lg px-3 py-2">
+                      <AlertTriangle className="w-4 h-4 text-red-300 mt-0.5 shrink-0" />
+                      <div className="text-xs">
+                        <span className="font-semibold text-red-200">
+                          {statistics.batteriesNok} bateria(s) em estado ruim
+                        </span>
+                        <span className="text-white/80 ml-1">
+                          (estufada, vazando, trincada, etc.)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </DialogHeader>
 
             {/* Summary Cards */}
