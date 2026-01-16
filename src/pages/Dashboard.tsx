@@ -24,6 +24,7 @@ import { DashboardFiltersBar } from "@/components/dashboard/DashboardFilters";
 import { DashboardFilters } from "@/components/dashboard/types";
 import { useDashboardStats } from "@/components/dashboard/useDashboardStats";
 import { DrillDownModal } from "@/components/dashboard/DrillDownModal";
+import { SiteDetailModal } from "@/components/dashboard/SiteDetailModal";
 
 // Panels
 import { OverviewPanel } from "@/components/dashboard/panels/OverviewPanel";
@@ -50,6 +51,10 @@ export default function Dashboard() {
   const [modalType, setModalType] = useState<"sites" | "batteries" | "acs">("sites");
   const [modalTitle, setModalTitle] = useState("");
   const [modalFilterFn, setModalFilterFn] = useState<(data: any) => any[]>(() => () => []);
+
+  // Site detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   // Fetch reports using React Query
   const {
@@ -347,9 +352,19 @@ export default function Dashboard() {
         batteries={modalType === "batteries" ? modalFilterFn(batteries) : undefined}
         acs={modalType === "acs" ? modalFilterFn(acs) : undefined}
         onSiteClick={(id) => {
-          setModalOpen(false);
-          navigate(`/historico?reportId=${id}`);
+          setSelectedReportId(id);
+          setDetailModalOpen(true);
         }}
+      />
+
+      {/* Site Detail Modal */}
+      <SiteDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedReportId(null);
+        }}
+        reportId={selectedReportId}
       />
     </div>
   );
