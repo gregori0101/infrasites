@@ -100,11 +100,11 @@ export default function Dashboard() {
   // Panel navigation items
   const panelItems = [
     { id: "overview" as const, label: "Visão Geral", icon: Home },
-    { id: "dgos" as const, label: "DGOS", icon: LayoutDashboard },
-    { id: "energia" as const, label: "Energia", icon: Zap },
+    { id: "bateria" as const, label: "Baterias", icon: Battery },
     { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
-    { id: "bateria" as const, label: "Baterias", icon: Battery },
+    { id: "energia" as const, label: "Energia", icon: Zap },
+    { id: "dgos" as const, label: "Fibra", icon: LayoutDashboard },
   ];
 
   return (
