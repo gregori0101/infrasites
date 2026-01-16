@@ -1,7 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { compressToMaxSize, isBase64DataURL, getBase64SizeKB } from './imageCompression';
 
 const BUCKET_NAME = 'report-photos';
+const MAX_IMAGE_SIZE_KB = 500; // Target max size for compressed images
 
 /**
  * Converts a base64 data URL to a Blob
@@ -21,6 +23,7 @@ function dataURLToBlob(dataURL: string): Blob {
 
 /**
  * Uploads a photo to Supabase Storage and returns the public URL
+ * Automatically compresses images before upload
  */
 export async function uploadPhoto(
   base64Data: string,
@@ -32,18 +35,34 @@ export async function uploadPhoto(
     return base64Data;
   }
 
-  // Generate unique filename
-  const extension = base64Data.includes('image/png') ? 'png' : 'jpg';
-  const fileName = `${siteCode}/${category}/${uuidv4()}.${extension}`;
+  // Compress image before upload if it's base64
+  let processedData = base64Data;
+  if (isBase64DataURL(base64Data)) {
+    const originalSize = getBase64SizeKB(base64Data);
+    console.log(`[Photo] Original size: ${originalSize}KB - ${category}`);
+    
+    try {
+      processedData = await compressToMaxSize(base64Data, MAX_IMAGE_SIZE_KB);
+      const compressedSize = getBase64SizeKB(processedData);
+      const savings = Math.round((1 - compressedSize / originalSize) * 100);
+      console.log(`[Photo] Compressed: ${compressedSize}KB (${savings}% reduction) - ${category}`);
+    } catch (err) {
+      console.warn(`[Photo] Compression failed, using original - ${category}:`, err);
+      processedData = base64Data;
+    }
+  }
+
+  // Generate unique filename (always jpg after compression)
+  const fileName = `${siteCode}/${category}/${uuidv4()}.jpg`;
 
   // Convert base64 to blob
-  const blob = dataURLToBlob(base64Data);
+  const blob = dataURLToBlob(processedData);
 
   // Upload to Supabase Storage
   const { error } = await supabase.storage
     .from(BUCKET_NAME)
     .upload(fileName, blob, {
-      contentType: blob.type,
+      contentType: 'image/jpeg',
       upsert: true
     });
 
