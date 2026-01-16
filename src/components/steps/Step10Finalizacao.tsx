@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, PenTool, Send, 
   CheckCircle, Loader2, AlertCircle, Upload,
-  Eye, X, Download, ArrowLeft
+  Eye, X, Download, ArrowLeft, ImageIcon,
+  Battery, Thermometer, Zap, Radio, Building2
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
@@ -25,6 +26,119 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ChecklistData } from "@/types/checklist";
+
+interface ChecklistStats {
+  totalGabinetes: number;
+  totalBaterias: { ok: number; nok: number; total: number };
+  totalACs: { ok: number; nok: number; total: number };
+  totalFotos: number;
+  fccStatus: { gerenciado: number; naoGerenciado: number };
+  energiaStatus: string;
+  gmgStatus: string;
+}
+
+function calculateChecklistStats(data: ChecklistData): ChecklistStats {
+  let bateriasOk = 0, bateriasNok = 0, totalBaterias = 0;
+  let acsOk = 0, acsNok = 0, totalACs = 0;
+  let fccGerenciado = 0, fccNaoGerenciado = 0;
+  let totalFotos = 0;
+
+  // Count photos helper
+  const countPhoto = (photo: string | null | undefined) => {
+    if (photo && (photo.startsWith('data:') || photo.startsWith('http'))) {
+      totalFotos++;
+    }
+  };
+
+  const countPhotoArray = (photos: (string | null)[] | undefined) => {
+    if (photos) {
+      photos.forEach(p => countPhoto(p));
+    }
+  };
+
+  // Count main photos
+  countPhoto(data.fotoPanoramica);
+  countPhoto(data.fotoObservacao);
+  countPhoto(data.assinaturaDigital);
+
+  // Process gabinetes
+  data.gabinetes.forEach(gab => {
+    // Baterias
+    gab.baterias.bancos.forEach(banco => {
+      if (banco.fabricante || banco.tipo) {
+        totalBaterias++;
+        if (banco.estado === 'OK') {
+          bateriasOk++;
+        } else if (banco.estado && banco.estado !== 'NA') {
+          bateriasNok++;
+        }
+      }
+    });
+
+    // ACs
+    gab.climatizacao.acs.forEach(ac => {
+      if (ac.modelo) {
+        totalACs++;
+        if (ac.funcionamento === 'OK') {
+          acsOk++;
+        } else if (ac.funcionamento === 'NOK') {
+          acsNok++;
+        }
+      }
+    });
+
+    // FCC
+    if (gab.fcc.gerenciadaSG) fccGerenciado++;
+    else fccNaoGerenciado++;
+
+    // Gabinete photos
+    countPhoto(gab.fcc.fotoPanoramica);
+    countPhoto(gab.fcc.fotoPainel);
+    countPhoto(gab.baterias.fotoBanco);
+    countPhoto(gab.climatizacao.fotoAR1);
+    countPhoto(gab.climatizacao.fotoAR2);
+    countPhoto(gab.climatizacao.fotoAR3);
+    countPhoto(gab.climatizacao.fotoAR4);
+    countPhoto(gab.climatizacao.fotoCondensador);
+    countPhoto(gab.climatizacao.fotoEvaporador);
+    countPhoto(gab.climatizacao.fotoControlador);
+    countPhoto(gab.fotoTransmissao);
+    countPhoto(gab.fotoAcesso);
+  });
+
+  // Fibra photos
+  countPhoto(data.fibra.fotoGeralAbordagens);
+  countPhoto(data.fibra.fotoObservacoesDGOs);
+  countPhotoArray(data.fibra.abordagem1?.fotoCaixasSubterraneas);
+  countPhotoArray(data.fibra.abordagem1?.fotoSubidaLateral);
+  countPhotoArray(data.fibra.abordagem2?.fotoCaixasSubterraneas);
+  countPhotoArray(data.fibra.abordagem2?.fotoSubidaLateral);
+  countPhotoArray(data.fibra.fotosCaixasPassagem);
+  data.fibra.dgos.forEach(dgo => {
+    countPhoto(dgo.fotoExterno);
+    countPhoto(dgo.fotoCordoes);
+  });
+
+  // Energia photos
+  countPhoto(data.energia.fotoTransformador);
+  countPhoto(data.energia.fotoQuadroGeral);
+  countPhoto(data.energia.fotoPlaca);
+  countPhoto(data.energia.cabos?.fotoCabos);
+
+  // Torre photos
+  countPhoto(data.torre?.fotoNinhos);
+
+  return {
+    totalGabinetes: data.gabinetes.length,
+    totalBaterias: { ok: bateriasOk, nok: bateriasNok, total: totalBaterias },
+    totalACs: { ok: acsOk, nok: acsNok, total: totalACs },
+    totalFotos,
+    fccStatus: { gerenciado: fccGerenciado, naoGerenciado: fccNaoGerenciado },
+    energiaStatus: data.energia.tensaoEntrada || 'Não informado',
+    gmgStatus: data.gmg?.informar ? 'Sim' : 'Não'
+  };
+}
 
 interface Step10Props {
   showErrors?: boolean;
@@ -41,10 +155,16 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const [pdfUrl, setPdfUrl] = React.useState<string | null>(null);
   const [preparedData, setPreparedData] = React.useState<any>(null);
   const [pdfBlob, setPdfBlob] = React.useState<Blob | null>(null);
+  const [checklistStats, setChecklistStats] = React.useState<ChecklistStats | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
   const progress = calculateProgress();
+
+  // Calculate stats when data changes
+  React.useEffect(() => {
+    setChecklistStats(calculateChecklistStats(data));
+  }, [data]);
 
   const handleCanvasStart = (e: React.TouchEvent | React.MouseEvent) => {
     setIsDrawing(true);
@@ -356,12 +476,12 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
 
       {/* PDF Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-4 pb-2 border-b bg-card">
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2">
                 <Eye className="w-5 h-5 text-primary" />
-                Preview do Relatório
+                Preview do Relatório - {data.siglaSite || 'Novo Site'}
               </DialogTitle>
               <div className="flex items-center gap-2">
                 <Button
@@ -383,6 +503,100 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
               </div>
             </div>
           </DialogHeader>
+
+          {/* Stats Summary Bar */}
+          {checklistStats && (
+            <div className="px-4 py-3 bg-muted/50 border-b">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {/* Gabinetes */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <Building2 className="w-4 h-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Gabinetes</p>
+                    <p className="font-semibold text-sm">{checklistStats.totalGabinetes}</p>
+                  </div>
+                </div>
+
+                {/* Baterias */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <Battery className="w-4 h-4 text-secondary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Baterias</p>
+                    <div className="flex items-center gap-1 text-sm">
+                      <span className="text-success font-semibold">{checklistStats.totalBaterias.ok}</span>
+                      <span className="text-muted-foreground">/</span>
+                      <span className="text-destructive font-semibold">{checklistStats.totalBaterias.nok}</span>
+                      <span className="text-muted-foreground text-xs">({checklistStats.totalBaterias.total})</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ACs */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <Thermometer className="w-4 h-4 text-accent shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Ar Cond.</p>
+                    <div className="flex items-center gap-1 text-sm">
+                      <span className="text-success font-semibold">{checklistStats.totalACs.ok}</span>
+                      <span className="text-muted-foreground">/</span>
+                      <span className="text-destructive font-semibold">{checklistStats.totalACs.nok}</span>
+                      <span className="text-muted-foreground text-xs">({checklistStats.totalACs.total})</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* FCC */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <Zap className="w-4 h-4 text-warning shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">FCC Gerenciada</p>
+                    <p className="font-semibold text-sm">
+                      {checklistStats.fccStatus.gerenciado}/{checklistStats.totalGabinetes}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Energia */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <Radio className="w-4 h-4 text-info shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Tensão</p>
+                    <p className="font-semibold text-sm">{checklistStats.energiaStatus}</p>
+                  </div>
+                </div>
+
+                {/* Fotos */}
+                <div className="flex items-center gap-2 bg-card rounded-lg p-2 border">
+                  <ImageIcon className="w-4 h-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Fotos</p>
+                    <p className="font-semibold text-sm">{checklistStats.totalFotos}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Info Row */}
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-success"></span>
+                  OK
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-destructive"></span>
+                  NOK
+                </span>
+                <span className="ml-auto">
+                  Técnico: <span className="font-medium text-foreground">{data.tecnico}</span>
+                </span>
+                <span>
+                  UF: <span className="font-medium text-foreground">{data.uf}</span>
+                </span>
+                <span>
+                  GMG: <span className="font-medium text-foreground">{checklistStats.gmgStatus}</span>
+                </span>
+              </div>
+            </div>
+          )}
           
           <div className="flex-1 overflow-hidden bg-muted/30">
             {pdfUrl ? (
