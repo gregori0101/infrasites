@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, PenTool, Send, 
-  CheckCircle, Loader2, AlertCircle, Upload 
+  CheckCircle, Loader2, AlertCircle, Upload,
+  Eye, X, Download, ArrowLeft
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
@@ -18,6 +19,12 @@ import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Step10Props {
   showErrors?: boolean;
@@ -28,7 +35,12 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist } = useChecklist();
   const [isSending, setIsSending] = React.useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
+  const [previewOpen, setPreviewOpen] = React.useState(false);
+  const [pdfUrl, setPdfUrl] = React.useState<string | null>(null);
+  const [preparedData, setPreparedData] = React.useState<any>(null);
+  const [pdfBlob, setPdfBlob] = React.useState<Blob | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = React.useState(false);
 
@@ -89,22 +101,31 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     updateData('assinaturaDigital', null);
   };
 
-  const handleSendReport = async () => {
+  // Cleanup PDF URL when component unmounts or preview closes
+  React.useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
+  const handlePreview = async () => {
     if (progress < 50) {
       toast.error('Checklist incompleto', {
-        description: 'Preencha pelo menos 50% dos campos para enviar.'
+        description: 'Preencha pelo menos 50% dos campos para visualizar.'
       });
       return;
     }
 
     if (!data.tecnico) {
       toast.error('Nome do técnico obrigatório', {
-        description: 'Preencha o nome do técnico antes de enviar.'
+        description: 'Preencha o nome do técnico antes de visualizar.'
       });
       return;
     }
 
-    setIsSending(true);
+    setIsPreviewLoading(true);
     
     try {
       // Atualizar data/hora
@@ -117,29 +138,72 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       const dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
       
       // 2. Gerar PDF com as URLs
-      setUploadProgress('Gerando PDF...');
-      const pdfBlob = await generatePDF(dataWithUrls);
+      setUploadProgress('Gerando PDF para preview...');
+      const blob = await generatePDF(dataWithUrls);
       
-      // 3. Gerar Excel
-      setUploadProgress('Gerando Excel...');
-      const excelBlob = generateExcel(dataWithUrls);
+      // Store for later use
+      setPreparedData(dataWithUrls);
+      setPdfBlob(blob);
       
+      // Create URL for preview
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setPreviewOpen(true);
+      
+      toast.success('PDF gerado!', {
+        description: 'Revise o documento antes de enviar.'
+      });
+    } catch (error) {
+      console.error('Error generating preview:', error);
+      toast.error('Erro ao gerar preview', {
+        description: 'Tente novamente.'
+      });
+    } finally {
+      setIsPreviewLoading(false);
+      setUploadProgress('');
+    }
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(null);
+    }
+  };
+
+  const handleConfirmSend = async () => {
+    if (!preparedData || !pdfBlob) {
+      toast.error('Erro interno', {
+        description: 'Dados não preparados. Tente novamente.'
+      });
+      return;
+    }
+
+    setIsSending(true);
+    
+    try {
+      // 1. Download do PDF já gerado
       const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
-      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
-      
-      // 4. Download dos arquivos
-      setUploadProgress('Baixando arquivos...');
       downloadPDF(pdfBlob, pdfFilename);
+      
+      // 2. Gerar e baixar Excel
+      setUploadProgress('Gerando Excel...');
+      const excelBlob = generateExcel(preparedData);
+      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
       downloadExcel(excelBlob, excelFilename);
 
-      // 5. Salvar no banco de dados
+      // 3. Salvar no banco de dados
       setUploadProgress('Salvando no banco de dados...');
-      const result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
+      const result = await saveReportToDatabase(preparedData, pdfFilename, excelFilename);
       
       if (result.success) {
         toast.success('Relatório enviado com sucesso!', {
           description: 'Os dados foram salvos e os arquivos foram baixados.'
         });
+        
+        // Close preview and reset
+        handleClosePreview();
         
         // Reset do formulário após envio bem-sucedido
         setTimeout(() => {
@@ -156,6 +220,14 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     } finally {
       setIsSending(false);
       setUploadProgress('');
+    }
+  };
+
+  const handleDownloadPreview = () => {
+    if (pdfBlob) {
+      const pdfFilename = `Preview_Checklist_${data.siglaSite || 'NOVO'}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+      downloadPDF(pdfBlob, pdfFilename);
+      toast.success('PDF baixado!');
     }
   };
 
@@ -257,31 +329,105 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       )}
 
       <Button
-        className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
-        onClick={handleSendReport}
-        disabled={isSending || progress < 50}
+        className="w-full h-16 text-lg font-semibold gap-3 bg-secondary hover:bg-secondary/90"
+        onClick={handlePreview}
+        disabled={isPreviewLoading || isSending || progress < 50}
       >
-        {isSending ? (
+        {isPreviewLoading ? (
           <>
             <Loader2 className="w-6 h-6 animate-spin" />
-            {uploadProgress || 'Enviando...'}
+            {uploadProgress || 'Gerando preview...'}
           </>
         ) : (
           <>
-            <Send className="w-6 h-6" />
-            Enviar Relatório
+            <Eye className="w-6 h-6" />
+            Visualizar PDF antes de Enviar
           </>
         )}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        O relatório será salvo no banco de dados e os arquivos PDF e Excel serão baixados automaticamente.
-        As fotos serão salvas no servidor para melhor qualidade no PDF.
+        Revise o PDF gerado antes de enviar. As fotos serão comprimidas e salvas no servidor.
       </p>
 
       <p className="text-xs text-center text-muted-foreground">
         Data/Hora: {new Date().toLocaleString('pt-BR')}
       </p>
+
+      {/* PDF Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-4 pb-2 border-b bg-card">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-primary" />
+                Preview do Relatório
+              </DialogTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadPreview}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Baixar Preview
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClosePreview}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-hidden bg-muted/30">
+            {pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+          </div>
+
+          <div className="p-4 border-t bg-card flex items-center justify-between gap-4">
+            <Button
+              variant="outline"
+              onClick={handleClosePreview}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar e Editar
+            </Button>
+            
+            <Button
+              onClick={handleConfirmSend}
+              disabled={isSending}
+              className="gap-2 bg-primary hover:bg-primary/90 min-w-[200px]"
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {uploadProgress || 'Enviando...'}
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Confirmar e Enviar
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
