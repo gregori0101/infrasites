@@ -86,14 +86,14 @@ export async function uploadAllPhotos(
   data: any,
   siteCode: string
 ): Promise<any> {
-  const updatedData = { ...data };
+  const updatedData = JSON.parse(JSON.stringify(data)); // Deep clone to avoid mutations
 
   // Helper function to upload a single photo
   const uploadSinglePhoto = async (
-    photo: string | null,
+    photo: string | null | undefined,
     category: string
   ): Promise<string | null> => {
-    if (!photo || photo.startsWith('http')) return photo;
+    if (!photo || photo.startsWith('http')) return photo || null;
     try {
       return await uploadPhoto(photo, siteCode, category);
     } catch (e) {
@@ -104,9 +104,10 @@ export async function uploadAllPhotos(
 
   // Helper function to upload array of photos
   const uploadPhotoArray = async (
-    photos: (string | null)[],
+    photos: (string | null | undefined)[] | undefined,
     category: string
   ): Promise<(string | null)[]> => {
+    if (!Array.isArray(photos)) return [];
     return Promise.all(
       photos.map((p, idx) =>
         p ? uploadSinglePhoto(p, `${category}_${idx}`) : Promise.resolve(null)
@@ -133,57 +134,70 @@ export async function uploadAllPhotos(
   );
 
   // Upload gabinete photos
-  for (let i = 0; i < updatedData.gabinetes.length; i++) {
+  const gabinetes = Array.isArray(data.gabinetes) ? data.gabinetes : [];
+  for (let i = 0; i < gabinetes.length; i++) {
     const gab = updatedData.gabinetes[i];
+    if (!gab) continue;
+    
     const prefix = `gabinete_${i + 1}`;
 
     // FCC photos
-    gab.fcc.fotoPanoramica = await uploadSinglePhoto(
-      gab.fcc.fotoPanoramica,
-      `${prefix}_fcc_panoramica`
-    );
-    gab.fcc.fotoPainel = await uploadSinglePhoto(
-      gab.fcc.fotoPainel,
-      `${prefix}_fcc_painel`
-    );
+    if (gab.fcc) {
+      gab.fcc.fotoPanoramica = await uploadSinglePhoto(
+        gab.fcc.fotoPanoramica,
+        `${prefix}_fcc_panoramica`
+      );
+      gab.fcc.fotoPainel = await uploadSinglePhoto(
+        gab.fcc.fotoPainel,
+        `${prefix}_fcc_painel`
+      );
+    }
 
     // Battery photo
-    gab.baterias.fotoBanco = await uploadSinglePhoto(
-      gab.baterias.fotoBanco,
-      `${prefix}_bateria`
-    );
+    if (gab.baterias) {
+      gab.baterias.fotoBanco = await uploadSinglePhoto(
+        gab.baterias.fotoBanco,
+        `${prefix}_bateria`
+      );
+    }
 
     // Climate photos
-    gab.climatizacao.fotoAR1 = await uploadSinglePhoto(
-      gab.climatizacao.fotoAR1,
-      `${prefix}_ar1`
-    );
-    gab.climatizacao.fotoAR2 = await uploadSinglePhoto(
-      gab.climatizacao.fotoAR2,
-      `${prefix}_ar2`
-    );
-    gab.climatizacao.fotoAR3 = await uploadSinglePhoto(
-      gab.climatizacao.fotoAR3,
-      `${prefix}_ar3`
-    );
-    gab.climatizacao.fotoAR4 = await uploadSinglePhoto(
-      gab.climatizacao.fotoAR4,
-      `${prefix}_ar4`
-    );
-    gab.climatizacao.fotoCondensador = await uploadSinglePhoto(
-      gab.climatizacao.fotoCondensador,
-      `${prefix}_condensador`
-    );
-    gab.climatizacao.fotoEvaporador = await uploadSinglePhoto(
-      gab.climatizacao.fotoEvaporador,
-      `${prefix}_evaporador`
-    );
-    gab.climatizacao.fotoControlador = await uploadSinglePhoto(
-      gab.climatizacao.fotoControlador,
-      `${prefix}_controlador`
-    );
+    if (gab.climatizacao) {
+      gab.climatizacao.fotoAR1 = await uploadSinglePhoto(
+        gab.climatizacao.fotoAR1,
+        `${prefix}_ar1`
+      );
+      gab.climatizacao.fotoAR2 = await uploadSinglePhoto(
+        gab.climatizacao.fotoAR2,
+        `${prefix}_ar2`
+      );
+      gab.climatizacao.fotoAR3 = await uploadSinglePhoto(
+        gab.climatizacao.fotoAR3,
+        `${prefix}_ar3`
+      );
+      gab.climatizacao.fotoAR4 = await uploadSinglePhoto(
+        gab.climatizacao.fotoAR4,
+        `${prefix}_ar4`
+      );
+      gab.climatizacao.fotoCondensador = await uploadSinglePhoto(
+        gab.climatizacao.fotoCondensador,
+        `${prefix}_condensador`
+      );
+      gab.climatizacao.fotoEvaporador = await uploadSinglePhoto(
+        gab.climatizacao.fotoEvaporador,
+        `${prefix}_evaporador`
+      );
+      gab.climatizacao.fotoControlador = await uploadSinglePhoto(
+        gab.climatizacao.fotoControlador,
+        `${prefix}_controlador`
+      );
+    }
 
-    // Equipment photos
+    // Gabinete photos
+    gab.fotoPanoramicaGabinete = await uploadSinglePhoto(
+      gab.fotoPanoramicaGabinete,
+      `${prefix}_panoramica`
+    );
     gab.fotoTransmissao = await uploadSinglePhoto(
       gab.fotoTransmissao,
       `${prefix}_transmissao`
@@ -194,86 +208,102 @@ export async function uploadAllPhotos(
     );
   }
 
-  // Upload fiber photos
-  updatedData.fibra.fotoGeralAbordagens = await uploadSinglePhoto(
-    data.fibra.fotoGeralAbordagens,
-    'fibra_geral'
-  );
-  updatedData.fibra.fotoObservacoesDGOs = await uploadSinglePhoto(
-    data.fibra.fotoObservacoesDGOs,
-    'fibra_obs_dgo'
-  );
+  // Upload fiber optic photos (fibraOptica - new structure)
+  if (data.fibraOptica) {
+    if (!updatedData.fibraOptica) {
+      updatedData.fibraOptica = {};
+    }
 
-  // Abordagem photos
-  if (data.fibra.abordagem1?.fotoCaixasSubterraneas) {
-    updatedData.fibra.abordagem1.fotoCaixasSubterraneas = await uploadPhotoArray(
-      data.fibra.abordagem1.fotoCaixasSubterraneas,
-      'fibra_abord1_caixa'
-    );
-  }
-  if (data.fibra.abordagem1?.fotoSubidaLateral) {
-    updatedData.fibra.abordagem1.fotoSubidaLateral = await uploadPhotoArray(
-      data.fibra.abordagem1.fotoSubidaLateral,
-      'fibra_abord1_subida'
-    );
-  }
+    // Upload abordagens photos
+    const abordagens = Array.isArray(data.fibraOptica.abordagens) ? data.fibraOptica.abordagens : [];
+    if (!Array.isArray(updatedData.fibraOptica.abordagens)) {
+      updatedData.fibraOptica.abordagens = [];
+    }
+    for (let i = 0; i < abordagens.length; i++) {
+      const abordagem = abordagens[i];
+      if (!updatedData.fibraOptica.abordagens[i]) {
+        updatedData.fibraOptica.abordagens[i] = { ...abordagem };
+      }
+      if (Array.isArray(abordagem?.fotos)) {
+        updatedData.fibraOptica.abordagens[i].fotos = await uploadPhotoArray(
+          abordagem.fotos,
+          `fibra_abord${i + 1}_foto`
+        );
+      }
+    }
 
-  if (data.fibra.abordagem2?.fotoCaixasSubterraneas) {
-    updatedData.fibra.abordagem2.fotoCaixasSubterraneas = await uploadPhotoArray(
-      data.fibra.abordagem2.fotoCaixasSubterraneas,
-      'fibra_abord2_caixa'
-    );
-  }
-  if (data.fibra.abordagem2?.fotoSubidaLateral) {
-    updatedData.fibra.abordagem2.fotoSubidaLateral = await uploadPhotoArray(
-      data.fibra.abordagem2.fotoSubidaLateral,
-      'fibra_abord2_subida'
-    );
-  }
-
-  // Caixas de passagem
-  if (data.fibra.fotosCaixasPassagem) {
-    updatedData.fibra.fotosCaixasPassagem = await uploadPhotoArray(
-      data.fibra.fotosCaixasPassagem,
+    // Upload caixas de passagem photos
+    updatedData.fibraOptica.fotosCaixasPassagem = await uploadPhotoArray(
+      data.fibraOptica.fotosCaixasPassagem,
       'fibra_caixa_passagem'
     );
+
+    // Upload caixas subterraneas photos
+    updatedData.fibraOptica.fotosCaixasSubterraneas = await uploadPhotoArray(
+      data.fibraOptica.fotosCaixasSubterraneas,
+      'fibra_caixa_subterranea'
+    );
+
+    // Upload subidas laterais photos
+    updatedData.fibraOptica.fotosSubidasLaterais = await uploadPhotoArray(
+      data.fibraOptica.fotosSubidasLaterais,
+      'fibra_subida_lateral'
+    );
+
+    // Upload DGO photos
+    const dgos = Array.isArray(data.fibraOptica.dgos) ? data.fibraOptica.dgos : [];
+    if (!Array.isArray(updatedData.fibraOptica.dgos)) {
+      updatedData.fibraOptica.dgos = [];
+    }
+    for (let i = 0; i < dgos.length; i++) {
+      const dgo = dgos[i];
+      if (!updatedData.fibraOptica.dgos[i]) {
+        updatedData.fibraOptica.dgos[i] = { ...dgo };
+      }
+      updatedData.fibraOptica.dgos[i].fotoDGO = await uploadSinglePhoto(
+        dgo?.fotoDGO,
+        `dgo_${i + 1}_foto`
+      );
+      updatedData.fibraOptica.dgos[i].fotoCordesDetalhada = await uploadSinglePhoto(
+        dgo?.fotoCordesDetalhada,
+        `dgo_${i + 1}_cordoes_detalhe`
+      );
+    }
   }
 
-  // DGO photos
-  for (let i = 0; i < updatedData.fibra.dgos.length; i++) {
-    const dgo = updatedData.fibra.dgos[i];
-    dgo.fotoExterno = await uploadSinglePhoto(
-      dgo.fotoExterno,
-      `dgo_${i + 1}_externo`
+  // Upload energy photos
+  if (data.energia) {
+    if (!updatedData.energia) {
+      updatedData.energia = {};
+    }
+    updatedData.energia.fotoTransformador = await uploadSinglePhoto(
+      data.energia.fotoTransformador,
+      'energia_transformador'
     );
-    dgo.fotoCordoes = await uploadSinglePhoto(
-      dgo.fotoCordoes,
-      `dgo_${i + 1}_cordoes`
+    updatedData.energia.fotoQuadroGeral = await uploadSinglePhoto(
+      data.energia.fotoQuadroGeral,
+      'energia_quadro'
     );
+    updatedData.energia.fotoPlaca = await uploadSinglePhoto(
+      data.energia.fotoPlaca,
+      'energia_placa'
+    );
+    if (data.energia.cabos) {
+      if (!updatedData.energia.cabos) {
+        updatedData.energia.cabos = {};
+      }
+      updatedData.energia.cabos.fotoCabos = await uploadSinglePhoto(
+        data.energia.cabos.fotoCabos,
+        'energia_cabos'
+      );
+    }
   }
 
-  // Energy photos
-  updatedData.energia.fotoTransformador = await uploadSinglePhoto(
-    data.energia.fotoTransformador,
-    'energia_transformador'
-  );
-  updatedData.energia.fotoQuadroGeral = await uploadSinglePhoto(
-    data.energia.fotoQuadroGeral,
-    'energia_quadro'
-  );
-  updatedData.energia.fotoPlaca = await uploadSinglePhoto(
-    data.energia.fotoPlaca,
-    'energia_placa'
-  );
-  if (data.energia.cabos) {
-    updatedData.energia.cabos.fotoCabos = await uploadSinglePhoto(
-      data.energia.cabos.fotoCabos,
-      'energia_cabos'
-    );
-  }
-
-  // Tower photos
+  // Upload tower photos
   if (data.torre?.fotoNinhos) {
+    if (!updatedData.torre) {
+      updatedData.torre = {};
+    }
     updatedData.torre.fotoNinhos = await uploadSinglePhoto(
       data.torre.fotoNinhos,
       'torre_ninhos'
