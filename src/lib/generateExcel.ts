@@ -181,6 +181,26 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
     }
   }
   
+  // GRUPO FIBRA ÓPTICA
+  row['Fibra_Abordagens_Qtd'] = data.fibraOptica.qtdAbordagens;
+  data.fibraOptica.abordagens.forEach((abord, i) => {
+    row[`Fibra_Abord${i + 1}_Tipo`] = abord.tipoEntrada;
+    row[`Fibra_Abord${i + 1}_Descricao`] = abord.descricao || '';
+  });
+  row['Fibra_Caixas_Passagem_Qtd'] = data.fibraOptica.qtdCaixasPassagem;
+  row['Fibra_Caixas_Subterraneas_Qtd'] = data.fibraOptica.qtdCaixasSubterraneas;
+  row['Fibra_Subidas_Laterais_Qtd'] = data.fibraOptica.qtdSubidasLaterais;
+  row['Fibra_DGOs_Qtd'] = data.fibraOptica.qtdDGOs;
+  row['Fibra_DGOs_Cordoes_OK_Qtd'] = data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'OK').length;
+  row['Fibra_DGOs_Cordoes_NOK_Qtd'] = data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'NOK').length;
+  
+  // DGOs details
+  data.fibraOptica.dgos.forEach((dgo, i) => {
+    row[`Fibra_DGO${i + 1}_ID`] = dgo.identificacao;
+    row[`Fibra_DGO${i + 1}_Capacidade`] = `${dgo.capacidadeFO}FO`;
+    row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.estadoCordoes;
+  });
+  
   // GRUPO ENERGIA
   row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro;
   row['Energia_Fabricante'] = data.energia.fabricante;

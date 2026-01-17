@@ -107,17 +107,16 @@ function calculateChecklistStats(data: ChecklistData): ChecklistStats {
     countPhoto(gab.fotoAcesso);
   });
 
-  // Fibra photos
-  countPhoto(data.fibra.fotoGeralAbordagens);
-  countPhoto(data.fibra.fotoObservacoesDGOs);
-  countPhotoArray(data.fibra.abordagem1?.fotoCaixasSubterraneas);
-  countPhotoArray(data.fibra.abordagem1?.fotoSubidaLateral);
-  countPhotoArray(data.fibra.abordagem2?.fotoCaixasSubterraneas);
-  countPhotoArray(data.fibra.abordagem2?.fotoSubidaLateral);
-  countPhotoArray(data.fibra.fotosCaixasPassagem);
-  data.fibra.dgos.forEach(dgo => {
-    countPhoto(dgo.fotoExterno);
-    countPhoto(dgo.fotoCordoes);
+  // Fibra Óptica photos
+  data.fibraOptica.abordagens.forEach(abord => {
+    countPhotoArray(abord.fotos);
+  });
+  countPhotoArray(data.fibraOptica.fotosCaixasPassagem);
+  countPhotoArray(data.fibraOptica.fotosCaixasSubterraneas);
+  countPhotoArray(data.fibraOptica.fotosSubidasLaterais);
+  data.fibraOptica.dgos.forEach(dgo => {
+    countPhoto(dgo.fotoDGO);
+    countPhoto(dgo.fotoCordesDetalhada);
   });
 
   // Energia photos

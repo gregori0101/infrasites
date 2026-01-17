@@ -41,11 +41,8 @@ export type StatusFuncionamento = 'OK' | 'NOK' | 'NA';
 
 // Fibra types
 export type AbordagemFibra = 'AÉREA' | 'SUBTERRÂNEA';
-export type NumAbordagens = 1 | 2 | 3;
-export type ConvergenciaFibra = 'CONVERGENTES' | 'SEM CONVERGÊNCIA';
-export type CapacidadeDGO = '12FO' | '24FO' | '48FO' | '72FO' | '144FO' | '144+FO';
-export type FormatoDGO = 'SLIDE' | 'FRONTAL' | 'ARTICULADO' | 'MÓDULO';
-export type EstadoFisico = 'OK' | 'NOK';
+export type NumAbordagens = 1 | 2;
+export type EstadoCordoes = 'OK' | 'NOK';
 
 // Energia types
 export type TipoQuadro = 'QDCA' | 'QGBT' | 'SUBQUADRO';
@@ -81,36 +78,32 @@ export interface EnergiaData {
   fotoPlaca: string | null;
 }
 
-export interface AbordagemData {
-  tipo: AbordagemFibra;
-  fotoCaixasSubterraneas: string[];
-  subidaLateralOK: boolean;
-  fotoSubidaLateral: string[];
+// New Fibra Óptica structures
+export interface AbordagemFibraData {
+  tipoEntrada: AbordagemFibra;
+  descricao: string;
+  fotos: string[];
 }
 
-export interface DGOData {
-  fotoExterno: string | null;
-  capacidade: CapacidadeDGO;
-  formatos: FormatoDGO[];
-  estadoFisico: EstadoFisico;
-  organizacaoCordoes: EstadoFisico;
-  fotoCordoes: string | null;
+export interface DGOFibraData {
+  identificacao: string;
+  capacidadeFO: number;
+  estadoCordoes: EstadoCordoes;
+  fotoDGO: string | null;
+  fotoCordesDetalhada: string | null; // required if estadoCordoes = NOK
 }
 
-export interface FibraData {
-  numAbordagens: NumAbordagens;
-  abordagem1: AbordagemData;
-  abordagem2?: AbordagemData;
-  abordagem3?: AbordagemData;
-  convergencia?: ConvergenciaFibra;
-  fotoGeralAbordagens: string | null;
-  caixasPassagemExistem: boolean;
-  caixasPassagemPadrao: boolean;
+export interface FibraOpticaData {
+  qtdAbordagens: NumAbordagens;
+  abordagens: AbordagemFibraData[];
+  qtdCaixasPassagem: number;
   fotosCaixasPassagem: string[];
-  numDGOs: number;
-  dgos: DGOData[];
-  observacoesDGOs: string;
-  fotoObservacoesDGOs: string | null;
+  qtdCaixasSubterraneas: number;
+  fotosCaixasSubterraneas: string[];
+  qtdSubidasLaterais: number;
+  fotosSubidasLaterais: string[];
+  qtdDGOs: number;
+  dgos: DGOFibraData[];
 }
 
 export interface BancoBateria {
@@ -195,7 +188,7 @@ export interface ChecklistData {
   qtdGabinetes: number;
   fotoPanoramica: string | null;
   gabinetes: GabineteData[];
-  fibra: FibraData;
+  fibraOptica: FibraOpticaData;
   energia: EnergiaData;
   gmg: GMGData;
   torre: TorreData;
@@ -249,33 +242,31 @@ export const INITIAL_GABINETE: GabineteData = {
   fotoAcesso: null,
 };
 
-export const INITIAL_ABORDAGEM: AbordagemData = {
-  tipo: 'AÉREA',
-  fotoCaixasSubterraneas: [],
-  subidaLateralOK: true,
-  fotoSubidaLateral: [],
+export const INITIAL_ABORDAGEM_FIBRA: AbordagemFibraData = {
+  tipoEntrada: 'AÉREA',
+  descricao: '',
+  fotos: [],
 };
 
-export const INITIAL_DGO: DGOData = {
-  fotoExterno: null,
-  capacidade: '12FO',
-  formatos: [],
-  estadoFisico: 'OK',
-  organizacaoCordoes: 'OK',
-  fotoCordoes: null,
+export const INITIAL_DGO_FIBRA: DGOFibraData = {
+  identificacao: '',
+  capacidadeFO: 12,
+  estadoCordoes: 'OK',
+  fotoDGO: null,
+  fotoCordesDetalhada: null,
 };
 
-export const INITIAL_FIBRA: FibraData = {
-  numAbordagens: 1,
-  abordagem1: { ...INITIAL_ABORDAGEM },
-  fotoGeralAbordagens: null,
-  caixasPassagemExistem: false,
-  caixasPassagemPadrao: true,
+export const INITIAL_FIBRA_OPTICA: FibraOpticaData = {
+  qtdAbordagens: 1,
+  abordagens: [{ ...INITIAL_ABORDAGEM_FIBRA }],
+  qtdCaixasPassagem: 0,
   fotosCaixasPassagem: [],
-  numDGOs: 0,
+  qtdCaixasSubterraneas: 0,
+  fotosCaixasSubterraneas: [],
+  qtdSubidasLaterais: 0,
+  fotosSubidasLaterais: [],
+  qtdDGOs: 0,
   dgos: [],
-  observacoesDGOs: '',
-  fotoObservacoesDGOs: null,
 };
 
 export const INITIAL_ENERGIA: EnergiaData = {
@@ -308,7 +299,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   qtdGabinetes: 1,
   fotoPanoramica: null,
   gabinetes: [{ ...INITIAL_GABINETE }],
-  fibra: { ...INITIAL_FIBRA },
+  fibraOptica: { ...INITIAL_FIBRA_OPTICA },
   energia: { ...INITIAL_ENERGIA },
   gmg: {
     informar: false,
