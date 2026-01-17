@@ -55,6 +55,18 @@ function buildDashboardColumns(): string {
     'torre_aterramento',
     'torre_housekeeping',
     'observacoes',
+    // Fibra Óptica columns
+    'fibra_qtd_abordagens',
+    'fibra_abord1_tipo',
+    'fibra_abord1_descricao',
+    'fibra_abord2_tipo',
+    'fibra_abord2_descricao',
+    'fibra_caixas_passagem_qtd',
+    'fibra_caixas_subterraneas_qtd',
+    'fibra_subidas_laterais_qtd',
+    'fibra_dgos_qtd',
+    'fibra_dgos_ok_qtd',
+    'fibra_dgos_nok_qtd',
   ];
 
   // Add gabinete columns (no photos)
@@ -248,6 +260,33 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   
   // Assinatura
   row.assinatura_digital = data.assinaturaDigital || null;
+
+  // Fibra Óptica
+  row.fibra_qtd_abordagens = data.fibraOptica?.qtdAbordagens || 1;
+  if (data.fibraOptica?.abordagens?.[0]) {
+    row.fibra_abord1_tipo = data.fibraOptica.abordagens[0].tipoEntrada || null;
+    row.fibra_abord1_descricao = data.fibraOptica.abordagens[0].descricao || null;
+  }
+  if (data.fibraOptica?.abordagens?.[1]) {
+    row.fibra_abord2_tipo = data.fibraOptica.abordagens[1].tipoEntrada || null;
+    row.fibra_abord2_descricao = data.fibraOptica.abordagens[1].descricao || null;
+  }
+  row.fibra_caixas_passagem_qtd = data.fibraOptica?.qtdCaixasPassagem || 0;
+  row.fibra_caixas_subterraneas_qtd = data.fibraOptica?.qtdCaixasSubterraneas || 0;
+  row.fibra_subidas_laterais_qtd = data.fibraOptica?.qtdSubidasLaterais || 0;
+  row.fibra_dgos_qtd = data.fibraOptica?.qtdDGOs || 0;
+  row.fibra_dgos_ok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'OK').length || 0;
+  row.fibra_dgos_nok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'NOK').length || 0;
+  
+  // DGO details (up to 4)
+  for (let i = 0; i < 4; i++) {
+    const dgo = data.fibraOptica?.dgos?.[i];
+    if (dgo) {
+      row[`fibra_dgo${i + 1}_id`] = dgo.identificacao || null;
+      row[`fibra_dgo${i + 1}_capacidade`] = `${dgo.capacidadeFO}FO`;
+      row[`fibra_dgo${i + 1}_cordoes`] = dgo.estadoCordoes || null;
+    }
+  }
 
   return row;
 }
