@@ -84,7 +84,55 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
   // Auto-save data to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(data));
+      try {
+        const dataToSave = JSON.stringify(data);
+        localStorage.setItem(CURRENT_SESSION_KEY, dataToSave);
+      } catch (error) {
+        // localStorage quota exceeded - try to save without photos
+        console.warn('localStorage quota exceeded, saving without photos:', error);
+        try {
+          const dataWithoutPhotos = {
+            ...data,
+            fotoPanoramica: null,
+            fotoObservacao: null,
+            assinaturaDigital: null,
+            gabinetes: data.gabinetes.map(gab => ({
+              ...gab,
+              fotoPanoramicaGabinete: null,
+              fotoTransmissao: null,
+              fotoAcesso: null,
+              fcc: { ...gab.fcc, fotoPanoramica: null, fotoPainel: null },
+              baterias: { ...gab.baterias, fotoBanco: null },
+              climatizacao: { 
+                ...gab.climatizacao, 
+                fotoAR1: null, fotoAR2: null, fotoAR3: null, fotoAR4: null,
+                fotoCondensador: null, fotoEvaporador: null, fotoControlador: null 
+              },
+            })),
+            fibra: {
+              ...data.fibra,
+              fotoGeralAbordagens: null,
+              fotoObservacoesDGOs: null,
+              fotosCaixasPassagem: [],
+              abordagem1: { ...data.fibra.abordagem1, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] },
+              abordagem2: data.fibra.abordagem2 ? { ...data.fibra.abordagem2, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] } : undefined,
+              abordagem3: data.fibra.abordagem3 ? { ...data.fibra.abordagem3, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] } : undefined,
+              dgos: data.fibra.dgos.map(dgo => ({ ...dgo, fotoExterno: null, fotoCordoes: null })),
+            },
+            energia: {
+              ...data.energia,
+              fotoTransformador: null,
+              fotoQuadroGeral: null,
+              fotoPlaca: null,
+              cabos: { ...data.energia.cabos, fotoCabos: null },
+            },
+            torre: { ...data.torre, fotoNinhos: null },
+          };
+          localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(dataWithoutPhotos));
+        } catch (innerError) {
+          console.error('Failed to save even without photos:', innerError);
+        }
+      }
     }
   }, [data]);
 
