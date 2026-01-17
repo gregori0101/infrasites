@@ -16,11 +16,16 @@ export type Database = {
     Tables: {
       reports: {
         Row: {
+          assinatura_digital: string | null
           created_at: string
           created_date: string
           created_time: string
           email_sent: boolean | null
           email_sent_at: string | null
+          energia_foto_cabos: string | null
+          energia_foto_placa: string | null
+          energia_foto_quadro_geral: string | null
+          energia_foto_transformador: string | null
           excel_file_path: string | null
           gab1_ac1_modelo: string | null
           gab1_ac1_status: string | null
@@ -32,6 +37,7 @@ export type Database = {
           gab1_ac4_status: string | null
           gab1_alarme_status: string | null
           gab1_bancos_interligados: string | null
+          gab1_bat_foto: string | null
           gab1_bat1_capacidade: string | null
           gab1_bat1_data_fabricacao: string | null
           gab1_bat1_estado: string | null
@@ -62,14 +68,24 @@ export type Database = {
           gab1_bat6_estado: string | null
           gab1_bat6_fabricante: string | null
           gab1_bat6_tipo: string | null
+          gab1_clima_foto_ar1: string | null
+          gab1_clima_foto_ar2: string | null
+          gab1_clima_foto_ar3: string | null
+          gab1_clima_foto_ar4: string | null
+          gab1_clima_foto_condensador: string | null
+          gab1_clima_foto_controlador: string | null
+          gab1_clima_foto_evaporador: string | null
           gab1_climatizacao_tipo: string | null
           gab1_fcc_consumo: string | null
           gab1_fcc_fabricante: string | null
+          gab1_fcc_foto_painel: string | null
+          gab1_fcc_foto_panoramica: string | null
           gab1_fcc_gerenciado: string | null
           gab1_fcc_gerenciavel: string | null
           gab1_fcc_qtd_ur: string | null
           gab1_fcc_tensao: string | null
           gab1_foto_acesso: string | null
+          gab1_foto_panoramica: string | null
           gab1_foto_transmissao: string | null
           gab1_plc_status: string | null
           gab1_protecao: string | null
@@ -87,6 +103,7 @@ export type Database = {
           gab2_ac4_status: string | null
           gab2_alarme_status: string | null
           gab2_bancos_interligados: string | null
+          gab2_bat_foto: string | null
           gab2_bat1_capacidade: string | null
           gab2_bat1_data_fabricacao: string | null
           gab2_bat1_estado: string | null
@@ -117,14 +134,24 @@ export type Database = {
           gab2_bat6_estado: string | null
           gab2_bat6_fabricante: string | null
           gab2_bat6_tipo: string | null
+          gab2_clima_foto_ar1: string | null
+          gab2_clima_foto_ar2: string | null
+          gab2_clima_foto_ar3: string | null
+          gab2_clima_foto_ar4: string | null
+          gab2_clima_foto_condensador: string | null
+          gab2_clima_foto_controlador: string | null
+          gab2_clima_foto_evaporador: string | null
           gab2_climatizacao_tipo: string | null
           gab2_fcc_consumo: string | null
           gab2_fcc_fabricante: string | null
+          gab2_fcc_foto_painel: string | null
+          gab2_fcc_foto_panoramica: string | null
           gab2_fcc_gerenciado: string | null
           gab2_fcc_gerenciavel: string | null
           gab2_fcc_qtd_ur: string | null
           gab2_fcc_tensao: string | null
           gab2_foto_acesso: string | null
+          gab2_foto_panoramica: string | null
           gab2_foto_transmissao: string | null
           gab2_plc_status: string | null
           gab2_protecao: string | null
@@ -142,6 +169,7 @@ export type Database = {
           gab3_ac4_status: string | null
           gab3_alarme_status: string | null
           gab3_bancos_interligados: string | null
+          gab3_bat_foto: string | null
           gab3_bat1_capacidade: string | null
           gab3_bat1_data_fabricacao: string | null
           gab3_bat1_estado: string | null
@@ -172,14 +200,24 @@ export type Database = {
           gab3_bat6_estado: string | null
           gab3_bat6_fabricante: string | null
           gab3_bat6_tipo: string | null
+          gab3_clima_foto_ar1: string | null
+          gab3_clima_foto_ar2: string | null
+          gab3_clima_foto_ar3: string | null
+          gab3_clima_foto_ar4: string | null
+          gab3_clima_foto_condensador: string | null
+          gab3_clima_foto_controlador: string | null
+          gab3_clima_foto_evaporador: string | null
           gab3_climatizacao_tipo: string | null
           gab3_fcc_consumo: string | null
           gab3_fcc_fabricante: string | null
+          gab3_fcc_foto_painel: string | null
+          gab3_fcc_foto_panoramica: string | null
           gab3_fcc_gerenciado: string | null
           gab3_fcc_gerenciavel: string | null
           gab3_fcc_qtd_ur: string | null
           gab3_fcc_tensao: string | null
           gab3_foto_acesso: string | null
+          gab3_foto_panoramica: string | null
           gab3_foto_transmissao: string | null
           gab3_plc_status: string | null
           gab3_protecao: string | null
@@ -197,6 +235,7 @@ export type Database = {
           gab4_ac4_status: string | null
           gab4_alarme_status: string | null
           gab4_bancos_interligados: string | null
+          gab4_bat_foto: string | null
           gab4_bat1_capacidade: string | null
           gab4_bat1_data_fabricacao: string | null
           gab4_bat1_estado: string | null
@@ -227,14 +266,24 @@ export type Database = {
           gab4_bat6_estado: string | null
           gab4_bat6_fabricante: string | null
           gab4_bat6_tipo: string | null
+          gab4_clima_foto_ar1: string | null
+          gab4_clima_foto_ar2: string | null
+          gab4_clima_foto_ar3: string | null
+          gab4_clima_foto_ar4: string | null
+          gab4_clima_foto_condensador: string | null
+          gab4_clima_foto_controlador: string | null
+          gab4_clima_foto_evaporador: string | null
           gab4_climatizacao_tipo: string | null
           gab4_fcc_consumo: string | null
           gab4_fcc_fabricante: string | null
+          gab4_fcc_foto_painel: string | null
+          gab4_fcc_foto_panoramica: string | null
           gab4_fcc_gerenciado: string | null
           gab4_fcc_gerenciavel: string | null
           gab4_fcc_qtd_ur: string | null
           gab4_fcc_tensao: string | null
           gab4_foto_acesso: string | null
+          gab4_foto_panoramica: string | null
           gab4_foto_transmissao: string | null
           gab4_plc_status: string | null
           gab4_protecao: string | null
@@ -252,6 +301,7 @@ export type Database = {
           gab5_ac4_status: string | null
           gab5_alarme_status: string | null
           gab5_bancos_interligados: string | null
+          gab5_bat_foto: string | null
           gab5_bat1_capacidade: string | null
           gab5_bat1_data_fabricacao: string | null
           gab5_bat1_estado: string | null
@@ -282,14 +332,24 @@ export type Database = {
           gab5_bat6_estado: string | null
           gab5_bat6_fabricante: string | null
           gab5_bat6_tipo: string | null
+          gab5_clima_foto_ar1: string | null
+          gab5_clima_foto_ar2: string | null
+          gab5_clima_foto_ar3: string | null
+          gab5_clima_foto_ar4: string | null
+          gab5_clima_foto_condensador: string | null
+          gab5_clima_foto_controlador: string | null
+          gab5_clima_foto_evaporador: string | null
           gab5_climatizacao_tipo: string | null
           gab5_fcc_consumo: string | null
           gab5_fcc_fabricante: string | null
+          gab5_fcc_foto_painel: string | null
+          gab5_fcc_foto_panoramica: string | null
           gab5_fcc_gerenciado: string | null
           gab5_fcc_gerenciavel: string | null
           gab5_fcc_qtd_ur: string | null
           gab5_fcc_tensao: string | null
           gab5_foto_acesso: string | null
+          gab5_foto_panoramica: string | null
           gab5_foto_transmissao: string | null
           gab5_plc_status: string | null
           gab5_protecao: string | null
@@ -307,6 +367,7 @@ export type Database = {
           gab6_ac4_status: string | null
           gab6_alarme_status: string | null
           gab6_bancos_interligados: string | null
+          gab6_bat_foto: string | null
           gab6_bat1_capacidade: string | null
           gab6_bat1_data_fabricacao: string | null
           gab6_bat1_estado: string | null
@@ -337,14 +398,24 @@ export type Database = {
           gab6_bat6_estado: string | null
           gab6_bat6_fabricante: string | null
           gab6_bat6_tipo: string | null
+          gab6_clima_foto_ar1: string | null
+          gab6_clima_foto_ar2: string | null
+          gab6_clima_foto_ar3: string | null
+          gab6_clima_foto_ar4: string | null
+          gab6_clima_foto_condensador: string | null
+          gab6_clima_foto_controlador: string | null
+          gab6_clima_foto_evaporador: string | null
           gab6_climatizacao_tipo: string | null
           gab6_fcc_consumo: string | null
           gab6_fcc_fabricante: string | null
+          gab6_fcc_foto_painel: string | null
+          gab6_fcc_foto_panoramica: string | null
           gab6_fcc_gerenciado: string | null
           gab6_fcc_gerenciavel: string | null
           gab6_fcc_qtd_ur: string | null
           gab6_fcc_tensao: string | null
           gab6_foto_acesso: string | null
+          gab6_foto_panoramica: string | null
           gab6_foto_transmissao: string | null
           gab6_plc_status: string | null
           gab6_protecao: string | null
@@ -362,6 +433,7 @@ export type Database = {
           gab7_ac4_status: string | null
           gab7_alarme_status: string | null
           gab7_bancos_interligados: string | null
+          gab7_bat_foto: string | null
           gab7_bat1_capacidade: string | null
           gab7_bat1_data_fabricacao: string | null
           gab7_bat1_estado: string | null
@@ -392,14 +464,24 @@ export type Database = {
           gab7_bat6_estado: string | null
           gab7_bat6_fabricante: string | null
           gab7_bat6_tipo: string | null
+          gab7_clima_foto_ar1: string | null
+          gab7_clima_foto_ar2: string | null
+          gab7_clima_foto_ar3: string | null
+          gab7_clima_foto_ar4: string | null
+          gab7_clima_foto_condensador: string | null
+          gab7_clima_foto_controlador: string | null
+          gab7_clima_foto_evaporador: string | null
           gab7_climatizacao_tipo: string | null
           gab7_fcc_consumo: string | null
           gab7_fcc_fabricante: string | null
+          gab7_fcc_foto_painel: string | null
+          gab7_fcc_foto_panoramica: string | null
           gab7_fcc_gerenciado: string | null
           gab7_fcc_gerenciavel: string | null
           gab7_fcc_qtd_ur: string | null
           gab7_fcc_tensao: string | null
           gab7_foto_acesso: string | null
+          gab7_foto_panoramica: string | null
           gab7_foto_transmissao: string | null
           gab7_plc_status: string | null
           gab7_protecao: string | null
@@ -421,17 +503,23 @@ export type Database = {
           state_uf: string | null
           technician_name: string | null
           torre_aterramento: string | null
+          torre_foto_ninhos: string | null
           torre_housekeeping: string | null
           torre_ninhos: string | null
           torre_protecao_fibra: string | null
           total_cabinets: number
         }
         Insert: {
+          assinatura_digital?: string | null
           created_at?: string
           created_date: string
           created_time: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_foto_cabos?: string | null
+          energia_foto_placa?: string | null
+          energia_foto_quadro_geral?: string | null
+          energia_foto_transformador?: string | null
           excel_file_path?: string | null
           gab1_ac1_modelo?: string | null
           gab1_ac1_status?: string | null
@@ -443,6 +531,7 @@ export type Database = {
           gab1_ac4_status?: string | null
           gab1_alarme_status?: string | null
           gab1_bancos_interligados?: string | null
+          gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
           gab1_bat1_data_fabricacao?: string | null
           gab1_bat1_estado?: string | null
@@ -473,14 +562,24 @@ export type Database = {
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
           gab1_bat6_tipo?: string | null
+          gab1_clima_foto_ar1?: string | null
+          gab1_clima_foto_ar2?: string | null
+          gab1_clima_foto_ar3?: string | null
+          gab1_clima_foto_ar4?: string | null
+          gab1_clima_foto_condensador?: string | null
+          gab1_clima_foto_controlador?: string | null
+          gab1_clima_foto_evaporador?: string | null
           gab1_climatizacao_tipo?: string | null
           gab1_fcc_consumo?: string | null
           gab1_fcc_fabricante?: string | null
+          gab1_fcc_foto_painel?: string | null
+          gab1_fcc_foto_panoramica?: string | null
           gab1_fcc_gerenciado?: string | null
           gab1_fcc_gerenciavel?: string | null
           gab1_fcc_qtd_ur?: string | null
           gab1_fcc_tensao?: string | null
           gab1_foto_acesso?: string | null
+          gab1_foto_panoramica?: string | null
           gab1_foto_transmissao?: string | null
           gab1_plc_status?: string | null
           gab1_protecao?: string | null
@@ -498,6 +597,7 @@ export type Database = {
           gab2_ac4_status?: string | null
           gab2_alarme_status?: string | null
           gab2_bancos_interligados?: string | null
+          gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
           gab2_bat1_data_fabricacao?: string | null
           gab2_bat1_estado?: string | null
@@ -528,14 +628,24 @@ export type Database = {
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
           gab2_bat6_tipo?: string | null
+          gab2_clima_foto_ar1?: string | null
+          gab2_clima_foto_ar2?: string | null
+          gab2_clima_foto_ar3?: string | null
+          gab2_clima_foto_ar4?: string | null
+          gab2_clima_foto_condensador?: string | null
+          gab2_clima_foto_controlador?: string | null
+          gab2_clima_foto_evaporador?: string | null
           gab2_climatizacao_tipo?: string | null
           gab2_fcc_consumo?: string | null
           gab2_fcc_fabricante?: string | null
+          gab2_fcc_foto_painel?: string | null
+          gab2_fcc_foto_panoramica?: string | null
           gab2_fcc_gerenciado?: string | null
           gab2_fcc_gerenciavel?: string | null
           gab2_fcc_qtd_ur?: string | null
           gab2_fcc_tensao?: string | null
           gab2_foto_acesso?: string | null
+          gab2_foto_panoramica?: string | null
           gab2_foto_transmissao?: string | null
           gab2_plc_status?: string | null
           gab2_protecao?: string | null
@@ -553,6 +663,7 @@ export type Database = {
           gab3_ac4_status?: string | null
           gab3_alarme_status?: string | null
           gab3_bancos_interligados?: string | null
+          gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
           gab3_bat1_data_fabricacao?: string | null
           gab3_bat1_estado?: string | null
@@ -583,14 +694,24 @@ export type Database = {
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
           gab3_bat6_tipo?: string | null
+          gab3_clima_foto_ar1?: string | null
+          gab3_clima_foto_ar2?: string | null
+          gab3_clima_foto_ar3?: string | null
+          gab3_clima_foto_ar4?: string | null
+          gab3_clima_foto_condensador?: string | null
+          gab3_clima_foto_controlador?: string | null
+          gab3_clima_foto_evaporador?: string | null
           gab3_climatizacao_tipo?: string | null
           gab3_fcc_consumo?: string | null
           gab3_fcc_fabricante?: string | null
+          gab3_fcc_foto_painel?: string | null
+          gab3_fcc_foto_panoramica?: string | null
           gab3_fcc_gerenciado?: string | null
           gab3_fcc_gerenciavel?: string | null
           gab3_fcc_qtd_ur?: string | null
           gab3_fcc_tensao?: string | null
           gab3_foto_acesso?: string | null
+          gab3_foto_panoramica?: string | null
           gab3_foto_transmissao?: string | null
           gab3_plc_status?: string | null
           gab3_protecao?: string | null
@@ -608,6 +729,7 @@ export type Database = {
           gab4_ac4_status?: string | null
           gab4_alarme_status?: string | null
           gab4_bancos_interligados?: string | null
+          gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
           gab4_bat1_data_fabricacao?: string | null
           gab4_bat1_estado?: string | null
@@ -638,14 +760,24 @@ export type Database = {
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
           gab4_bat6_tipo?: string | null
+          gab4_clima_foto_ar1?: string | null
+          gab4_clima_foto_ar2?: string | null
+          gab4_clima_foto_ar3?: string | null
+          gab4_clima_foto_ar4?: string | null
+          gab4_clima_foto_condensador?: string | null
+          gab4_clima_foto_controlador?: string | null
+          gab4_clima_foto_evaporador?: string | null
           gab4_climatizacao_tipo?: string | null
           gab4_fcc_consumo?: string | null
           gab4_fcc_fabricante?: string | null
+          gab4_fcc_foto_painel?: string | null
+          gab4_fcc_foto_panoramica?: string | null
           gab4_fcc_gerenciado?: string | null
           gab4_fcc_gerenciavel?: string | null
           gab4_fcc_qtd_ur?: string | null
           gab4_fcc_tensao?: string | null
           gab4_foto_acesso?: string | null
+          gab4_foto_panoramica?: string | null
           gab4_foto_transmissao?: string | null
           gab4_plc_status?: string | null
           gab4_protecao?: string | null
@@ -663,6 +795,7 @@ export type Database = {
           gab5_ac4_status?: string | null
           gab5_alarme_status?: string | null
           gab5_bancos_interligados?: string | null
+          gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
           gab5_bat1_data_fabricacao?: string | null
           gab5_bat1_estado?: string | null
@@ -693,14 +826,24 @@ export type Database = {
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
           gab5_bat6_tipo?: string | null
+          gab5_clima_foto_ar1?: string | null
+          gab5_clima_foto_ar2?: string | null
+          gab5_clima_foto_ar3?: string | null
+          gab5_clima_foto_ar4?: string | null
+          gab5_clima_foto_condensador?: string | null
+          gab5_clima_foto_controlador?: string | null
+          gab5_clima_foto_evaporador?: string | null
           gab5_climatizacao_tipo?: string | null
           gab5_fcc_consumo?: string | null
           gab5_fcc_fabricante?: string | null
+          gab5_fcc_foto_painel?: string | null
+          gab5_fcc_foto_panoramica?: string | null
           gab5_fcc_gerenciado?: string | null
           gab5_fcc_gerenciavel?: string | null
           gab5_fcc_qtd_ur?: string | null
           gab5_fcc_tensao?: string | null
           gab5_foto_acesso?: string | null
+          gab5_foto_panoramica?: string | null
           gab5_foto_transmissao?: string | null
           gab5_plc_status?: string | null
           gab5_protecao?: string | null
@@ -718,6 +861,7 @@ export type Database = {
           gab6_ac4_status?: string | null
           gab6_alarme_status?: string | null
           gab6_bancos_interligados?: string | null
+          gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
           gab6_bat1_data_fabricacao?: string | null
           gab6_bat1_estado?: string | null
@@ -748,14 +892,24 @@ export type Database = {
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
           gab6_bat6_tipo?: string | null
+          gab6_clima_foto_ar1?: string | null
+          gab6_clima_foto_ar2?: string | null
+          gab6_clima_foto_ar3?: string | null
+          gab6_clima_foto_ar4?: string | null
+          gab6_clima_foto_condensador?: string | null
+          gab6_clima_foto_controlador?: string | null
+          gab6_clima_foto_evaporador?: string | null
           gab6_climatizacao_tipo?: string | null
           gab6_fcc_consumo?: string | null
           gab6_fcc_fabricante?: string | null
+          gab6_fcc_foto_painel?: string | null
+          gab6_fcc_foto_panoramica?: string | null
           gab6_fcc_gerenciado?: string | null
           gab6_fcc_gerenciavel?: string | null
           gab6_fcc_qtd_ur?: string | null
           gab6_fcc_tensao?: string | null
           gab6_foto_acesso?: string | null
+          gab6_foto_panoramica?: string | null
           gab6_foto_transmissao?: string | null
           gab6_plc_status?: string | null
           gab6_protecao?: string | null
@@ -773,6 +927,7 @@ export type Database = {
           gab7_ac4_status?: string | null
           gab7_alarme_status?: string | null
           gab7_bancos_interligados?: string | null
+          gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
           gab7_bat1_data_fabricacao?: string | null
           gab7_bat1_estado?: string | null
@@ -803,14 +958,24 @@ export type Database = {
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
           gab7_bat6_tipo?: string | null
+          gab7_clima_foto_ar1?: string | null
+          gab7_clima_foto_ar2?: string | null
+          gab7_clima_foto_ar3?: string | null
+          gab7_clima_foto_ar4?: string | null
+          gab7_clima_foto_condensador?: string | null
+          gab7_clima_foto_controlador?: string | null
+          gab7_clima_foto_evaporador?: string | null
           gab7_climatizacao_tipo?: string | null
           gab7_fcc_consumo?: string | null
           gab7_fcc_fabricante?: string | null
+          gab7_fcc_foto_painel?: string | null
+          gab7_fcc_foto_panoramica?: string | null
           gab7_fcc_gerenciado?: string | null
           gab7_fcc_gerenciavel?: string | null
           gab7_fcc_qtd_ur?: string | null
           gab7_fcc_tensao?: string | null
           gab7_foto_acesso?: string | null
+          gab7_foto_panoramica?: string | null
           gab7_foto_transmissao?: string | null
           gab7_plc_status?: string | null
           gab7_protecao?: string | null
@@ -832,17 +997,23 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_foto_ninhos?: string | null
           torre_housekeeping?: string | null
           torre_ninhos?: string | null
           torre_protecao_fibra?: string | null
           total_cabinets?: number
         }
         Update: {
+          assinatura_digital?: string | null
           created_at?: string
           created_date?: string
           created_time?: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_foto_cabos?: string | null
+          energia_foto_placa?: string | null
+          energia_foto_quadro_geral?: string | null
+          energia_foto_transformador?: string | null
           excel_file_path?: string | null
           gab1_ac1_modelo?: string | null
           gab1_ac1_status?: string | null
@@ -854,6 +1025,7 @@ export type Database = {
           gab1_ac4_status?: string | null
           gab1_alarme_status?: string | null
           gab1_bancos_interligados?: string | null
+          gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
           gab1_bat1_data_fabricacao?: string | null
           gab1_bat1_estado?: string | null
@@ -884,14 +1056,24 @@ export type Database = {
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
           gab1_bat6_tipo?: string | null
+          gab1_clima_foto_ar1?: string | null
+          gab1_clima_foto_ar2?: string | null
+          gab1_clima_foto_ar3?: string | null
+          gab1_clima_foto_ar4?: string | null
+          gab1_clima_foto_condensador?: string | null
+          gab1_clima_foto_controlador?: string | null
+          gab1_clima_foto_evaporador?: string | null
           gab1_climatizacao_tipo?: string | null
           gab1_fcc_consumo?: string | null
           gab1_fcc_fabricante?: string | null
+          gab1_fcc_foto_painel?: string | null
+          gab1_fcc_foto_panoramica?: string | null
           gab1_fcc_gerenciado?: string | null
           gab1_fcc_gerenciavel?: string | null
           gab1_fcc_qtd_ur?: string | null
           gab1_fcc_tensao?: string | null
           gab1_foto_acesso?: string | null
+          gab1_foto_panoramica?: string | null
           gab1_foto_transmissao?: string | null
           gab1_plc_status?: string | null
           gab1_protecao?: string | null
@@ -909,6 +1091,7 @@ export type Database = {
           gab2_ac4_status?: string | null
           gab2_alarme_status?: string | null
           gab2_bancos_interligados?: string | null
+          gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
           gab2_bat1_data_fabricacao?: string | null
           gab2_bat1_estado?: string | null
@@ -939,14 +1122,24 @@ export type Database = {
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
           gab2_bat6_tipo?: string | null
+          gab2_clima_foto_ar1?: string | null
+          gab2_clima_foto_ar2?: string | null
+          gab2_clima_foto_ar3?: string | null
+          gab2_clima_foto_ar4?: string | null
+          gab2_clima_foto_condensador?: string | null
+          gab2_clima_foto_controlador?: string | null
+          gab2_clima_foto_evaporador?: string | null
           gab2_climatizacao_tipo?: string | null
           gab2_fcc_consumo?: string | null
           gab2_fcc_fabricante?: string | null
+          gab2_fcc_foto_painel?: string | null
+          gab2_fcc_foto_panoramica?: string | null
           gab2_fcc_gerenciado?: string | null
           gab2_fcc_gerenciavel?: string | null
           gab2_fcc_qtd_ur?: string | null
           gab2_fcc_tensao?: string | null
           gab2_foto_acesso?: string | null
+          gab2_foto_panoramica?: string | null
           gab2_foto_transmissao?: string | null
           gab2_plc_status?: string | null
           gab2_protecao?: string | null
@@ -964,6 +1157,7 @@ export type Database = {
           gab3_ac4_status?: string | null
           gab3_alarme_status?: string | null
           gab3_bancos_interligados?: string | null
+          gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
           gab3_bat1_data_fabricacao?: string | null
           gab3_bat1_estado?: string | null
@@ -994,14 +1188,24 @@ export type Database = {
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
           gab3_bat6_tipo?: string | null
+          gab3_clima_foto_ar1?: string | null
+          gab3_clima_foto_ar2?: string | null
+          gab3_clima_foto_ar3?: string | null
+          gab3_clima_foto_ar4?: string | null
+          gab3_clima_foto_condensador?: string | null
+          gab3_clima_foto_controlador?: string | null
+          gab3_clima_foto_evaporador?: string | null
           gab3_climatizacao_tipo?: string | null
           gab3_fcc_consumo?: string | null
           gab3_fcc_fabricante?: string | null
+          gab3_fcc_foto_painel?: string | null
+          gab3_fcc_foto_panoramica?: string | null
           gab3_fcc_gerenciado?: string | null
           gab3_fcc_gerenciavel?: string | null
           gab3_fcc_qtd_ur?: string | null
           gab3_fcc_tensao?: string | null
           gab3_foto_acesso?: string | null
+          gab3_foto_panoramica?: string | null
           gab3_foto_transmissao?: string | null
           gab3_plc_status?: string | null
           gab3_protecao?: string | null
@@ -1019,6 +1223,7 @@ export type Database = {
           gab4_ac4_status?: string | null
           gab4_alarme_status?: string | null
           gab4_bancos_interligados?: string | null
+          gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
           gab4_bat1_data_fabricacao?: string | null
           gab4_bat1_estado?: string | null
@@ -1049,14 +1254,24 @@ export type Database = {
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
           gab4_bat6_tipo?: string | null
+          gab4_clima_foto_ar1?: string | null
+          gab4_clima_foto_ar2?: string | null
+          gab4_clima_foto_ar3?: string | null
+          gab4_clima_foto_ar4?: string | null
+          gab4_clima_foto_condensador?: string | null
+          gab4_clima_foto_controlador?: string | null
+          gab4_clima_foto_evaporador?: string | null
           gab4_climatizacao_tipo?: string | null
           gab4_fcc_consumo?: string | null
           gab4_fcc_fabricante?: string | null
+          gab4_fcc_foto_painel?: string | null
+          gab4_fcc_foto_panoramica?: string | null
           gab4_fcc_gerenciado?: string | null
           gab4_fcc_gerenciavel?: string | null
           gab4_fcc_qtd_ur?: string | null
           gab4_fcc_tensao?: string | null
           gab4_foto_acesso?: string | null
+          gab4_foto_panoramica?: string | null
           gab4_foto_transmissao?: string | null
           gab4_plc_status?: string | null
           gab4_protecao?: string | null
@@ -1074,6 +1289,7 @@ export type Database = {
           gab5_ac4_status?: string | null
           gab5_alarme_status?: string | null
           gab5_bancos_interligados?: string | null
+          gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
           gab5_bat1_data_fabricacao?: string | null
           gab5_bat1_estado?: string | null
@@ -1104,14 +1320,24 @@ export type Database = {
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
           gab5_bat6_tipo?: string | null
+          gab5_clima_foto_ar1?: string | null
+          gab5_clima_foto_ar2?: string | null
+          gab5_clima_foto_ar3?: string | null
+          gab5_clima_foto_ar4?: string | null
+          gab5_clima_foto_condensador?: string | null
+          gab5_clima_foto_controlador?: string | null
+          gab5_clima_foto_evaporador?: string | null
           gab5_climatizacao_tipo?: string | null
           gab5_fcc_consumo?: string | null
           gab5_fcc_fabricante?: string | null
+          gab5_fcc_foto_painel?: string | null
+          gab5_fcc_foto_panoramica?: string | null
           gab5_fcc_gerenciado?: string | null
           gab5_fcc_gerenciavel?: string | null
           gab5_fcc_qtd_ur?: string | null
           gab5_fcc_tensao?: string | null
           gab5_foto_acesso?: string | null
+          gab5_foto_panoramica?: string | null
           gab5_foto_transmissao?: string | null
           gab5_plc_status?: string | null
           gab5_protecao?: string | null
@@ -1129,6 +1355,7 @@ export type Database = {
           gab6_ac4_status?: string | null
           gab6_alarme_status?: string | null
           gab6_bancos_interligados?: string | null
+          gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
           gab6_bat1_data_fabricacao?: string | null
           gab6_bat1_estado?: string | null
@@ -1159,14 +1386,24 @@ export type Database = {
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
           gab6_bat6_tipo?: string | null
+          gab6_clima_foto_ar1?: string | null
+          gab6_clima_foto_ar2?: string | null
+          gab6_clima_foto_ar3?: string | null
+          gab6_clima_foto_ar4?: string | null
+          gab6_clima_foto_condensador?: string | null
+          gab6_clima_foto_controlador?: string | null
+          gab6_clima_foto_evaporador?: string | null
           gab6_climatizacao_tipo?: string | null
           gab6_fcc_consumo?: string | null
           gab6_fcc_fabricante?: string | null
+          gab6_fcc_foto_painel?: string | null
+          gab6_fcc_foto_panoramica?: string | null
           gab6_fcc_gerenciado?: string | null
           gab6_fcc_gerenciavel?: string | null
           gab6_fcc_qtd_ur?: string | null
           gab6_fcc_tensao?: string | null
           gab6_foto_acesso?: string | null
+          gab6_foto_panoramica?: string | null
           gab6_foto_transmissao?: string | null
           gab6_plc_status?: string | null
           gab6_protecao?: string | null
@@ -1184,6 +1421,7 @@ export type Database = {
           gab7_ac4_status?: string | null
           gab7_alarme_status?: string | null
           gab7_bancos_interligados?: string | null
+          gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
           gab7_bat1_data_fabricacao?: string | null
           gab7_bat1_estado?: string | null
@@ -1214,14 +1452,24 @@ export type Database = {
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
           gab7_bat6_tipo?: string | null
+          gab7_clima_foto_ar1?: string | null
+          gab7_clima_foto_ar2?: string | null
+          gab7_clima_foto_ar3?: string | null
+          gab7_clima_foto_ar4?: string | null
+          gab7_clima_foto_condensador?: string | null
+          gab7_clima_foto_controlador?: string | null
+          gab7_clima_foto_evaporador?: string | null
           gab7_climatizacao_tipo?: string | null
           gab7_fcc_consumo?: string | null
           gab7_fcc_fabricante?: string | null
+          gab7_fcc_foto_painel?: string | null
+          gab7_fcc_foto_panoramica?: string | null
           gab7_fcc_gerenciado?: string | null
           gab7_fcc_gerenciavel?: string | null
           gab7_fcc_qtd_ur?: string | null
           gab7_fcc_tensao?: string | null
           gab7_foto_acesso?: string | null
+          gab7_foto_panoramica?: string | null
           gab7_foto_transmissao?: string | null
           gab7_plc_status?: string | null
           gab7_protecao?: string | null
@@ -1243,6 +1491,7 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_foto_ninhos?: string | null
           torre_housekeeping?: string | null
           torre_ninhos?: string | null
           torre_protecao_fibra?: string | null
