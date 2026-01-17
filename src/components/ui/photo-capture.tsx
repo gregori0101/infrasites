@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Camera, X, ZoomIn, Loader2 } from "lucide-react";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogTrigger } from "./dialog";
-import { compressToMaxSize } from "@/lib/imageCompression";
+import { compressWithFallback } from "@/lib/imageCompression";
 import { toast } from "sonner";
 
 interface PhotoCaptureProps {
@@ -46,8 +46,8 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
             throw new Error("Falha ao ler a imagem");
           }
           
-          // Compress image to reduce size
-          const compressed = await compressToMaxSize(dataURL, 800);
+          // Compress image with multiple fallback attempts
+          const compressed = await compressWithFallback(dataURL, 800);
           onChange(compressed);
           toast.success("Foto adicionada com sucesso!");
         } catch (error) {

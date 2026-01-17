@@ -114,6 +114,86 @@ export async function compressToMaxSize(
 }
 
 /**
+ * Compression attempt configuration
+ */
+interface CompressionAttempt {
+  quality: number;
+  maxWidth: number;
+  maxHeight: number;
+  mimeType: 'image/jpeg' | 'image/webp';
+}
+
+/**
+ * Attempts to compress an image with multiple fallback strategies
+ * @param dataURL - The base64 encoded image data URL
+ * @param maxSizeKB - Maximum file size in KB (default: 800KB)
+ * @returns Promise<string> - Compressed image as base64 data URL
+ */
+export async function compressWithFallback(
+  dataURL: string,
+  maxSizeKB: number = 800
+): Promise<string> {
+  const getSize = (data: string) => Math.round((data.length * 3) / 4 / 1024);
+  
+  // Define compression attempts from highest quality to lowest
+  const attempts: CompressionAttempt[] = [
+    { quality: 0.9, maxWidth: 1920, maxHeight: 1920, mimeType: 'image/jpeg' },
+    { quality: 0.8, maxWidth: 1600, maxHeight: 1600, mimeType: 'image/jpeg' },
+    { quality: 0.7, maxWidth: 1280, maxHeight: 1280, mimeType: 'image/jpeg' },
+    { quality: 0.6, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/jpeg' },
+    { quality: 0.5, maxWidth: 800, maxHeight: 800, mimeType: 'image/jpeg' },
+    { quality: 0.4, maxWidth: 640, maxHeight: 640, mimeType: 'image/jpeg' },
+    // Try WebP format as last resort (better compression)
+    { quality: 0.6, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/webp' },
+    { quality: 0.5, maxWidth: 800, maxHeight: 800, mimeType: 'image/webp' },
+  ];
+  
+  let lastResult = dataURL;
+  let lastError: Error | null = null;
+  
+  for (const attempt of attempts) {
+    try {
+      const compressed = await compressImage(dataURL, {
+        quality: attempt.quality,
+        maxWidth: attempt.maxWidth,
+        maxHeight: attempt.maxHeight,
+        mimeType: attempt.mimeType,
+      });
+      
+      const size = getSize(compressed);
+      
+      // If size is acceptable, return immediately
+      if (size <= maxSizeKB) {
+        console.log(`Image compressed successfully: ${size}KB (quality: ${attempt.quality}, ${attempt.maxWidth}x${attempt.maxHeight}, ${attempt.mimeType})`);
+        return compressed;
+      }
+      
+      // Keep the best result so far
+      if (getSize(compressed) < getSize(lastResult)) {
+        lastResult = compressed;
+      }
+    } catch (error) {
+      console.warn(`Compression attempt failed (quality: ${attempt.quality}):`, error);
+      lastError = error as Error;
+      // Continue to next attempt
+    }
+  }
+  
+  // If we got here, return the best result we have (even if larger than maxSizeKB)
+  const finalSize = getSize(lastResult);
+  if (finalSize > maxSizeKB) {
+    console.warn(`Could not compress to ${maxSizeKB}KB, best result: ${finalSize}KB`);
+  }
+  
+  // If all attempts failed, throw the last error
+  if (lastResult === dataURL && lastError) {
+    throw lastError;
+  }
+  
+  return lastResult;
+}
+
+/**
  * Gets the estimated file size of a base64 data URL in KB
  */
 export function getBase64SizeKB(dataURL: string): number {
