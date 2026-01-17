@@ -3,9 +3,10 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
 import { ChipSelect } from "@/components/ui/chip-select";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Server, Radio, Wifi, AlertCircle } from "lucide-react";
+import { Server, Radio, Wifi, AlertCircle, Camera } from "lucide-react";
 import { GabineteType, TecnologiaAcesso, TecnologiaTransporte } from "@/types/checklist";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
@@ -89,6 +90,40 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
           value={gabinete.tecnologiasTransporte}
           onChange={(value) => updateGabinete(currentGabinete, { tecnologiasTransporte: value })}
         />
+      </FormCard>
+
+      <FormCard title="Fotos do Gabinete" icon={<Camera className="w-4 h-4" />} variant="accent">
+        <div className="space-y-4">
+          <PhotoCapture
+            label="Vista Panorâmica do Gabinete"
+            value={gabinete.fotoPanoramicaGabinete}
+            onChange={(value) => updateGabinete(currentGabinete, { fotoPanoramicaGabinete: value })}
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            Capture uma foto panorâmica externa do gabinete
+          </p>
+          
+          <PhotoCapture
+            label="Equipamentos de Transmissão (gabinete aberto)"
+            value={gabinete.fotoTransmissao}
+            onChange={(value) => updateGabinete(currentGabinete, { fotoTransmissao: value })}
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            Capture uma foto clara dos equipamentos de transmissão com o gabinete aberto
+          </p>
+          
+          <PhotoCapture
+            label="Equipamentos de Acesso (gabinete aberto)"
+            value={gabinete.fotoAcesso}
+            onChange={(value) => updateGabinete(currentGabinete, { fotoAcesso: value })}
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            Capture uma foto clara dos equipamentos de acesso com o gabinete aberto
+          </p>
+        </div>
       </FormCard>
     </div>
   );
