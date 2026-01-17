@@ -1,4 +1,4 @@
-import { ChecklistData, GabineteData, INITIAL_GABINETE, INITIAL_CHECKLIST, INITIAL_FIBRA, INITIAL_ENERGIA } from "@/types/checklist";
+import { ChecklistData, GabineteData, INITIAL_GABINETE, INITIAL_CHECKLIST, INITIAL_FIBRA_OPTICA, INITIAL_ENERGIA } from "@/types/checklist";
 import { ReportRow } from "./reportDatabase";
 import { v4 as uuid } from "uuid";
 
@@ -99,7 +99,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     qtdGabinetes: report.total_cabinets || 1,
     fotoPanoramica: report.panoramic_photo_url || null,
     gabinetes,
-    fibra: { ...INITIAL_FIBRA },
+    fibraOptica: { ...INITIAL_FIBRA_OPTICA },
     energia: { 
       ...INITIAL_ENERGIA,
       fotoTransformador: report.energia_foto_transformador || null,

@@ -8,11 +8,12 @@ import { Step2Gabinete } from "@/components/steps/Step2Gabinete";
 import { Step3FCC } from "@/components/steps/Step3FCC";
 import { Step4Baterias } from "@/components/steps/Step4Baterias";
 import { Step5Climatizacao } from "@/components/steps/Step5Climatizacao";
+import { Step6FibraOptica } from "@/components/steps/Step6FibraOptica";
 import { Step7Energia } from "@/components/steps/Step7Energia";
 import { Step9GMGTorre } from "@/components/steps/Step9GMGTorre";
 import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
-  MapPin, Server, Zap, Battery, Fan, Plug,
+  MapPin, Server, Zap, Battery, Fan, Plug, Cable,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
   Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus
 } from "lucide-react";
@@ -28,6 +29,7 @@ const STEPS = [
   { label: 'FCC', icon: <Zap /> },
   { label: 'Baterias', icon: <Battery /> },
   { label: 'Clima', icon: <Fan /> },
+  { label: 'Fibra', icon: <Cable /> },
   { label: 'Energia', icon: <Plug /> },
   { label: 'GMG/Torre', icon: <Fuel /> },
   { label: 'Finalizar', icon: <FileCheck /> },
@@ -155,9 +157,10 @@ export function ChecklistWizard() {
       case 2: return <Step3FCC showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 3: return <Step4Baterias showErrors={showValidationErrors} validationErrors={validation.errors} />;
       case 4: return <Step5Climatizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 5: return <Step7Energia showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 6: return <Step9GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
-      case 7: return <Step10Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 5: return <Step6FibraOptica showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 6: return <Step7Energia showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 7: return <Step9GMGTorre showErrors={showValidationErrors} validationErrors={validation.errors} />;
+      case 8: return <Step10Finalizacao showErrors={showValidationErrors} validationErrors={validation.errors} />;
       default: return null;
     }
   };

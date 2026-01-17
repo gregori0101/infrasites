@@ -500,7 +500,70 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     ]);
   }
 
-  // ===== ENERGY SECTION =====
+  // ===== FIBER OPTICS SECTION =====
+  doc.addPage();
+  addHeader();
+
+  addSectionTitle('FIBRA ÓPTICA DO SITE', '🔗');
+
+  // Abordagens summary
+  addInfoCard('Abordagens de Fibra', [
+    { label: 'Quantidade de Abordagens', value: data.fibraOptica.qtdAbordagens },
+    ...data.fibraOptica.abordagens.map((abord, i) => ({
+      label: `Abordagem ${i + 1}`,
+      value: abord.tipoEntrada + (abord.descricao ? ` - ${abord.descricao}` : ''),
+    })),
+  ]);
+
+  // Infraestrutura
+  addInfoCard('Infraestrutura', [
+    { label: 'Caixas de Passagem', value: data.fibraOptica.qtdCaixasPassagem },
+    { label: 'Caixas Subterrâneas', value: data.fibraOptica.qtdCaixasSubterraneas },
+    { label: 'Subidas Laterais', value: data.fibraOptica.qtdSubidasLaterais },
+    { label: 'Total de DGOs', value: data.fibraOptica.qtdDGOs },
+    { label: 'DGOs OK', value: data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'OK').length },
+    { label: 'DGOs NOK', value: data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'NOK').length },
+  ]);
+
+  // DGOs details
+  if (data.fibraOptica.dgos.length > 0) {
+    checkNewPage(40);
+    addSubSectionTitle('Detalhes dos DGOs');
+    
+    for (const dgo of data.fibraOptica.dgos) {
+      checkNewPage(30);
+      addFieldRow('Identificação', dgo.identificacao);
+      addFieldRow('Capacidade', `${dgo.capacidadeFO} FO`);
+      addFieldRow('Cordões', dgo.estadoCordoes, dgo.estadoCordoes === 'OK' ? 'ok' : 'error');
+    }
+  }
+
+  // Fibra photos grid
+  const fibraPhotos: { photo: string | null; label: string }[] = [];
+  data.fibraOptica.abordagens.forEach((abord, i) => {
+    abord.fotos.forEach((foto, j) => {
+      fibraPhotos.push({ photo: foto, label: `Abordagem ${i + 1} - Foto ${j + 1}` });
+    });
+  });
+  data.fibraOptica.fotosCaixasPassagem.forEach((foto, i) => {
+    fibraPhotos.push({ photo: foto, label: `Caixa Passagem ${i + 1}` });
+  });
+  data.fibraOptica.fotosCaixasSubterraneas.forEach((foto, i) => {
+    fibraPhotos.push({ photo: foto, label: `Caixa Subterrânea ${i + 1}` });
+  });
+  data.fibraOptica.fotosSubidasLaterais.forEach((foto, i) => {
+    fibraPhotos.push({ photo: foto, label: `Subida Lateral ${i + 1}` });
+  });
+  data.fibraOptica.dgos.forEach((dgo, i) => {
+    if (dgo.fotoDGO) fibraPhotos.push({ photo: dgo.fotoDGO, label: `DGO ${i + 1}` });
+    if (dgo.fotoCordesDetalhada) fibraPhotos.push({ photo: dgo.fotoCordesDetalhada, label: `DGO ${i + 1} - Cordões` });
+  });
+
+  if (fibraPhotos.length > 0) {
+    checkNewPage(60);
+    addSubSectionTitle('Fotos de Fibra Óptica');
+    await addPhotoGrid(fibraPhotos);
+  }
   doc.addPage();
   addHeader();
 
