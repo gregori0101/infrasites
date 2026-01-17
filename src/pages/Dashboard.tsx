@@ -14,6 +14,7 @@ import {
   Trash2,
   LayoutDashboard,
   Home,
+  Cable,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
@@ -33,8 +34,9 @@ import { EnergiaPanel } from "@/components/dashboard/panels/EnergiaPanel";
 import { ZeladoriaPanel } from "@/components/dashboard/panels/ZeladoriaPanel";
 import { BateriaPanel } from "@/components/dashboard/panels/BateriaPanel";
 import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPanel";
+import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/FibraOpticaPanel";
 
-type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao";
+type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -102,9 +104,77 @@ export default function Dashboard() {
     { id: "overview" as const, label: "Visão Geral", icon: Home },
     { id: "bateria" as const, label: "Baterias", icon: Battery },
     { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
+    { id: "fibra" as const, label: "Fibra Óptica", icon: Cable },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
     { id: "energia" as const, label: "Energia", icon: Zap },
   ];
+
+  // Calculate fiber stats from reports
+  const fibraStats = useMemo((): FibraStats => {
+    let totalAbordagens = 0;
+    let abordagensAereas = 0;
+    let abordagensSubterraneas = 0;
+    let totalCaixasPassagem = 0;
+    let totalCaixasSubterraneas = 0;
+    let totalSubidasLaterais = 0;
+    let totalDGOs = 0;
+    let dgosOk = 0;
+    let dgosNok = 0;
+    let sitesWithFibra = 0;
+
+    reports.forEach(report => {
+      const qtdAbord = (report as any).fibra_qtd_abordagens || 0;
+      if (qtdAbord > 0) {
+        sitesWithFibra++;
+        totalAbordagens += qtdAbord;
+        
+        if ((report as any).fibra_abord1_tipo === 'AÉREA') abordagensAereas++;
+        else if ((report as any).fibra_abord1_tipo === 'SUBTERRÂNEA') abordagensSubterraneas++;
+        
+        if (qtdAbord >= 2) {
+          if ((report as any).fibra_abord2_tipo === 'AÉREA') abordagensAereas++;
+          else if ((report as any).fibra_abord2_tipo === 'SUBTERRÂNEA') abordagensSubterraneas++;
+        }
+      }
+
+      totalCaixasPassagem += (report as any).fibra_caixas_passagem_qtd || 0;
+      totalCaixasSubterraneas += (report as any).fibra_caixas_subterraneas_qtd || 0;
+      totalSubidasLaterais += (report as any).fibra_subidas_laterais_qtd || 0;
+      
+      const qtdDgos = (report as any).fibra_dgos_qtd || 0;
+      totalDGOs += qtdDgos;
+      dgosOk += (report as any).fibra_dgos_ok_qtd || 0;
+      dgosNok += (report as any).fibra_dgos_nok_qtd || 0;
+    });
+
+    return {
+      totalSites: reports.length,
+      sitesWithFibra,
+      totalAbordagens,
+      abordagensAereas,
+      abordagensSubterraneas,
+      totalCaixasPassagem,
+      totalCaixasSubterraneas,
+      totalSubidasLaterais,
+      totalDGOs,
+      dgosOk,
+      dgosNok,
+      abordagemChart: [
+        { name: "Aérea", value: abordagensAereas, color: "#3b82f6" },
+        { name: "Subterrânea", value: abordagensSubterraneas, color: "#6b7280" },
+      ].filter(d => d.value > 0),
+      dgosStatusChart: [
+        { name: "OK", value: dgosOk, color: "#22c55e" },
+        { name: "NOK", value: dgosNok, color: "#ef4444" },
+      ].filter(d => d.value > 0),
+      infraestruturaChart: [
+        { name: "Caixas de Passagem", value: totalCaixasPassagem },
+        { name: "Caixas Subterrâneas", value: totalCaixasSubterraneas },
+        { name: "Subidas Laterais", value: totalSubidasLaterais },
+        { name: "DGOs", value: totalDGOs },
+      ],
+    };
+  }, [reports]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -334,6 +404,10 @@ export default function Dashboard() {
                     else openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
                   }}
                 />
+              )}
+
+              {activePanel === "fibra" && (
+                <FibraOpticaPanel stats={fibraStats} />
               )}
             </>
           )}
