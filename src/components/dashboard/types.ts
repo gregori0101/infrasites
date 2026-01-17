@@ -93,11 +93,9 @@ export interface PanelStats {
   sitesWithoutGMG: number;
   energiaStatus: { name: string; value: number; color: string }[];
   
-  // Zeladoria/Fibra Panel
+  // Zeladoria Panel
   zeladoriaOk: number;
   zeladoriaTotal: number;
-  fibraProtegida: number;
-  fibraTotal: number;
   aterramentoOk: number;
   climatizacaoStatus: { name: string; value: number; color: string }[];
   
