@@ -148,6 +148,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`${prefix}_fcc_gerenciavel`] = gab.fcc.gerenciavel ? 'SIM' : 'NÃO';
       row[`${prefix}_fcc_consumo`] = gab.fcc.consumoDC?.toString() || null;
       row[`${prefix}_fcc_qtd_ur`] = gab.fcc.qtdURSuportadas?.toString() || null;
+      row[`${prefix}_fcc_foto_panoramica`] = gab.fcc.fotoPanoramica || null;
+      row[`${prefix}_fcc_foto_painel`] = gab.fcc.fotoPainel || null;
       
       // Batteries (up to 6)
       for (let j = 0; j < 6; j++) {
@@ -161,6 +163,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
         }
       }
       row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados ? 'SIM' : 'NÃO';
+      row[`${prefix}_bat_foto`] = gab.baterias.fotoBanco || null;
       
       // Climatization
       row[`${prefix}_climatizacao_tipo`] = gab.climatizacao.tipo || null;
@@ -177,6 +180,16 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       
       row[`${prefix}_plc_status`] = gab.climatizacao.plcLeadLag || null;
       row[`${prefix}_alarme_status`] = gab.climatizacao.alarmistica || null;
+      row[`${prefix}_clima_foto_ar1`] = gab.climatizacao.fotoAR1 || null;
+      row[`${prefix}_clima_foto_ar2`] = gab.climatizacao.fotoAR2 || null;
+      row[`${prefix}_clima_foto_ar3`] = gab.climatizacao.fotoAR3 || null;
+      row[`${prefix}_clima_foto_ar4`] = gab.climatizacao.fotoAR4 || null;
+      row[`${prefix}_clima_foto_condensador`] = gab.climatizacao.fotoCondensador || null;
+      row[`${prefix}_clima_foto_evaporador`] = gab.climatizacao.fotoEvaporador || null;
+      row[`${prefix}_clima_foto_controlador`] = gab.climatizacao.fotoControlador || null;
+      
+      // Equipment photos
+      row[`${prefix}_foto_panoramica`] = gab.fotoPanoramicaGabinete || null;
       row[`${prefix}_foto_transmissao`] = gab.fotoTransmissao || null;
       row[`${prefix}_foto_acesso`] = gab.fotoAcesso || null;
     }
@@ -193,9 +206,21 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.torre_aterramento = data.torre.aterramento || null;
   row.torre_housekeeping = data.torre.zeladoria || null;
 
+  // Energia photos
+  row.energia_foto_transformador = data.energia?.fotoTransformador || null;
+  row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
+  row.energia_foto_placa = data.energia?.fotoPlaca || null;
+  row.energia_foto_cabos = data.energia?.cabos?.fotoCabos || null;
+
+  // Torre photos
+  row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
+
   // Observations
   row.observacoes = data.observacoes || null;
   row.observacao_foto_url = data.fotoObservacao || null;
+  
+  // Assinatura
+  row.assinatura_digital = data.assinaturaDigital || null;
 
   return row;
 }
