@@ -1,8 +1,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Camera, X, ZoomIn, Image as ImageIcon } from "lucide-react";
+import { Camera, X, ZoomIn, Loader2 } from "lucide-react";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogTrigger } from "./dialog";
+import { compressToMaxSize } from "@/lib/imageCompression";
+import { toast } from "sonner";
 
 interface PhotoCaptureProps {
   value: string | null;
@@ -14,15 +16,63 @@ interface PhotoCaptureProps {
 
 export function PhotoCapture({ value, onChange, label, required = false, className }: PhotoCaptureProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
+      return;
+    }
+
+    // Validate file size (max 20MB before compression)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        onChange(event.target?.result as string);
+      
+      reader.onload = async (event) => {
+        try {
+          const dataURL = event.target?.result as string;
+          if (!dataURL) {
+            throw new Error("Falha ao ler a imagem");
+          }
+          
+          // Compress image to reduce size
+          const compressed = await compressToMaxSize(dataURL, 800);
+          onChange(compressed);
+          toast.success("Foto adicionada com sucesso!");
+        } catch (error) {
+          console.error("Error processing image:", error);
+          toast.error("Erro ao processar imagem", { 
+            description: "Tente novamente ou use outra imagem." 
+          });
+        } finally {
+          setIsLoading(false);
+        }
       };
+      
+      reader.onerror = () => {
+        console.error("FileReader error");
+        toast.error("Erro ao carregar imagem", { 
+          description: "Verifique se o arquivo é válido." 
+        });
+        setIsLoading(false);
+      };
+      
       reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Error handling file:", error);
+      toast.error("Erro ao processar arquivo");
+      setIsLoading(false);
     }
   };
 
@@ -80,18 +130,29 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
       ) : (
         <button
           onClick={() => inputRef.current?.click()}
+          disabled={isLoading}
           className={cn(
             "w-full aspect-video rounded-lg border-2 border-dashed transition-all duration-200",
             "flex flex-col items-center justify-center gap-2 text-muted-foreground",
             "hover:border-primary hover:text-primary hover:bg-primary/5",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
             required && !value && "border-destructive/50"
           )}
         >
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-            <Camera className="w-6 h-6" />
-          </div>
-          <span className="text-sm font-medium">Capturar Foto</span>
-          <span className="text-xs">Toque para abrir a câmera</span>
+          {isLoading ? (
+            <>
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <span className="text-sm font-medium">Processando...</span>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <Camera className="w-6 h-6" />
+              </div>
+              <span className="text-sm font-medium">Capturar Foto</span>
+              <span className="text-xs">Toque para abrir a câmera</span>
+            </>
+          )}
         </button>
       )}
     </div>
