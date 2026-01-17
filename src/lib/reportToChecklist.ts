@@ -48,8 +48,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         fotoEvaporador: null,
         fotoControlador: null,
       },
-      fotoTransmissao: null,
-      fotoAcesso: null,
+      fotoTransmissao: report[`${prefix}_foto_transmissao`] || null,
+      fotoAcesso: report[`${prefix}_foto_acesso`] || null,
     };
     
     // Parse batteries
