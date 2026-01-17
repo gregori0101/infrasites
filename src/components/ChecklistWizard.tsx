@@ -14,7 +14,7 @@ import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Plug,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, History, AlertCircle, LayoutDashboard
+  Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,8 @@ export function ChecklistWizard() {
     toggleDarkMode,
     getAllLocal,
     loadFromLocal,
-    deleteLocal
+    deleteLocal,
+    resetChecklist
   } = useChecklist();
 
   const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
@@ -177,7 +178,21 @@ export function ChecklistWizard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                if (window.confirm('Iniciar novo checklist? Os dados atuais serão perdidos.')) {
+                  resetChecklist();
+                  toast.success('Novo checklist iniciado');
+                }
+              }}
+              title="Novo Checklist"
+            >
+              <FilePlus className="w-4 h-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
