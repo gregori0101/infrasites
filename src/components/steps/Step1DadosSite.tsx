@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Building2, Image, AlertCircle } from "lucide-react";
-import { UF, AbrigoType } from "@/types/checklist";
+import { UF } from "@/types/checklist";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 
 const UF_OPTIONS: UF[] = ['PA', 'AM', 'MA', 'RR', 'AP'];
-const ABRIGO_OPTIONS: AbrigoType[] = ['SHARING', 'GABINETE 1', 'GABINETE 2', 'GABINETE 3', 'GABINETE 4', 'GABINETE 5', 'GABINETE 6', 'GABINETE 7'];
+
 
 interface Step1Props {
   showErrors?: boolean;
@@ -29,7 +29,7 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
   const isSiglaValid = data.siglaSite.length === 5;
   const siglaError = showErrors && getFieldError(validationErrors, 'siglaSite');
   const ufError = showErrors && getFieldError(validationErrors, 'uf');
-  const abrigoError = showErrors && getFieldError(validationErrors, 'abrigoSelecionado');
+  
   const fotoError = showErrors && getFieldError(validationErrors, 'fotoPanoramica');
 
   return (
@@ -109,26 +109,6 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="abrigo">
-              Abrigo Selecionado <span className="text-destructive">*</span>
-            </Label>
-            <Select 
-              value={data.abrigoSelecionado} 
-              onValueChange={(value: AbrigoType) => updateData('abrigoSelecionado', value)}
-            >
-              <SelectTrigger id="abrigo">
-                <SelectValue placeholder="Selecione o abrigo" />
-              </SelectTrigger>
-              <SelectContent>
-                {ABRIGO_OPTIONS.map((abrigo) => (
-                  <SelectItem key={abrigo} value={abrigo}>
-                    {abrigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </FormCard>
 
