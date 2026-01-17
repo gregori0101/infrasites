@@ -111,7 +111,6 @@ export default function Dashboard() {
 
   // Calculate fiber stats from reports
   const fibraStats = useMemo((): FibraStats => {
-    let totalAbordagens = 0;
     let abordagensAereas = 0;
     let abordagensSubterraneas = 0;
     let totalCaixasPassagem = 0;
@@ -121,12 +120,20 @@ export default function Dashboard() {
     let dgosOk = 0;
     let dgosNok = 0;
     let sitesWithFibra = 0;
+    let sitesDesprotegidos = 0; // 1 abordagem
+    let sitesProtegidos = 0; // 2 abordagens
 
     reports.forEach(report => {
       const qtdAbord = (report as any).fibra_qtd_abordagens || 0;
       if (qtdAbord > 0) {
         sitesWithFibra++;
-        totalAbordagens += qtdAbord;
+        
+        // Contabilizar sites protegidos vs desprotegidos
+        if (qtdAbord === 1) {
+          sitesDesprotegidos++;
+        } else if (qtdAbord >= 2) {
+          sitesProtegidos++;
+        }
         
         if ((report as any).fibra_abord1_tipo === 'AÉREA') abordagensAereas++;
         else if ((report as any).fibra_abord1_tipo === 'SUBTERRÂNEA') abordagensSubterraneas++;
@@ -150,7 +157,8 @@ export default function Dashboard() {
     return {
       totalSites: reports.length,
       sitesWithFibra,
-      totalAbordagens,
+      sitesProtegidos,
+      sitesDesprotegidos,
       abordagensAereas,
       abordagensSubterraneas,
       totalCaixasPassagem,
@@ -166,6 +174,10 @@ export default function Dashboard() {
       dgosStatusChart: [
         { name: "OK", value: dgosOk, color: "#22c55e" },
         { name: "NOK", value: dgosNok, color: "#ef4444" },
+      ].filter(d => d.value > 0),
+      protecaoChart: [
+        { name: "Protegidos (2 abord.)", value: sitesProtegidos, color: "#22c55e" },
+        { name: "Desprotegidos (1 abord.)", value: sitesDesprotegidos, color: "#f59e0b" },
       ].filter(d => d.value > 0),
       infraestruturaChart: [
         { name: "Caixas de Passagem", value: totalCaixasPassagem },

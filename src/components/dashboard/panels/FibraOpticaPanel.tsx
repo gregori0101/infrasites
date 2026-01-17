@@ -19,7 +19,8 @@ import {
 export interface FibraStats {
   totalSites: number;
   sitesWithFibra: number;
-  totalAbordagens: number;
+  sitesProtegidos: number;
+  sitesDesprotegidos: number;
   abordagensAereas: number;
   abordagensSubterraneas: number;
   totalCaixasPassagem: number;
@@ -30,6 +31,7 @@ export interface FibraStats {
   dgosNok: number;
   abordagemChart: { name: string; value: number; color: string }[];
   dgosStatusChart: { name: string; value: number; color: string }[];
+  protecaoChart: { name: string; value: number; color: string }[];
   infraestruturaChart: { name: string; value: number }[];
 }
 
@@ -53,18 +55,20 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total de Abordagens"
-          value={stats.totalAbordagens}
-          subtitle={`${stats.abordagensAereas} aéreas, ${stats.abordagensSubterraneas} subterrâneas`}
-          icon={Cable}
-          iconBg="bg-blue-500/10 text-blue-500"
+          title="Sites Protegidos"
+          value={stats.sitesProtegidos}
+          subtitle="2 abordagens de fibra"
+          icon={CheckCircle2}
+          iconBg="bg-success/10 text-success"
+          badge={stats.sitesProtegidos > 0 ? { text: "Redundância", variant: "success" } : undefined}
         />
         <StatCard
-          title="Total DGOs"
-          value={stats.totalDGOs}
-          subtitle={`Em ${stats.sitesWithFibra} sites`}
-          icon={Layers}
-          iconBg="bg-purple-500/10 text-purple-500"
+          title="Sites Desprotegidos"
+          value={stats.sitesDesprotegidos}
+          subtitle="Apenas 1 abordagem"
+          icon={XCircle}
+          iconBg="bg-amber-500/10 text-amber-500"
+          badge={stats.sitesDesprotegidos > 0 ? { text: "Atenção", variant: "warning" } : undefined}
         />
         <StatCard
           title="DGOs OK"
@@ -129,31 +133,31 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-4">
-        {/* Tipo de Abordagem */}
+        {/* Proteção de Fibra */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Cable className="w-4 h-4 text-blue-500" />
-              Tipos de Abordagem
+              Proteção de Fibra (Abordagens)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.abordagemChart.length > 0 ? (
+            {stats.protecaoChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={stats.abordagemChart}
+                      data={stats.protecaoChart}
                       cx="50%"
                       cy="50%"
                       innerRadius={40}
                       outerRadius={70}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, value }) => `${name}: ${value}`}
                       labelLine={false}
                     >
-                      {stats.abordagemChart.map((entry, index) => (
+                      {stats.protecaoChart.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -280,17 +284,15 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
               </div>
             </div>
             <div className="flex gap-2">
-              <Badge variant="outline" className="bg-blue-500/10">
-                {stats.totalAbordagens} abordagens
+              <Badge variant="outline" className="bg-success/10">
+                {stats.sitesProtegidos} protegidos
+              </Badge>
+              <Badge variant="outline" className="bg-amber-500/10">
+                {stats.sitesDesprotegidos} desprotegidos
               </Badge>
               <Badge variant="outline" className="bg-purple-500/10">
                 {stats.totalDGOs} DGOs
               </Badge>
-              {stats.dgosNok > 0 && (
-                <Badge variant="destructive">
-                  {stats.dgosNok} NOK
-                </Badge>
-              )}
             </div>
           </div>
         </CardContent>
