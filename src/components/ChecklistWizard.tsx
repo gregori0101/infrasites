@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { VivoLogo } from "@/components/ui/vivo-logo";
+import vivoLogo from "@/assets/vivo-logo.png";
 import { useStepValidation } from "@/hooks/use-validation";
 import { toast } from "sonner";
 
@@ -168,7 +168,7 @@ export function ChecklistWizard() {
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <VivoLogo size="md" />
+            <img src={vivoLogo} alt="Vivo" className="h-8 w-auto" />
             <div className="h-6 w-px bg-border" />
             <div>
               <h1 className="font-bold text-sm leading-tight">Checklist Telecom</h1>
