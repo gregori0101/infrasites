@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReportsSummary, fetchReportById, ReportRow } from "@/lib/reportDatabase";
+import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow } from "@/lib/reportDatabase";
 
 const ESTADOS_BR = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -102,7 +102,8 @@ export default function ReportsHistory() {
 
   const openReportDetails = async (report: ReportRow) => {
     if (report.id) {
-      const fullReport = await fetchReportById(report.id);
+      // Carrega o relatório com URLs das fotos para gerar o PDF com imagens
+      const fullReport = await fetchReportByIdWithPhotos(report.id);
       setSelectedReport(fullReport);
     }
   };

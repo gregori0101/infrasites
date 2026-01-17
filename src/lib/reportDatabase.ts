@@ -107,12 +107,39 @@ function buildDetailColumns(): string {
   return buildDashboardColumns() + ',pdf_file_path,excel_file_path,observacao_foto_url,panoramic_photo_url';
 }
 
-// Photo columns only
+// Photo columns only (used for on-demand loading / PDF regeneration)
 function buildPhotoColumns(): string {
-  const cols: string[] = ['id', 'panoramic_photo_url', 'observacao_foto_url'];
+  const cols: string[] = [
+    'id',
+    'panoramic_photo_url',
+    'observacao_foto_url',
+    'assinatura_digital',
+    'energia_foto_transformador',
+    'energia_foto_quadro_geral',
+    'energia_foto_placa',
+    'energia_foto_cabos',
+    'torre_foto_ninhos',
+  ];
+
   for (let g = 1; g <= 7; g++) {
-    cols.push(`gab${g}_foto_transmissao`, `gab${g}_foto_acesso`);
+    const prefix = `gab${g}`;
+    cols.push(
+      `${prefix}_fcc_foto_panoramica`,
+      `${prefix}_fcc_foto_painel`,
+      `${prefix}_bat_foto`,
+      `${prefix}_clima_foto_ar1`,
+      `${prefix}_clima_foto_ar2`,
+      `${prefix}_clima_foto_ar3`,
+      `${prefix}_clima_foto_ar4`,
+      `${prefix}_clima_foto_condensador`,
+      `${prefix}_clima_foto_evaporador`,
+      `${prefix}_clima_foto_controlador`,
+      `${prefix}_foto_panoramica`,
+      `${prefix}_foto_transmissao`,
+      `${prefix}_foto_acesso`,
+    );
   }
+
   return cols.join(',');
 }
 
@@ -392,11 +419,11 @@ export async function fetchReports(filters?: {
 }
 
 /**
- * Fetch single report by ID (without photos by default for speed)
+ * Fetch single report by ID (sem fotos por padrão para velocidade)
  */
 export async function fetchReportById(id: string): Promise<ReportRow | null> {
   const columns = buildDashboardColumns();
-  
+
   const { data, error } = await supabase
     .from('reports')
     .select(columns)
@@ -406,6 +433,27 @@ export async function fetchReportById(id: string): Promise<ReportRow | null> {
   if (error) {
     console.error('Error fetching report:', error);
     throw new Error(`Erro ao buscar relatório: ${error.message}`);
+  }
+
+  return data as unknown as ReportRow | null;
+}
+
+/**
+ * Fetch single report by ID WITH photos (para gerar PDF/Excel com imagens)
+ */
+export async function fetchReportByIdWithPhotos(id: string): Promise<ReportRow | null> {
+  // Busca colunas leves + todas as URLs de fotos necessárias para o PDF
+  const columns = buildDetailColumns() + ',' + buildPhotoColumns();
+
+  const { data, error } = await supabase
+    .from('reports')
+    .select(columns)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching report (with photos):', error);
+    throw new Error(`Erro ao buscar relatório (com fotos): ${error.message}`);
   }
 
   return data as unknown as ReportRow | null;
