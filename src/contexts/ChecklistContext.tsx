@@ -25,10 +25,25 @@ interface ChecklistContextType {
 const ChecklistContext = createContext<ChecklistContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'telecom_checklists';
+const CURRENT_SESSION_KEY = 'telecom_current_session';
 
 export function ChecklistProvider({ children }: { children: React.ReactNode }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [currentGabinete, setCurrentGabinete] = useState(0);
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem(`${CURRENT_SESSION_KEY}_step`);
+      return saved ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
+
+  const [currentGabinete, setCurrentGabinete] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem(`${CURRENT_SESSION_KEY}_gabinete`);
+      return saved ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('darkMode');
@@ -39,6 +54,24 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [data, setData] = useState<ChecklistData>(() => {
+    // Try to load current session from localStorage
+    if (typeof window !== 'undefined') {
+      const savedSession = localStorage.getItem(CURRENT_SESSION_KEY);
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          // Validate that it has required fields
+          if (parsed.id && parsed.gabinetes) {
+            console.log('Restored session from localStorage');
+            return parsed;
+          }
+        } catch (e) {
+          console.warn('Failed to parse saved session:', e);
+        }
+      }
+    }
+    
+    // Create new checklist if no saved session
     const now = new Date().toISOString();
     return {
       ...INITIAL_CHECKLIST,
@@ -47,6 +80,26 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       updatedAt: now,
     };
   });
+
+  // Auto-save data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(data));
+    }
+  }, [data]);
+
+  // Save current step and gabinete to sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(`${CURRENT_SESSION_KEY}_step`, currentStep.toString());
+    }
+  }, [currentStep]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(`${CURRENT_SESSION_KEY}_gabinete`, currentGabinete.toString());
+    }
+  }, [currentGabinete]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
@@ -129,14 +182,23 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
 
   const resetChecklist = useCallback(() => {
     const now = new Date().toISOString();
-    setData({
+    const newData = {
       ...INITIAL_CHECKLIST,
       id: uuidv4(),
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    setData(newData);
     setCurrentStep(0);
     setCurrentGabinete(0);
+    
+    // Clear session storage
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_step`);
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_gabinete`);
+      // Update localStorage with new empty session
+      localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newData));
+    }
   }, []);
 
   const saveToLocal = useCallback(() => {
