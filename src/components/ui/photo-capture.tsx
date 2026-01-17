@@ -46,8 +46,8 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
             throw new Error("Falha ao ler a imagem");
           }
           
-          // Compress image with multiple fallback attempts
-          const compressed = await compressWithFallback(dataURL, 800);
+          // Compress image with multiple fallback attempts (max 300KB for localStorage compatibility)
+          const compressed = await compressWithFallback(dataURL, 300);
           onChange(compressed);
           toast.success("Foto adicionada com sucesso!");
         } catch (error) {
