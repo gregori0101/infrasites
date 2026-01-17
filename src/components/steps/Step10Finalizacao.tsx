@@ -108,13 +108,13 @@ function calculateChecklistStats(data: ChecklistData): ChecklistStats {
   });
 
   // Fibra Óptica photos
-  data.fibraOptica.abordagens.forEach(abord => {
+  (data.fibraOptica?.abordagens ?? []).forEach((abord) => {
     countPhotoArray(abord.fotos);
   });
-  countPhotoArray(data.fibraOptica.fotosCaixasPassagem);
-  countPhotoArray(data.fibraOptica.fotosCaixasSubterraneas);
-  countPhotoArray(data.fibraOptica.fotosSubidasLaterais);
-  data.fibraOptica.dgos.forEach(dgo => {
+  countPhotoArray(data.fibraOptica?.fotosCaixasPassagem ?? []);
+  countPhotoArray(data.fibraOptica?.fotosCaixasSubterraneas ?? []);
+  countPhotoArray(data.fibraOptica?.fotosSubidasLaterais ?? []);
+  (data.fibraOptica?.dgos ?? []).forEach((dgo) => {
     countPhoto(dgo.fotoDGO);
     countPhoto(dgo.fotoCordesDetalhada);
   });
