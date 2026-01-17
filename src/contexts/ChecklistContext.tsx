@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { ChecklistData, INITIAL_CHECKLIST, INITIAL_GABINETE, GabineteData } from '@/types/checklist';
+import {
+  ChecklistData,
+  INITIAL_CHECKLIST,
+  INITIAL_GABINETE,
+  INITIAL_FIBRA_OPTICA,
+  INITIAL_ABORDAGEM_FIBRA,
+  GabineteData,
+} from '@/types/checklist';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ChecklistContextType {
@@ -63,7 +70,27 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
           // Validate that it has required fields
           if (parsed.id && parsed.gabinetes) {
             console.log('Restored session from localStorage');
-            return parsed;
+
+            const parsedFibra = parsed.fibraOptica || {};
+
+            return {
+              ...INITIAL_CHECKLIST,
+              ...parsed,
+              // Ensure nested structures exist even for older saved sessions
+              gabinetes: Array.isArray(parsed.gabinetes) && parsed.gabinetes.length > 0 ? parsed.gabinetes : [{ ...INITIAL_GABINETE }],
+              fibraOptica: {
+                ...INITIAL_FIBRA_OPTICA,
+                ...parsedFibra,
+                abordagens:
+                  Array.isArray(parsedFibra.abordagens) && parsedFibra.abordagens.length > 0
+                    ? parsedFibra.abordagens
+                    : [{ ...INITIAL_ABORDAGEM_FIBRA }],
+                dgos: Array.isArray(parsedFibra.dgos) ? parsedFibra.dgos : [],
+                fotosCaixasPassagem: Array.isArray(parsedFibra.fotosCaixasPassagem) ? parsedFibra.fotosCaixasPassagem : [],
+                fotosCaixasSubterraneas: Array.isArray(parsedFibra.fotosCaixasSubterraneas) ? parsedFibra.fotosCaixasSubterraneas : [],
+                fotosSubidasLaterais: Array.isArray(parsedFibra.fotosSubidasLaterais) ? parsedFibra.fotosSubidasLaterais : [],
+              },
+            } as ChecklistData;
           }
         } catch (e) {
           console.warn('Failed to parse saved session:', e);

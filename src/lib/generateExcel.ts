@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { ChecklistData } from '@/types/checklist';
+import { ChecklistData, INITIAL_ABORDAGEM_FIBRA, INITIAL_FIBRA_OPTICA } from '@/types/checklist';
 import { format } from 'date-fns';
 
 const TECNOLOGIAS_ACESSO = ['2G', '3G', '4G', '5G'];
@@ -182,20 +182,30 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   }
   
   // GRUPO FIBRA ÓPTICA
-  row['Fibra_Abordagens_Qtd'] = data.fibraOptica.qtdAbordagens;
-  data.fibraOptica.abordagens.forEach((abord, i) => {
+  const fibra = {
+    ...INITIAL_FIBRA_OPTICA,
+    ...(data.fibraOptica || {}),
+    abordagens:
+      data.fibraOptica?.abordagens && data.fibraOptica.abordagens.length > 0
+        ? data.fibraOptica.abordagens
+        : [{ ...INITIAL_ABORDAGEM_FIBRA }],
+    dgos: data.fibraOptica?.dgos || [],
+  };
+
+  row['Fibra_Abordagens_Qtd'] = fibra.qtdAbordagens;
+  fibra.abordagens.forEach((abord, i) => {
     row[`Fibra_Abord${i + 1}_Tipo`] = abord.tipoEntrada;
     row[`Fibra_Abord${i + 1}_Descricao`] = abord.descricao || '';
   });
-  row['Fibra_Caixas_Passagem_Qtd'] = data.fibraOptica.qtdCaixasPassagem;
-  row['Fibra_Caixas_Subterraneas_Qtd'] = data.fibraOptica.qtdCaixasSubterraneas;
-  row['Fibra_Subidas_Laterais_Qtd'] = data.fibraOptica.qtdSubidasLaterais;
-  row['Fibra_DGOs_Qtd'] = data.fibraOptica.qtdDGOs;
-  row['Fibra_DGOs_Cordoes_OK_Qtd'] = data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'OK').length;
-  row['Fibra_DGOs_Cordoes_NOK_Qtd'] = data.fibraOptica.dgos.filter(d => d.estadoCordoes === 'NOK').length;
-  
+  row['Fibra_Caixas_Passagem_Qtd'] = fibra.qtdCaixasPassagem;
+  row['Fibra_Caixas_Subterraneas_Qtd'] = fibra.qtdCaixasSubterraneas;
+  row['Fibra_Subidas_Laterais_Qtd'] = fibra.qtdSubidasLaterais;
+  row['Fibra_DGOs_Qtd'] = fibra.qtdDGOs;
+  row['Fibra_DGOs_Cordoes_OK_Qtd'] = fibra.dgos.filter((d) => d.estadoCordoes === 'OK').length;
+  row['Fibra_DGOs_Cordoes_NOK_Qtd'] = fibra.dgos.filter((d) => d.estadoCordoes === 'NOK').length;
+
   // DGOs details
-  data.fibraOptica.dgos.forEach((dgo, i) => {
+  fibra.dgos.forEach((dgo, i) => {
     row[`Fibra_DGO${i + 1}_ID`] = dgo.identificacao;
     row[`Fibra_DGO${i + 1}_Capacidade`] = `${dgo.capacidadeFO}FO`;
     row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.estadoCordoes;
