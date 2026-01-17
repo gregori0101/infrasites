@@ -104,8 +104,6 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       energiaStatus: [],
       zeladoriaOk: 0,
       zeladoriaTotal: filtered.length,
-      fibraProtegida: 0,
-      fibraTotal: filtered.length,
       aterramentoOk: 0,
       climatizacaoStatus: [],
       totalBatteries: 0,
@@ -169,11 +167,6 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       // Zeladoria
       if (report.torre_housekeeping === "OK") {
         stats.zeladoriaOk++;
-      }
-      
-      // Fibra protection
-      if (report.torre_protecao_fibra === "SIM") {
-        stats.fibraProtegida++;
       }
       
       // Aterramento

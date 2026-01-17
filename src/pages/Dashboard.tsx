@@ -104,7 +104,6 @@ export default function Dashboard() {
     { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
     { id: "energia" as const, label: "Energia", icon: Zap },
-    { id: "dgos" as const, label: "Fibra", icon: LayoutDashboard },
   ];
 
   return (
@@ -318,7 +317,6 @@ export default function Dashboard() {
                   sites={sites}
                   onDrillDown={(type) => {
                     if (type === "zeladoria") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
-                    else if (type === "fibra") openDrillDown("sites", "Fibra Protegida", (s) => s);
                     else openDrillDown("sites", "Aterramento OK", (s) => s);
                   }}
                 />
