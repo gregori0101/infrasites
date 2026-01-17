@@ -419,7 +419,47 @@ export default function Dashboard() {
               )}
 
               {activePanel === "fibra" && (
-                <FibraOpticaPanel stats={fibraStats} />
+                <FibraOpticaPanel 
+                  stats={fibraStats} 
+                  onDrillDown={(type) => {
+                    if (type === "protegidos") {
+                      openDrillDown("sites", "Sites Protegidos (2 abordagens)", (s) => 
+                        s.filter((site: any) => {
+                          const report = reports.find(r => r.id === site.id);
+                          return report && (report as any).fibra_qtd_abordagens >= 2;
+                        })
+                      );
+                    } else if (type === "desprotegidos") {
+                      openDrillDown("sites", "Sites Desprotegidos (1 abordagem)", (s) => 
+                        s.filter((site: any) => {
+                          const report = reports.find(r => r.id === site.id);
+                          return report && (report as any).fibra_qtd_abordagens === 1;
+                        })
+                      );
+                    } else if (type === "dgos-ok") {
+                      openDrillDown("sites", "Sites com DGOs OK", (s) => 
+                        s.filter((site: any) => {
+                          const report = reports.find(r => r.id === site.id);
+                          return report && ((report as any).fibra_dgos_ok_qtd || 0) > 0;
+                        })
+                      );
+                    } else if (type === "dgos-nok") {
+                      openDrillDown("sites", "Sites com DGOs NOK", (s) => 
+                        s.filter((site: any) => {
+                          const report = reports.find(r => r.id === site.id);
+                          return report && ((report as any).fibra_dgos_nok_qtd || 0) > 0;
+                        })
+                      );
+                    } else {
+                      openDrillDown("sites", "Todos os Sites com Fibra", (s) => 
+                        s.filter((site: any) => {
+                          const report = reports.find(r => r.id === site.id);
+                          return report && ((report as any).fibra_qtd_abordagens || 0) > 0;
+                        })
+                      );
+                    }
+                  }}
+                />
               )}
             </>
           )}

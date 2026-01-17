@@ -37,7 +37,7 @@ export interface FibraStats {
 
 interface Props {
   stats: FibraStats;
-  onDrillDown?: (type: string) => void;
+  onDrillDown?: (type: "protegidos" | "desprotegidos" | "dgos-ok" | "dgos-nok" | "all") => void;
 }
 
 export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
@@ -61,6 +61,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           icon={CheckCircle2}
           iconBg="bg-success/10 text-success"
           badge={stats.sitesProtegidos > 0 ? { text: "Redundância", variant: "success" } : undefined}
+          onClick={() => onDrillDown?.("protegidos")}
         />
         <StatCard
           title="Sites Desprotegidos"
@@ -69,6 +70,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           icon={XCircle}
           iconBg="bg-amber-500/10 text-amber-500"
           badge={stats.sitesDesprotegidos > 0 ? { text: "Atenção", variant: "warning" } : undefined}
+          onClick={() => onDrillDown?.("desprotegidos")}
         />
         <StatCard
           title="DGOs OK"
@@ -77,6 +79,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           icon={CheckCircle2}
           iconBg="bg-success/10 text-success"
           badge={{ text: `${dgosPercent}%`, variant: "success" }}
+          onClick={() => onDrillDown?.("dgos-ok")}
         />
         <StatCard
           title="DGOs NOK"
@@ -85,6 +88,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           icon={XCircle}
           iconBg="bg-destructive/10 text-destructive"
           badge={stats.dgosNok > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
+          onClick={() => onDrillDown?.("dgos-nok")}
         />
       </div>
 
