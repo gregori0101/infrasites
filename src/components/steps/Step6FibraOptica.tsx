@@ -21,7 +21,18 @@ interface Step6Props {
 
 export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Props) {
   const { data, updateData } = useChecklist();
-  const fibraOptica = data.fibraOptica || INITIAL_FIBRA_OPTICA;
+  
+  // Ensure fibraOptica and its nested arrays are always defined
+  const rawFibra = data.fibraOptica || INITIAL_FIBRA_OPTICA;
+  const fibraOptica = {
+    ...INITIAL_FIBRA_OPTICA,
+    ...rawFibra,
+    abordagens: rawFibra.abordagens?.length > 0 ? rawFibra.abordagens : [{ ...INITIAL_ABORDAGEM_FIBRA }],
+    dgos: rawFibra.dgos || [],
+    fotosCaixasPassagem: rawFibra.fotosCaixasPassagem || [],
+    fotosCaixasSubterraneas: rawFibra.fotosCaixasSubterraneas || [],
+    fotosSubidasLaterais: rawFibra.fotosSubidasLaterais || [],
+  };
 
   const updateFibra = (updates: Partial<typeof fibraOptica>) => {
     updateData('fibraOptica', { ...fibraOptica, ...updates });
