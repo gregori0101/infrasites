@@ -1,8 +1,6 @@
 export type UF = 'PA' | 'AM' | 'MA' | 'RR' | 'AP';
 
-export type AbrigoType = 'SHARING' | 'GABINETE 1' | 'GABINETE 2' | 'GABINETE 3' | 'GABINETE 4' | 'GABINETE 5' | 'GABINETE 6' | 'GABINETE 7';
-
-export type GabineteType = 
+export type GabineteType =
   | 'CONTAINER'
   | 'SHARING'
   | 'HUAWEI 3012'
@@ -195,7 +193,6 @@ export interface ChecklistData {
   siglaSite: string;
   uf: UF;
   qtdGabinetes: number;
-  abrigoSelecionado: AbrigoType;
   fotoPanoramica: string | null;
   gabinetes: GabineteData[];
   fibra: FibraData;
@@ -309,7 +306,6 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   siglaSite: '',
   uf: 'PA',
   qtdGabinetes: 1,
-  abrigoSelecionado: 'GABINETE 1',
   fotoPanoramica: null,
   gabinetes: [{ ...INITIAL_GABINETE }],
   fibra: { ...INITIAL_FIBRA },

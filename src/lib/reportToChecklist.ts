@@ -96,7 +96,6 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     siglaSite: report.site_code || '',
     uf: (report.state_uf || 'PA') as any,
     qtdGabinetes: report.total_cabinets || 1,
-    abrigoSelecionado: 'GABINETE 1',
     fotoPanoramica: report.panoramic_photo_url || null,
     gabinetes,
     fibra: { ...INITIAL_FIBRA },

@@ -25,9 +25,6 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         if (!data.uf) {
           errors.push({ field: 'uf', message: 'Selecione a UF' });
         }
-        if (!data.abrigoSelecionado) {
-          errors.push({ field: 'abrigoSelecionado', message: 'Selecione o abrigo' });
-        }
         if (!data.fotoPanoramica) {
           errors.push({ field: 'fotoPanoramica', message: 'Foto panorâmica é obrigatória' });
         }
