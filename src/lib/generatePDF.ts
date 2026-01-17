@@ -389,7 +389,6 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   addInfoCard('Informações Gerais', [
     { label: 'Sigla SCIENCE', value: data.siglaSite },
     { label: 'Estado (UF)', value: data.uf },
-    { label: 'Tipo de Abrigo', value: data.abrigoSelecionado },
     { label: 'Qtd. Gabinetes', value: data.qtdGabinetes },
     { label: 'Técnico', value: data.tecnico },
     { label: 'Data/Hora', value: data.dataHora ? format(new Date(data.dataHora), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : '-' },

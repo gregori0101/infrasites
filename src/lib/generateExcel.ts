@@ -284,7 +284,6 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   row['Observacoes_Gerais'] = data.observacoes || '';
   row['Foto_Observacao'] = getPhotoValue(data.fotoObservacao);
   row['Assinatura_Digital'] = getPhotoValue(data.assinaturaDigital);
-  row['Abrigo_Selecionado'] = data.abrigoSelecionado;
   row['Data_Hora_Checklist'] = data.dataHora ? format(new Date(data.dataHora), 'dd/MM/yyyy HH:mm:ss') : '';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
   

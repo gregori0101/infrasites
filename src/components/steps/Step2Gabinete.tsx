@@ -35,12 +35,9 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
 
   return (
     <div className="space-y-4 animate-slide-up">
-      <div className="bg-primary/10 rounded-lg p-3 flex items-center justify-between">
+      <div className="bg-primary/10 rounded-lg p-3 flex items-center justify-center">
         <span className="text-sm font-medium text-primary">
           Gabinete {currentGabinete + 1} de {data.qtdGabinetes}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {data.abrigoSelecionado}
         </span>
       </div>
 
