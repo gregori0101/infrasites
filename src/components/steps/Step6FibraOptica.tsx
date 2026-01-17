@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Cable, Box, ArrowUpCircle, Layers, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AbordagemFibra, NumAbordagens, AbordagemFibraData, DGOFibraData, INITIAL_ABORDAGEM_FIBRA, INITIAL_DGO_FIBRA } from "@/types/checklist";
+import { AbordagemFibra, NumAbordagens, AbordagemFibraData, DGOFibraData, INITIAL_ABORDAGEM_FIBRA, INITIAL_DGO_FIBRA, INITIAL_FIBRA_OPTICA } from "@/types/checklist";
 import { ValidationError } from "@/hooks/use-validation";
 
 interface Step6Props {
@@ -21,7 +21,7 @@ interface Step6Props {
 
 export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Props) {
   const { data, updateData } = useChecklist();
-  const fibraOptica = data.fibraOptica;
+  const fibraOptica = data.fibraOptica || INITIAL_FIBRA_OPTICA;
 
   const updateFibra = (updates: Partial<typeof fibraOptica>) => {
     updateData('fibraOptica', { ...fibraOptica, ...updates });
