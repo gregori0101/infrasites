@@ -284,59 +284,134 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const calculateProgress = useCallback((): number => {
-    let filled = 0;
-    let total = 0;
+    // Pesos por seção (total = 100%)
+    const WEIGHTS = {
+      site: 10,           // Step 1: Dados do Site
+      gabineteInfo: 8,    // Step 2: Info do Gabinete (por gab)
+      fcc: 12,            // Step 3: FCC (por gab)
+      baterias: 12,       // Step 4: Baterias (por gab)
+      climatizacao: 8,    // Step 5: Climatização (por gab)
+      energia: 20,        // Step 6: Energia
+      gmgTorre: 15,       // Step 7: GMG e Torre
+      finalizacao: 15,    // Step 8: Finalização
+    };
 
-    // Step 1: Site data
-    total += 4;
-    if (data.siglaSite.length === 5) filled++;
-    if (data.uf) filled++;
-    if (data.qtdGabinetes > 0) filled++;
-    if (data.fotoPanoramica) filled++;
+    // Calcula peso por gabinete (distribui peso entre todos)
+    const numGabs = Math.max(1, data.gabinetes.length);
+    const gabWeightFactor = 1 / numGabs;
 
-    // Steps 2-6: Gabinete data (per gabinete)
-    data.gabinetes.forEach(gab => {
-      // Gabinete info
-      total += 3;
-      if (gab.tipo) filled++;
-      if (gab.tecnologiasAcesso.length > 0) filled++;
-      if (gab.tecnologiasTransporte.length > 0) filled++;
+    let progress = 0;
 
-      // FCC
-      total += 4;
-      if (gab.fcc.fabricante) filled++;
-      if (gab.fcc.consumoDC > 0) filled++;
-      if (gab.fcc.fotoPanoramica) filled++;
-      if (gab.fcc.fotoPainel) filled++;
+    // ========== Step 1: Dados do Site (10%) ==========
+    const siteFields = [
+      data.siglaSite.length === 5,
+      !!data.uf,
+      data.qtdGabinetes > 0,
+      !!data.fotoPanoramica,
+    ];
+    const siteProgress = siteFields.filter(Boolean).length / siteFields.length;
+    progress += siteProgress * WEIGHTS.site;
 
-      // Baterias
-      total += 2;
-      if (gab.baterias.numBancos > 0) filled++;
-      if (gab.baterias.fotoBanco) filled++;
+    // ========== Steps por Gabinete ==========
+    data.gabinetes.forEach((gab) => {
+      // Step 2: Gabinete Info (8% distribuído)
+      const gabInfoFields = [
+        !!gab.tipo,
+        gab.tecnologiasAcesso.length > 0,
+        gab.tecnologiasTransporte.length > 0,
+        !!gab.fotoPanoramicaGabinete,
+      ];
+      const gabInfoProgress = gabInfoFields.filter(Boolean).length / gabInfoFields.length;
+      progress += gabInfoProgress * WEIGHTS.gabineteInfo * gabWeightFactor;
 
-      // Climatização
-      total += 2;
-      if (gab.climatizacao.tipo !== 'NA') filled++;
-      if (gab.climatizacao.fotoAR1 || gab.climatizacao.tipo === 'NA') filled++;
+      // Step 3: FCC (12% distribuído)
+      const fccFields = [
+        !!gab.fcc.fabricante,
+        !!gab.fcc.tensaoDC,
+        gab.fcc.consumoDC > 0,
+        gab.fcc.qtdURSuportadas !== null && gab.fcc.qtdURSuportadas !== undefined,
+        !!gab.fcc.fotoPanoramica,
+        !!gab.fcc.fotoPainel,
+      ];
+      const fccProgress = fccFields.filter(Boolean).length / fccFields.length;
+      progress += fccProgress * WEIGHTS.fcc * gabWeightFactor;
 
-      // Equipamentos
-      total += 2;
-      if (gab.fotoTransmissao) filled++;
-      if (gab.fotoAcesso) filled++;
+      // Step 4: Baterias (12% distribuído)
+      let bateriasProgress = 0;
+      if (gab.baterias.numBancos > 0) {
+        const batFields = [
+          true, // numBancos preenchido
+          !!gab.baterias.fotoBanco,
+          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.tipo && b.tipo !== 'NA'),
+          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.fabricante),
+          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.estado),
+        ];
+        bateriasProgress = batFields.filter(Boolean).length / batFields.length;
+      } else {
+        // Se numBancos = 0, considera 0% ou verifica se foi intencional
+        bateriasProgress = 0;
+      }
+      progress += bateriasProgress * WEIGHTS.baterias * gabWeightFactor;
+
+      // Step 5: Climatização (8% distribuído)
+      let climaProgress = 0;
+      if (gab.climatizacao.tipo === 'NA') {
+        climaProgress = 1; // 100% se não aplicável
+      } else if (gab.climatizacao.tipo === 'AR CONDICIONADO') {
+        const climaFields = [
+          true, // tipo selecionado
+          gab.climatizacao.acs.length > 0 && gab.climatizacao.acs.some(ac => ac.modelo !== 'NA'),
+          !!gab.climatizacao.fotoAR1,
+          gab.climatizacao.plcLeadLag !== null,
+        ];
+        climaProgress = climaFields.filter(Boolean).length / climaFields.length;
+      } else if (gab.climatizacao.tipo === 'FAN') {
+        climaProgress = gab.climatizacao.fanOK !== undefined ? 1 : 0.5;
+      }
+      progress += climaProgress * WEIGHTS.climatizacao * gabWeightFactor;
     });
 
-    // Step 7: GMG e Torre
-    total += 3;
-    filled++; // GMG has default
-    if (data.torre.aterramento) filled++;
-    if (data.torre.zeladoria) filled++;
+    // ========== Step 6: Energia (20%) ==========
+    const energiaFields = [
+      !!data.energia.tipoQuadro,
+      !!data.energia.fabricante,
+      data.energia.potenciaKVA > 0,
+      !!data.energia.tensaoEntrada,
+      !!data.energia.fotoQuadroGeral,
+      // Fotos condicionais
+      data.energia.transformadorOK || !!data.energia.fotoTransformador,
+      (data.energia.cabos.terminaisApertados && data.energia.cabos.isolacaoOK) || !!data.energia.cabos.fotoCabos,
+      data.energia.placaStatus === 'OK' || !!data.energia.fotoPlaca,
+    ];
+    const energiaProgress = energiaFields.filter(Boolean).length / energiaFields.length;
+    progress += energiaProgress * WEIGHTS.energia;
 
-    // Step 8: Finalização
-    total += 2;
-    if (data.observacoes || data.tecnico) filled++;
-    if (data.assinaturaDigital) filled++;
+    // ========== Step 7: GMG e Torre (15%) ==========
+    const gmgTorreFields = [
+      // GMG - opcional, então conta se informar=false ou se campos preenchidos
+      !data.gmg.informar || (!!data.gmg.fabricante && (data.gmg.potencia ?? 0) > 0),
+      // Torre
+      !!data.torre.aterramento,
+      !!data.torre.zeladoria,
+      data.torre.fibrasProtegidas !== undefined,
+      // Foto ninhos só obrigatória se houver ninhos
+      !data.torre.ninhos || !!data.torre.fotoNinhos,
+    ];
+    const gmgTorreProgress = gmgTorreFields.filter(Boolean).length / gmgTorreFields.length;
+    progress += gmgTorreProgress * WEIGHTS.gmgTorre;
 
-    return Math.round((filled / total) * 100);
+    // ========== Step 8: Finalização (15%) ==========
+    const finFields = [
+      !!data.tecnico && data.tecnico.trim().length > 0,
+      !!data.assinaturaDigital,
+      // Observação é opcional, mas dá crédito parcial se preenchida
+    ];
+    // Adiciona bônus se tiver observação
+    const finProgress = finFields.filter(Boolean).length / finFields.length;
+    const obsBonus = data.observacoes && data.observacoes.trim().length > 0 ? 0.1 : 0;
+    progress += Math.min(1, finProgress + obsBonus) * WEIGHTS.finalizacao;
+
+    return Math.min(100, Math.round(progress));
   }, [data]);
 
   return (
