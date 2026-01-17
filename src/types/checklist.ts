@@ -169,6 +169,7 @@ export interface GabineteData {
   fcc: FCCData;
   baterias: BateriasData;
   climatizacao: ClimatizacaoData;
+  fotoPanoramicaGabinete: string | null;
   fotoTransmissao: string | null;
   fotoAcesso: string | null;
 }
@@ -246,6 +247,7 @@ export const INITIAL_GABINETE: GabineteData = {
     fotoEvaporador: null,
     fotoControlador: null,
   },
+  fotoPanoramicaGabinete: null,
   fotoTransmissao: null,
   fotoAcesso: null,
 };
