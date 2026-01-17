@@ -267,7 +267,7 @@ export function ChecklistWizard() {
           </div>
         </div>
 
-        <ProgressBar value={progress} />
+        
 
         <div className="mt-3">
           <StepIndicator
