@@ -40,6 +40,7 @@ export default function ReportsHistory() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
+  const [downloadingPDFId, setDownloadingPDFId] = useState<string | null>(null);
   
   // Filters
   const [siteCodeFilter, setSiteCodeFilter] = useState("");
@@ -123,6 +124,31 @@ export default function ReportsHistory() {
       toast.error('Erro ao gerar PDF');
     } finally {
       setIsGeneratingPDF(false);
+    }
+  };
+
+  // Download direto de PDF sem abrir modal
+  const handleQuickDownloadPDF = async (e: React.MouseEvent, report: ReportRow) => {
+    e.stopPropagation(); // Não abre o modal ao clicar no botão
+    if (!report.id) return;
+    
+    setDownloadingPDFId(report.id);
+    try {
+      const fullReport = await fetchReportByIdWithPhotos(report.id);
+      if (!fullReport) {
+        toast.error('Relatório não encontrado');
+        return;
+      }
+      const checklistData = reportToChecklist(fullReport);
+      const pdfBlob = await generatePDF(checklistData);
+      const filename = `Checklist_${report.site_code}_${report.state_uf}_${report.created_date?.replace(/\//g, '')}.pdf`;
+      downloadPDF(pdfBlob, filename);
+      toast.success('PDF baixado com sucesso!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Erro ao gerar PDF');
+    } finally {
+      setDownloadingPDFId(null);
     }
   };
 
@@ -382,6 +408,20 @@ Por favor, anexe-os a este email antes de enviar.
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => handleQuickDownloadPDF(e, report)}
+                        disabled={downloadingPDFId === report.id}
+                        title="Baixar PDF"
+                      >
+                        {downloadingPDFId === report.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                      </Button>
                       <Badge variant={report.email_sent ? "default" : "secondary"}>
                         {report.email_sent ? (
                           <MailCheck className="w-3 h-3 mr-1" />
