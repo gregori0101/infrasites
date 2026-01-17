@@ -109,16 +109,6 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
                 fotoCondensador: null, fotoEvaporador: null, fotoControlador: null 
               },
             })),
-            fibra: {
-              ...data.fibra,
-              fotoGeralAbordagens: null,
-              fotoObservacoesDGOs: null,
-              fotosCaixasPassagem: [],
-              abordagem1: { ...data.fibra.abordagem1, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] },
-              abordagem2: data.fibra.abordagem2 ? { ...data.fibra.abordagem2, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] } : undefined,
-              abordagem3: data.fibra.abordagem3 ? { ...data.fibra.abordagem3, fotoCaixasSubterraneas: [], fotoSubidaLateral: [] } : undefined,
-              dgos: data.fibra.dgos.map(dgo => ({ ...dgo, fotoExterno: null, fotoCordoes: null })),
-            },
             energia: {
               ...data.energia,
               fotoTransformador: null,

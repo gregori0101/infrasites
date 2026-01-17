@@ -70,21 +70,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 5: // Step6Fibra
-        if (!data.fibra.fotoGeralAbordagens) {
-          errors.push({ field: 'fibra.fotoGeralAbordagens', message: 'Foto geral das abordagens é obrigatória' });
-        }
-        data.fibra.dgos.forEach((dgo, idx) => {
-          if (!dgo.fotoExterno) {
-            errors.push({ field: `fibra.dgo${idx}.fotoExterno`, message: `Foto externa do DGO ${idx + 1} é obrigatória` });
-          }
-          if (dgo.organizacaoCordoes === 'NOK' && !dgo.fotoCordoes) {
-            errors.push({ field: `fibra.dgo${idx}.fotoCordoes`, message: `Foto dos cordões do DGO ${idx + 1} é obrigatória` });
-          }
-        });
-        break;
-
-      case 6: // Step7Energia
+      case 5: // Step7Energia
         if (!data.energia.fotoQuadroGeral) {
           errors.push({ field: 'energia.fotoQuadroGeral', message: 'Foto do quadro geral é obrigatória' });
         }
@@ -99,17 +85,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 7: // Step8Equipamentos
-        if (!gabinete) break;
-        if (!gabinete.fotoTransmissao) {
-          errors.push({ field: 'fotoTransmissao', message: 'Foto de equipamentos de transmissão é obrigatória' });
-        }
-        if (!gabinete.fotoAcesso) {
-          errors.push({ field: 'fotoAcesso', message: 'Foto de equipamentos de acesso é obrigatória' });
-        }
-        break;
-
-      case 8: // Step9GMGTorre
+      case 6: // Step9GMGTorre
         // GMG fields are optional based on "informar" toggle
         // Torre validation
         if (data.torre.ninhos && !data.torre.fotoNinhos) {
@@ -117,7 +93,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 9: // Step10Finalizacao
+      case 7: // Step10Finalizacao
         if (!data.tecnico || data.tecnico.trim() === '') {
           errors.push({ field: 'tecnico', message: 'Nome do técnico é obrigatório' });
         }
