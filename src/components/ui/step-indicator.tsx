@@ -11,7 +11,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ steps, currentStep, onStepClick, className }: StepIndicatorProps) {
   return (
-    <div className={cn("flex items-center justify-between overflow-x-auto pb-2 gap-1", className)}>
+    <div className={cn("flex items-center justify-between overflow-x-auto py-2 px-1 gap-1", className)}>
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isCurrent = index === currentStep;
@@ -22,7 +22,7 @@ export function StepIndicator({ steps, currentStep, onStepClick, className }: St
             onClick={() => onStepClick?.(index)}
             disabled={!onStepClick}
             className={cn(
-              "flex flex-col items-center min-w-[3rem] transition-all duration-200",
+              "flex flex-col items-center min-w-[3rem] transition-all duration-200 p-1",
               onStepClick && "cursor-pointer hover:scale-105",
               !onStepClick && "cursor-default"
             )}
