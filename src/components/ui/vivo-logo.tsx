@@ -1,4 +1,5 @@
 import * as React from "react";
+import vivoLogo from "@/assets/vivo-logo.png";
 
 interface VivoLogoProps {
   className?: string;
@@ -13,63 +14,11 @@ export function VivoLogo({ className = "", size = "md" }: VivoLogoProps) {
   };
 
   return (
-    <svg
-      viewBox="0 0 120 40"
-      className={`${sizeClasses[size]} w-auto ${className}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Vivo Logo */}
-      <defs>
-        <linearGradient id="vivoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#660099" />
-          <stop offset="100%" stopColor="#9933CC" />
-        </linearGradient>
-      </defs>
-      
-      {/* V */}
-      <path
-        d="M8 8L16 32L24 8H19L16 20L13 8H8Z"
-        fill="url(#vivoGradient)"
-      />
-      
-      {/* i */}
-      <circle cx="30" cy="10" r="3" fill="url(#vivoGradient)" />
-      <rect x="27" y="15" width="6" height="17" rx="2" fill="url(#vivoGradient)" />
-      
-      {/* v */}
-      <path
-        d="M40 15L48 32L56 15H51L48 25L45 15H40Z"
-        fill="url(#vivoGradient)"
-      />
-      
-      {/* o */}
-      <ellipse
-        cx="68"
-        cy="24"
-        rx="10"
-        ry="9"
-        stroke="url(#vivoGradient)"
-        strokeWidth="5"
-        fill="none"
-      />
-      
-      {/* Dot accent */}
-      <circle cx="90" cy="24" r="4" fill="#FF6B35" />
-      
-      {/* Telecom text */}
-      <text
-        x="98"
-        y="28"
-        fill="currentColor"
-        fontSize="10"
-        fontFamily="Inter, sans-serif"
-        fontWeight="500"
-        className="fill-muted-foreground"
-      >
-        
-      </text>
-    </svg>
+    <img 
+      src={vivoLogo} 
+      alt="Vivo" 
+      className={`${sizeClasses[size]} w-auto object-contain shrink-0 ${className}`}
+    />
   );
 }
 

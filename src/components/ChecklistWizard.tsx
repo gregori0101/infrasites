@@ -171,7 +171,7 @@ export function ChecklistWizard() {
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <img src={vivoLogo} alt="Vivo" className="h-8 w-auto" />
+            <img src={vivoLogo} alt="Vivo" className="h-8 w-auto shrink-0 object-contain" />
             <div className="h-6 w-px bg-border" />
             <div>
               <h1 className="font-bold text-sm leading-tight">Checklist Telecom</h1>
