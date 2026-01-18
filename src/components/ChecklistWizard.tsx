@@ -272,7 +272,7 @@ export function ChecklistWizard() {
 
         
 
-        <div className="mt-3">
+        <div className="mt-4 pt-1">
           <StepIndicator
             steps={STEPS}
             currentStep={currentStep}

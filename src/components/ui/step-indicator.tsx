@@ -11,7 +11,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ steps, currentStep, onStepClick, className }: StepIndicatorProps) {
   return (
-    <div className={cn("flex items-center justify-between overflow-x-auto py-2 px-1 gap-1", className)}>
+    <div className={cn("flex items-center justify-between overflow-x-auto pt-3 pb-2 px-1 gap-1", className)}>
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isCurrent = index === currentStep;
