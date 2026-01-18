@@ -172,13 +172,6 @@ export function ChecklistWizard() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <img src={vivoLogo} alt="Vivo" className="h-6 w-auto shrink-0 object-contain" />
-            <div className="h-6 w-px bg-border" />
-            <div>
-              <h1 className="font-bold text-sm leading-tight">Checklist Telecom</h1>
-              <p className="text-[10px] text-muted-foreground">
-                {data.siglaSite || 'Novo'} • {data.uf}
-              </p>
-            </div>
           </div>
 
           <div className="flex items-center gap-1">
