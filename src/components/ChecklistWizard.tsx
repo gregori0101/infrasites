@@ -168,8 +168,8 @@ export function ChecklistWizard() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
+      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 shadow-sm">
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
             <img src={vivoLogo} alt="Vivo" className="h-6 w-auto shrink-0 object-contain" />
           </div>
@@ -265,7 +265,7 @@ export function ChecklistWizard() {
 
         
 
-        <div className="mt-4 pt-1">
+        <div className="mt-1">
           <StepIndicator
             steps={STEPS}
             currentStep={currentStep}
