@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle } from "lucide-react";
+import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,26 +22,33 @@ interface Props {
 }
 
 interface PhotoViewerProps {
-  url: string;
+  url: string | null | undefined;
   label: string;
+  compact?: boolean;
 }
 
-function PhotoViewer({ url, label }: PhotoViewerProps) {
+function PhotoViewer({ url, label, compact = false }: PhotoViewerProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   
   if (!url || error) {
     return (
-      <div className="aspect-video bg-muted rounded-lg flex flex-col items-center justify-center text-muted-foreground">
-        <ImageIcon className="w-8 h-8 mb-2" />
-        <span className="text-xs">{label}</span>
-        <span className="text-xs">Sem foto</span>
+      <div className={cn(
+        "bg-muted rounded-lg flex flex-col items-center justify-center text-muted-foreground",
+        compact ? "aspect-square p-2" : "aspect-video"
+      )}>
+        <ImageIcon className={cn("mb-1", compact ? "w-5 h-5" : "w-8 h-8 mb-2")} />
+        <span className={cn(compact ? "text-[10px]" : "text-xs")}>{label}</span>
+        <span className={cn(compact ? "text-[10px]" : "text-xs")}>Sem foto</span>
       </div>
     );
   }
 
   return (
-    <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+    <div className={cn(
+      "relative bg-muted rounded-lg overflow-hidden",
+      compact ? "aspect-square" : "aspect-video"
+    )}>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -54,7 +61,10 @@ function PhotoViewer({ url, label }: PhotoViewerProps) {
         onLoad={() => setLoading(false)}
         onError={() => setError(true)}
       />
-      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1">
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0 bg-black/60 text-white px-2",
+        compact ? "text-[10px] py-0.5" : "text-xs py-1"
+      )}>
         {label}
       </div>
     </div>
@@ -84,6 +94,20 @@ function InfoRow({ label, value, icon: Icon }: { label: string; value: string | 
   );
 }
 
+// Inline photo grid for sections
+function PhotoGrid({ photos }: { photos: { url: string | null | undefined; label: string }[] }) {
+  const validPhotos = photos.filter(p => p.url);
+  if (validPhotos.length === 0) return null;
+  
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-3">
+      {photos.map((photo, idx) => (
+        <PhotoViewer key={idx} url={photo.url} label={photo.label} compact />
+      ))}
+    </div>
+  );
+}
+
 export function SiteDetailModal({ open, onClose, reportId }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<ReportRow | null>(null);
@@ -109,19 +133,58 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
 
   const totalCabinets = report?.total_cabinets || 1;
 
-  // Collect all photos
-  const allPhotos: { url: string; label: string }[] = [];
+  // Collect all photos for gallery tab
+  const allPhotos: { url: string; label: string; category: string }[] = [];
   if (report?.panoramic_photo_url) {
-    allPhotos.push({ url: report.panoramic_photo_url, label: "Foto Panorâmica" });
+    allPhotos.push({ url: report.panoramic_photo_url, label: "Panorâmica", category: "Geral" });
   }
   if (report?.observacao_foto_url) {
-    allPhotos.push({ url: report.observacao_foto_url, label: "Foto Observação" });
+    allPhotos.push({ url: report.observacao_foto_url, label: "Observação", category: "Geral" });
   }
+  // Energy photos
+  if (report?.energia_foto_quadro_geral) {
+    allPhotos.push({ url: report.energia_foto_quadro_geral, label: "Quadro Geral", category: "Energia" });
+  }
+  if (report?.energia_foto_transformador) {
+    allPhotos.push({ url: report.energia_foto_transformador, label: "Transformador", category: "Energia" });
+  }
+  if (report?.energia_foto_placa) {
+    allPhotos.push({ url: report.energia_foto_placa, label: "Placa", category: "Energia" });
+  }
+  if (report?.energia_foto_cabos) {
+    allPhotos.push({ url: report.energia_foto_cabos, label: "Cabos", category: "Energia" });
+  }
+  // Torre photos
+  if (report?.torre_foto_ninhos) {
+    allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
+  }
+  // Gabinete photos
   for (let g = 1; g <= 7; g++) {
+    const panoramica = report?.[`gab${g}_foto_panoramica`];
     const transmissao = report?.[`gab${g}_foto_transmissao`];
     const acesso = report?.[`gab${g}_foto_acesso`];
-    if (transmissao) allPhotos.push({ url: transmissao, label: `Gabinete ${g} - Transmissão` });
-    if (acesso) allPhotos.push({ url: acesso, label: `Gabinete ${g} - Acesso` });
+    const fccPan = report?.[`gab${g}_fcc_foto_panoramica`];
+    const fccPainel = report?.[`gab${g}_fcc_foto_painel`];
+    const batFoto = report?.[`gab${g}_bat_foto`];
+    
+    if (panoramica) allPhotos.push({ url: panoramica, label: "Panorâmica", category: `Gab ${g}` });
+    if (transmissao) allPhotos.push({ url: transmissao, label: "Transmissão", category: `Gab ${g}` });
+    if (acesso) allPhotos.push({ url: acesso, label: "Acesso", category: `Gab ${g}` });
+    if (fccPan) allPhotos.push({ url: fccPan, label: "FCC Panorâmica", category: `Gab ${g}` });
+    if (fccPainel) allPhotos.push({ url: fccPainel, label: "FCC Painel", category: `Gab ${g}` });
+    if (batFoto) allPhotos.push({ url: batFoto, label: "Baterias", category: `Gab ${g}` });
+    
+    // AC photos
+    for (let a = 1; a <= 4; a++) {
+      const acFoto = report?.[`gab${g}_clima_foto_ar${a}`];
+      if (acFoto) allPhotos.push({ url: acFoto, label: `AC ${a}`, category: `Gab ${g}` });
+    }
+    const condensador = report?.[`gab${g}_clima_foto_condensador`];
+    const evaporador = report?.[`gab${g}_clima_foto_evaporador`];
+    const controlador = report?.[`gab${g}_clima_foto_controlador`];
+    if (condensador) allPhotos.push({ url: condensador, label: "Condensador", category: `Gab ${g}` });
+    if (evaporador) allPhotos.push({ url: evaporador, label: "Evaporador", category: `Gab ${g}` });
+    if (controlador) allPhotos.push({ url: controlador, label: "Controlador", category: `Gab ${g}` });
   }
 
   // Calculate statistics and critical issues
@@ -325,8 +388,10 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     Gab {i + 1}
                   </TabsTrigger>
                 ))}
+                <TabsTrigger value="energia">Energia</TabsTrigger>
+                <TabsTrigger value="fibra">Fibra</TabsTrigger>
                 <TabsTrigger value="gmg">GMG/Torre</TabsTrigger>
-                <TabsTrigger value="fotos">Fotos ({allPhotos.length})</TabsTrigger>
+                <TabsTrigger value="galeria">Galeria ({allPhotos.length})</TabsTrigger>
               </TabsList>
 
               <div className="px-6 py-4">
@@ -359,12 +424,49 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       </CardContent>
                     </Card>
                   )}
+
+                  {report.observacao_foto_url && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Foto Observação</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <PhotoViewer url={report.observacao_foto_url} label="Observação" />
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
 
                 {/* Tab: Gabinetes */}
                 {Array.from({ length: totalCabinets }, (_, i) => {
                   const g = i + 1;
                   const prefix = `gab${g}`;
+                  
+                  // Collect gabinete photos
+                  const gabFotos = [
+                    { url: report[`${prefix}_foto_panoramica`], label: "Panorâmica" },
+                    { url: report[`${prefix}_foto_transmissao`], label: "Transmissão" },
+                    { url: report[`${prefix}_foto_acesso`], label: "Acesso" },
+                  ];
+                  
+                  const fccFotos = [
+                    { url: report[`${prefix}_fcc_foto_panoramica`], label: "FCC Panorâmica" },
+                    { url: report[`${prefix}_fcc_foto_painel`], label: "FCC Painel" },
+                  ];
+                  
+                  const batFotos = [
+                    { url: report[`${prefix}_bat_foto`], label: "Bancos de Bateria" },
+                  ];
+                  
+                  const climaFotos = [
+                    { url: report[`${prefix}_clima_foto_ar1`], label: "AC 1" },
+                    { url: report[`${prefix}_clima_foto_ar2`], label: "AC 2" },
+                    { url: report[`${prefix}_clima_foto_ar3`], label: "AC 3" },
+                    { url: report[`${prefix}_clima_foto_ar4`], label: "AC 4" },
+                    { url: report[`${prefix}_clima_foto_condensador`], label: "Condensador" },
+                    { url: report[`${prefix}_clima_foto_evaporador`], label: "Evaporador" },
+                    { url: report[`${prefix}_clima_foto_controlador`], label: "Controlador" },
+                  ];
                   
                   return (
                     <TabsContent key={g} value={prefix} className="mt-0 space-y-4">
@@ -376,11 +478,14 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                             Gabinete {g} - Informações
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                          <InfoRow label="Tipo" value={report[`${prefix}_tipo`]} />
-                          <InfoRow label="Proteção" value={report[`${prefix}_protecao`]} />
-                          <InfoRow label="Tecnologias Acesso" value={report[`${prefix}_tecnologias_acesso`]} icon={Radio} />
-                          <InfoRow label="Tecnologias Transporte" value={report[`${prefix}_tecnologias_transporte`]} />
+                        <CardContent>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                            <InfoRow label="Tipo" value={report[`${prefix}_tipo`]} />
+                            <InfoRow label="Proteção" value={report[`${prefix}_protecao`]} />
+                            <InfoRow label="Tecnologias Acesso" value={report[`${prefix}_tecnologias_acesso`]} icon={Radio} />
+                            <InfoRow label="Tecnologias Transporte" value={report[`${prefix}_tecnologias_transporte`]} />
+                          </div>
+                          <PhotoGrid photos={gabFotos} />
                         </CardContent>
                       </Card>
 
@@ -392,13 +497,16 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                             FCC
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                          <InfoRow label="Fabricante" value={report[`${prefix}_fcc_fabricante`]} />
-                          <InfoRow label="Tensão DC" value={report[`${prefix}_fcc_tensao`]} />
-                          <InfoRow label="Gerenciada" value={report[`${prefix}_fcc_gerenciado`]} />
-                          <InfoRow label="Gerenciável" value={report[`${prefix}_fcc_gerenciavel`]} />
-                          <InfoRow label="Consumo DC" value={report[`${prefix}_fcc_consumo`]} />
-                          <InfoRow label="Qtd UR" value={report[`${prefix}_fcc_qtd_ur`]} />
+                        <CardContent>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
+                            <InfoRow label="Fabricante" value={report[`${prefix}_fcc_fabricante`]} />
+                            <InfoRow label="Tensão DC" value={report[`${prefix}_fcc_tensao`]} />
+                            <InfoRow label="Gerenciada" value={report[`${prefix}_fcc_gerenciado`]} />
+                            <InfoRow label="Gerenciável" value={report[`${prefix}_fcc_gerenciavel`]} />
+                            <InfoRow label="Consumo DC" value={report[`${prefix}_fcc_consumo`]} />
+                            <InfoRow label="Qtd UR" value={report[`${prefix}_fcc_qtd_ur`]} />
+                          </div>
+                          <PhotoGrid photos={fccFotos} />
                         </CardContent>
                       </Card>
 
@@ -441,6 +549,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                           <div className="mt-3">
                             <InfoRow label="Bancos Interligados" value={report[`${prefix}_bancos_interligados`]} />
                           </div>
+                          <PhotoGrid photos={batFotos} />
                         </CardContent>
                       </Card>
 
@@ -488,27 +597,128 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                               );
                             })}
                           </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Fotos do Gabinete */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4" />
-                            Fotos do Gabinete
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <PhotoViewer url={report[`${prefix}_foto_transmissao`]} label="Transmissão" />
-                            <PhotoViewer url={report[`${prefix}_foto_acesso`]} label="Acesso" />
-                          </div>
+                          <PhotoGrid photos={climaFotos} />
                         </CardContent>
                       </Card>
                     </TabsContent>
                   );
                 })}
+
+                {/* Tab: Energia */}
+                <TabsContent value="energia" className="mt-0 space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Plug className="w-4 h-4" />
+                        Quadro de Energia
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
+                        <InfoRow label="Tipo" value={report.energia_tipo} />
+                        <InfoRow label="Fabricante" value={report.energia_fabricante} />
+                        <InfoRow label="Potência (kVA)" value={report.energia_potencia} />
+                        <InfoRow label="Tensão" value={report.energia_tensao} />
+                        <InfoRow label="Tipo Disjuntor" value={report.energia_tipo_disjuntor} />
+                        <InfoRow label="Corrente Disjuntor" value={report.energia_corrente_disjuntor} />
+                      </div>
+                      
+                      {/* Energy Photos */}
+                      <PhotoGrid photos={[
+                        { url: report.energia_foto_quadro_geral, label: "Quadro Geral" },
+                        { url: report.energia_foto_transformador, label: "Transformador" },
+                        { url: report.energia_foto_placa, label: "Placa" },
+                        { url: report.energia_foto_cabos, label: "Cabos" },
+                      ]} />
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        Proteções
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">DPS:</span>
+                          <StatusBadge status={report.energia_dps_status} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Aterramento:</span>
+                          <StatusBadge status={report.energia_aterramento_status} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Cabos:</span>
+                          <StatusBadge status={report.energia_cabos_status} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Nobreak:</span>
+                          <StatusBadge status={report.energia_nobreak_status} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Fibra */}
+                <TabsContent value="fibra" className="mt-0 space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Cable className="w-4 h-4" />
+                        Fibra Óptica
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
+                        <InfoRow label="Qtd Abordagens" value={report.fibra_qtd_abordagens?.toString()} />
+                        <InfoRow label="Caixas de Passagem" value={report.fibra_caixas_passagem_qtd?.toString()} />
+                        <InfoRow label="Caixas Subterrâneas" value={report.fibra_caixas_subterraneas_qtd?.toString()} />
+                        <InfoRow label="Subidas Laterais" value={report.fibra_subidas_laterais_qtd?.toString()} />
+                        <InfoRow label="Total DGOs" value={report.fibra_dgos_qtd?.toString()} />
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">DGOs OK:</span>
+                          <Badge className="bg-success text-success-foreground">{report.fibra_dgos_ok_qtd || 0}</Badge>
+                          <span className="text-sm text-muted-foreground">NOK:</span>
+                          <Badge className="bg-destructive text-destructive-foreground">{report.fibra_dgos_nok_qtd || 0}</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Abordagem 1 */}
+                  {report.fibra_abord1_tipo && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Abordagem 1</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                          <InfoRow label="Tipo" value={report.fibra_abord1_tipo} />
+                          <InfoRow label="Descrição" value={report.fibra_abord1_descricao} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Abordagem 2 */}
+                  {report.fibra_abord2_tipo && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Abordagem 2</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                          <InfoRow label="Tipo" value={report.fibra_abord2_tipo} />
+                          <InfoRow label="Descrição" value={report.fibra_abord2_descricao} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
 
                 {/* Tab: GMG/Torre */}
                 <TabsContent value="gmg" className="mt-0 space-y-4">
@@ -538,27 +748,50 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         Torre e Infraestrutura
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                      <div className="flex items-center gap-2 py-1">
-                        <span className="text-sm text-muted-foreground">Ninhos:</span>
-                        <StatusBadge status={report.torre_ninhos} />
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Ninhos:</span>
+                          <StatusBadge status={report.torre_ninhos} />
+                        </div>
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Fibra Protegida:</span>
+                          <StatusBadge status={report.torre_protecao_fibra} />
+                        </div>
+                        <InfoRow label="Aterramento" value={report.torre_aterramento} />
+                        <InfoRow label="Zeladoria" value={report.torre_housekeeping} />
                       </div>
-                      <div className="flex items-center gap-2 py-1">
-                        <span className="text-sm text-muted-foreground">Fibra Protegida:</span>
-                        <StatusBadge status={report.torre_protecao_fibra} />
-                      </div>
-                      <InfoRow label="Aterramento" value={report.torre_aterramento} />
-                      <InfoRow label="Zeladoria" value={report.torre_housekeeping} />
+                      
+                      {/* Foto de ninhos */}
+                      {report.torre_ninhos === "SIM" && report.torre_foto_ninhos && (
+                        <div className="mt-4">
+                          <PhotoViewer url={report.torre_foto_ninhos} label="Foto dos Ninhos" />
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
 
-                {/* Tab: Fotos */}
-                <TabsContent value="fotos" className="mt-0">
+                {/* Tab: Galeria (todas as fotos) */}
+                <TabsContent value="galeria" className="mt-0">
                   {allPhotos.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {allPhotos.map((photo, idx) => (
-                        <PhotoViewer key={idx} url={photo.url} label={photo.label} />
+                    <div className="space-y-6">
+                      {/* Group photos by category */}
+                      {Object.entries(
+                        allPhotos.reduce((acc, photo) => {
+                          if (!acc[photo.category]) acc[photo.category] = [];
+                          acc[photo.category].push(photo);
+                          return acc;
+                        }, {} as Record<string, typeof allPhotos>)
+                      ).map(([category, photos]) => (
+                        <div key={category}>
+                          <h3 className="text-sm font-semibold mb-2 text-muted-foreground">{category}</h3>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {photos.map((photo, idx) => (
+                              <PhotoViewer key={idx} url={photo.url} label={photo.label} compact />
+                            ))}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   ) : (
