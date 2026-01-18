@@ -11,7 +11,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ steps, currentStep, onStepClick, className }: StepIndicatorProps) {
   return (
-    <div className={cn("flex items-center justify-between overflow-x-auto pt-3 pb-2 px-1 gap-1", className)}>
+    <div className={cn("flex items-center justify-between overflow-x-auto pt-2 pb-1 px-1 gap-1", className)}>
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isCurrent = index === currentStep;
@@ -29,16 +29,16 @@ export function StepIndicator({ steps, currentStep, onStepClick, className }: St
           >
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
+                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
                 isCompleted && "bg-success text-success-foreground",
-                isCurrent && "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background",
+                isCurrent && "bg-primary text-primary-foreground ring-1 ring-primary ring-offset-1 ring-offset-background",
                 !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
               )}
             >
               {isCompleted ? (
-                <Check className="w-4 h-4" />
+                <Check className="w-3.5 h-3.5" />
               ) : (
-                <span className="[&>svg]:w-4 [&>svg]:h-4">{step.icon}</span>
+                <span className="[&>svg]:w-3.5 [&>svg]:h-3.5">{step.icon}</span>
               )}
             </div>
             <span
