@@ -14,6 +14,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lightbox } from "@/components/ui/lightbox";
 import { fetchFullReportById, ReportRow } from "@/lib/reportDatabase";
+import { reportToChecklist } from "@/lib/reportToChecklist";
+import { generatePDF, downloadPDF } from "@/lib/generatePDF";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -164,6 +167,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<ReportRow | null>(null);
   const [activeTab, setActiveTab] = useState("geral");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -174,6 +178,24 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     setLightboxImages(images);
     setLightboxIndex(index);
     setLightboxOpen(true);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!report) return;
+    
+    setIsGeneratingPDF(true);
+    try {
+      const checklistData = reportToChecklist(report);
+      const pdfBlob = await generatePDF(checklistData);
+      const filename = `Checklist_${report.site_code}_${report.state_uf}_${report.created_date?.replace(/\//g, '') || ''}.pdf`;
+      downloadPDF(pdfBlob, filename);
+      toast.success('PDF baixado com sucesso!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Erro ao gerar PDF');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   useEffect(() => {
@@ -343,14 +365,19 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       Site OK
                     </Badge>
                   )}
-                  {report.pdf_file_path && (
-                    <Button variant="secondary" size="sm" asChild>
-                      <a href={report.pdf_file_path} target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4 mr-1" />
-                        PDF
-                      </a>
-                    </Button>
-                  )}
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={handleDownloadPDF}
+                    disabled={isGeneratingPDF}
+                  >
+                    {isGeneratingPDF ? (
+                      <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-1" />
+                    )}
+                    PDF
+                  </Button>
                 </div>
               </div>
               
