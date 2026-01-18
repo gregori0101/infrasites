@@ -177,7 +177,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -278,44 +278,46 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
               )}
             </DialogHeader>
 
-            {/* Summary Cards */}
-            <div className="px-6 py-3 border-b bg-muted/30 shrink-0">
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">{report.technician_name || "N/A"}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">{totalCabinets} Gabinete(s)</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Battery className="w-4 h-4 text-success" />
-                  <span className="font-medium">{statistics?.batteriesOk || 0} OK</span>
-                  {statistics && statistics.batteriesNok > 0 && (
-                    <Badge className="bg-destructive text-destructive-foreground text-xs">{statistics.batteriesNok} NOK</Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Thermometer className="w-4 h-4 text-primary" />
-                  <span className="font-medium">{statistics?.acsOk || 0} OK</span>
-                  {statistics && statistics.acsNok > 0 && (
-                    <Badge className="bg-destructive text-destructive-foreground text-xs">{statistics.acsNok} NOK</Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Zap className="w-4 h-4 text-warning" />
-                  <StatusBadge status={report.gmg_existe} label={report.gmg_existe === "SIM" ? "Com GMG" : "Sem GMG"} />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">{allPhotos.length} Foto(s)</span>
+            {/* Scrollable content area */}
+            <ScrollArea className="flex-1">
+              {/* Summary Cards */}
+              <div className="px-6 py-3 border-b bg-muted/30">
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{report.technician_name || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{totalCabinets} Gabinete(s)</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Battery className="w-4 h-4 text-success" />
+                    <span className="font-medium">{statistics?.batteriesOk || 0} OK</span>
+                    {statistics && statistics.batteriesNok > 0 && (
+                      <Badge className="bg-destructive text-destructive-foreground text-xs">{statistics.batteriesNok} NOK</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Thermometer className="w-4 h-4 text-primary" />
+                    <span className="font-medium">{statistics?.acsOk || 0} OK</span>
+                    {statistics && statistics.acsNok > 0 && (
+                      <Badge className="bg-destructive text-destructive-foreground text-xs">{statistics.acsNok} NOK</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Zap className="w-4 h-4 text-warning" />
+                    <StatusBadge status={report.gmg_existe} label={report.gmg_existe === "SIM" ? "Com GMG" : "Sem GMG"} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{allPhotos.length} Foto(s)</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col">
               <TabsList className="mx-6 mt-3 shrink-0 flex flex-wrap h-auto gap-1">
                 <TabsTrigger value="geral">Geral</TabsTrigger>
                 {Array.from({ length: totalCabinets }, (_, i) => (
@@ -327,7 +329,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                 <TabsTrigger value="fotos">Fotos ({allPhotos.length})</TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1 px-6 py-4">
+              <div className="px-6 py-4">
                 {/* Tab: Geral */}
                 <TabsContent value="geral" className="mt-0 space-y-4">
                   <Card>
@@ -566,8 +568,9 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </div>
                   )}
                 </TabsContent>
-              </ScrollArea>
-            </Tabs>
+              </div>
+              </Tabs>
+            </ScrollArea>
           </>
         ) : (
           <div className="text-center py-12 text-muted-foreground">
