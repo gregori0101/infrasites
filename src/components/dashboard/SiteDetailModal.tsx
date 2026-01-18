@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Lightbox } from "@/components/ui/lightbox";
 import { fetchFullReportById, ReportRow } from "@/lib/reportDatabase";
 import { cn } from "@/lib/utils";
 
@@ -25,11 +26,20 @@ interface PhotoViewerProps {
   url: string | null | undefined;
   label: string;
   compact?: boolean;
+  onClick?: () => void;
 }
 
-function PhotoViewer({ url, label, compact = false }: PhotoViewerProps) {
+// Context for lightbox
+interface LightboxContextType {
+  openLightbox: (images: { url: string; label: string }[], index: number) => void;
+}
+
+const LightboxContext = createContext<LightboxContextType | null>(null);
+
+function PhotoViewer({ url, label, compact = false, onClick }: PhotoViewerProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const lightboxContext = useContext(LightboxContext);
   
   if (!url || error) {
     return (
@@ -44,11 +54,22 @@ function PhotoViewer({ url, label, compact = false }: PhotoViewerProps) {
     );
   }
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (lightboxContext) {
+      lightboxContext.openLightbox([{ url, label }], 0);
+    }
+  };
+
   return (
-    <div className={cn(
-      "relative bg-muted rounded-lg overflow-hidden",
-      compact ? "aspect-square" : "aspect-video"
-    )}>
+    <div 
+      className={cn(
+        "relative bg-muted rounded-lg overflow-hidden cursor-pointer group",
+        compact ? "aspect-square" : "aspect-video"
+      )}
+      onClick={handleClick}
+    >
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -57,10 +78,21 @@ function PhotoViewer({ url, label, compact = false }: PhotoViewerProps) {
       <img
         src={url}
         alt={label}
-        className={cn("w-full h-full object-cover transition-opacity", loading ? "opacity-0" : "opacity-100")}
+        className={cn(
+          "w-full h-full object-cover transition-all",
+          loading ? "opacity-0" : "opacity-100",
+          "group-hover:scale-105"
+        )}
         onLoad={() => setLoading(false)}
         onError={() => setError(true)}
       />
+      <div className={cn(
+        "absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center"
+      )}>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-full p-2">
+          <ImageIcon className="w-5 h-5 text-white" />
+        </div>
+      </div>
       <div className={cn(
         "absolute bottom-0 left-0 right-0 bg-black/60 text-white px-2",
         compact ? "text-[10px] py-0.5" : "text-xs py-1"
@@ -94,15 +126,35 @@ function InfoRow({ label, value, icon: Icon }: { label: string; value: string | 
   );
 }
 
-// Inline photo grid for sections
-function PhotoGrid({ photos }: { photos: { url: string | null | undefined; label: string }[] }) {
-  const validPhotos = photos.filter(p => p.url);
+// Inline photo grid for sections with lightbox support
+function PhotoGrid({ photos, allPhotos }: { 
+  photos: { url: string | null | undefined; label: string }[];
+  allPhotos?: { url: string; label: string }[];
+}) {
+  const validPhotos = photos.filter(p => p.url) as { url: string; label: string }[];
+  const lightboxContext = useContext(LightboxContext);
+  
   if (validPhotos.length === 0) return null;
+  
+  const handlePhotoClick = (photoUrl: string) => {
+    if (!lightboxContext) return;
+    
+    // Use allPhotos if provided, otherwise just the section photos
+    const imagesToShow = allPhotos || validPhotos;
+    const index = imagesToShow.findIndex(p => p.url === photoUrl);
+    lightboxContext.openLightbox(imagesToShow, index >= 0 ? index : 0);
+  };
   
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-3">
       {photos.map((photo, idx) => (
-        <PhotoViewer key={idx} url={photo.url} label={photo.label} compact />
+        <PhotoViewer 
+          key={idx} 
+          url={photo.url} 
+          label={photo.label} 
+          compact 
+          onClick={photo.url ? () => handlePhotoClick(photo.url!) : undefined}
+        />
       ))}
     </div>
   );
@@ -112,6 +164,17 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<ReportRow | null>(null);
   const [activeTab, setActiveTab] = useState("geral");
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  const openLightbox = (images: { url: string; label: string }[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   useEffect(() => {
     if (open && reportId) {
@@ -238,16 +301,20 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     statistics.batteriesNok > 0
   );
 
+  // Flatten allPhotos for lightbox (remove category)
+  const lightboxPhotosFlat = allPhotos.map(p => ({ url: p.url, label: `${p.category} - ${p.label}` }));
+
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : report ? (
-          <>
-            {/* Header */}
+    <LightboxContext.Provider value={{ openLightbox }}>
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : report ? (
+            <>
+              {/* Header */}
             <DialogHeader className="px-6 py-4 border-b shrink-0 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -787,9 +854,19 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         <div key={category}>
                           <h3 className="text-sm font-semibold mb-2 text-muted-foreground">{category}</h3>
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {photos.map((photo, idx) => (
-                              <PhotoViewer key={idx} url={photo.url} label={photo.label} compact />
-                            ))}
+                            {photos.map((photo, idx) => {
+                              // Find index in full list for lightbox navigation
+                              const fullIndex = lightboxPhotosFlat.findIndex(p => p.url === photo.url);
+                              return (
+                                <PhotoViewer 
+                                  key={idx} 
+                                  url={photo.url} 
+                                  label={photo.label} 
+                                  compact 
+                                  onClick={() => openLightbox(lightboxPhotosFlat, fullIndex >= 0 ? fullIndex : 0)}
+                                />
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
@@ -804,14 +881,23 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
               </div>
               </Tabs>
             </ScrollArea>
-          </>
-        ) : (
-          <div className="text-center py-12 text-muted-foreground">
-            <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Relatório não encontrado</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+            </>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Relatório não encontrado</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Lightbox */}
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+    </LightboxContext.Provider>
   );
 }
