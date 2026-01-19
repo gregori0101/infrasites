@@ -515,6 +515,7 @@ export type Database = {
           gmg_combustivel: string | null
           gmg_existe: string | null
           gmg_fabricante: string | null
+          gmg_foto_painel: string | null
           gmg_potencia: string | null
           gmg_ultimo_teste: string | null
           id: string
@@ -1032,6 +1033,7 @@ export type Database = {
           gmg_combustivel?: string | null
           gmg_existe?: string | null
           gmg_fabricante?: string | null
+          gmg_foto_painel?: string | null
           gmg_potencia?: string | null
           gmg_ultimo_teste?: string | null
           id?: string
@@ -1549,6 +1551,7 @@ export type Database = {
           gmg_combustivel?: string | null
           gmg_existe?: string | null
           gmg_fabricante?: string | null
+          gmg_foto_painel?: string | null
           gmg_potencia?: string | null
           gmg_ultimo_teste?: string | null
           id?: string
