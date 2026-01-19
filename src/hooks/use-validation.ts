@@ -86,7 +86,10 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         break;
 
       case 6: // Step9GMGTorre
-        // GMG fields are optional based on "informar" toggle
+        // GMG validation - ultimoTeste is required when GMG exists
+        if (data.gmg.informar && !data.gmg.ultimoTeste) {
+          errors.push({ field: 'gmg.ultimoTeste', message: 'Data do último teste é obrigatória quando GMG existe' });
+        }
         // Torre validation
         if (data.torre.ninhos && !data.torre.fotoNinhos) {
           errors.push({ field: 'fotoNinhos', message: 'Foto de ninhos é obrigatória quando há ninhos' });

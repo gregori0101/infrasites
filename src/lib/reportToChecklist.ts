@@ -114,6 +114,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       informar: report.gmg_existe === 'SIM',
       fabricante: report.gmg_fabricante as any,
       potencia: parseInt(report.gmg_potencia) || undefined,
+      ultimoTeste: report.gmg_ultimo_teste || undefined,
     },
     torre: {
       ninhos: report.torre_ninhos === 'SIM',

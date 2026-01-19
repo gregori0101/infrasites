@@ -240,7 +240,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.gmg_fabricante = data.gmg.fabricante || null;
   row.gmg_potencia = data.gmg.potencia || null;
   row.gmg_combustivel = null; // Not in current data structure
-  row.gmg_ultimo_teste = null;
+  row.gmg_ultimo_teste = data.gmg.ultimoTeste || null;
   row.gmg_foto_painel = data.gmg.fotoGMG || null;
   row.torre_ninhos = data.torre.ninhos ? 'SIM' : 'NÃO';
   row.torre_protecao_fibra = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
