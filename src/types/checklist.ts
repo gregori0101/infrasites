@@ -171,6 +171,7 @@ export interface GMGData {
   potencia?: number;
   autonomia?: number;
   status?: StatusFuncionamento;
+  fotoGMG?: string | null;
 }
 
 export interface TorreData {

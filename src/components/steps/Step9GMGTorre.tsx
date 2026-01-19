@@ -108,6 +108,12 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                   ))}
                 </div>
               </div>
+
+              <PhotoCapture
+                label="Foto do Painel do GMG"
+                value={data.gmg.fotoGMG || null}
+                onChange={(value) => updateGMG({ fotoGMG: value })}
+              />
             </div>
           )}
         </div>
