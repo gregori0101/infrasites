@@ -243,6 +243,10 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.torre_foto_ninhos) {
     allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
   }
+  // GMG photo
+  if (report?.gmg_foto_painel) {
+    allPhotos.push({ url: report.gmg_foto_painel, label: "Painel do GMG", category: "GMG" });
+  }
   // Gabinete photos
   for (let g = 1; g <= 7; g++) {
     const panoramica = report?.[`gab${g}_foto_panoramica`];
@@ -823,15 +827,24 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         Grupo Motor Gerador (GMG)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                      <div className="flex items-center gap-2 py-1">
-                        <span className="text-sm text-muted-foreground">Possui GMG:</span>
-                        <StatusBadge status={report.gmg_existe} />
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Possui GMG:</span>
+                          <StatusBadge status={report.gmg_existe} />
+                        </div>
+                        <InfoRow label="Fabricante" value={report.gmg_fabricante} />
+                        <InfoRow label="Potência" value={report.gmg_potencia} />
+                        <InfoRow label="Combustível" value={report.gmg_combustivel} />
+                        <InfoRow label="Último Teste" value={report.gmg_ultimo_teste} />
                       </div>
-                      <InfoRow label="Fabricante" value={report.gmg_fabricante} />
-                      <InfoRow label="Potência" value={report.gmg_potencia} />
-                      <InfoRow label="Combustível" value={report.gmg_combustivel} />
-                      <InfoRow label="Último Teste" value={report.gmg_ultimo_teste} />
+                      
+                      {/* Foto do Painel do GMG */}
+                      {report.gmg_existe === "SIM" && report.gmg_foto_painel && (
+                        <div className="mt-4">
+                          <PhotoViewer url={report.gmg_foto_painel} label="Painel do GMG" />
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 

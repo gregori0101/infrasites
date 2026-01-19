@@ -131,6 +131,7 @@ function buildPhotoColumns(): string {
     'energia_foto_placa',
     'energia_foto_cabos',
     'torre_foto_ninhos',
+    'gmg_foto_painel',
   ];
 
   for (let g = 1; g <= 7; g++) {
@@ -240,6 +241,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.gmg_potencia = data.gmg.potencia || null;
   row.gmg_combustivel = null; // Not in current data structure
   row.gmg_ultimo_teste = null;
+  row.gmg_foto_painel = data.gmg.fotoGMG || null;
   row.torre_ninhos = data.torre.ninhos ? 'SIM' : 'NÃO';
   row.torre_protecao_fibra = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
   row.torre_aterramento = data.torre.aterramento || null;
