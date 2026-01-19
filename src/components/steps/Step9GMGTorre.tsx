@@ -109,6 +109,30 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  Data do Último Teste
+                  <span className="text-destructive">*</span>
+                </Label>
+                <input
+                  type="date"
+                  value={data.gmg.ultimoTeste || ''}
+                  onChange={(e) => updateGMG({ ultimoTeste: e.target.value })}
+                  className={cn(
+                    "w-full h-10 px-3 rounded-md border bg-background text-sm",
+                    showErrors && getFieldError(validationErrors, 'gmg.ultimoTeste')
+                      ? "border-destructive"
+                      : "border-input"
+                  )}
+                />
+                {showErrors && getFieldError(validationErrors, 'gmg.ultimoTeste') && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {getFieldError(validationErrors, 'gmg.ultimoTeste')}
+                  </p>
+                )}
+              </div>
+
               <PhotoCapture
                 label="Foto do Painel do GMG"
                 value={data.gmg.fotoGMG || null}

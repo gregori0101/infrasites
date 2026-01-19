@@ -628,6 +628,7 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     addFieldRow('Potência (kVA)', data.gmg.potencia);
     addFieldRow('Autonomia (h)', data.gmg.autonomia);
     addFieldRow('Status', data.gmg.status, data.gmg.status === 'OK' ? 'ok' : 'error');
+    addFieldRow('Último Teste', data.gmg.ultimoTeste);
     
     // Foto do Painel do GMG
     if (data.gmg.fotoGMG) {

@@ -171,6 +171,7 @@ export interface GMGData {
   potencia?: number;
   autonomia?: number;
   status?: StatusFuncionamento;
+  ultimoTeste?: string;
   fotoGMG?: string | null;
 }
 
