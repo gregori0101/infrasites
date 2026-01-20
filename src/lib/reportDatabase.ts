@@ -299,10 +299,14 @@ export async function saveReportToDatabase(
   excelPath?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const row = buildReportRow(data);
     row.pdf_file_path = pdfPath || null;
     row.excel_file_path = excelPath || null;
     row.email_sent = false;
+    row.user_id = user?.id || null;
 
     const { data: inserted, error } = await supabase
       .from('reports')

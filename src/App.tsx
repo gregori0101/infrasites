@@ -4,10 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ChecklistProvider } from "@/contexts/ChecklistContext";
-import ProtectedHistoryRoute from "@/components/ProtectedHistoryRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ReportsHistory from "./pages/ReportsHistory";
+import Login from "./pages/Login";
+import PendingApproval from "./pages/PendingApproval";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,28 +19,45 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ChecklistProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner position="top-center" />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={
-                <ProtectedHistoryRoute>
-                  <Dashboard />
-                </ProtectedHistoryRoute>
-              } />
-              <Route path="/historico" element={
-                <ProtectedHistoryRoute>
-                  <ReportsHistory />
-                </ProtectedHistoryRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ChecklistProvider>
+      <AuthProvider>
+        <ChecklistProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="top-center" />
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/pending-approval" element={<PendingApproval />} />
+                
+                {/* Protected routes */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute requireGestor>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/historico" element={
+                  <ProtectedRoute>
+                    <ReportsHistory />
+                  </ProtectedRoute>
+                } />
+                <Route path="/usuarios" element={
+                  <ProtectedRoute requireGestor>
+                    <UserManagement />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ChecklistProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
