@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { StepIndicator } from "@/components/ui/step-indicator";
 import { Button } from "@/components/ui/button";
@@ -15,7 +17,7 @@ import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Plug, Cable,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus
+  Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus, LogOut, Users
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -51,11 +53,19 @@ export function ChecklistWizard() {
     resetChecklist
   } = useChecklist();
 
+  const { signOut, isGestor, user } = useAuth();
+  const navigate = useNavigate();
+
   const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
   const [touchEnd, setTouchEnd] = React.useState<{ x: number; y: number } | null>(null);
 
   const progress = calculateProgress();
   const savedChecklists = getAllLocal();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   // Steps 1-4 are per-gabinete (step 0 = site, step 5 = energia)
   const isGabineteStep = (currentStep >= 1 && currentStep <= 4);
@@ -189,15 +199,28 @@ export function ChecklistWizard() {
             >
               <FilePlus className="w-4 h-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => window.location.href = '/dashboard'}
-              title="Dashboard"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-            </Button>
+            {isGestor && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => navigate('/dashboard')}
+                  title="Dashboard"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => navigate('/usuarios')}
+                  title="Gerenciar Usuários"
+                >
+                  <Users className="w-4 h-4" />
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -205,6 +228,15 @@ export function ChecklistWizard() {
               onClick={toggleDarkMode}
             >
               {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleLogout}
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4" />
             </Button>
 
             <Sheet>
