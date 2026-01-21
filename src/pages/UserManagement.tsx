@@ -80,27 +80,18 @@ export default function UserManagement() {
       // Get user IDs to fetch emails
       const userIds = (roles || []).map(r => r.user_id);
       
-      // Fetch emails from edge function
+      // Fetch emails from backend function (uses current session automatically)
       let emailMap: Record<string, string> = {};
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-emails`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${sessionData.session?.access_token}`,
-              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            },
-            body: JSON.stringify({ userIds }),
-          }
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          emailMap = data.emails || {};
+        const { data, error } = await supabase.functions.invoke('get-user-emails', {
+          body: { userIds },
+        });
+
+        if (error) {
+          throw error;
         }
+
+        emailMap = (data as any)?.emails || {};
       } catch (emailError) {
         console.error('Error fetching emails:', emailError);
       }

@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,13 +22,36 @@ Deno.serve(async (req) => {
       );
     }
 
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create client with user's token to verify they're admin
     const supabaseClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: authHeader } }
     });
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
+    // Prefer user id from verified JWT claims (more reliable in functions runtime)
+    let requesterUserId = req.headers.get('x-jwt-claim-sub')?.trim();
+
+    // Fallback: ask auth API for the current user
+    if (!requesterUserId) {
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+      if (userError || !user) {
+        console.error('auth.getUser failed', { message: userError?.message, name: userError?.name });
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      requesterUserId = user.id;
+    }
+
+    if (!requesterUserId) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -36,7 +59,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if user is admin
-    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { _user_id: user.id });
+    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { _user_id: requesterUserId });
     if (!isAdmin) {
       return new Response(
         JSON.stringify({ error: 'Admin access required' }),
