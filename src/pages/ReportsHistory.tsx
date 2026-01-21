@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
   ArrowLeft, Search, Filter, Mail, MailCheck, 
   FileText, FileSpreadsheet, RefreshCw, X,
-  Calendar, User, Building2, Loader2, AlertCircle, Download
+  Calendar, User, Building2, Loader2, AlertCircle, Download, Trash2
 } from "lucide-react";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, generateConsolidatedExcel, downloadExcel } from "@/lib/generateExcel";
@@ -26,7 +26,19 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow } from "@/lib/reportDatabase";
+import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow, deleteReportById } from "@/lib/reportDatabase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ESTADOS_BR = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -36,11 +48,15 @@ const ESTADOS_BR = [
 
 export default function ReportsHistory() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
+
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
   const [downloadingPDFId, setDownloadingPDFId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Filters
   const [siteCodeFilter, setSiteCodeFilter] = useState("");
@@ -243,6 +259,24 @@ Por favor, anexe-os a este email antes de enviar.
       return format(parseISO(createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR });
     } catch {
       return '-';
+    }
+  };
+
+  const handleDeleteSelectedReport = async () => {
+    if (!selectedReport?.id) return;
+    setIsDeleting(true);
+    try {
+      await deleteReportById(selectedReport.id);
+      toast.success("Relatório excluído com sucesso!");
+      setSelectedReport(null);
+      await queryClient.invalidateQueries({ queryKey: ['reports-summary'] });
+    } catch (err) {
+      console.error('Error deleting report:', err);
+      toast.error('Erro ao excluir relatório', {
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -572,6 +606,43 @@ Por favor, anexe-os a este email antes de enviar.
                   <Mail className="w-4 h-4 mr-2" />
                   Enviar Email
                 </Button>
+
+                {isAdmin && selectedReport?.id && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        disabled={isGeneratingPDF || isGeneratingExcel || isDeleting}
+                        title="Excluir relatório"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4 mr-2" />
+                        )}
+                        Excluir
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir relatório?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação é permanente. O relatório será removido do sistema.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteSelectedReport}
+                          disabled={isDeleting}
+                        >
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </Card>
           </div>
