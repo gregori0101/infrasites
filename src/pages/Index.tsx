@@ -21,9 +21,6 @@ const Index = () => {
       updateData('siglaSite', assignment.site.site_code);
       updateData('uf', assignment.site.uf as any);
       
-      // Store assignment ID for later linking
-      sessionStorage.setItem('currentAssignmentId', assignment.id);
-      
       // Switch to checklist tab and start from beginning
       setCurrentStep(0);
       setCurrentGabinete(0);

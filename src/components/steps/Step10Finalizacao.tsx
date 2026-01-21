@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
 import { saveReportToDatabase } from "@/lib/reportDatabase";
+import { updateAssignmentStatus } from "@/lib/assignmentDatabase";
 import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
@@ -317,6 +318,19 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       const result = await saveReportToDatabase(preparedData, pdfFilename, excelFilename);
       
       if (result.success) {
+        // 4. Vincular à atribuição se houver
+        const assignmentId = sessionStorage.getItem('currentAssignmentId');
+        if (assignmentId && result.id) {
+          try {
+            setUploadProgress('Finalizando atribuição...');
+            await updateAssignmentStatus(assignmentId, 'concluido', result.id);
+            sessionStorage.removeItem('currentAssignmentId');
+          } catch (assignmentError) {
+            console.error('Error updating assignment:', assignmentError);
+            // Don't fail the whole operation, just log the error
+          }
+        }
+        
         toast.success('Relatório enviado com sucesso!', {
           description: 'Os dados foram salvos e os arquivos foram baixados.'
         });
