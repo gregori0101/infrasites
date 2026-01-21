@@ -325,3 +325,44 @@ export function getPhotoUrl(path: string): string {
   
   return data.publicUrl;
 }
+
+function extractBucketPathFromPublicUrl(publicUrl: string): string | null {
+  try {
+    const url = new URL(publicUrl);
+    // Expected path: /storage/v1/object/public/<bucket>/<path>
+    const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+    const idx = url.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(url.pathname.substring(idx + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Deletes photos from storage given their public URLs.
+ * Only URLs that belong to the configured bucket will be deleted.
+ */
+export async function deletePhotosByPublicUrls(publicUrls: string[]): Promise<{ deleted: number }>{
+  const paths = Array.from(
+    new Set(
+      (publicUrls || [])
+        .filter((u): u is string => typeof u === 'string' && u.startsWith('http'))
+        .map(extractBucketPathFromPublicUrl)
+        .filter((p): p is string => !!p)
+    )
+  );
+
+  if (paths.length === 0) return { deleted: 0 };
+
+  const { error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .remove(paths);
+
+  if (error) {
+    console.error('Error deleting photos from storage:', error);
+    throw new Error(`Erro ao excluir fotos do armazenamento: ${error.message}`);
+  }
+
+  return { deleted: paths.length };
+}

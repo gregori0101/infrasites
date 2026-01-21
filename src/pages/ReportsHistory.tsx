@@ -28,6 +28,8 @@ import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow, deleteReportById } from "@/lib/reportDatabase";
 import { clearReportLinkFromAssignments } from "@/lib/assignmentDatabase";
+import { deletePhotosByPublicUrls } from "@/lib/photoStorage";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +60,7 @@ export default function ReportsHistory() {
   const [isExportingAll, setIsExportingAll] = useState(false);
   const [downloadingPDFId, setDownloadingPDFId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [shouldDeletePhotos, setShouldDeletePhotos] = useState(false);
   
   // Filters
   const [siteCodeFilter, setSiteCodeFilter] = useState("");
@@ -123,6 +126,7 @@ export default function ReportsHistory() {
       // Carrega o relatório com URLs das fotos para gerar o PDF com imagens
       const fullReport = await fetchReportByIdWithPhotos(report.id);
       setSelectedReport(fullReport);
+      setShouldDeletePhotos(false);
     }
   };
 
@@ -267,11 +271,20 @@ Por favor, anexe-os a este email antes de enviar.
     if (!selectedReport?.id) return;
     setIsDeleting(true);
     try {
+      if (shouldDeletePhotos) {
+        // Delete any photo URLs present in the report object.
+        const urls = Object.values(selectedReport).filter(
+          (v): v is string => typeof v === 'string' && v.startsWith('http')
+        );
+        await deletePhotosByPublicUrls(urls);
+      }
+
       // Avoid broken references: clear any assignment that points to this report.
       await clearReportLinkFromAssignments(selectedReport.id);
       await deleteReportById(selectedReport.id);
       toast.success("Relatório excluído com sucesso!");
       setSelectedReport(null);
+      setShouldDeletePhotos(false);
       await queryClient.invalidateQueries({ queryKey: ['reports-summary'] });
     } catch (err) {
       console.error('Error deleting report:', err);
@@ -634,6 +647,22 @@ Por favor, anexe-os a este email antes de enviar.
                           Esta ação é permanente. O relatório será removido do sistema.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
+
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium">Excluir também as fotos</p>
+                          <p className="text-xs text-muted-foreground">
+                            Se ativado, as fotos serão removidas do armazenamento.
+                          </p>
+                        </div>
+                        <Switch
+                          checked={shouldDeletePhotos}
+                          onCheckedChange={setShouldDeletePhotos}
+                          disabled={isDeleting}
+                          aria-label="Excluir também as fotos"
+                        />
+                      </div>
+
                       <AlertDialogFooter>
                         <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
