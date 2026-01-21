@@ -12,6 +12,8 @@ import ReportsHistory from "./pages/ReportsHistory";
 import Login from "./pages/Login";
 import PendingApproval from "./pages/PendingApproval";
 import UserManagement from "./pages/UserManagement";
+import SiteManagement from "./pages/SiteManagement";
+import AssignmentManagement from "./pages/AssignmentManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +51,16 @@ const App = () => {
                 <Route path="/usuarios" element={
                   <ProtectedRoute requireAdmin>
                     <UserManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/sites" element={
+                  <ProtectedRoute requireAdmin>
+                    <SiteManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/atribuicoes" element={
+                  <ProtectedRoute requireGestor>
+                    <AssignmentManagement />
                   </ProtectedRoute>
                 } />
                 
