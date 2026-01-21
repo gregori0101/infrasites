@@ -57,9 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshRole = async () => {
-    if (user) {
-      const role = await fetchUserRole(user.id);
+    // Get current session to ensure we have the latest user
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (currentSession?.user) {
+      const role = await fetchUserRole(currentSession.user.id);
       setUserRole(role);
+      setUser(currentSession.user);
+      setSession(currentSession);
     }
   };
 

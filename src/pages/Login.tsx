@@ -19,7 +19,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, refreshRole } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,12 +56,15 @@ export default function Login() {
             .eq('user_id', data.user.id)
             .single();
           
+          // Refresh the auth context role
+          await refreshRole();
+          
           if (roleData?.approved) {
             // Approved user - go directly to checklist
             navigate('/');
           } else {
             // Not approved - go to pending approval page
-            navigate('/aguardando-aprovacao');
+            navigate('/pending-approval');
           }
         }
       } else {
