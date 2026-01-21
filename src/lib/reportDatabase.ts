@@ -541,3 +541,19 @@ export async function fetchFullReportById(id: string): Promise<ReportRow | null>
 
   return data as ReportRow | null;
 }
+
+/**
+ * Delete a report by ID.
+ * RLS: only administrators are allowed to delete.
+ */
+export async function deleteReportById(reportId: string): Promise<void> {
+  const { error } = await supabase
+    .from('reports')
+    .delete()
+    .eq('id', reportId);
+
+  if (error) {
+    console.error('Error deleting report:', error);
+    throw new Error(`Erro ao excluir relatório: ${error.message}`);
+  }
+}
