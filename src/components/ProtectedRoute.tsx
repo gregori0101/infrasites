@@ -6,10 +6,11 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   children: ReactNode;
   requireGestor?: boolean;
+  requireAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children, requireGestor = false }: ProtectedRouteProps) {
-  const { user, isLoading, isApproved, isGestor } = useAuth();
+export default function ProtectedRoute({ children, requireGestor = false, requireAdmin = false }: ProtectedRouteProps) {
+  const { user, isLoading, isApproved, isGestor, isAdmin } = useAuth();
 
   if (isLoading) {
     return (
@@ -32,7 +33,12 @@ export default function ProtectedRoute({ children, requireGestor = false }: Prot
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Requires gestor but user is not gestor
+  // Requires admin but user is not admin
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Requires gestor but user is not gestor (includes admin)
   if (requireGestor && !isGestor) {
     return <Navigate to="/" replace />;
   }
