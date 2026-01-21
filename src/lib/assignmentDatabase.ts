@@ -156,8 +156,7 @@ export async function fetchTechnicians(): Promise<{ id: string; email: string }[
   }
 }
 
-export async function getUnassignedSites(): Promise<{ id: string; site_code: string; uf: string; tipo: string }[]> {
-  // Get all sites
+export async function getAllSites(): Promise<{ id: string; site_code: string; uf: string; tipo: string }[]> {
   const { data: sites, error: sitesError } = await supabase
     .from('sites')
     .select('id, site_code, uf, tipo')
@@ -168,18 +167,5 @@ export async function getUnassignedSites(): Promise<{ id: string; site_code: str
     throw sitesError;
   }
 
-  // Get sites with pending/in_progress assignments
-  const { data: assignments, error: assignmentsError } = await supabase
-    .from('site_assignments')
-    .select('site_id')
-    .in('status', ['pendente', 'em_andamento']);
-
-  if (assignmentsError) {
-    console.error('Error fetching assignments:', assignmentsError);
-    throw assignmentsError;
-  }
-
-  const assignedSiteIds = new Set((assignments || []).map(a => a.site_id));
-  
-  return (sites || []).filter(site => !assignedSiteIds.has(site.id));
+  return sites || [];
 }

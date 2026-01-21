@@ -61,7 +61,7 @@ import {
   fetchAssignments, 
   createAssignment, 
   deleteAssignment, 
-  getUnassignedSites,
+  getAllSites,
   fetchTechnicians,
   SiteAssignment,
   AssignmentStatus
@@ -102,9 +102,9 @@ export default function AssignmentManagement() {
     queryFn: fetchAssignments,
   });
 
-  const { data: unassignedSites = [] } = useQuery({
-    queryKey: ['unassigned-sites'],
-    queryFn: getUnassignedSites,
+  const { data: allSites = [] } = useQuery({
+    queryKey: ['all-sites'],
+    queryFn: getAllSites,
   });
 
   const { data: technicians = [] } = useQuery({
@@ -116,7 +116,7 @@ export default function AssignmentManagement() {
     mutationFn: createAssignment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-sites'] });
+      queryClient.invalidateQueries({ queryKey: ['all-sites'] });
       toast.success('Vistoria atribuída com sucesso');
       setAssignDialogOpen(false);
       resetForm();
@@ -130,7 +130,7 @@ export default function AssignmentManagement() {
     mutationFn: deleteAssignment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-sites'] });
+      queryClient.invalidateQueries({ queryKey: ['all-sites'] });
       toast.success('Atribuição removida');
       setDeleteDialogOpen(false);
       setAssignmentToDelete(null);
@@ -377,7 +377,7 @@ export default function AssignmentManagement() {
                   >
                     {selectedSite
                       ? (() => {
-                          const site = unassignedSites.find((s) => s.id === selectedSite);
+                          const site = allSites.find((s) => s.id === selectedSite);
                           return site ? `${site.site_code} - ${site.uf} (${site.tipo})` : "Selecione o site";
                         })()
                       : "Selecione o site"}
@@ -390,7 +390,7 @@ export default function AssignmentManagement() {
                     <CommandList>
                       <CommandEmpty>Nenhum site encontrado.</CommandEmpty>
                       <CommandGroup>
-                        {unassignedSites.map((site) => (
+                        {allSites.map((site) => (
                           <CommandItem
                             key={site.id}
                             value={`${site.site_code} ${site.uf} ${site.tipo}`}
