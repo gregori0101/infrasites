@@ -37,13 +37,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, UserPlus, Calendar, Search, Trash2, 
-  Clock, CheckCircle, AlertCircle, Building2
+  Clock, CheckCircle, AlertCircle, Building2, ChevronsUpDown, Check
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { 
   fetchAssignments, 
   createAssignment, 
@@ -70,6 +83,7 @@ export default function AssignmentManagement() {
   const [assignDialogOpen, setAssignDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = React.useState<SiteAssignment | null>(null);
+  const [sitePopoverOpen, setSitePopoverOpen] = React.useState(false);
   
   // Assignment form state
   const [selectedSite, setSelectedSite] = React.useState("");
@@ -353,24 +367,52 @@ export default function AssignmentManagement() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Site</Label>
-              <Select value={selectedSite} onValueChange={setSelectedSite}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o site" />
-                </SelectTrigger>
-                <SelectContent>
-                  {unassignedSites.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      Nenhum site disponível
-                    </SelectItem>
-                  ) : (
-                    unassignedSites.map((site) => (
-                      <SelectItem key={site.id} value={site.id}>
-                        {site.site_code} - {site.uf} ({site.tipo})
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <Popover open={sitePopoverOpen} onOpenChange={setSitePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={sitePopoverOpen}
+                    className="w-full justify-between font-normal"
+                  >
+                    {selectedSite
+                      ? (() => {
+                          const site = unassignedSites.find((s) => s.id === selectedSite);
+                          return site ? `${site.site_code} - ${site.uf} (${site.tipo})` : "Selecione o site";
+                        })()
+                      : "Selecione o site"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar por sigla do site..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum site encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {unassignedSites.map((site) => (
+                          <CommandItem
+                            key={site.id}
+                            value={`${site.site_code} ${site.uf} ${site.tipo}`}
+                            onSelect={() => {
+                              setSelectedSite(site.id);
+                              setSitePopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedSite === site.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {site.site_code} - {site.uf} ({site.tipo})
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
