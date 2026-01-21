@@ -49,6 +49,7 @@ import {
   createAssignment, 
   deleteAssignment, 
   getUnassignedSites,
+  fetchTechnicians,
   SiteAssignment,
   AssignmentStatus
 } from "@/lib/assignmentDatabase";
@@ -94,22 +95,7 @@ export default function AssignmentManagement() {
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],
-    queryFn: async (): Promise<Technician[]> => {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'tecnico')
-        .eq('approved', true);
-      
-      if (error) throw error;
-      
-      // Return user_ids as both id and email for now
-      // In production, you'd use an edge function to get actual emails
-      return (data || []).map(r => ({ 
-        id: r.user_id, 
-        email: `Técnico ${r.user_id.slice(0, 8)}...` 
-      }));
-    },
+    queryFn: fetchTechnicians,
   });
 
   const createMutation = useMutation({
