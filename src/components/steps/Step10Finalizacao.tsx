@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
-  FileText, Camera, PenTool, Send, 
+  FileText, Camera, Send, 
   CheckCircle, Loader2, AlertCircle, Upload,
   Eye, X, Download, ArrowLeft, ImageIcon,
   Battery, Thermometer, Zap, Radio, Building2
@@ -61,7 +61,6 @@ function calculateChecklistStats(data: ChecklistData): ChecklistStats {
   // Count main photos
   countPhoto(data.fotoPanoramica);
   countPhoto(data.fotoObservacao);
-  countPhoto(data.assinaturaDigital);
 
   // Process gabinetes
   data.gabinetes.forEach(gab => {
@@ -156,8 +155,6 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const [preparedData, setPreparedData] = React.useState<any>(null);
   const [pdfBlob, setPdfBlob] = React.useState<Blob | null>(null);
   const [checklistStats, setChecklistStats] = React.useState<ChecklistStats | null>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = React.useState(false);
 
   const progress = calculateProgress();
 
@@ -166,60 +163,6 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     setChecklistStats(calculateChecklistStats(data));
   }, [data]);
 
-  const handleCanvasStart = (e: React.TouchEvent | React.MouseEvent) => {
-    setIsDrawing(true);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-    
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  };
-
-  const handleCanvasMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-    
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = 'hsl(var(--primary))';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  };
-
-  const handleCanvasEnd = () => {
-    setIsDrawing(false);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const dataUrl = canvas.toDataURL();
-      updateData('assinaturaDigital', dataUrl);
-    }
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-    updateData('assinaturaDigital', null);
-  };
 
   // Cleanup PDF URL when component unmounts or preview closes
   React.useEffect(() => {
@@ -426,33 +369,6 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         />
       </FormCard>
 
-      <FormCard title="Assinatura Digital" icon={<PenTool className="w-4 h-4" />} variant="accent">
-        <div className="space-y-3">
-          <div className="border-2 border-dashed border-primary/30 rounded-lg overflow-hidden bg-card">
-            <canvas
-              ref={canvasRef}
-              width={300}
-              height={150}
-              className="w-full touch-none"
-              onMouseDown={handleCanvasStart}
-              onMouseMove={handleCanvasMove}
-              onMouseUp={handleCanvasEnd}
-              onMouseLeave={handleCanvasEnd}
-              onTouchStart={handleCanvasStart}
-              onTouchMove={handleCanvasMove}
-              onTouchEnd={handleCanvasEnd}
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">
-              Desenhe sua assinatura acima
-            </span>
-            <Button variant="outline" size="sm" onClick={clearSignature}>
-              Limpar
-            </Button>
-          </div>
-        </div>
-      </FormCard>
 
       {uploadProgress && (
         <div className="rounded-lg p-3 bg-primary/10 border border-primary/30 flex items-center gap-3">
