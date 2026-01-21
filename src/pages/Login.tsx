@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
 import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet';
 
 export default function Login() {
@@ -40,17 +41,28 @@ export default function Login() {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
+        const { error, data } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
             setError('Email ou senha incorretos');
           } else {
             setError(error.message);
           }
-        } else {
-          // Redirect will happen after auth state updates - navigate to home
-          // The Index page handles role-based display
-          navigate('/');
+        } else if (data?.user) {
+          // Check if user is approved
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('approved')
+            .eq('user_id', data.user.id)
+            .single();
+          
+          if (roleData?.approved) {
+            // Approved user - go directly to checklist
+            navigate('/');
+          } else {
+            // Not approved - go to pending approval page
+            navigate('/aguardando-aprovacao');
+          }
         }
       } else {
         const { error } = await signUp(email, password);
