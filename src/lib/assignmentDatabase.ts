@@ -125,19 +125,35 @@ export async function deleteAssignment(assignmentId: string): Promise<void> {
 }
 
 export async function fetchTechnicians(): Promise<{ id: string; email: string }[]> {
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('user_id')
-    .eq('role', 'tecnico')
-    .eq('approved', true);
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session?.session?.access_token) {
+      throw new Error('No session');
+    }
 
-  if (error) {
+    const response = await supabase.functions.invoke('get-technician-emails', {
+      headers: {
+        Authorization: `Bearer ${session.session.access_token}`
+      }
+    });
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    return response.data?.technicians || [];
+  } catch (error) {
     console.error('Error fetching technicians:', error);
-    throw error;
+    // Fallback to basic query if edge function fails
+    const { data } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'tecnico')
+      .eq('approved', true);
+    
+    return (data || []).map(r => ({ id: r.user_id, email: r.user_id.substring(0, 8) + '...' }));
   }
-
-  // We need to get user emails - this requires an edge function or we return just IDs
-  return (data || []).map(r => ({ id: r.user_id, email: r.user_id }));
 }
 
 export async function getUnassignedSites(): Promise<{ id: string; site_code: string; uf: string; tipo: string }[]> {

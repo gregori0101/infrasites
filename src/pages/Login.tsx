@@ -48,6 +48,8 @@ export default function Login() {
             setError(error.message);
           }
         } else {
+          // Redirect will happen after auth state updates - navigate to home
+          // The Index page handles role-based display
           navigate('/');
         }
       } else {
