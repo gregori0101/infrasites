@@ -72,12 +72,38 @@ export default function UserManagement() {
 
       if (rolesError) throw rolesError;
 
-      // Get emails from auth metadata - for now use a workaround
-      // Since we can't query auth.users directly, we'll display user_id
+      // Get user IDs to fetch emails
+      const userIds = (roles || []).map(r => r.user_id);
+      
+      // Fetch emails from edge function
+      let emailMap: Record<string, string> = {};
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-emails`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionData.session?.access_token}`,
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({ userIds }),
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          emailMap = data.emails || {};
+        }
+      } catch (emailError) {
+        console.error('Error fetching emails:', emailError);
+      }
+
       const usersWithRoles: UserWithRole[] = (roles || []).map((role) => ({
         id: role.id,
         user_id: role.user_id,
-        email: role.user_id.slice(0, 8) + '...', // Placeholder
+        email: emailMap[role.user_id] || role.user_id.slice(0, 8) + '...',
         role: role.role as 'administrador' | 'gestor' | 'tecnico',
         approved: role.approved,
         created_at: role.created_at,
