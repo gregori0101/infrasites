@@ -157,15 +157,32 @@ export async function fetchTechnicians(): Promise<{ id: string; email: string }[
 }
 
 export async function getAllSites(): Promise<{ id: string; site_code: string; uf: string; tipo: string }[]> {
-  const { data: sites, error: sitesError } = await supabase
-    .from('sites')
-    .select('id, site_code, uf, tipo')
-    .order('site_code');
+  // Supabase has a default limit of 1000 rows per query; fetch all via pagination.
+  const allSites: { id: string; site_code: string; uf: string; tipo: string }[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  let hasMore = true;
 
-  if (sitesError) {
-    console.error('Error fetching sites:', sitesError);
-    throw sitesError;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, site_code, uf, tipo')
+      .order('site_code', { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error('Error fetching sites:', error);
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      allSites.push(...data);
+      from += pageSize;
+      hasMore = data.length === pageSize;
+    } else {
+      hasMore = false;
+    }
   }
 
-  return sites || [];
+  return allSites;
 }
