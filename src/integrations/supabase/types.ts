@@ -1574,6 +1574,87 @@ export type Database = {
         }
         Relationships: []
       }
+      site_assignments: {
+        Row: {
+          assigned_by: string
+          completed_at: string | null
+          created_at: string
+          deadline: string
+          id: string
+          report_id: string | null
+          site_id: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          technician_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          completed_at?: string | null
+          created_at?: string
+          deadline: string
+          id?: string
+          report_id?: string | null
+          site_id: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          technician_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string
+          id?: string
+          report_id?: string | null
+          site_id?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          technician_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_assignments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_assignments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          site_code: string
+          tipo: string
+          uf: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          site_code: string
+          tipo: string
+          uf: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          site_code?: string
+          tipo?: string
+          uf?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           approved: boolean
@@ -1625,6 +1706,7 @@ export type Database = {
     }
     Enums: {
       app_role: "gestor" | "tecnico" | "administrador"
+      assignment_status: "pendente" | "em_andamento" | "concluido" | "atrasado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1753,6 +1835,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["gestor", "tecnico", "administrador"],
+      assignment_status: ["pendente", "em_andamento", "concluido", "atrasado"],
     },
   },
 } as const

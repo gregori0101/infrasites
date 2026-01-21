@@ -1,0 +1,169 @@
+import { supabase } from "@/integrations/supabase/client";
+
+export type AssignmentStatus = 'pendente' | 'em_andamento' | 'concluido' | 'atrasado';
+export type AssignmentStatusDB = 'pendente' | 'em_andamento' | 'concluido' | 'atrasado';
+
+export interface SiteAssignment {
+  id: string;
+  site_id: string;
+  technician_id: string;
+  assigned_by: string;
+  deadline: string;
+  status: AssignmentStatus;
+  completed_at: string | null;
+  report_id: string | null;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  site?: {
+    site_code: string;
+    uf: string;
+    tipo: string;
+  };
+  technician?: {
+    email: string;
+  };
+}
+
+export interface AssignmentInsert {
+  site_id: string;
+  technician_id: string;
+  deadline: string;
+}
+
+export async function fetchAssignments(): Promise<SiteAssignment[]> {
+  const { data, error } = await supabase
+    .from('site_assignments')
+    .select(`
+      *,
+      site:sites(site_code, uf, tipo)
+    `)
+    .order('deadline', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching assignments:', error);
+    throw error;
+  }
+
+  return (data || []) as unknown as SiteAssignment[];
+}
+
+export async function fetchTechnicianAssignments(technicianId: string): Promise<SiteAssignment[]> {
+  const { data, error } = await supabase
+    .from('site_assignments')
+    .select(`
+      *,
+      site:sites(site_code, uf, tipo)
+    `)
+    .eq('technician_id', technicianId)
+    .order('deadline', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching technician assignments:', error);
+    throw error;
+  }
+
+  return (data || []) as unknown as SiteAssignment[];
+}
+
+export async function createAssignment(assignment: AssignmentInsert): Promise<void> {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user) throw new Error('User not authenticated');
+
+  const { error } = await supabase
+    .from('site_assignments')
+    .insert({
+      site_id: assignment.site_id,
+      technician_id: assignment.technician_id,
+      assigned_by: user.user.id,
+      deadline: assignment.deadline,
+      status: 'pendente'
+    });
+
+  if (error) {
+    console.error('Error creating assignment:', error);
+    throw error;
+  }
+}
+
+export async function updateAssignmentStatus(
+  assignmentId: string, 
+  status: AssignmentStatus,
+  reportId?: string
+): Promise<void> {
+  const updates: Record<string, unknown> = { status };
+  
+  if (status === 'concluido') {
+    updates.completed_at = new Date().toISOString();
+  }
+  
+  if (reportId) {
+    updates.report_id = reportId;
+  }
+
+  const { error } = await supabase
+    .from('site_assignments')
+    .update(updates)
+    .eq('id', assignmentId);
+
+  if (error) {
+    console.error('Error updating assignment status:', error);
+    throw error;
+  }
+}
+
+export async function deleteAssignment(assignmentId: string): Promise<void> {
+  const { error } = await supabase
+    .from('site_assignments')
+    .delete()
+    .eq('id', assignmentId);
+
+  if (error) {
+    console.error('Error deleting assignment:', error);
+    throw error;
+  }
+}
+
+export async function fetchTechnicians(): Promise<{ id: string; email: string }[]> {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('user_id')
+    .eq('role', 'tecnico')
+    .eq('approved', true);
+
+  if (error) {
+    console.error('Error fetching technicians:', error);
+    throw error;
+  }
+
+  // We need to get user emails - this requires an edge function or we return just IDs
+  return (data || []).map(r => ({ id: r.user_id, email: r.user_id }));
+}
+
+export async function getUnassignedSites(): Promise<{ id: string; site_code: string; uf: string; tipo: string }[]> {
+  // Get all sites
+  const { data: sites, error: sitesError } = await supabase
+    .from('sites')
+    .select('id, site_code, uf, tipo')
+    .order('site_code');
+
+  if (sitesError) {
+    console.error('Error fetching sites:', sitesError);
+    throw sitesError;
+  }
+
+  // Get sites with pending/in_progress assignments
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from('site_assignments')
+    .select('site_id')
+    .in('status', ['pendente', 'em_andamento']);
+
+  if (assignmentsError) {
+    console.error('Error fetching assignments:', assignmentsError);
+    throw assignmentsError;
+  }
+
+  const assignedSiteIds = new Set((assignments || []).map(a => a.site_id));
+  
+  return (sites || []).filter(site => !assignedSiteIds.has(site.id));
+}
