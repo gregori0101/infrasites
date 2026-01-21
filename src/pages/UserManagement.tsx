@@ -14,7 +14,10 @@ import {
   Shield, 
   Wrench,
   Loader2,
-  RefreshCw 
+  RefreshCw,
+  Mail,
+  Calendar,
+  UserCog
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +48,8 @@ interface UserWithRole {
   role: 'administrador' | 'gestor' | 'tecnico';
   approved: boolean;
   created_at: string;
+  approved_at: string | null;
+  approved_by: string | null;
 }
 
 export default function UserManagement() {
@@ -107,6 +112,8 @@ export default function UserManagement() {
         role: role.role as 'administrador' | 'gestor' | 'tecnico',
         approved: role.approved,
         created_at: role.created_at,
+        approved_at: role.approved_at,
+        approved_by: role.approved_by,
       }));
 
       setUsers(usersWithRoles);
@@ -291,11 +298,17 @@ export default function UserManagement() {
                       key={u.id}
                       className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                     >
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{u.user_id}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Cadastro: {new Date(u.created_at).toLocaleDateString('pt-BR')}
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <p className="font-medium text-sm truncate">{u.email}</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Cadastro: {new Date(u.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -349,29 +362,48 @@ export default function UserManagement() {
                   {approvedUsers.map((u) => (
                     <div
                       key={u.id}
-                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                      className="p-4 bg-muted/50 rounded-lg space-y-3"
                     >
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          {u.role === 'gestor' ? (
-                            <Shield className="h-4 w-4 text-primary" />
-                          ) : (
-                            <Wrench className="h-4 w-4 text-primary" />
-                          )}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            {u.role === 'administrador' ? (
+                              <UserCog className="h-5 w-5 text-primary" />
+                            ) : u.role === 'gestor' ? (
+                              <Shield className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Wrench className="h-5 w-5 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <p className="font-medium text-sm truncate">{u.email}</p>
+                              <Badge 
+                                variant={u.role === 'administrador' ? 'default' : u.role === 'gestor' ? 'default' : 'secondary'} 
+                                className={`text-xs shrink-0 ${u.role === 'administrador' ? 'bg-primary' : ''}`}
+                              >
+                                {u.role === 'administrador' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : 'Técnico'}
+                              </Badge>
+                              {u.user_id === user?.id && (
+                                <Badge variant="outline" className="text-xs shrink-0">Você</Badge>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                Cadastro: {new Date(u.created_at).toLocaleDateString('pt-BR')} às {new Date(u.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {u.approved_at && (
+                                <span className="flex items-center gap-1">
+                                  <Check className="h-3 w-3 text-green-500" />
+                                  Aprovado: {new Date(u.approved_at).toLocaleDateString('pt-BR')} às {new Date(u.approved_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-sm">{u.user_id}</p>
-                          <Badge 
-                            variant={u.role === 'administrador' ? 'default' : u.role === 'gestor' ? 'default' : 'secondary'} 
-                            className={`text-xs ${u.role === 'administrador' ? 'bg-purple-600' : ''}`}
-                          >
-                            {u.role === 'administrador' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : 'Técnico'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
                         {u.user_id !== user?.id && (
-                          <>
+                          <div className="flex items-center gap-2 shrink-0">
                             <Select
                               value={u.role}
                               onValueChange={(value) => handleRoleChange(u.user_id, value as 'administrador' | 'gestor' | 'tecnico')}
@@ -395,7 +427,7 @@ export default function UserManagement() {
                                 open: true, 
                                 userId: u.user_id, 
                                 action: 'reject',
-                                email: u.user_id 
+                                email: u.email 
                               })}
                             >
                               {actionLoading === u.user_id ? (
@@ -404,10 +436,7 @@ export default function UserManagement() {
                                 <X className="h-4 w-4" />
                               )}
                             </Button>
-                          </>
-                        )}
-                        {u.user_id === user?.id && (
-                          <Badge variant="outline" className="text-xs">Você</Badge>
+                          </div>
                         )}
                       </div>
                     </div>
