@@ -186,3 +186,19 @@ export async function getAllSites(): Promise<{ id: string; site_code: string; uf
 
   return allSites;
 }
+
+/**
+ * Clears the report link from assignments that reference a given report.
+ * Useful when deleting a report to avoid broken references.
+ */
+export async function clearReportLinkFromAssignments(reportId: string): Promise<void> {
+  const { error } = await supabase
+    .from('site_assignments')
+    .update({ report_id: null })
+    .eq('report_id', reportId);
+
+  if (error) {
+    console.error('Error clearing report link from assignments:', error);
+    throw new Error(`Erro ao limpar vínculo de atribuições: ${error.message}`);
+  }
+}

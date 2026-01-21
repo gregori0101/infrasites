@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow, deleteReportById } from "@/lib/reportDatabase";
+import { clearReportLinkFromAssignments } from "@/lib/assignmentDatabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -266,6 +267,8 @@ Por favor, anexe-os a este email antes de enviar.
     if (!selectedReport?.id) return;
     setIsDeleting(true);
     try {
+      // Avoid broken references: clear any assignment that points to this report.
+      await clearReportLinkFromAssignments(selectedReport.id);
       await deleteReportById(selectedReport.id);
       toast.success("Relatório excluído com sucesso!");
       setSelectedReport(null);
