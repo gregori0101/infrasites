@@ -89,6 +89,9 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
 
   const handleStartChecklist = async (assignment: SiteAssignment) => {
     try {
+      // Store assignment ID for linking after completion
+      sessionStorage.setItem('currentAssignmentId', assignment.id);
+      
       if (assignment.status === 'pendente') {
         await updateAssignmentStatus(assignment.id, 'em_andamento');
         refetch();
