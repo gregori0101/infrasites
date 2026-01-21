@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if user is admin
-    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { uid: user.id });
+    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { _user_id: user.id });
     if (!isAdmin) {
       return new Response(
         JSON.stringify({ error: 'Admin access required' }),
