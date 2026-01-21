@@ -47,7 +47,7 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 <Route path="/usuarios" element={
-                  <ProtectedRoute requireGestor>
+                  <ProtectedRoute requireAdmin>
                     <UserManagement />
                   </ProtectedRoute>
                 } />

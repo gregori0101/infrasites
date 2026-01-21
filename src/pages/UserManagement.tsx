@@ -42,14 +42,14 @@ interface UserWithRole {
   id: string;
   user_id: string;
   email: string;
-  role: 'gestor' | 'tecnico';
+  role: 'administrador' | 'gestor' | 'tecnico';
   approved: boolean;
   created_at: string;
 }
 
 export default function UserManagement() {
   const navigate = useNavigate();
-  const { user, isGestor } = useAuth();
+  const { user, isAdmin, userRole } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function UserManagement() {
         id: role.id,
         user_id: role.user_id,
         email: role.user_id.slice(0, 8) + '...', // Placeholder
-        role: role.role as 'gestor' | 'tecnico',
+        role: role.role as 'administrador' | 'gestor' | 'tecnico',
         approved: role.approved,
         created_at: role.created_at,
       }));
@@ -97,12 +97,12 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
-    if (!isGestor) {
+    if (!isAdmin) {
       navigate('/');
       return;
     }
     fetchUsers();
-  }, [isGestor, navigate]);
+  }, [isAdmin, navigate]);
 
   const handleApprove = async (userId: string) => {
     setActionLoading(userId);
@@ -170,7 +170,7 @@ export default function UserManagement() {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'gestor' | 'tecnico') => {
+  const handleRoleChange = async (userId: string, newRole: 'administrador' | 'gestor' | 'tecnico') => {
     setActionLoading(userId);
     try {
       const { error } = await supabase
@@ -180,9 +180,15 @@ export default function UserManagement() {
 
       if (error) throw error;
 
+      const roleLabels = {
+        administrador: 'Administrador',
+        gestor: 'Gestor',
+        tecnico: 'Técnico'
+      };
+
       toast({
         title: 'Perfil alterado',
-        description: `Usuário agora é ${newRole === 'gestor' ? 'Gestor' : 'Técnico'}`,
+        description: `Usuário agora é ${roleLabels[newRole]}`,
       });
       
       fetchUsers();
@@ -201,7 +207,7 @@ export default function UserManagement() {
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
 
-  if (!isGestor) {
+  if (!isAdmin) {
     return null;
   }
 
@@ -329,8 +335,11 @@ export default function UserManagement() {
                         </div>
                         <div>
                           <p className="font-medium text-sm">{u.user_id}</p>
-                          <Badge variant={u.role === 'gestor' ? 'default' : 'secondary'} className="text-xs">
-                            {u.role === 'gestor' ? 'Gestor' : 'Técnico'}
+                          <Badge 
+                            variant={u.role === 'administrador' ? 'default' : u.role === 'gestor' ? 'default' : 'secondary'} 
+                            className={`text-xs ${u.role === 'administrador' ? 'bg-purple-600' : ''}`}
+                          >
+                            {u.role === 'administrador' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : 'Técnico'}
                           </Badge>
                         </div>
                       </div>
@@ -339,15 +348,16 @@ export default function UserManagement() {
                           <>
                             <Select
                               value={u.role}
-                              onValueChange={(value) => handleRoleChange(u.user_id, value as 'gestor' | 'tecnico')}
+                              onValueChange={(value) => handleRoleChange(u.user_id, value as 'administrador' | 'gestor' | 'tecnico')}
                               disabled={actionLoading === u.user_id}
                             >
-                              <SelectTrigger className="w-28 h-8">
+                              <SelectTrigger className="w-32 h-8">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="tecnico">Técnico</SelectItem>
                                 <SelectItem value="gestor">Gestor</SelectItem>
+                                <SelectItem value="administrador">Administrador</SelectItem>
                               </SelectContent>
                             </Select>
                             <Button
