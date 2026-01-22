@@ -43,7 +43,9 @@ import {
 } from "lucide-react";
 
 export interface TechnicianRanking {
+  id: string;
   name: string;
+  email?: string;
   count: number;
   mainUf: string;
 }
@@ -265,7 +267,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                 </TableHeader>
                 <TableBody>
                   {stats.technicianRanking.slice(0, 10).map((tech, index) => (
-                    <TableRow key={tech.name}>
+                    <TableRow key={tech.id}>
                       <TableCell className="font-medium">
                         {index < 3 ? (
                           <Badge
@@ -284,8 +286,8 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                           <span className="text-muted-foreground">{index + 1}º</span>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium truncate max-w-[150px]">
-                        {tech.name}
+                      <TableCell className="font-medium truncate max-w-[200px]" title={tech.email || tech.name}>
+                        {tech.email || tech.name}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline">{tech.mainUf}</Badge>
