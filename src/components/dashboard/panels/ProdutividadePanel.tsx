@@ -116,11 +116,20 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
       .sort((a, b) => b.total - a.total);
   }, [stats.vistoriasPorDiaUf]);
 
-  // Get unique days for table headers
+  // Get unique days for table headers - sorted ascending (left to right = oldest to newest)
   const uniqueDays = useMemo(() => {
     const days = new Set<string>();
     stats.vistoriasPorDia.forEach(d => days.add(d.day));
-    return Array.from(days).slice(-7); // Last 7 days
+    
+    // Sort by date ascending
+    const sortDayKey = (a: string, b: string) => {
+      const [dayA, monthA] = a.split('/').map(Number);
+      const [dayB, monthB] = b.split('/').map(Number);
+      if (monthA !== monthB) return monthA - monthB;
+      return dayA - dayB;
+    };
+    
+    return Array.from(days).sort(sortDayKey).slice(-7); // Last 7 days, sorted ascending
   }, [stats.vistoriasPorDia]);
 
   return (

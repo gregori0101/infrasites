@@ -401,12 +401,21 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       .map(([month, count]) => ({ month, count }))
       .slice(-6);
 
-    // Daily evolution (last 14 days)
+    // Daily evolution (last 14 days) - sort by date ascending (left to right = oldest to newest)
+    const sortDayKey = (a: string, b: string) => {
+      // Parse dd/MM format and compare
+      const [dayA, monthA] = a.split('/').map(Number);
+      const [dayB, monthB] = b.split('/').map(Number);
+      if (monthA !== monthB) return monthA - monthB;
+      return dayA - dayB;
+    };
+
     stats.vistoriasPorDia = Object.entries(dayMap)
       .map(([day, count]) => ({ day, count }))
+      .sort((a, b) => sortDayKey(a.day, b.day))
       .slice(-14);
 
-    // Daily by technician (flatten)
+    // Daily by technician (flatten) - sorted by date ascending
     stats.vistoriasPorDiaTecnico = Object.entries(dayTechnicianMap)
       .flatMap(([day, techs]) => 
         Object.entries(techs).map(([technicianId, data]) => ({
@@ -416,9 +425,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           count: data.count
         }))
       )
-      .sort((a, b) => a.day.localeCompare(b.day));
+      .sort((a, b) => sortDayKey(a.day, b.day));
 
-    // Daily by UF (flatten)
+    // Daily by UF (flatten) - sorted by date ascending
     stats.vistoriasPorDiaUf = Object.entries(dayUfMap)
       .flatMap(([day, ufs]) => 
         Object.entries(ufs).map(([uf, count]) => ({
@@ -427,7 +436,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           count
         }))
       )
-      .sort((a, b) => a.day.localeCompare(b.day));
+      .sort((a, b) => sortDayKey(a.day, b.day));
 
     stats.batteryStateChart = [
       { name: "BOA", value: batteryStates.ok, color: "#22c55e" },
