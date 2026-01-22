@@ -137,9 +137,9 @@ export function DrillDownModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden mt-4">
+        <div className="flex-1 overflow-hidden mt-4 min-h-0">
           {type === "sites" && paginatedSites && (
-            <ScrollArea className="w-full whitespace-nowrap">
+            <ScrollArea className="h-[calc(85vh-280px)] w-full">
               <div className="min-w-[600px]">
                 <Table>
                   <TableHeader>
@@ -178,12 +178,13 @@ export function DrillDownModal({
                   </TableBody>
                 </Table>
               </div>
+              <ScrollBar orientation="vertical" />
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           )}
 
           {type === "batteries" && paginatedBatteries && (
-            <ScrollArea className="w-full whitespace-nowrap">
+            <ScrollArea className="h-[calc(85vh-280px)] w-full">
               <div className="min-w-[700px]">
                 <Table>
                   <TableHeader>
@@ -217,12 +218,13 @@ export function DrillDownModal({
                   </TableBody>
                 </Table>
               </div>
+              <ScrollBar orientation="vertical" />
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           )}
 
           {type === "acs" && paginatedACs && (
-            <ScrollArea className="w-full whitespace-nowrap">
+            <ScrollArea className="h-[calc(85vh-280px)] w-full">
               <div className="min-w-[600px]">
                 <Table>
                   <TableHeader>
@@ -249,6 +251,7 @@ export function DrillDownModal({
                   </TableBody>
                 </Table>
               </div>
+              <ScrollBar orientation="vertical" />
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           )}
