@@ -202,3 +202,101 @@ export async function clearReportLinkFromAssignments(reportId: string): Promise<
     throw new Error(`Erro ao limpar vínculo de atribuições: ${error.message}`);
   }
 }
+
+export interface AssignmentStatsByUf {
+  uf: string;
+  totalSites: number;
+  pendentes: number;
+  emAndamento: number;
+  concluidas: number;
+  semAtribuicao: number;
+}
+
+export interface AssignmentDashboardStats {
+  byUf: AssignmentStatsByUf[];
+  totalPendente: number;
+  totalEmAndamento: number;
+  totalConcluido: number;
+}
+
+/**
+ * Fetches assignment statistics grouped by UF for the productivity dashboard.
+ * Cross-references sites with their assignments to show completion status by region.
+ */
+export async function fetchAssignmentStatsForDashboard(): Promise<AssignmentDashboardStats> {
+  // Fetch all sites
+  const sites = await getAllSites();
+  
+  // Fetch all assignments
+  const { data: assignments, error } = await supabase
+    .from('site_assignments')
+    .select('site_id, status');
+  
+  if (error) {
+    console.error('Error fetching assignments for dashboard:', error);
+    throw error;
+  }
+
+  // Create a map of site_id to assignment status
+  const assignmentMap = new Map<string, AssignmentStatus>();
+  (assignments || []).forEach(a => {
+    // If a site has multiple assignments, prioritize: concluido > em_andamento > pendente
+    const current = assignmentMap.get(a.site_id);
+    if (!current) {
+      assignmentMap.set(a.site_id, a.status as AssignmentStatus);
+    } else if (a.status === 'concluido') {
+      assignmentMap.set(a.site_id, 'concluido');
+    } else if (a.status === 'em_andamento' && current !== 'concluido') {
+      assignmentMap.set(a.site_id, 'em_andamento');
+    }
+  });
+
+  // Group by UF
+  const ufMap = new Map<string, AssignmentStatsByUf>();
+  
+  let totalPendente = 0;
+  let totalEmAndamento = 0;
+  let totalConcluido = 0;
+
+  sites.forEach(site => {
+    const uf = site.uf || 'N/A';
+    
+    if (!ufMap.has(uf)) {
+      ufMap.set(uf, {
+        uf,
+        totalSites: 0,
+        pendentes: 0,
+        emAndamento: 0,
+        concluidas: 0,
+        semAtribuicao: 0
+      });
+    }
+    
+    const stats = ufMap.get(uf)!;
+    stats.totalSites++;
+    
+    const status = assignmentMap.get(site.id);
+    if (!status) {
+      stats.semAtribuicao++;
+    } else if (status === 'pendente' || status === 'atrasado') {
+      stats.pendentes++;
+      totalPendente++;
+    } else if (status === 'em_andamento') {
+      stats.emAndamento++;
+      totalEmAndamento++;
+    } else if (status === 'concluido') {
+      stats.concluidas++;
+      totalConcluido++;
+    }
+  });
+
+  // Convert to array and sort by total sites
+  const byUf = Array.from(ufMap.values()).sort((a, b) => b.totalSites - a.totalSites);
+
+  return {
+    byUf,
+    totalPendente,
+    totalEmAndamento,
+    totalConcluido
+  };
+}

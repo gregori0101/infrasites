@@ -124,7 +124,10 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       fanNokCount: 0,
       plcOkCount: 0,
       plcNokCount: 0,
-      climatizacaoChart: []
+      climatizacaoChart: [],
+      // Produtividade
+      technicianRanking: [],
+      mediaPorTecnico: 0
     };
 
     const siteInfoList: SiteInfo[] = [];
@@ -136,13 +139,22 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     const monthMap: Record<string, number> = {};
     const batteryStates = { ok: 0, estufada: 0, vazando: 0, trincada: 0, semCarga: 0 };
     const batteryAges = { ok: 0, warning: 0, critical: 0 };
+    const technicianMap: Record<string, { count: number; ufs: Record<string, number> }> = {};
 
     filtered.forEach((report) => {
       const uf = report.state_uf || "N/A";
+      const techName = report.technician_name || "Desconhecido";
       let hasProblems = false;
       let batteryIssues = 0;
       let acIssues = 0;
       let climatizacaoIssues = 0;
+      
+      // Technician tracking
+      if (!technicianMap[techName]) {
+        technicianMap[techName] = { count: 0, ufs: {} };
+      }
+      technicianMap[techName].count++;
+      technicianMap[techName].ufs[uf] = (technicianMap[techName].ufs[uf] || 0) + 1;
       
       // UF Distribution
       if (!ufMap[uf]) ufMap[uf] = { count: 0, ok: 0, nok: 0 };
@@ -398,6 +410,20 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       { name: "Fan", value: stats.fanTotal, color: "#22c55e" },
       { name: "N/A", value: stats.naTotal, color: "#6b7280" },
     ].filter(item => item.value > 0);
+
+    // Build technician ranking
+    stats.technicianRanking = Object.entries(technicianMap)
+      .map(([name, data]) => {
+        // Find main UF (most frequent)
+        const mainUf = Object.entries(data.ufs).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+        return { name, count: data.count, mainUf };
+      })
+      .sort((a, b) => b.count - a.count);
+    
+    const uniqueTechnicians = stats.technicianRanking.length;
+    stats.mediaPorTecnico = uniqueTechnicians > 0 
+      ? stats.totalSites / uniqueTechnicians 
+      : 0;
 
     // Apply status filter
     let finalSites = siteInfoList;
