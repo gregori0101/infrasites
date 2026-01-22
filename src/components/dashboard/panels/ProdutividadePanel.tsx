@@ -260,9 +260,9 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">#</TableHead>
-                    <TableHead>Técnico</TableHead>
-                    <TableHead className="text-center">UF Principal</TableHead>
-                    <TableHead className="text-right">Vistorias</TableHead>
+                    <TableHead className="min-w-[200px]">Email do Técnico</TableHead>
+                    <TableHead className="text-center w-20">UF</TableHead>
+                    <TableHead className="text-right w-24">Vistorias</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -286,8 +286,14 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                           <span className="text-muted-foreground">{index + 1}º</span>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium truncate max-w-[200px]" title={tech.email || tech.name}>
-                        {tech.email || tech.name}
+                      <TableCell className="font-medium truncate max-w-[280px]" title={tech.email || tech.name}>
+                        {tech.email ? (
+                          <span>{tech.email}</span>
+                        ) : (
+                          <span className="text-muted-foreground italic">
+                            {tech.name} <span className="text-xs">(sem email)</span>
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline">{tech.mainUf}</Badge>

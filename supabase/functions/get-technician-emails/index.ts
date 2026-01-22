@@ -66,14 +66,30 @@ Deno.serve(async (req) => {
       throw techError
     }
 
-    if (!technicians || technicians.length === 0) {
+    const approvedTechnicianIds = technicians?.map(t => t.user_id) || []
+
+    // Also get user_ids from reports to include technicians who submitted reports
+    // but might not be in the approved list
+    const { data: reportTechnicians, error: reportError } = await supabaseAdmin
+      .from('reports')
+      .select('user_id')
+      .not('user_id', 'is', null)
+
+    if (reportError) {
+      throw reportError
+    }
+
+    // Combine both lists and deduplicate
+    const reportUserIds = reportTechnicians?.map(r => r.user_id).filter(Boolean) || []
+    const allUserIds = [...new Set([...approvedTechnicianIds, ...reportUserIds])]
+
+    if (allUserIds.length === 0) {
       return new Response(JSON.stringify({ technicians: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
     // Get user emails from auth.users
-    const userIds = technicians.map(t => t.user_id)
     const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers({
       perPage: 1000
     })
@@ -82,9 +98,9 @@ Deno.serve(async (req) => {
       throw usersError
     }
 
-    // Filter and map to get only technician emails
+    // Filter and map to get emails for all relevant users
     const technicianEmails = users
-      .filter(u => userIds.includes(u.id))
+      .filter(u => allUserIds.includes(u.id))
       .map(u => ({
         id: u.id,
         email: u.email || u.id
