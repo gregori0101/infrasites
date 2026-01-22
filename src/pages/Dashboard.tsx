@@ -177,6 +177,9 @@ export default function Dashboard() {
       mediaPorTecnico: stats.mediaPorTecnico,
       technicianRanking: technicianRankingWithEmails,
       vistoriasPorMes: stats.vistoriasPorMes,
+      vistoriasPorDia: stats.vistoriasPorDia,
+      vistoriasPorDiaTecnico: stats.vistoriasPorDiaTecnico,
+      vistoriasPorDiaUf: stats.vistoriasPorDiaUf,
       vistoriasPorUf,
       assignmentsByUf: assignmentStats?.byUf || []
     };

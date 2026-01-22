@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,9 @@ export interface ProdutividadeStats {
   mediaPorTecnico: number;
   technicianRanking: TechnicianRanking[];
   vistoriasPorMes: { month: string; count: number }[];
+  vistoriasPorDia: { day: string; count: number }[];
+  vistoriasPorDiaTecnico: { day: string; technician: string; technicianId: string; count: number }[];
+  vistoriasPorDiaUf: { day: string; uf: string; count: number }[];
   vistoriasPorUf: { uf: string; count: number }[];
   assignmentsByUf: UfAssignmentStats[];
 }
@@ -79,8 +82,46 @@ interface Props {
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
 export function ProdutividadePanel({ stats, onDrillDown }: Props) {
-  const [metaMensal, setMetaMensal] = useState<number>(100);
+  const [metaDiaria, setMetaDiaria] = useState<number>(10);
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
+
+  // Aggregate daily data by technician for table
+  const dailyTechnicianSummary = useMemo(() => {
+    const summary: Record<string, { name: string; days: Record<string, number>; total: number }> = {};
+    stats.vistoriasPorDiaTecnico.forEach(item => {
+      if (!summary[item.technicianId]) {
+        summary[item.technicianId] = { name: item.technician, days: {}, total: 0 };
+      }
+      summary[item.technicianId].days[item.day] = item.count;
+      summary[item.technicianId].total += item.count;
+    });
+    return Object.entries(summary)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }, [stats.vistoriasPorDiaTecnico]);
+
+  // Aggregate daily data by UF for table
+  const dailyUfSummary = useMemo(() => {
+    const summary: Record<string, { days: Record<string, number>; total: number }> = {};
+    stats.vistoriasPorDiaUf.forEach(item => {
+      if (!summary[item.uf]) {
+        summary[item.uf] = { days: {}, total: 0 };
+      }
+      summary[item.uf].days[item.day] = item.count;
+      summary[item.uf].total += item.count;
+    });
+    return Object.entries(summary)
+      .map(([uf, data]) => ({ uf, ...data }))
+      .sort((a, b) => b.total - a.total);
+  }, [stats.vistoriasPorDiaUf]);
+
+  // Get unique days for table headers
+  const uniqueDays = useMemo(() => {
+    const days = new Set<string>();
+    stats.vistoriasPorDia.forEach(d => days.add(d.day));
+    return Array.from(days).slice(-7); // Last 7 days
+  }, [stats.vistoriasPorDia]);
 
   return (
     <div className="space-y-6">
@@ -123,38 +164,38 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
 
       {/* Gráficos de Evolução */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Evolução Mensal */}
+        {/* Evolução Diária */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-500" />
-                Evolução Mensal de Vistorias
+                <TrendingUp className="w-4 h-4 text-primary" />
+                Evolução Diária de Vistorias
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Label htmlFor="meta-input" className="text-xs text-muted-foreground whitespace-nowrap">
-                  Meta mensal:
+                  Meta diária:
                 </Label>
                 <Input
                   id="meta-input"
                   type="number"
                   min={0}
-                  value={metaMensal}
-                  onChange={(e) => setMetaMensal(Number(e.target.value) || 0)}
+                  value={metaDiaria}
+                  onChange={(e) => setMetaDiaria(Number(e.target.value) || 0)}
                   className="w-20 h-7 text-sm"
                 />
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {stats.vistoriasPorMes.length > 0 ? (
+            {stats.vistoriasPorDia.length > 0 ? (
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={stats.vistoriasPorMes}>
+                  <LineChart data={stats.vistoriasPorDia}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 12 }}
+                      dataKey="day"
+                      tick={{ fontSize: 11 }}
                       className="text-muted-foreground"
                     />
                     <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
@@ -165,16 +206,16 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                         borderRadius: "8px",
                       }}
                     />
-                    {metaMensal > 0 && (
+                    {metaDiaria > 0 && (
                       <ReferenceLine
-                        y={metaMensal}
-                        stroke="#ef4444"
+                        y={metaDiaria}
+                        stroke="hsl(var(--destructive))"
                         strokeDasharray="5 5"
                         strokeWidth={2}
                         label={{
-                          value: `Meta: ${metaMensal}`,
+                          value: `Meta: ${metaDiaria}`,
                           position: "insideTopRight",
-                          fill: "#ef4444",
+                          fill: "hsl(var(--destructive))",
                           fontSize: 11,
                           fontWeight: 600,
                         }}
@@ -183,9 +224,9 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                     <Line
                       type="monotone"
                       dataKey="count"
-                      stroke="#3b82f6"
+                      stroke="hsl(var(--primary))"
                       strokeWidth={3}
-                      dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                      dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
                       name="Vistorias"
                     />
                   </LineChart>
@@ -358,6 +399,123 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                 Sem dados de atribuições
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Produtividade Diária por Técnico e UF */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Produtividade Diária por Técnico */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              Produtividade Diária por Técnico (Últimos 7 dias)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background min-w-[150px]">Técnico</TableHead>
+                    {uniqueDays.map(day => (
+                      <TableHead key={day} className="text-center w-16">{day}</TableHead>
+                    ))}
+                    <TableHead className="text-right w-20">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dailyTechnicianSummary.map((tech) => (
+                    <TableRow key={tech.id}>
+                      <TableCell className="font-medium truncate max-w-[150px] sticky left-0 bg-background" title={tech.name}>
+                        {tech.name}
+                      </TableCell>
+                      {uniqueDays.map(day => (
+                        <TableCell key={day} className="text-center">
+                          {tech.days[day] ? (
+                            <Badge variant="secondary" className="bg-primary/10 text-primary">
+                              {tech.days[day]}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-right font-bold text-primary">
+                        {tech.total}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {dailyTechnicianSummary.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={uniqueDays.length + 2} className="text-center text-muted-foreground">
+                        Sem dados disponíveis
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+              <ScrollBar orientation="vertical" />
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Produtividade Diária por UF */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              Produtividade Diária por UF (Últimos 7 dias)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background w-16">UF</TableHead>
+                    {uniqueDays.map(day => (
+                      <TableHead key={day} className="text-center w-16">{day}</TableHead>
+                    ))}
+                    <TableHead className="text-right w-20">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dailyUfSummary.map((row) => (
+                    <TableRow key={row.uf}>
+                      <TableCell className="font-medium sticky left-0 bg-background">
+                        <Badge variant="outline">{row.uf}</Badge>
+                      </TableCell>
+                      {uniqueDays.map(day => (
+                        <TableCell key={day} className="text-center">
+                          {row.days[day] ? (
+                            <Badge variant="secondary" className="bg-primary/10 text-primary">
+                              {row.days[day]}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-right font-bold text-primary">
+                        {row.total}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {dailyUfSummary.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={uniqueDays.length + 2} className="text-center text-muted-foreground">
+                        Sem dados disponíveis
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+              <ScrollBar orientation="vertical" />
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
