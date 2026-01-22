@@ -100,6 +100,9 @@ export interface PanelStats {
   sitesNok: number;
   percentOk: number;
   vistoriasPorMes: { month: string; count: number }[];
+  vistoriasPorDia: { day: string; count: number }[];
+  vistoriasPorDiaTecnico: { day: string; technician: string; technicianId: string; count: number }[];
+  vistoriasPorDiaUf: { day: string; uf: string; count: number }[];
   ufDistribution: { name: string; count: number; ok: number; nok: number }[];
   
   // AC/Energia Panel

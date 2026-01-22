@@ -95,6 +95,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       sitesNok: 0,
       percentOk: 0,
       vistoriasPorMes: [],
+      vistoriasPorDia: [],
+      vistoriasPorDiaTecnico: [],
+      vistoriasPorDiaUf: [],
       ufDistribution: [],
       totalACs: 0,
       acsOk: 0,
@@ -137,6 +140,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     
     const ufMap: Record<string, { count: number; ok: number; nok: number }> = {};
     const monthMap: Record<string, number> = {};
+    const dayMap: Record<string, number> = {};
+    const dayTechnicianMap: Record<string, Record<string, { count: number; name: string }>> = {};
+    const dayUfMap: Record<string, Record<string, number>> = {};
     const batteryStates = { ok: 0, estufada: 0, vazando: 0, trincada: 0, semCarga: 0 };
     const batteryAges = { ok: 0, warning: 0, critical: 0 };
     const technicianMap: Record<string, { count: number; ufs: Record<string, number>; name: string }> = {};
@@ -161,12 +167,27 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       if (!ufMap[uf]) ufMap[uf] = { count: 0, ok: 0, nok: 0 };
       ufMap[uf].count++;
       
-      // Monthly distribution
+      // Monthly and daily distribution
       if (report.created_at) {
         const d = new Date(report.created_at);
         if (isValid(d)) {
           const monthKey = format(d, "MMM/yy", { locale: ptBR });
           monthMap[monthKey] = (monthMap[monthKey] || 0) + 1;
+          
+          // Daily distribution
+          const dayKey = format(d, "dd/MM", { locale: ptBR });
+          dayMap[dayKey] = (dayMap[dayKey] || 0) + 1;
+          
+          // Daily by technician
+          if (!dayTechnicianMap[dayKey]) dayTechnicianMap[dayKey] = {};
+          if (!dayTechnicianMap[dayKey][techId]) {
+            dayTechnicianMap[dayKey][techId] = { count: 0, name: techName };
+          }
+          dayTechnicianMap[dayKey][techId].count++;
+          
+          // Daily by UF
+          if (!dayUfMap[dayKey]) dayUfMap[dayKey] = {};
+          dayUfMap[dayKey][uf] = (dayUfMap[dayKey][uf] || 0) + 1;
         }
       }
       
@@ -379,6 +400,34 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     stats.vistoriasPorMes = Object.entries(monthMap)
       .map(([month, count]) => ({ month, count }))
       .slice(-6);
+
+    // Daily evolution (last 14 days)
+    stats.vistoriasPorDia = Object.entries(dayMap)
+      .map(([day, count]) => ({ day, count }))
+      .slice(-14);
+
+    // Daily by technician (flatten)
+    stats.vistoriasPorDiaTecnico = Object.entries(dayTechnicianMap)
+      .flatMap(([day, techs]) => 
+        Object.entries(techs).map(([technicianId, data]) => ({
+          day,
+          technician: data.name,
+          technicianId,
+          count: data.count
+        }))
+      )
+      .sort((a, b) => a.day.localeCompare(b.day));
+
+    // Daily by UF (flatten)
+    stats.vistoriasPorDiaUf = Object.entries(dayUfMap)
+      .flatMap(([day, ufs]) => 
+        Object.entries(ufs).map(([uf, count]) => ({
+          day,
+          uf,
+          count
+        }))
+      )
+      .sort((a, b) => a.day.localeCompare(b.day));
 
     stats.batteryStateChart = [
       { name: "BOA", value: batteryStates.ok, color: "#22c55e" },
