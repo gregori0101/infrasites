@@ -139,22 +139,23 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     const monthMap: Record<string, number> = {};
     const batteryStates = { ok: 0, estufada: 0, vazando: 0, trincada: 0, semCarga: 0 };
     const batteryAges = { ok: 0, warning: 0, critical: 0 };
-    const technicianMap: Record<string, { count: number; ufs: Record<string, number> }> = {};
+    const technicianMap: Record<string, { count: number; ufs: Record<string, number>; name: string }> = {};
 
     filtered.forEach((report) => {
       const uf = report.state_uf || "N/A";
+      const techId = report.user_id || "unknown";
       const techName = report.technician_name || "Desconhecido";
       let hasProblems = false;
       let batteryIssues = 0;
       let acIssues = 0;
       let climatizacaoIssues = 0;
       
-      // Technician tracking
-      if (!technicianMap[techName]) {
-        technicianMap[techName] = { count: 0, ufs: {} };
+      // Technician tracking by user_id
+      if (!technicianMap[techId]) {
+        technicianMap[techId] = { count: 0, ufs: {}, name: techName };
       }
-      technicianMap[techName].count++;
-      technicianMap[techName].ufs[uf] = (technicianMap[techName].ufs[uf] || 0) + 1;
+      technicianMap[techId].count++;
+      technicianMap[techId].ufs[uf] = (technicianMap[techId].ufs[uf] || 0) + 1;
       
       // UF Distribution
       if (!ufMap[uf]) ufMap[uf] = { count: 0, ok: 0, nok: 0 };
@@ -411,12 +412,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       { name: "N/A", value: stats.naTotal, color: "#6b7280" },
     ].filter(item => item.value > 0);
 
-    // Build technician ranking
+    // Build technician ranking by user_id
     stats.technicianRanking = Object.entries(technicianMap)
-      .map(([name, data]) => {
+      .map(([id, data]) => {
         // Find main UF (most frequent)
         const mainUf = Object.entries(data.ufs).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
-        return { name, count: data.count, mainUf };
+        return { id, name: data.name, count: data.count, mainUf };
       })
       .sort((a, b) => b.count - a.count);
     

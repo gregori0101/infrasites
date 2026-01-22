@@ -38,6 +38,7 @@ import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPan
 import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/FibraOpticaPanel";
 import { ProdutividadePanel, ProdutividadeStats } from "@/components/dashboard/panels/ProdutividadePanel";
 import { fetchAssignmentStatsForDashboard } from "@/lib/assignmentDatabase";
+import { supabase } from "@/integrations/supabase/client";
 
 type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade";
 
@@ -82,6 +83,27 @@ export default function Dashboard() {
     queryFn: () => fetchAssignmentStatsForDashboard(),
     staleTime: 1000 * 60 * 5,
     retry: 2,
+  });
+
+  // Fetch technician emails for productivity panel
+  const { data: technicianEmails } = useQuery({
+    queryKey: ["technician-emails-dashboard"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+      
+      const { data, error } = await supabase.functions.invoke("get-technician-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      
+      if (error) {
+        console.error("Error fetching technician emails:", error);
+        return [];
+      }
+      return data?.technicians || [];
+    },
+    staleTime: 1000 * 60 * 10,
+    retry: 1,
   });
 
   // Process stats based on filters
@@ -137,18 +159,28 @@ export default function Dashboard() {
       count: uf.count
     })).sort((a, b) => b.count - a.count);
 
+    // Map technician emails to ranking
+    const emailMap = new Map<string, string>(
+      (technicianEmails || []).map((t: { id: string; email: string }) => [t.id, t.email] as [string, string])
+    );
+    
+    const technicianRankingWithEmails = stats.technicianRanking.map(tech => ({
+      ...tech,
+      email: emailMap.get(tech.id) as string | undefined
+    }));
+
     return {
       totalRealizadas,
       totalPendentes,
       totalEmAndamento,
       taxaConclusao,
       mediaPorTecnico: stats.mediaPorTecnico,
-      technicianRanking: stats.technicianRanking,
+      technicianRanking: technicianRankingWithEmails,
       vistoriasPorMes: stats.vistoriasPorMes,
       vistoriasPorUf,
       assignmentsByUf: assignmentStats?.byUf || []
     };
-  }, [stats, assignmentStats]);
+  }, [stats, assignmentStats, technicianEmails]);
 
   // Calculate fiber stats from reports
   const fibraStats = useMemo((): FibraStats => {

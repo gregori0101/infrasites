@@ -74,7 +74,9 @@ export interface OverviewStats {
 }
 
 export interface TechnicianRanking {
+  id: string;
   name: string;
+  email?: string;
   count: number;
   mainUf: string;
 }
