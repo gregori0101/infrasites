@@ -38,6 +38,7 @@ const SUMMARY_COLUMNS = `
 function buildDashboardColumns(): string {
   const cols: string[] = [
     'id',
+    'user_id',
     'created_at',
     'created_date',
     'created_time',
