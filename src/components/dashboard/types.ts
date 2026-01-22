@@ -73,6 +73,21 @@ export interface OverviewStats {
   lastUpdate: string;
 }
 
+export interface TechnicianRanking {
+  name: string;
+  count: number;
+  mainUf: string;
+}
+
+export interface UfAssignmentStats {
+  uf: string;
+  totalSites: number;
+  concluidas: number;
+  emAndamento: number;
+  pendentes: number;
+  semAtribuicao: number;
+}
+
 export interface PanelStats {
   // Overview Panel
   overview: OverviewStats;
@@ -120,6 +135,10 @@ export interface PanelStats {
   plcOkCount: number;
   plcNokCount: number;
   climatizacaoChart: { name: string; value: number; color: string }[];
+
+  // Produtividade Panel
+  technicianRanking: TechnicianRanking[];
+  mediaPorTecnico: number;
 }
 
 export interface DrillDownData {

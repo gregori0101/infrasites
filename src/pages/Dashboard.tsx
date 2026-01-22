@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Home,
   Cable,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
@@ -35,8 +36,10 @@ import { ZeladoriaPanel } from "@/components/dashboard/panels/ZeladoriaPanel";
 import { BateriaPanel } from "@/components/dashboard/panels/BateriaPanel";
 import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPanel";
 import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/FibraOpticaPanel";
+import { ProdutividadePanel, ProdutividadeStats } from "@/components/dashboard/panels/ProdutividadePanel";
+import { fetchAssignmentStatsForDashboard } from "@/lib/assignmentDatabase";
 
-type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra";
+type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -73,6 +76,14 @@ export default function Dashboard() {
     refetchOnWindowFocus: true,
   });
 
+  // Fetch assignment stats for productivity panel
+  const { data: assignmentStats } = useQuery({
+    queryKey: ["dashboard-assignment-stats"],
+    queryFn: () => fetchAssignmentStatsForDashboard(),
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+  });
+
   // Process stats based on filters
   const { stats, sites, batteries, acs, climatizacao } = useDashboardStats(reports, filters);
 
@@ -102,12 +113,42 @@ export default function Dashboard() {
   // Panel navigation items
   const panelItems = [
     { id: "overview" as const, label: "Visão Geral", icon: Home },
+    { id: "produtividade" as const, label: "Produtividade", icon: Users },
     { id: "bateria" as const, label: "Baterias", icon: Battery },
     { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
     { id: "fibra" as const, label: "Fibra Óptica", icon: Cable },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
     { id: "energia" as const, label: "Energia", icon: Zap },
   ];
+
+  // Calculate productivity stats
+  const produtividadeStats = useMemo((): ProdutividadeStats => {
+    const totalRealizadas = stats.totalSites;
+    const totalPendentes = assignmentStats?.totalPendente || 0;
+    const totalEmAndamento = assignmentStats?.totalEmAndamento || 0;
+    const totalAtribuidas = totalRealizadas + totalPendentes + totalEmAndamento;
+    const taxaConclusao = totalAtribuidas > 0 
+      ? Math.round((totalRealizadas / totalAtribuidas) * 100) 
+      : 0;
+
+    // Vistorias por UF from reports
+    const vistoriasPorUf = stats.ufDistribution.map(uf => ({
+      uf: uf.name,
+      count: uf.count
+    })).sort((a, b) => b.count - a.count);
+
+    return {
+      totalRealizadas,
+      totalPendentes,
+      totalEmAndamento,
+      taxaConclusao,
+      mediaPorTecnico: stats.mediaPorTecnico,
+      technicianRanking: stats.technicianRanking,
+      vistoriasPorMes: stats.vistoriasPorMes,
+      vistoriasPorUf,
+      assignmentsByUf: assignmentStats?.byUf || []
+    };
+  }, [stats, assignmentStats]);
 
   // Calculate fiber stats from reports
   const fibraStats = useMemo((): FibraStats => {
@@ -351,6 +392,16 @@ export default function Dashboard() {
                     if (type === "total") openDrillDown("sites", "Todos os Sites", (s) => s);
                     else if (type === "ok") openDrillDown("sites", "Sites OK", (s) => s.filter((site: any) => !site.hasProblems));
                     else openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
+                  }}
+                />
+              )}
+
+              {activePanel === "produtividade" && (
+                <ProdutividadePanel
+                  stats={produtividadeStats}
+                  onDrillDown={(type) => {
+                    if (type === "realizadas") openDrillDown("sites", "Vistorias Realizadas", (s) => s);
+                    else if (type === "pendentes") openDrillDown("sites", "Sites com Atribuições Pendentes", (s) => s);
                   }}
                 />
               )}
