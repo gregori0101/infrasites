@@ -369,7 +369,6 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                   <TableHead>UF</TableHead>
                   <TableHead className="text-center">Total Sites</TableHead>
                   <TableHead className="text-center">Concluídas</TableHead>
-                  <TableHead className="text-center">Em Andamento</TableHead>
                   <TableHead className="text-center">Pendentes</TableHead>
                   <TableHead className="text-center">Sem Atribuição</TableHead>
                   <TableHead className="text-right">% Concluído</TableHead>
@@ -386,9 +385,6 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                       <TableCell className="text-center">{row.totalSites}</TableCell>
                       <TableCell className="text-center text-green-600 font-medium">
                         {row.concluidas}
-                      </TableCell>
-                      <TableCell className="text-center text-blue-600">
-                        {row.emAndamento}
                       </TableCell>
                       <TableCell className="text-center text-amber-600">
                         {row.pendentes}
@@ -415,7 +411,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                 })}
                 {stats.assignmentsByUf.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       Sem dados disponíveis
                     </TableCell>
                   </TableRow>

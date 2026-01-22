@@ -222,6 +222,7 @@ export interface AssignmentDashboardStats {
 /**
  * Fetches assignment statistics grouped by UF for the productivity dashboard.
  * Cross-references sites with their assignments to show completion status by region.
+ * Concluídas are now counted from actual reports using first 2 chars of site_code as UF.
  */
 export async function fetchAssignmentStatsForDashboard(): Promise<AssignmentDashboardStats> {
   // Fetch all sites
@@ -236,6 +237,25 @@ export async function fetchAssignmentStatsForDashboard(): Promise<AssignmentDash
     console.error('Error fetching assignments for dashboard:', error);
     throw error;
   }
+
+  // Fetch completed reports to count concluídas by UF from site_code
+  const { data: reports, error: reportsError } = await supabase
+    .from('reports')
+    .select('site_code');
+  
+  if (reportsError) {
+    console.error('Error fetching reports for dashboard:', reportsError);
+    throw reportsError;
+  }
+
+  // Count completed reports by UF (first 2 chars of site_code)
+  const reportsByUf = new Map<string, number>();
+  (reports || []).forEach(r => {
+    if (r.site_code && r.site_code.length >= 2) {
+      const uf = r.site_code.substring(0, 2).toUpperCase();
+      reportsByUf.set(uf, (reportsByUf.get(uf) || 0) + 1);
+    }
+  });
 
   // Create a map of site_id to assignment status
   const assignmentMap = new Map<string, AssignmentStatus>();
@@ -285,18 +305,39 @@ export async function fetchAssignmentStatsForDashboard(): Promise<AssignmentDash
       stats.emAndamento++;
       totalEmAndamento++;
     } else if (status === 'concluido') {
-      stats.concluidas++;
       totalConcluido++;
+    }
+  });
+
+  // Now update concluídas from actual reports count by UF
+  ufMap.forEach((stats, uf) => {
+    stats.concluidas = reportsByUf.get(uf) || 0;
+  });
+
+  // Also add UFs that appear in reports but not in sites
+  reportsByUf.forEach((count, uf) => {
+    if (!ufMap.has(uf)) {
+      ufMap.set(uf, {
+        uf,
+        totalSites: 0,
+        pendentes: 0,
+        emAndamento: 0,
+        concluidas: count,
+        semAtribuicao: 0
+      });
     }
   });
 
   // Convert to array and sort by total sites
   const byUf = Array.from(ufMap.values()).sort((a, b) => b.totalSites - a.totalSites);
 
+  // Recalculate totalConcluido from reports
+  const totalConcluidoFromReports = Array.from(reportsByUf.values()).reduce((a, b) => a + b, 0);
+
   return {
     byUf,
     totalPendente,
     totalEmAndamento,
-    totalConcluido
+    totalConcluido: totalConcluidoFromReports
   };
 }
