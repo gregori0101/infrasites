@@ -305,63 +305,66 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[300px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead className="min-w-[200px]">Email do Técnico</TableHead>
-                    <TableHead className="text-center w-20">UF</TableHead>
-                    <TableHead className="text-right w-24">Vistorias</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stats.technicianRanking.slice(0, 10).map((tech, index) => (
-                    <TableRow key={tech.id}>
-                      <TableCell className="font-medium">
-                        {index < 3 ? (
-                          <Badge
-                            variant={index === 0 ? "default" : "secondary"}
-                            className={
-                              index === 0
-                                ? "bg-amber-500"
-                                : index === 1
-                                ? "bg-gray-400"
-                                : "bg-amber-700"
-                            }
-                          >
-                            {index + 1}º
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">{index + 1}º</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium truncate max-w-[280px]" title={tech.email || tech.name}>
-                        {tech.email ? (
-                          <span>{tech.email}</span>
-                        ) : (
-                          <span className="text-muted-foreground italic">
-                            {tech.name} <span className="text-xs">(sem email)</span>
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">{tech.mainUf}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-bold text-primary">
-                        {tech.count}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {stats.technicianRanking.length === 0 && (
+            <ScrollArea className="h-[300px] w-full">
+              <div className="min-w-[400px]">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        Sem dados de técnicos
-                      </TableCell>
+                      <TableHead className="w-10">#</TableHead>
+                      <TableHead>Email do Técnico</TableHead>
+                      <TableHead className="text-right w-20">Vistorias</TableHead>
+                      <TableHead className="text-center w-14">UF</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {stats.technicianRanking.slice(0, 10).map((tech, index) => (
+                      <TableRow key={tech.id}>
+                        <TableCell className="font-medium">
+                          {index < 3 ? (
+                            <Badge
+                              variant={index === 0 ? "default" : "secondary"}
+                              className={
+                                index === 0
+                                  ? "bg-amber-500"
+                                  : index === 1
+                                  ? "bg-gray-400"
+                                  : "bg-amber-700"
+                              }
+                            >
+                              {index + 1}º
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">{index + 1}º</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium truncate max-w-[180px]" title={tech.email || tech.name}>
+                          {tech.email ? (
+                            <span>{tech.email}</span>
+                          ) : (
+                            <span className="text-muted-foreground italic">
+                              {tech.name} <span className="text-xs">(sem email)</span>
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-primary text-lg">
+                          {tech.count}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline">{tech.mainUf}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {stats.technicianRanking.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          Sem dados de técnicos
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="horizontal" />
               <ScrollBar orientation="vertical" />
             </ScrollArea>
           </CardContent>
