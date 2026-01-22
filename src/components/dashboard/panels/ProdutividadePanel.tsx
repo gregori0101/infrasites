@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { StatCard } from "../StatCard";
 import {
   ChartContainer,
@@ -19,6 +21,7 @@ import {
   Cell,
   Tooltip,
   Legend,
+  ReferenceLine,
 } from "recharts";
 import {
   Table,
@@ -74,6 +77,7 @@ interface Props {
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
 export function ProdutividadePanel({ stats, onDrillDown }: Props) {
+  const [metaMensal, setMetaMensal] = useState<number>(100);
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
 
   return (
@@ -120,10 +124,25 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
         {/* Evolução Mensal */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-blue-500" />
-              Evolução Mensal de Vistorias
-            </CardTitle>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-500" />
+                Evolução Mensal de Vistorias
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="meta-input" className="text-xs text-muted-foreground whitespace-nowrap">
+                  Meta mensal:
+                </Label>
+                <Input
+                  id="meta-input"
+                  type="number"
+                  min={0}
+                  value={metaMensal}
+                  onChange={(e) => setMetaMensal(Number(e.target.value) || 0)}
+                  className="w-20 h-7 text-sm"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {stats.vistoriasPorMes.length > 0 ? (
@@ -144,6 +163,21 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                         borderRadius: "8px",
                       }}
                     />
+                    {metaMensal > 0 && (
+                      <ReferenceLine
+                        y={metaMensal}
+                        stroke="#ef4444"
+                        strokeDasharray="5 5"
+                        strokeWidth={2}
+                        label={{
+                          value: `Meta: ${metaMensal}`,
+                          position: "insideTopRight",
+                          fill: "#ef4444",
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      />
+                    )}
                     <Line
                       type="monotone"
                       dataKey="count"
