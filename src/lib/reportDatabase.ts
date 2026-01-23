@@ -133,6 +133,20 @@ function buildPhotoColumns(): string {
     'energia_foto_cabos',
     'torre_foto_ninhos',
     'gmg_foto_painel',
+    // Fiber optic photos
+    'fibra_abord1_foto',
+    'fibra_abord2_foto',
+    'fibra_foto_caixas_passagem',
+    'fibra_foto_caixas_subterraneas',
+    'fibra_foto_subidas_laterais',
+    'fibra_dgo1_foto',
+    'fibra_dgo1_cordoes_foto',
+    'fibra_dgo2_foto',
+    'fibra_dgo2_cordoes_foto',
+    'fibra_dgo3_foto',
+    'fibra_dgo3_cordoes_foto',
+    'fibra_dgo4_foto',
+    'fibra_dgo4_cordoes_foto',
   ];
 
   for (let g = 1; g <= 7; g++) {
@@ -281,6 +295,19 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.fibra_dgos_ok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'OK').length || 0;
   row.fibra_dgos_nok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'NOK').length || 0;
   
+  // Abordagens photos
+  if (data.fibraOptica?.abordagens?.[0]?.fotos?.length) {
+    row.fibra_abord1_foto = data.fibraOptica.abordagens[0].fotos[0] || null;
+  }
+  if (data.fibraOptica?.abordagens?.[1]?.fotos?.length) {
+    row.fibra_abord2_foto = data.fibraOptica.abordagens[1].fotos[0] || null;
+  }
+
+  // Infrastructure photos (store first photo of each array)
+  row.fibra_foto_caixas_passagem = data.fibraOptica?.fotosCaixasPassagem?.[0] || null;
+  row.fibra_foto_caixas_subterraneas = data.fibraOptica?.fotosCaixasSubterraneas?.[0] || null;
+  row.fibra_foto_subidas_laterais = data.fibraOptica?.fotosSubidasLaterais?.[0] || null;
+
   // DGO details (up to 4)
   for (let i = 0; i < 4; i++) {
     const dgo = data.fibraOptica?.dgos?.[i];
@@ -288,6 +315,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`fibra_dgo${i + 1}_id`] = dgo.identificacao || null;
       row[`fibra_dgo${i + 1}_capacidade`] = `${dgo.capacidadeFO}FO`;
       row[`fibra_dgo${i + 1}_cordoes`] = dgo.estadoCordoes || null;
+      row[`fibra_dgo${i + 1}_foto`] = dgo.fotoDGO || null;
+      row[`fibra_dgo${i + 1}_cordoes_foto`] = dgo.fotoCordesDetalhada || null;
     }
   }
 
