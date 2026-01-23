@@ -208,10 +208,50 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                   />
                   <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload || !payload.length) return null;
+                      
+                      const currentValue = payload[0].value as number;
+                      const currentIndex = stats.vistoriasPorDia.findIndex(d => d.day === label);
+                      const previousValue = currentIndex > 0 
+                        ? stats.vistoriasPorDia[currentIndex - 1].count 
+                        : null;
+                      
+                      const difference = previousValue !== null ? currentValue - previousValue : null;
+                      const percentChange = previousValue !== null && previousValue > 0 
+                        ? ((currentValue - previousValue) / previousValue) * 100 
+                        : null;
+                      
+                      return (
+                        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                          <p className="font-semibold text-foreground mb-2">{label}</p>
+                          <div className="space-y-1">
+                            <p className="text-sm">
+                              <span className="text-muted-foreground">Vistorias: </span>
+                              <span className="font-bold text-primary">{currentValue}</span>
+                            </p>
+                            {previousValue !== null && (
+                              <>
+                                <p className="text-sm">
+                                  <span className="text-muted-foreground">Dia anterior: </span>
+                                  <span className="font-medium">{previousValue}</span>
+                                </p>
+                                <p className="text-sm flex items-center gap-1">
+                                  <span className="text-muted-foreground">Variação: </span>
+                                  <span className={`font-bold ${difference! >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {difference! >= 0 ? '+' : ''}{difference}
+                                    {percentChange !== null && (
+                                      <span className="ml-1">
+                                        ({percentChange >= 0 ? '+' : ''}{percentChange.toFixed(1)}%)
+                                      </span>
+                                    )}
+                                  </span>
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
                     }}
                   />
                   {metaDiaria > 0 && (
