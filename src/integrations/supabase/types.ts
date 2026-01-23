@@ -28,26 +28,39 @@ export type Database = {
           energia_foto_transformador: string | null
           excel_file_path: string | null
           fibra_abord1_descricao: string | null
+          fibra_abord1_foto: string | null
           fibra_abord1_tipo: string | null
           fibra_abord2_descricao: string | null
+          fibra_abord2_foto: string | null
           fibra_abord2_tipo: string | null
           fibra_caixas_passagem_qtd: number | null
           fibra_caixas_subterraneas_qtd: number | null
           fibra_dgo1_capacidade: string | null
           fibra_dgo1_cordoes: string | null
+          fibra_dgo1_cordoes_foto: string | null
+          fibra_dgo1_foto: string | null
           fibra_dgo1_id: string | null
           fibra_dgo2_capacidade: string | null
           fibra_dgo2_cordoes: string | null
+          fibra_dgo2_cordoes_foto: string | null
+          fibra_dgo2_foto: string | null
           fibra_dgo2_id: string | null
           fibra_dgo3_capacidade: string | null
           fibra_dgo3_cordoes: string | null
+          fibra_dgo3_cordoes_foto: string | null
+          fibra_dgo3_foto: string | null
           fibra_dgo3_id: string | null
           fibra_dgo4_capacidade: string | null
           fibra_dgo4_cordoes: string | null
+          fibra_dgo4_cordoes_foto: string | null
+          fibra_dgo4_foto: string | null
           fibra_dgo4_id: string | null
           fibra_dgos_nok_qtd: number | null
           fibra_dgos_ok_qtd: number | null
           fibra_dgos_qtd: number | null
+          fibra_foto_caixas_passagem: string | null
+          fibra_foto_caixas_subterraneas: string | null
+          fibra_foto_subidas_laterais: string | null
           fibra_qtd_abordagens: number | null
           fibra_subidas_laterais_qtd: number | null
           gab1_ac1_modelo: string | null
@@ -547,26 +560,39 @@ export type Database = {
           energia_foto_transformador?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
+          fibra_abord1_foto?: string | null
           fibra_abord1_tipo?: string | null
           fibra_abord2_descricao?: string | null
+          fibra_abord2_foto?: string | null
           fibra_abord2_tipo?: string | null
           fibra_caixas_passagem_qtd?: number | null
           fibra_caixas_subterraneas_qtd?: number | null
           fibra_dgo1_capacidade?: string | null
           fibra_dgo1_cordoes?: string | null
+          fibra_dgo1_cordoes_foto?: string | null
+          fibra_dgo1_foto?: string | null
           fibra_dgo1_id?: string | null
           fibra_dgo2_capacidade?: string | null
           fibra_dgo2_cordoes?: string | null
+          fibra_dgo2_cordoes_foto?: string | null
+          fibra_dgo2_foto?: string | null
           fibra_dgo2_id?: string | null
           fibra_dgo3_capacidade?: string | null
           fibra_dgo3_cordoes?: string | null
+          fibra_dgo3_cordoes_foto?: string | null
+          fibra_dgo3_foto?: string | null
           fibra_dgo3_id?: string | null
           fibra_dgo4_capacidade?: string | null
           fibra_dgo4_cordoes?: string | null
+          fibra_dgo4_cordoes_foto?: string | null
+          fibra_dgo4_foto?: string | null
           fibra_dgo4_id?: string | null
           fibra_dgos_nok_qtd?: number | null
           fibra_dgos_ok_qtd?: number | null
           fibra_dgos_qtd?: number | null
+          fibra_foto_caixas_passagem?: string | null
+          fibra_foto_caixas_subterraneas?: string | null
+          fibra_foto_subidas_laterais?: string | null
           fibra_qtd_abordagens?: number | null
           fibra_subidas_laterais_qtd?: number | null
           gab1_ac1_modelo?: string | null
@@ -1066,26 +1092,39 @@ export type Database = {
           energia_foto_transformador?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
+          fibra_abord1_foto?: string | null
           fibra_abord1_tipo?: string | null
           fibra_abord2_descricao?: string | null
+          fibra_abord2_foto?: string | null
           fibra_abord2_tipo?: string | null
           fibra_caixas_passagem_qtd?: number | null
           fibra_caixas_subterraneas_qtd?: number | null
           fibra_dgo1_capacidade?: string | null
           fibra_dgo1_cordoes?: string | null
+          fibra_dgo1_cordoes_foto?: string | null
+          fibra_dgo1_foto?: string | null
           fibra_dgo1_id?: string | null
           fibra_dgo2_capacidade?: string | null
           fibra_dgo2_cordoes?: string | null
+          fibra_dgo2_cordoes_foto?: string | null
+          fibra_dgo2_foto?: string | null
           fibra_dgo2_id?: string | null
           fibra_dgo3_capacidade?: string | null
           fibra_dgo3_cordoes?: string | null
+          fibra_dgo3_cordoes_foto?: string | null
+          fibra_dgo3_foto?: string | null
           fibra_dgo3_id?: string | null
           fibra_dgo4_capacidade?: string | null
           fibra_dgo4_cordoes?: string | null
+          fibra_dgo4_cordoes_foto?: string | null
+          fibra_dgo4_foto?: string | null
           fibra_dgo4_id?: string | null
           fibra_dgos_nok_qtd?: number | null
           fibra_dgos_ok_qtd?: number | null
           fibra_dgos_qtd?: number | null
+          fibra_foto_caixas_passagem?: string | null
+          fibra_foto_caixas_subterraneas?: string | null
+          fibra_foto_subidas_laterais?: string | null
           fibra_qtd_abordagens?: number | null
           fibra_subidas_laterais_qtd?: number | null
           gab1_ac1_modelo?: string | null
