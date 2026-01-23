@@ -90,6 +90,17 @@ export interface UfAssignmentStats {
   semAtribuicao: number;
 }
 
+export interface AutonomyRiskStats {
+  sitesOk: number;          // >= 6h
+  sitesMedioRisco: number;  // >= 4h < 6h
+  sitesAltoRisco: number;   // >= 2h < 4h
+  sitesCritico: number;     // < 2h
+  // Com GMG
+  sitesOkComGMG: number;    // >= 4h
+  sitesAltoRiscoComGMG: number;  // >= 2h < 4h
+  sitesCriticoComGMG: number;     // < 2h
+}
+
 export interface PanelStats {
   // Overview Panel
   overview: OverviewStats;
@@ -127,6 +138,9 @@ export interface PanelStats {
   batteriesOver8Years: number;
   batteryStateChart: { name: string; value: number; color: string }[];
   batteryAgeChart: { name: string; value: number; color: string }[];
+  
+  // Autonomy Risk (New)
+  autonomyRisk: AutonomyRiskStats;
   
   // Climatização Panel
   climatizacaoTotal: number;
