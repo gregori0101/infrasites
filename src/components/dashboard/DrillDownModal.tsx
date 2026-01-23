@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Download, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,12 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { SiteInfo, BatteryInfo, ACInfo } from "./types";
 import { cn } from "@/lib/utils";
+import {
+  generateSitesExcel,
+  generateBatteriesExcel,
+  generateACsExcel,
+  downloadDrillDownExcel,
+} from "@/lib/generateDrillDownExcel";
 
 interface Props {
   open: boolean;
@@ -29,7 +35,6 @@ interface Props {
   sites?: SiteInfo[];
   batteries?: BatteryInfo[];
   acs?: ACInfo[];
-  onExport?: () => void;
   onSiteClick?: (siteId: string) => void;
 }
 
@@ -43,7 +48,6 @@ export function DrillDownModal({
   sites,
   batteries,
   acs,
-  onExport,
   onSiteClick,
 }: Props) {
   const [search, setSearch] = useState("");
@@ -115,12 +119,29 @@ export function DrillDownModal({
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg">{title}</DialogTitle>
             <div className="flex items-center gap-2">
-              {onExport && (
-                <Button variant="outline" size="sm" onClick={onExport}>
-                  <Download className="w-4 h-4 mr-1" />
-                  Exportar
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  let blob: Blob;
+                  const sanitizedTitle = title.replace(/[^a-zA-Z0-9]/g, "_");
+                  const filename = `${sanitizedTitle}_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+                  if (type === "sites" && filteredSites) {
+                    blob = generateSitesExcel(filteredSites, title);
+                  } else if (type === "batteries" && filteredBatteries) {
+                    blob = generateBatteriesExcel(filteredBatteries, title);
+                  } else if (type === "acs" && filteredACs) {
+                    blob = generateACsExcel(filteredACs, title);
+                  } else {
+                    return;
+                  }
+                  downloadDrillDownExcel(blob, filename);
+                }}
+              >
+                <Download className="w-4 h-4 mr-1" />
+                Exportar Excel
+              </Button>
             </div>
           </div>
           <div className="relative mt-2">

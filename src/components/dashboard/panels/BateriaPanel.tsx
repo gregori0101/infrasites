@@ -3,11 +3,18 @@ import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 interface Props {
   stats: PanelStats;
   batteries: BatteryInfo[];
-  onDrillDown: (type: "all" | "ok" | "nok" | "obsolete-warning" | "obsolete-critical") => void;
+  onDrillDown: (
+    type: "all" | "ok" | "nok" | "obsolete-warning" | "obsolete-critical" | 
+    "autonomy-ok" | "autonomy-medio" | "autonomy-alto" | "autonomy-critico" |
+    "chumbo-all" | "litio-all" | "chumbo-uf" | "litio-uf" |
+    "troca-all" | "troca-uf" | "obsolete-ok" | "obsolete-medio" | "obsolete-alto",
+    uf?: string
+  ) => void;
 }
 
 export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
@@ -54,7 +61,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
     subtitle,
     icon: Icon, 
     colorClass,
-    bgClass
+    bgClass,
+    onClick
   }: { 
     title: string; 
     value: number; 
@@ -62,14 +70,24 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
     icon: React.ElementType; 
     colorClass: string;
     bgClass: string;
+    onClick?: () => void;
   }) => (
-    <Card className="transition-all hover:shadow-md">
+    <Card 
+      className={cn(
+        "transition-all hover:shadow-md",
+        onClick && "cursor-pointer hover:border-primary/50 active:scale-[0.98]"
+      )}
+      onClick={onClick}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <p className={`text-sm font-medium ${colorClass}`}>{title}</p>
             <p className="text-3xl font-bold tracking-tight">{value}</p>
             <p className="text-xs text-muted-foreground">{subtitle}</p>
+            {onClick && (
+              <p className="text-xs text-primary mt-1">Ver detalhes →</p>
+            )}
           </div>
           <div className={`p-3 rounded-xl ${bgClass}`}>
             <Icon className="w-5 h-5" />
@@ -128,6 +146,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               icon={ShieldCheck}
               colorClass="text-success"
               bgClass="bg-success/10 text-success"
+              onClick={() => onDrillDown("autonomy-ok")}
             />
             <AutonomyRiskCard
               title="Médio Risco"
@@ -136,6 +155,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               icon={ShieldAlert}
               colorClass="text-warning"
               bgClass="bg-warning/10 text-warning"
+              onClick={() => onDrillDown("autonomy-medio")}
             />
             <AutonomyRiskCard
               title="Alto Risco"
@@ -144,6 +164,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               icon={ShieldAlert}
               colorClass="text-accent"
               bgClass="bg-accent/10 text-accent"
+              onClick={() => onDrillDown("autonomy-alto")}
             />
             <AutonomyRiskCard
               title="Crítico"
@@ -152,6 +173,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               icon={ShieldX}
               colorClass="text-destructive"
               bgClass="bg-destructive/10 text-destructive"
+              onClick={() => onDrillDown("autonomy-critico")}
             />
           </div>
         </div>
@@ -225,24 +247,32 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {/* Total Card */}
-          <Card className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700">
+          <Card 
+            className="bg-muted/30 border-muted-foreground/20 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+            onClick={() => onDrillDown("chumbo-all")}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Battery className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">TOTAL</span>
+                <Battery className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">TOTAL</span>
               </div>
-              <p className="text-3xl font-bold text-slate-700 dark:text-slate-200">{stats.bateriasChumboTotal}</p>
+              <p className="text-3xl font-bold">{stats.bateriasChumboTotal}</p>
               <p className="text-xs text-muted-foreground mt-1">unidades</p>
+              <p className="text-xs text-primary mt-1">Ver detalhes →</p>
             </CardContent>
           </Card>
 
           {/* UF Cards */}
           {stats.bateriasChumboByUf.map(({ uf, count }) => (
-            <Card key={`chumbo-${uf}`} className="hover:shadow-md transition-shadow">
+            <Card 
+              key={`chumbo-${uf}`} 
+              className="hover:shadow-md transition-all cursor-pointer hover:border-primary/50 active:scale-[0.98]"
+              onClick={() => onDrillDown("chumbo-uf", uf)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{uf}</span>
-                  <Battery className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm font-bold text-muted-foreground">{uf}</span>
+                  <Battery className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-2xl font-bold">{count}</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -274,24 +304,32 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {/* Total Card */}
-          <Card className="bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700">
+          <Card 
+            className="bg-success/5 border-success/30 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+            onClick={() => onDrillDown("litio-all")}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-700 text-emerald-700 dark:text-emerald-300">TOTAL</span>
+                <Zap className="w-5 h-5 text-success" />
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success/20 text-success">TOTAL</span>
               </div>
-              <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{stats.bateriasLitioTotal}</p>
+              <p className="text-3xl font-bold text-success">{stats.bateriasLitioTotal}</p>
               <p className="text-xs text-muted-foreground mt-1">unidades</p>
+              <p className="text-xs text-primary mt-1">Ver detalhes →</p>
             </CardContent>
           </Card>
 
           {/* UF Cards */}
           {stats.bateriasLitioByUf.map(({ uf, count }) => (
-            <Card key={`litio-${uf}`} className="hover:shadow-md transition-shadow border-emerald-100 dark:border-emerald-900/50">
+            <Card 
+              key={`litio-${uf}`} 
+              className="hover:shadow-md transition-all border-success/20 cursor-pointer hover:border-primary/50 active:scale-[0.98]"
+              onClick={() => onDrillDown("litio-uf", uf)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{uf}</span>
-                  <Zap className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-bold text-success">{uf}</span>
+                  <Zap className="w-4 h-4 text-success/70" />
                 </div>
                 <p className="text-2xl font-bold">{count}</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -304,7 +342,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           ))}
 
           {stats.bateriasLitioByUf.length === 0 && (
-            <Card className="col-span-full border-emerald-100 dark:border-emerald-900/50">
+            <Card className="col-span-full border-success/20">
               <CardContent className="p-6 text-center text-muted-foreground">
                 <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p>Nenhuma bateria de lítio registrada</p>
@@ -380,13 +418,17 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             {unitLabelSingular} por Risco de Obsolescência (todas as baterias)
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-success/50">
+            <Card 
+              className="border-success/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+              onClick={() => onDrillDown("obsolete-ok")}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-success">OK</p>
                     <p className="text-3xl font-bold tracking-tight">{obsolescencia.ok}</p>
                     <p className="text-xs text-muted-foreground">Baterias dentro do prazo</p>
+                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
                   </div>
                   <div className="p-3 rounded-xl bg-success/10">
                     <ShieldCheck className="w-5 h-5 text-success" />
@@ -395,13 +437,17 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               </CardContent>
             </Card>
             
-            <Card className="border-warning/50">
+            <Card 
+              className="border-warning/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+              onClick={() => onDrillDown("obsolete-medio")}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-warning">Médio Risco</p>
                     <p className="text-3xl font-bold tracking-tight">{obsolescencia.medioRisco}</p>
                     <p className="text-xs text-muted-foreground">Atenção recomendada</p>
+                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
                   </div>
                   <div className="p-3 rounded-xl bg-warning/10">
                     <ShieldAlert className="w-5 h-5 text-warning" />
@@ -410,13 +456,17 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               </CardContent>
             </Card>
             
-            <Card className="border-destructive/50">
+            <Card 
+              className="border-destructive/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+              onClick={() => onDrillDown("obsolete-alto")}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-destructive">Alto Risco</p>
                     <p className="text-3xl font-bold tracking-tight">{obsolescencia.altoRisco}</p>
                     <p className="text-xs text-muted-foreground">Substituição recomendada</p>
+                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
                   </div>
                   <div className="p-3 rounded-xl bg-destructive/10">
                     <ShieldX className="w-5 h-5 text-destructive" />
@@ -494,7 +544,10 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </Card>
 
         {/* Painel 1: Total Baterias para Troca */}
-        <Card className="bg-destructive/10 border-destructive">
+        <Card 
+          className="bg-destructive/10 border-destructive cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.99] transition-all"
+          onClick={() => onDrillDown("troca-all")}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -503,6 +556,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                   <h3 className="text-lg font-semibold text-destructive">TOTAL BATERIAS PARA TROCA</h3>
                 </div>
                 <p className="text-xs text-muted-foreground">Região Norte (PA, MA, AM, RR, AP)</p>
+                <p className="text-xs text-primary">Clique para ver detalhes →</p>
               </div>
               <div className="text-right">
                 <p className="text-5xl font-bold text-destructive">{stats.bateriasParaTroca.total}</p>
@@ -520,7 +574,10 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {/* Total Card */}
-            <Card className="bg-destructive/10 border-destructive/50">
+            <Card 
+              className="bg-destructive/10 border-destructive/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+              onClick={() => onDrillDown("troca-all")}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <RefreshCw className="w-5 h-5 text-destructive" />
@@ -542,7 +599,14 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               const colors = getRiskColor(count);
               
               return (
-                <Card key={`troca-${uf}`} className={`transition-all hover:shadow-md ${colors.border}`}>
+                <Card 
+                  key={`troca-${uf}`} 
+                  className={cn(
+                    "transition-all hover:shadow-md cursor-pointer hover:border-primary/50 active:scale-[0.98]",
+                    colors.border
+                  )}
+                  onClick={() => onDrillDown("troca-uf", uf)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className={`text-sm font-bold ${colors.text}`}>{uf}</span>
