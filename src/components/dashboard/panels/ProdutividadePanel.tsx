@@ -172,127 +172,81 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
       </div>
 
       {/* Gráficos de Evolução */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Evolução Diária */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                Evolução Diária de Vistorias
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="meta-input" className="text-xs text-muted-foreground whitespace-nowrap">
-                  Meta diária:
-                </Label>
-                <Input
-                  id="meta-input"
-                  type="number"
-                  min={0}
-                  value={metaDiaria}
-                  onChange={(e) => setMetaDiaria(Number(e.target.value) || 0)}
-                  className="w-20 h-7 text-sm"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {stats.vistoriasPorDia.length > 0 ? (
-              <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={stats.vistoriasPorDia}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="day"
-                      tick={{ fontSize: 11 }}
-                      className="text-muted-foreground"
-                    />
-                    <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--background))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    {metaDiaria > 0 && (
-                      <ReferenceLine
-                        y={metaDiaria}
-                        stroke="hsl(var(--destructive))"
-                        strokeDasharray="5 5"
-                        strokeWidth={2}
-                        label={{
-                          value: `Meta: ${metaDiaria}`,
-                          position: "insideTopRight",
-                          fill: "hsl(var(--destructive))",
-                          fontSize: 11,
-                          fontWeight: 600,
-                        }}
-                      />
-                    )}
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={3}
-                      dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                      name="Vistorias"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Sem dados para exibir
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Vistorias por UF */}
-        <Card>
-          <CardHeader className="pb-2">
+      {/* Evolução Diária - Full Width */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-green-500" />
-              Vistorias Realizadas por UF
+              <TrendingUp className="w-4 h-4 text-primary" />
+              Evolução Diária de Vistorias
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.vistoriasPorUf.length > 0 ? (
-              <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.vistoriasPorUf.slice(0, 10)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis type="number" tick={{ fontSize: 12 }} />
-                    <YAxis
-                      dataKey="uf"
-                      type="category"
-                      tick={{ fontSize: 12 }}
-                      width={40}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--background))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
+            <div className="flex items-center gap-2">
+              <Label htmlFor="meta-input" className="text-xs text-muted-foreground whitespace-nowrap">
+                Meta diária:
+              </Label>
+              <Input
+                id="meta-input"
+                type="number"
+                min={0}
+                value={metaDiaria}
+                onChange={(e) => setMetaDiaria(Number(e.target.value) || 0)}
+                className="w-20 h-7 text-sm"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {stats.vistoriasPorDia.length > 0 ? (
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.vistoriasPorDia}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: 11 }}
+                    className="text-muted-foreground"
+                  />
+                  <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  {metaDiaria > 0 && (
+                    <ReferenceLine
+                      y={metaDiaria}
+                      stroke="hsl(var(--destructive))"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      label={{
+                        value: `Meta: ${metaDiaria}`,
+                        position: "insideTopRight",
+                        fill: "hsl(var(--destructive))",
+                        fontSize: 11,
+                        fontWeight: 600,
                       }}
                     />
-                    <Bar dataKey="count" name="Vistorias" radius={[0, 4, 4, 0]}>
-                      {stats.vistoriasPorUf.slice(0, 10).map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Sem dados para exibir
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  )}
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={3}
+                    dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                    name="Vistorias"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              Sem dados para exibir
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Ranking de Técnicos e Status por UF */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
