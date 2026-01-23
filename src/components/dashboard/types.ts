@@ -5,6 +5,7 @@ export interface DashboardFilters {
   technician: string;
   stateUf: string;
   status: "all" | "ok" | "nok";
+  siteType: string; // e.g., "DWDM", "HL3", "HL4", "all"
 }
 
 export interface BatteryInfo {

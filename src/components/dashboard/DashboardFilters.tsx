@@ -31,15 +31,17 @@ interface Props {
   onFiltersChange: (filters: FiltersType) => void;
   uniqueUFs: string[];
   uniqueTechnicians: string[];
+  uniqueSiteTypes: string[];
 }
 
-export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians }: Props) {
+export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   const hasActiveFilters = 
     filters.technician || 
     filters.stateUf !== "all" || 
     filters.status !== "all" ||
+    filters.siteType !== "all" ||
     filters.dateRange.from ||
     filters.dateRange.to;
 
@@ -47,6 +49,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.technician,
     filters.stateUf !== "all" ? filters.stateUf : null,
     filters.status !== "all" ? filters.status : null,
+    filters.siteType !== "all" ? filters.siteType : null,
     filters.dateRange.from,
   ].filter(Boolean).length;
 
@@ -56,6 +59,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
       technician: "",
       stateUf: "all",
       status: "all",
+      siteType: "all",
     });
   };
 
@@ -101,7 +105,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
         {/* Collapsible Content */}
         <CollapsibleContent>
           <div className="px-4 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Date Range */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Período</Label>
@@ -187,6 +191,27 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
                     {uniqueUFs.map((uf) => (
                       <SelectItem key={uf} value={uf}>
                         {uf}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+              </Select>
+              </div>
+
+              {/* Site Type */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Tipo de Site</Label>
+                <Select
+                  value={filters.siteType}
+                  onValueChange={(v) => onFiltersChange({ ...filters, siteType: v })}
+                >
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {uniqueSiteTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
                       </SelectItem>
                     ))}
                   </SelectContent>

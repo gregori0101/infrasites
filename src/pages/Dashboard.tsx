@@ -50,6 +50,7 @@ export default function Dashboard() {
     technician: "",
     stateUf: "all",
     status: "all",
+    siteType: "all",
   });
 
   // Drill-down modal state
@@ -85,7 +86,22 @@ export default function Dashboard() {
     retry: 2,
   });
 
-  // Fetch technician emails for productivity panel
+  // Fetch sites to get site types
+  const { data: sitesData = [] } = useQuery({
+    queryKey: ["dashboard-sites"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sites")
+        .select("site_code, tipo");
+      if (error) {
+        console.error("Error fetching sites:", error);
+        return [];
+      }
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+    retry: 2,
+  });
   const { data: technicianEmails } = useQuery({
     queryKey: ["technician-emails-dashboard"],
     queryFn: async () => {
@@ -106,8 +122,23 @@ export default function Dashboard() {
     retry: 1,
   });
 
-  // Process stats based on filters
-  const { stats, sites, batteries, acs, climatizacao } = useDashboardStats(reports, filters);
+  // Build site type map for filtering
+  const siteTypeMap = useMemo(() => {
+    const map = new Map<string, string>();
+    sitesData.forEach((site: { site_code: string; tipo: string }) => {
+      map.set(site.site_code, site.tipo);
+    });
+    return map;
+  }, [sitesData]);
+
+  // Filter reports by site type before processing
+  const filteredReportsBySiteType = useMemo(() => {
+    if (filters.siteType === "all") return reports;
+    return reports.filter(r => siteTypeMap.get(r.site_code) === filters.siteType);
+  }, [reports, filters.siteType, siteTypeMap]);
+
+  // Process stats based on filters (using reports already filtered by site type)
+  const { stats, sites, batteries, acs, climatizacao } = useDashboardStats(filteredReportsBySiteType, filters);
 
   // Extract unique values for filter dropdowns
   const uniqueUFs = useMemo(() => {
@@ -116,9 +147,15 @@ export default function Dashboard() {
   }, [reports]);
 
   const uniqueTechnicians = useMemo(() => {
-    const techs = new Set(reports.map((r) => r.technician_name).filter(Boolean));
+    const techs = new Set(filteredReportsBySiteType.map((r) => r.technician_name).filter(Boolean));
     return Array.from(techs).sort() as string[];
-  }, [reports]);
+  }, [filteredReportsBySiteType]);
+
+  // Extract unique site types
+  const uniqueSiteTypes = useMemo(() => {
+    const types = new Set(sitesData.map((s: { tipo: string }) => s.tipo).filter(Boolean));
+    return Array.from(types).sort() as string[];
+  }, [sitesData]);
 
   // Drill-down handlers
   const openDrillDown = (
@@ -399,6 +436,7 @@ export default function Dashboard() {
             onFiltersChange={setFilters}
             uniqueUFs={uniqueUFs}
             uniqueTechnicians={uniqueTechnicians}
+            uniqueSiteTypes={uniqueSiteTypes}
           />
 
           {/* Loading State */}
