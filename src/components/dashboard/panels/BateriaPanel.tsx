@@ -1,16 +1,7 @@
 import React from "react";
-import { Battery, AlertTriangle, Clock, Gauge, ShieldCheck, ShieldAlert, ShieldX, Info, Zap } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { StatCard } from "../StatCard";
+import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PanelStats, BatteryInfo } from "../types";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-} from "recharts";
 
 interface Props {
   stats: PanelStats;
@@ -19,64 +10,11 @@ interface Props {
 }
 
 export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
-  const percentOk = stats.totalBatteries > 0 
-    ? Math.round((stats.batteriesOk / stats.totalBatteries) * 100) 
-    : 0;
-
-  const percentOver5 = stats.totalBatteries > 0 
-    ? Math.round((stats.batteriesOver5Years / stats.totalBatteries) * 100) 
-    : 0;
-
-  const percentOver8 = stats.totalBatteries > 0 
-    ? Math.round((stats.batteriesOver8Years / stats.totalBatteries) * 100) 
-    : 0;
-
   // Calculate totals for autonomy risk
   const totalSemGMG = stats.autonomyRisk.sitesOk + stats.autonomyRisk.sitesMedioRisco + 
     stats.autonomyRisk.sitesAltoRisco + stats.autonomyRisk.sitesCritico;
   const totalComGMG = stats.autonomyRisk.sitesOkComGMG + stats.autonomyRisk.sitesAltoRiscoComGMG + 
     stats.autonomyRisk.sitesCriticoComGMG;
-
-  // Gauge visualization for obsolescence
-  const GaugeCard = ({ 
-    title, 
-    value, 
-    percent, 
-    color, 
-    onClick 
-  }: { 
-    title: string; 
-    value: number; 
-    percent: number; 
-    color: string;
-    onClick: () => void;
-  }) => (
-    <Card 
-      className="cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all"
-      onClick={onClick}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-muted-foreground">{title}</span>
-          <Gauge className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <div className="relative w-full h-4 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="absolute left-0 top-0 h-full rounded-full transition-all"
-            style={{ 
-              width: `${Math.min(percent, 100)}%`,
-              backgroundColor: color,
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-2xl font-bold">{value}</span>
-          <span className="text-lg font-medium" style={{ color }}>{percent}%</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   // Autonomy Risk Card Component
   const AutonomyRiskCard = ({ 
     title, 
@@ -352,169 +290,218 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </div>
       </div>
 
-      {/* SEÇÃO 4: Obsolescência (existente) */}
-      <div className="space-y-4">
+      {/* SEÇÃO 4: Regras de Obsolescência - NOVA */}
+      <div className="space-y-6">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1 h-6 bg-warning rounded-full" />
-          <h2 className="font-semibold text-lg">Painel Baterias - Obsolescência</h2>
+          <h2 className="font-semibold text-lg">Regras de Obsolescência por Tecnologia</h2>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Baterias"
-            value={stats.totalBatteries}
-            subtitle="Unidades cadastradas"
-            icon={Battery}
-            iconBg="bg-primary/10 text-primary"
-            onClick={() => onDrillDown("all")}
-          />
-          <StatCard
-            title="Baterias OK"
-            value={stats.batteriesOk}
-            subtitle={`${percentOk}% operacional`}
-            icon={Battery}
-            iconBg="bg-success/10 text-success"
-            badge={{ text: `${percentOk}%`, variant: "success" }}
-            onClick={() => onDrillDown("ok")}
-          />
-          <StatCard
-            title="Baterias com Defeito"
-            value={stats.batteriesNok}
-            subtitle="Requerem substituição"
-            icon={AlertTriangle}
-            iconBg="bg-destructive/10 text-destructive"
-            badge={stats.batteriesNok > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
-            onClick={() => onDrillDown("nok")}
-          />
-          <StatCard
-            title="Próximo Vencimento"
-            value={stats.batteriesOver5Years - stats.batteriesOver8Years}
-            subtitle="Entre 5-8 anos"
-            icon={Clock}
-            iconBg="bg-warning/10 text-warning"
-            onClick={() => onDrillDown("obsolete-warning")}
-          />
-        </div>
-
-        {/* Obsolescence Gauges */}
-        <div className="grid lg:grid-cols-2 gap-4">
-          <GaugeCard 
-            title="Baterias 5-8 anos (Atenção)"
-            value={stats.batteriesOver5Years - stats.batteriesOver8Years}
-            percent={percentOver5 - percentOver8}
-            color="#f59e0b"
-            onClick={() => onDrillDown("obsolete-warning")}
-          />
-          <GaugeCard 
-            title="Baterias +8 anos (CRÍTICO)"
-            value={stats.batteriesOver8Years}
-            percent={percentOver8}
-            color="#ef4444"
-            onClick={() => onDrillDown("obsolete-critical")}
-          />
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* Battery State Chart */}
-          <Card>
+        {/* Bloco de Regras por Tecnologia */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Regras Baterias de Chumbo */}
+          <Card className="bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-700">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Battery className="w-4 h-4 text-primary" />
-                Estado das Baterias
+                <Battery className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                Baterias de Chumbo (Polímero e Monobloco)
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {stats.batteryStateChart.length > 0 ? (
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={stats.batteryStateChart}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={5}
-                        dataKey="value"
-                        label={({ name, value }) => `${value}`}
-                      >
-                        {stats.batteryStateChart.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Battery className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p>Nenhum problema detectado</p>
-                  </div>
-                </div>
-              )}
+            <CardContent className="pt-0">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-success shrink-0" />
+                  <span><strong className="text-foreground">OK:</strong> <span className="text-muted-foreground">Data de fabricação &lt; 2 anos</span></span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-warning shrink-0" />
+                  <span><strong className="text-foreground">Médio Risco:</strong> <span className="text-muted-foreground">≥ 2 anos e &lt; 3 anos</span></span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-destructive shrink-0" />
+                  <span><strong className="text-foreground">Alto Risco:</strong> <span className="text-muted-foreground">≥ 3 anos</span></span>
+                </li>
+              </ul>
             </CardContent>
           </Card>
 
-          {/* Battery Age Chart */}
-          <Card>
+          {/* Regras Baterias de Lítio */}
+          <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Clock className="w-4 h-4 text-warning" />
-                Idade das Baterias
+                <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                Baterias de Lítio
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {stats.batteryAgeChart.length > 0 ? (
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={stats.batteryAgeChart}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={5}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {stats.batteryAgeChart.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Clock className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p>Nenhum dado de idade disponível</p>
-                  </div>
-                </div>
-              )}
+            <CardContent className="pt-0">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-success shrink-0" />
+                  <span><strong className="text-foreground">OK:</strong> <span className="text-muted-foreground">Data de fabricação &lt; 5 anos</span></span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-warning shrink-0" />
+                  <span><strong className="text-foreground">Médio Risco:</strong> <span className="text-muted-foreground">≥ 5 anos e &lt; 10 anos</span></span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-destructive shrink-0" />
+                  <span><strong className="text-foreground">Alto Risco:</strong> <span className="text-muted-foreground">≥ 10 anos</span></span>
+                </li>
+              </ul>
             </CardContent>
           </Card>
         </div>
+
+        {/* Painel de Sites por Obsolescência - Chumbo */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Battery className="w-4 h-4" />
+            Sites por Obsolescência - Baterias de Chumbo
+          </h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-success/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-success">OK</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.sitesOk}</p>
+                    <p className="text-xs text-muted-foreground">Baterias &lt; 2 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-success/10">
+                    <ShieldCheck className="w-5 h-5 text-success" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-warning/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-warning">Médio Risco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.sitesMedioRisco}</p>
+                    <p className="text-xs text-muted-foreground">Baterias 2-3 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-warning/10">
+                    <ShieldAlert className="w-5 h-5 text-warning" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-destructive/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-destructive">Alto Risco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.sitesAltoRisco}</p>
+                    <p className="text-xs text-muted-foreground">Baterias ≥ 3 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-destructive/10">
+                    <ShieldX className="w-5 h-5 text-destructive" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-muted">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.sitesSemBanco}</p>
+                    <p className="text-xs text-muted-foreground">Sem bateria de chumbo</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted">
+                    <Battery className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Painel de Sites por Obsolescência - Lítio */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Zap className="w-4 h-4" />
+            Sites por Obsolescência - Baterias de Lítio
+          </h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-success/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-success">OK</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.sitesOk}</p>
+                    <p className="text-xs text-muted-foreground">Baterias &lt; 5 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-success/10">
+                    <ShieldCheck className="w-5 h-5 text-success" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-warning/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-warning">Médio Risco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.sitesMedioRisco}</p>
+                    <p className="text-xs text-muted-foreground">Baterias 5-10 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-warning/10">
+                    <ShieldAlert className="w-5 h-5 text-warning" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-destructive/50">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-destructive">Alto Risco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.sitesAltoRisco}</p>
+                    <p className="text-xs text-muted-foreground">Baterias ≥ 10 anos</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-destructive/10">
+                    <ShieldX className="w-5 h-5 text-destructive" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-muted">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
+                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.sitesSemBanco}</p>
+                    <p className="text-xs text-muted-foreground">Sem bateria de lítio</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted">
+                    <Zap className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Nota explicativa */}
+        <Card className="bg-muted/30 border-dashed">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada site.
+                Sites "Sem Banco" não possuem baterias daquela tecnologia registradas ou não têm data de fabricação informada.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

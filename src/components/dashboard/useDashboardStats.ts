@@ -44,6 +44,19 @@ function getObsolescenceStatus(age: number): "ok" | "warning" | "critical" {
   return "ok";
 }
 
+// New obsolescence classification by battery type
+function getObsolescenciaChumbo(age: number): "ok" | "medio" | "alto" {
+  if (age >= 3) return "alto";
+  if (age >= 2) return "medio";
+  return "ok";
+}
+
+function getObsolescenciaLitio(age: number): "ok" | "medio" | "alto" {
+  if (age >= 10) return "alto";
+  if (age >= 5) return "medio";
+  return "ok";
+}
+
 // Calculate simulated autonomy in hours based on battery capacity (Ah)
 // Using simplified formula: Autonomy (h) = Total Capacity (Ah) / Average Load (A)
 // Assumption: Average load = 50A per cabinet, multiple batteries add capacity
@@ -199,7 +212,20 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       bateriasChumboTotal: 0,
       bateriasChumboByUf: [],
       bateriasLitioTotal: 0,
-      bateriasLitioByUf: []
+      bateriasLitioByUf: [],
+      // Obsolescência por tipo
+      obsolescenciaChumbo: {
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesSemBanco: 0,
+      },
+      obsolescenciaLitio: {
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesSemBanco: 0,
+      }
     };
 
     const siteInfoList: SiteInfo[] = [];
@@ -230,6 +256,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       let batteryIssues = 0;
       let acIssues = 0;
       let climatizacaoIssues = 0;
+      
+      // Track obsolescence per site for new rules
+      let siteChumboMaxAge = -1; // -1 means no chumbo battery
+      let siteLitioMaxAge = -1;  // -1 means no litio battery
+      let siteHasChumbo = false;
+      let siteHasLitio = false;
       
       // Technician tracking by user_id
       if (!technicianMap[techId]) {
@@ -435,12 +467,37 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             if (tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO")) {
               bateriasLitioTotal++;
               litioByUf[uf] = (litioByUf[uf] || 0) + 1;
+              siteHasLitio = true;
+              if (idade > siteLitioMaxAge) siteLitioMaxAge = idade;
             } else if (tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO")) {
               bateriasChumboTotal++;
               chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
+              siteHasChumbo = true;
+              if (idade > siteChumboMaxAge) siteChumboMaxAge = idade;
             }
           }
         }
+      }
+      
+      // Calculate obsolescence status for this site based on worst battery
+      // Chumbo: OK < 2 years, Médio 2-3 years, Alto >= 3 years
+      if (siteHasChumbo) {
+        const chumboStatus = getObsolescenciaChumbo(siteChumboMaxAge);
+        if (chumboStatus === "ok") stats.obsolescenciaChumbo.sitesOk++;
+        else if (chumboStatus === "medio") stats.obsolescenciaChumbo.sitesMedioRisco++;
+        else stats.obsolescenciaChumbo.sitesAltoRisco++;
+      } else {
+        stats.obsolescenciaChumbo.sitesSemBanco++;
+      }
+      
+      // Lítio: OK < 5 years, Médio 5-10 years, Alto >= 10 years
+      if (siteHasLitio) {
+        const litioStatus = getObsolescenciaLitio(siteLitioMaxAge);
+        if (litioStatus === "ok") stats.obsolescenciaLitio.sitesOk++;
+        else if (litioStatus === "medio") stats.obsolescenciaLitio.sitesMedioRisco++;
+        else stats.obsolescenciaLitio.sitesAltoRisco++;
+      } else {
+        stats.obsolescenciaLitio.sitesSemBanco++;
       }
       
       // Check zeladoria
