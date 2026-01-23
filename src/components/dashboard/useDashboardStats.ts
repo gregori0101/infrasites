@@ -180,22 +180,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       batteriesOver8Years: 0,
       batteryStateChart: [],
       batteryAgeChart: [],
-      // Autonomy Risk - per gabinete and per site
+      // Autonomy Risk - unified (regardless of GMG)
       autonomyRisk: {
         gabinetesOk: 0,
         gabinetesMedioRisco: 0,
         gabinetesAltoRisco: 0,
         gabinetesCritico: 0,
-        gabinetesOkComGMG: 0,
-        gabinetesAltoRiscoComGMG: 0,
-        gabinetesCriticoComGMG: 0,
         sitesOk: 0,
         sitesMedioRisco: 0,
         sitesAltoRisco: 0,
         sitesCritico: 0,
-        sitesOkComGMG: 0,
-        sitesAltoRiscoComGMG: 0,
-        sitesCriticoComGMG: 0,
       },
       // Climatização
       climatizacaoTotal: 0,
@@ -217,18 +211,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       bateriasChumboByUf: [],
       bateriasLitioTotal: 0,
       bateriasLitioByUf: [],
-      // Obsolescência por tipo - per gabinete and per site
-      obsolescenciaChumbo: {
-        gabinetesOk: 0,
-        gabinetesMedioRisco: 0,
-        gabinetesAltoRisco: 0,
-        gabinetesSemBanco: 0,
-        sitesOk: 0,
-        sitesMedioRisco: 0,
-        sitesAltoRisco: 0,
-        sitesSemBanco: 0,
-      },
-      obsolescenciaLitio: {
+      // Obsolescência unificada (Chumbo + Lítio)
+      obsolescencia: {
         gabinetesOk: 0,
         gabinetesMedioRisco: 0,
         gabinetesAltoRisco: 0,
@@ -500,41 +484,44 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         
         // Only process autonomy and obsolescence for valid gabinetes (g <= total_cabinets)
         if (g <= (report.total_cabinets || 1)) {
-          // Calculate autonomy risk for this gabinete
+          // Calculate autonomy risk for this gabinete (unified, regardless of GMG)
           const gabAutonomyHours = calculateGabineteAutonomy(report, g);
           const gabAutonomyRisk = classifyAutonomyRisk(gabAutonomyHours, hasGMG);
           
-          // Update autonomy risk counters per gabinete
-          if (hasGMG) {
-            if (gabAutonomyRisk === "ok") stats.autonomyRisk.gabinetesOkComGMG++;
-            else if (gabAutonomyRisk === "alto") stats.autonomyRisk.gabinetesAltoRiscoComGMG++;
-            else if (gabAutonomyRisk === "critico") stats.autonomyRisk.gabinetesCriticoComGMG++;
-          } else {
-            if (gabAutonomyRisk === "ok") stats.autonomyRisk.gabinetesOk++;
-            else if (gabAutonomyRisk === "medio") stats.autonomyRisk.gabinetesMedioRisco++;
-            else if (gabAutonomyRisk === "alto") stats.autonomyRisk.gabinetesAltoRisco++;
-            else if (gabAutonomyRisk === "critico") stats.autonomyRisk.gabinetesCritico++;
-          }
+          // Update unified autonomy risk counters per gabinete
+          if (gabAutonomyRisk === "ok") stats.autonomyRisk.gabinetesOk++;
+          else if (gabAutonomyRisk === "medio") stats.autonomyRisk.gabinetesMedioRisco++;
+          else if (gabAutonomyRisk === "alto") stats.autonomyRisk.gabinetesAltoRisco++;
+          else if (gabAutonomyRisk === "critico") stats.autonomyRisk.gabinetesCritico++;
           
-          // Calculate obsolescence status for this gabinete based on worst battery
-          // Chumbo: OK < 2 years, Médio 2-3 years, Alto >= 3 years
-          if (gabHasChumbo) {
-            const chumboStatus = getObsolescenciaChumbo(gabChumboMaxAge);
-            if (chumboStatus === "ok") stats.obsolescenciaChumbo.gabinetesOk++;
-            else if (chumboStatus === "medio") stats.obsolescenciaChumbo.gabinetesMedioRisco++;
-            else stats.obsolescenciaChumbo.gabinetesAltoRisco++;
-          } else {
-            stats.obsolescenciaChumbo.gabinetesSemBanco++;
-          }
+          // Calculate unified obsolescence status for this gabinete
+          // Uses the worst (oldest) battery regardless of type
+          const gabMaxAge = Math.max(gabChumboMaxAge, gabLitioMaxAge);
+          const hasBattery = gabHasChumbo || gabHasLitio;
           
-          // Lítio: OK < 5 years, Médio 5-10 years, Alto >= 10 years
-          if (gabHasLitio) {
-            const litioStatus = getObsolescenciaLitio(gabLitioMaxAge);
-            if (litioStatus === "ok") stats.obsolescenciaLitio.gabinetesOk++;
-            else if (litioStatus === "medio") stats.obsolescenciaLitio.gabinetesMedioRisco++;
-            else stats.obsolescenciaLitio.gabinetesAltoRisco++;
+          if (hasBattery && gabMaxAge >= 0) {
+            // Apply the stricter criteria (Chumbo rules since they have lower thresholds)
+            // Chumbo: OK < 2y, Médio 2-3y, Alto >= 3y
+            // Lítio: OK < 5y, Médio 5-10y, Alto >= 10y
+            // We classify based on the type present, using worst case
+            let gabObsolStatus: "ok" | "medio" | "alto" = "ok";
+            if (gabHasChumbo && gabHasLitio) {
+              // Both types present - use worst status
+              const chumboStatus = getObsolescenciaChumbo(gabChumboMaxAge);
+              const litioStatus = getObsolescenciaLitio(gabLitioMaxAge);
+              if (chumboStatus === "alto" || litioStatus === "alto") gabObsolStatus = "alto";
+              else if (chumboStatus === "medio" || litioStatus === "medio") gabObsolStatus = "medio";
+            } else if (gabHasChumbo) {
+              gabObsolStatus = getObsolescenciaChumbo(gabChumboMaxAge);
+            } else {
+              gabObsolStatus = getObsolescenciaLitio(gabLitioMaxAge);
+            }
+            
+            if (gabObsolStatus === "ok") stats.obsolescencia.gabinetesOk++;
+            else if (gabObsolStatus === "medio") stats.obsolescencia.gabinetesMedioRisco++;
+            else stats.obsolescencia.gabinetesAltoRisco++;
           } else {
-            stats.obsolescenciaLitio.gabinetesSemBanco++;
+            stats.obsolescencia.gabinetesSemBanco++;
           }
         }
       }
@@ -551,7 +538,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         ufMap[uf].ok++;
       }
       
-      // Calculate site-level autonomy and obsolescence
+      // Calculate site-level autonomy (unified, regardless of GMG)
       const numCabinets = report.total_cabinets || 1;
       const siteEstimatedLoad = numCabinets * 30;
       const siteAutonomyHours = (siteEstimatedLoad > 0 && siteTotalCapacityAh > 0) 
@@ -559,35 +546,32 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         : 4;
       const siteAutonomyRisk = classifyAutonomyRisk(siteAutonomyHours, hasGMG);
       
-      // Update site-level autonomy counters
-      if (hasGMG) {
-        if (siteAutonomyRisk === "ok") stats.autonomyRisk.sitesOkComGMG++;
-        else if (siteAutonomyRisk === "alto") stats.autonomyRisk.sitesAltoRiscoComGMG++;
-        else if (siteAutonomyRisk === "critico") stats.autonomyRisk.sitesCriticoComGMG++;
-      } else {
-        if (siteAutonomyRisk === "ok") stats.autonomyRisk.sitesOk++;
-        else if (siteAutonomyRisk === "medio") stats.autonomyRisk.sitesMedioRisco++;
-        else if (siteAutonomyRisk === "alto") stats.autonomyRisk.sitesAltoRisco++;
-        else if (siteAutonomyRisk === "critico") stats.autonomyRisk.sitesCritico++;
-      }
+      // Update unified site-level autonomy counters
+      if (siteAutonomyRisk === "ok") stats.autonomyRisk.sitesOk++;
+      else if (siteAutonomyRisk === "medio") stats.autonomyRisk.sitesMedioRisco++;
+      else if (siteAutonomyRisk === "alto") stats.autonomyRisk.sitesAltoRisco++;
+      else if (siteAutonomyRisk === "critico") stats.autonomyRisk.sitesCritico++;
       
-      // Calculate site-level obsolescence
-      if (siteHasChumbo) {
-        const chumboStatus = getObsolescenciaChumbo(siteChumboMaxAge);
-        if (chumboStatus === "ok") stats.obsolescenciaChumbo.sitesOk++;
-        else if (chumboStatus === "medio") stats.obsolescenciaChumbo.sitesMedioRisco++;
-        else stats.obsolescenciaChumbo.sitesAltoRisco++;
+      // Calculate unified site-level obsolescence
+      const hasSiteBattery = siteHasChumbo || siteHasLitio;
+      if (hasSiteBattery) {
+        let siteObsolStatus: "ok" | "medio" | "alto" = "ok";
+        if (siteHasChumbo && siteHasLitio) {
+          const chumboStatus = getObsolescenciaChumbo(siteChumboMaxAge);
+          const litioStatus = getObsolescenciaLitio(siteLitioMaxAge);
+          if (chumboStatus === "alto" || litioStatus === "alto") siteObsolStatus = "alto";
+          else if (chumboStatus === "medio" || litioStatus === "medio") siteObsolStatus = "medio";
+        } else if (siteHasChumbo) {
+          siteObsolStatus = getObsolescenciaChumbo(siteChumboMaxAge);
+        } else {
+          siteObsolStatus = getObsolescenciaLitio(siteLitioMaxAge);
+        }
+        
+        if (siteObsolStatus === "ok") stats.obsolescencia.sitesOk++;
+        else if (siteObsolStatus === "medio") stats.obsolescencia.sitesMedioRisco++;
+        else stats.obsolescencia.sitesAltoRisco++;
       } else {
-        stats.obsolescenciaChumbo.sitesSemBanco++;
-      }
-      
-      if (siteHasLitio) {
-        const litioStatus = getObsolescenciaLitio(siteLitioMaxAge);
-        if (litioStatus === "ok") stats.obsolescenciaLitio.sitesOk++;
-        else if (litioStatus === "medio") stats.obsolescenciaLitio.sitesMedioRisco++;
-        else stats.obsolescenciaLitio.sitesAltoRisco++;
-      } else {
-        stats.obsolescenciaLitio.sitesSemBanco++;
+        stats.obsolescencia.sitesSemBanco++;
       }
       
       siteInfoList.push({

@@ -13,60 +13,35 @@ interface Props {
 export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
   
-  // Calculate totals for autonomy risk based on view mode
-  const totalSemGMG = viewMode === "gabinete" 
+  // Get correct values based on view mode - unified (no GMG separation)
+  const totalAutonomy = viewMode === "gabinete" 
     ? stats.autonomyRisk.gabinetesOk + stats.autonomyRisk.gabinetesMedioRisco + 
       stats.autonomyRisk.gabinetesAltoRisco + stats.autonomyRisk.gabinetesCritico
     : stats.autonomyRisk.sitesOk + stats.autonomyRisk.sitesMedioRisco + 
       stats.autonomyRisk.sitesAltoRisco + stats.autonomyRisk.sitesCritico;
-  
-  const totalComGMG = viewMode === "gabinete"
-    ? stats.autonomyRisk.gabinetesOkComGMG + stats.autonomyRisk.gabinetesAltoRiscoComGMG + 
-      stats.autonomyRisk.gabinetesCriticoComGMG
-    : stats.autonomyRisk.sitesOkComGMG + stats.autonomyRisk.sitesAltoRiscoComGMG + 
-      stats.autonomyRisk.sitesCriticoComGMG;
 
-  // Get correct values based on view mode
   const autonomy = viewMode === "gabinete" ? {
     ok: stats.autonomyRisk.gabinetesOk,
     medioRisco: stats.autonomyRisk.gabinetesMedioRisco,
     altoRisco: stats.autonomyRisk.gabinetesAltoRisco,
     critico: stats.autonomyRisk.gabinetesCritico,
-    okComGMG: stats.autonomyRisk.gabinetesOkComGMG,
-    altoRiscoComGMG: stats.autonomyRisk.gabinetesAltoRiscoComGMG,
-    criticoComGMG: stats.autonomyRisk.gabinetesCriticoComGMG,
   } : {
     ok: stats.autonomyRisk.sitesOk,
     medioRisco: stats.autonomyRisk.sitesMedioRisco,
     altoRisco: stats.autonomyRisk.sitesAltoRisco,
     critico: stats.autonomyRisk.sitesCritico,
-    okComGMG: stats.autonomyRisk.sitesOkComGMG,
-    altoRiscoComGMG: stats.autonomyRisk.sitesAltoRiscoComGMG,
-    criticoComGMG: stats.autonomyRisk.sitesCriticoComGMG,
   };
 
-  const obsolChumbo = viewMode === "gabinete" ? {
-    ok: stats.obsolescenciaChumbo.gabinetesOk,
-    medioRisco: stats.obsolescenciaChumbo.gabinetesMedioRisco,
-    altoRisco: stats.obsolescenciaChumbo.gabinetesAltoRisco,
-    semBanco: stats.obsolescenciaChumbo.gabinetesSemBanco,
+  const obsolescencia = viewMode === "gabinete" ? {
+    ok: stats.obsolescencia.gabinetesOk,
+    medioRisco: stats.obsolescencia.gabinetesMedioRisco,
+    altoRisco: stats.obsolescencia.gabinetesAltoRisco,
+    semBanco: stats.obsolescencia.gabinetesSemBanco,
   } : {
-    ok: stats.obsolescenciaChumbo.sitesOk,
-    medioRisco: stats.obsolescenciaChumbo.sitesMedioRisco,
-    altoRisco: stats.obsolescenciaChumbo.sitesAltoRisco,
-    semBanco: stats.obsolescenciaChumbo.sitesSemBanco,
-  };
-
-  const obsolLitio = viewMode === "gabinete" ? {
-    ok: stats.obsolescenciaLitio.gabinetesOk,
-    medioRisco: stats.obsolescenciaLitio.gabinetesMedioRisco,
-    altoRisco: stats.obsolescenciaLitio.gabinetesAltoRisco,
-    semBanco: stats.obsolescenciaLitio.gabinetesSemBanco,
-  } : {
-    ok: stats.obsolescenciaLitio.sitesOk,
-    medioRisco: stats.obsolescenciaLitio.sitesMedioRisco,
-    altoRisco: stats.obsolescenciaLitio.sitesAltoRisco,
-    semBanco: stats.obsolescenciaLitio.sitesSemBanco,
+    ok: stats.obsolescencia.sitesOk,
+    medioRisco: stats.obsolescencia.sitesMedioRisco,
+    altoRisco: stats.obsolescencia.sitesAltoRisco,
+    semBanco: stats.obsolescencia.sitesSemBanco,
   };
 
   const unitLabel = viewMode === "gabinete" ? "gabinetes" : "sites";
@@ -133,24 +108,23 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </CardContent>
       </Card>
 
-      {/* SEÇÃO 1: Risco de Autonomia */}
+      {/* SEÇÃO 1: Risco de Autonomia - UNIFICADO */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1 h-6 bg-primary rounded-full" />
           <h2 className="font-semibold text-lg">Risco de Autonomia de Bateria</h2>
         </div>
 
-        {/* SEM GMG */}
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Battery className="w-4 h-4" />
-            {unitLabelSingular} SEM Gerador ({totalSemGMG} {unitLabel})
+            {unitLabelSingular} por Risco de Autonomia ({totalAutonomy} {unitLabel})
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <AutonomyRiskCard
               title="OK"
               value={autonomy.ok}
-              subtitle="≥ 6 horas de autonomia"
+              subtitle="≥ 6h (sem GMG) ou ≥ 4h (com GMG)"
               icon={ShieldCheck}
               colorClass="text-success"
               bgClass="bg-success/10 text-success"
@@ -158,7 +132,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             <AutonomyRiskCard
               title="Médio Risco"
               value={autonomy.medioRisco}
-              subtitle="≥ 4h e < 6h de autonomia"
+              subtitle="≥ 4h e < 6h (sem gerador)"
               icon={ShieldAlert}
               colorClass="text-warning"
               bgClass="bg-warning/10 text-warning"
@@ -182,53 +156,19 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </div>
         </div>
 
-        {/* COM GMG */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Zap className="w-4 h-4" />
-            {unitLabelSingular} COM Gerador ({totalComGMG} {unitLabel})
-          </h3>
-          <div className="grid grid-cols-3 gap-4">
-            <AutonomyRiskCard
-              title="OK"
-              value={autonomy.okComGMG}
-              subtitle="≥ 4 horas de autonomia"
-              icon={ShieldCheck}
-              colorClass="text-success"
-              bgClass="bg-success/10 text-success"
-            />
-            <AutonomyRiskCard
-              title="Alto Risco"
-              value={autonomy.altoRiscoComGMG}
-              subtitle="≥ 2h e < 4h de autonomia"
-              icon={ShieldAlert}
-              colorClass="text-accent"
-              bgClass="bg-accent/10 text-accent"
-            />
-            <AutonomyRiskCard
-              title="Crítico"
-              value={autonomy.criticoComGMG}
-              subtitle="< 2 horas de autonomia"
-              icon={ShieldX}
-              colorClass="text-destructive"
-              bgClass="bg-destructive/10 text-destructive"
-            />
-          </div>
-        </div>
-
-        {/* Card de Critérios */}
+        {/* Card de Critérios - Autonomia */}
         <Card className="bg-muted/30 border-dashed">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Info className="w-4 h-4 text-primary" />
-              Critérios de Classificação de Risco
+              Critérios de Classificação de Risco de Autonomia
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div>
-              <p className="font-medium mb-2 flex items-center gap-2">
-                  <Battery className="w-4 h-4" /> Gabinetes SEM Gerador:
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Battery className="w-4 h-4" /> Sem Gerador (GMG):
                 </p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li className="flex items-center gap-2">
@@ -250,13 +190,13 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 </ul>
               </div>
               <div>
-              <p className="font-medium mb-2 flex items-center gap-2">
-                  <Zap className="w-4 h-4" /> Gabinetes COM Gerador:
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Com Gerador (GMG):
                 </p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-success" /> 
-                    <strong className="text-foreground">OK:</strong> Autonomia total ≥ 4 horas
+                    <strong className="text-foreground">OK:</strong> Autonomia ≥ 4 horas
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-accent" /> 
@@ -374,73 +314,70 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </div>
       </div>
 
-      {/* SEÇÃO 4: Regras de Obsolescência - NOVA */}
+      {/* SEÇÃO 4: Obsolescência - UNIFICADA */}
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1 h-6 bg-warning rounded-full" />
-          <h2 className="font-semibold text-lg">Regras de Obsolescência por Tecnologia</h2>
+          <h2 className="font-semibold text-lg">Risco de Obsolescência de Bateria</h2>
         </div>
 
-        {/* Bloco de Regras por Tecnologia */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Regras Baterias de Chumbo */}
-          <Card className="bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Battery className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                Baterias de Chumbo (Polímero e Monobloco)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-success shrink-0" />
-                  <span><strong className="text-foreground">OK:</strong> <span className="text-muted-foreground">Data de fabricação &lt; 2 anos</span></span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-warning shrink-0" />
-                  <span><strong className="text-foreground">Médio Risco:</strong> <span className="text-muted-foreground">≥ 2 anos e &lt; 3 anos</span></span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-destructive shrink-0" />
-                  <span><strong className="text-foreground">Alto Risco:</strong> <span className="text-muted-foreground">≥ 3 anos</span></span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+        {/* Regras de Obsolescência por Tecnologia */}
+        <Card className="bg-muted/30 border-dashed">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Info className="w-4 h-4 text-primary" />
+              Critérios de Obsolescência por Tecnologia
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Battery className="w-4 h-4 text-slate-600" /> Baterias de Chumbo:
+                </p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-success" /> 
+                    <strong className="text-foreground">OK:</strong> &lt; 2 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-warning" /> 
+                    <strong className="text-foreground">Médio Risco:</strong> ≥ 2 e &lt; 3 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
+                    <strong className="text-foreground">Alto Risco:</strong> ≥ 3 anos
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-emerald-600" /> Baterias de Lítio:
+                </p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-success" /> 
+                    <strong className="text-foreground">OK:</strong> &lt; 5 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-warning" /> 
+                    <strong className="text-foreground">Médio Risco:</strong> ≥ 5 e &lt; 10 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
+                    <strong className="text-foreground">Alto Risco:</strong> ≥ 10 anos
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Regras Baterias de Lítio */}
-          <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                Baterias de Lítio
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-success shrink-0" />
-                  <span><strong className="text-foreground">OK:</strong> <span className="text-muted-foreground">Data de fabricação &lt; 5 anos</span></span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-warning shrink-0" />
-                  <span><strong className="text-foreground">Médio Risco:</strong> <span className="text-muted-foreground">≥ 5 anos e &lt; 10 anos</span></span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-destructive shrink-0" />
-                  <span><strong className="text-foreground">Alto Risco:</strong> <span className="text-muted-foreground">≥ 10 anos</span></span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Painel de Obsolescência - Chumbo */}
+        {/* Painel de Obsolescência - UNIFICADO */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Battery className="w-4 h-4" />
-            {unitLabelSingular} por Obsolescência - Baterias de Chumbo
+            {unitLabelSingular} por Risco de Obsolescência (todas as baterias)
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-success/50">
@@ -448,8 +385,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-success">OK</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.ok}</p>
-                    <p className="text-xs text-muted-foreground">Baterias &lt; 2 anos</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.ok}</p>
+                    <p className="text-xs text-muted-foreground">Baterias dentro do prazo</p>
                   </div>
                   <div className="p-3 rounded-xl bg-success/10">
                     <ShieldCheck className="w-5 h-5 text-success" />
@@ -463,8 +400,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-warning">Médio Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.medioRisco}</p>
-                    <p className="text-xs text-muted-foreground">Baterias 2-3 anos</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.medioRisco}</p>
+                    <p className="text-xs text-muted-foreground">Atenção recomendada</p>
                   </div>
                   <div className="p-3 rounded-xl bg-warning/10">
                     <ShieldAlert className="w-5 h-5 text-warning" />
@@ -478,8 +415,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-destructive">Alto Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.altoRisco}</p>
-                    <p className="text-xs text-muted-foreground">Baterias ≥ 3 anos</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.altoRisco}</p>
+                    <p className="text-xs text-muted-foreground">Substituição recomendada</p>
                   </div>
                   <div className="p-3 rounded-xl bg-destructive/10">
                     <ShieldX className="w-5 h-5 text-destructive" />
@@ -493,80 +430,11 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.semBanco}</p>
-                    <p className="text-xs text-muted-foreground">Sem bateria de chumbo</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.semBanco}</p>
+                    <p className="text-xs text-muted-foreground">Sem bateria registrada</p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted">
                     <Battery className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Painel de Obsolescência - Lítio */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Zap className="w-4 h-4" />
-            {unitLabelSingular} por Obsolescência - Baterias de Lítio
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-success/50">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-success">OK</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.ok}</p>
-                    <p className="text-xs text-muted-foreground">Baterias &lt; 5 anos</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-success/10">
-                    <ShieldCheck className="w-5 h-5 text-success" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-warning/50">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-warning">Médio Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.medioRisco}</p>
-                    <p className="text-xs text-muted-foreground">Baterias 5-10 anos</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-warning/10">
-                    <ShieldAlert className="w-5 h-5 text-warning" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-destructive/50">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-destructive">Alto Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.altoRisco}</p>
-                    <p className="text-xs text-muted-foreground">Baterias ≥ 10 anos</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-destructive/10">
-                    <ShieldX className="w-5 h-5 text-destructive" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-muted">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.semBanco}</p>
-                    <p className="text-xs text-muted-foreground">Sem bateria de lítio</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-muted">
-                    <Zap className="w-5 h-5 text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -580,8 +448,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada {viewMode === "gabinete" ? "gabinete" : "site"}.
-                {unitLabelSingular} "Sem Banco" não possuem baterias daquela tecnologia registradas ou não têm data de fabricação informada.
+                A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada {viewMode === "gabinete" ? "gabinete" : "site"}, independente da tecnologia (chumbo ou lítio).
+                {unitLabelSingular} "Sem Banco" não possuem baterias registradas ou não têm data de fabricação informada.
               </p>
             </div>
           </CardContent>
