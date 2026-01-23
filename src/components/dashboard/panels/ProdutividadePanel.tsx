@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatCard } from "../StatCard";
@@ -40,7 +41,9 @@ import {
   Target,
   Award,
   MapPin,
+  Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 
 export interface TechnicianRanking {
   id: string;
@@ -48,6 +51,16 @@ export interface TechnicianRanking {
   email?: string;
   count: number;
   mainUf: string;
+}
+
+export interface TechnicianProductivity {
+  id: string;
+  name: string;
+  email?: string;
+  mainUf: string;
+  today: number;
+  thisMonth: number;
+  total: number;
 }
 
 export interface UfAssignmentStats {
@@ -83,7 +96,98 @@ const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
 export function ProdutividadePanel({ stats, onDrillDown }: Props) {
   const [metaDiaria, setMetaDiaria] = useState<number>(10);
+  const [searchTechnician, setSearchTechnician] = useState("");
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
+
+  // Calculate today's date in DD/MM format
+  const todayFormatted = useMemo(() => {
+    const today = new Date();
+    return `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}`;
+  }, []);
+
+  // Calculate current month in MM/YYYY format
+  const currentMonthFormatted = useMemo(() => {
+    const today = new Date();
+    return `${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+  }, []);
+
+  // Calculate technician productivity (daily, monthly, total)
+  const technicianProductivity: TechnicianProductivity[] = useMemo(() => {
+    const productivityMap = new Map<string, TechnicianProductivity>();
+    
+    // Initialize from ranking (has total counts)
+    stats.technicianRanking.forEach(tech => {
+      productivityMap.set(tech.id, {
+        id: tech.id,
+        name: tech.name,
+        email: tech.email,
+        mainUf: tech.mainUf,
+        today: 0,
+        thisMonth: 0,
+        total: tech.count,
+      });
+    });
+    
+    // Calculate today's count from daily data
+    stats.vistoriasPorDiaTecnico.forEach(item => {
+      const existing = productivityMap.get(item.technicianId);
+      if (existing) {
+        if (item.day === todayFormatted) {
+          existing.today += item.count;
+        }
+        // Calculate this month - check if day is in current month
+        const [day, month] = item.day.split('/').map(Number);
+        const currentMonth = new Date().getMonth() + 1;
+        if (month === currentMonth) {
+          existing.thisMonth += item.count;
+        }
+      }
+    });
+    
+    return Array.from(productivityMap.values())
+      .sort((a, b) => b.total - a.total);
+  }, [stats.technicianRanking, stats.vistoriasPorDiaTecnico, todayFormatted]);
+
+  // Filtered technicians based on search
+  const filteredTechnicians = useMemo(() => {
+    if (!searchTechnician.trim()) return technicianProductivity;
+    const search = searchTechnician.toLowerCase();
+    return technicianProductivity.filter(tech => 
+      tech.name.toLowerCase().includes(search) ||
+      (tech.email && tech.email.toLowerCase().includes(search)) ||
+      tech.mainUf.toLowerCase().includes(search)
+    );
+  }, [technicianProductivity, searchTechnician]);
+
+  // Export technicians to Excel
+  const handleExportTechnicians = () => {
+    const exportData = technicianProductivity.map((tech, index) => ({
+      'Posição': index + 1,
+      'Técnico': tech.email || tech.name,
+      'UF Principal': tech.mainUf,
+      'Hoje': tech.today,
+      'Este Mês': tech.thisMonth,
+      'Total': tech.total,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Produtividade Técnicos");
+    
+    // Auto-size columns
+    const colWidths = [
+      { wch: 8 },  // Posição
+      { wch: 35 }, // Técnico
+      { wch: 12 }, // UF Principal
+      { wch: 8 },  // Hoje
+      { wch: 10 }, // Este Mês
+      { wch: 8 },  // Total
+    ];
+    ws['!cols'] = colWidths;
+    
+    const fileName = `produtividade_tecnicos_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   // Aggregate daily data by technician for table
   const dailyTechnicianSummary = useMemo(() => {
@@ -288,50 +392,84 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
         </CardContent>
       </Card>
 
-      {/* Ranking de Técnicos e Status por UF */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Ranking de Técnicos */}
-        <Card>
-          <CardHeader className="pb-2">
+      {/* Produtividade Completa dos Técnicos - Full Width */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-500" />
-              Top 10 Técnicos por Produtividade
+              <Users className="w-4 h-4 text-primary" />
+              Produtividade dos Técnicos
+              <Badge variant="secondary" className="ml-2">
+                {technicianProductivity.length} técnicos
+              </Badge>
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px] w-full">
-              <div className="min-w-[400px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-10">#</TableHead>
-                      <TableHead>Email do Técnico</TableHead>
-                      <TableHead className="text-right w-20">Vistorias</TableHead>
-                      <TableHead className="text-center w-14">UF</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stats.technicianRanking.slice(0, 10).map((tech, index) => (
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Buscar técnico..."
+                value={searchTechnician}
+                onChange={(e) => setSearchTechnician(e.target.value)}
+                className="w-48 h-8 text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportTechnicians}
+                className="flex items-center gap-1"
+              >
+                <Download className="w-4 h-4" />
+                Exportar Excel
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[400px] w-full">
+            <div className="min-w-[500px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Técnico</TableHead>
+                    <TableHead className="text-center w-16">UF</TableHead>
+                    <TableHead className="text-right w-20">
+                      <div className="flex flex-col items-end">
+                        <span>Hoje</span>
+                        <span className="text-xs text-muted-foreground font-normal">{todayFormatted}</span>
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-right w-24">
+                      <div className="flex flex-col items-end">
+                        <span>Mensal</span>
+                        <span className="text-xs text-muted-foreground font-normal">{currentMonthFormatted}</span>
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-right w-20">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTechnicians.map((tech, index) => {
+                    const originalIndex = technicianProductivity.findIndex(t => t.id === tech.id);
+                    return (
                       <TableRow key={tech.id}>
                         <TableCell className="font-medium">
-                          {index < 3 ? (
+                          {originalIndex < 3 ? (
                             <Badge
-                              variant={index === 0 ? "default" : "secondary"}
+                              variant={originalIndex === 0 ? "default" : "secondary"}
                               className={
-                                index === 0
+                                originalIndex === 0
                                   ? "bg-amber-500"
-                                  : index === 1
+                                  : originalIndex === 1
                                   ? "bg-gray-400"
                                   : "bg-amber-700"
                               }
                             >
-                              {index + 1}º
+                              {originalIndex + 1}º
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground">{index + 1}º</span>
+                            <span className="text-muted-foreground">{originalIndex + 1}º</span>
                           )}
                         </TableCell>
-                        <TableCell className="font-medium truncate max-w-[180px]" title={tech.email || tech.name}>
+                        <TableCell className="font-medium truncate max-w-[200px]" title={tech.email || tech.name}>
                           {tech.email ? (
                             <span>{tech.email}</span>
                           ) : (
@@ -340,74 +478,84 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-primary text-lg">
-                          {tech.count}
-                        </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{tech.mainUf}</Badge>
                         </TableCell>
-                      </TableRow>
-                    ))}
-                    {stats.technicianRanking.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                          Sem dados de técnicos
+                        <TableCell className="text-right">
+                          {tech.today > 0 ? (
+                            <Badge className="bg-green-500 text-white">{tech.today}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-blue-600">
+                          {tech.thisMonth}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-primary text-lg">
+                          {tech.total}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-              <ScrollBar orientation="horizontal" />
-              <ScrollBar orientation="vertical" />
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                    );
+                  })}
+                  {filteredTechnicians.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        {searchTechnician ? "Nenhum técnico encontrado" : "Sem dados de técnicos"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <ScrollBar orientation="horizontal" />
+            <ScrollBar orientation="vertical" />
+          </ScrollArea>
+        </CardContent>
+      </Card>
 
-        {/* Status por UF (Stacked Bar) */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-blue-500" />
-              Status das Atribuições por UF
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.assignmentsByUf.length > 0 ? (
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.assignmentsByUf.slice(0, 8)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis
-                      dataKey="uf"
-                      type="category"
-                      tick={{ fontSize: 11 }}
-                      width={35}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--background))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="concluidas" name="Concluídas" stackId="a" fill="#22c55e" />
-                    <Bar dataKey="emAndamento" name="Em Andamento" stackId="a" fill="#3b82f6" />
-                    <Bar dataKey="pendentes" name="Pendentes" stackId="a" fill="#f59e0b" />
-                    <Bar dataKey="semAtribuicao" name="Sem Atribuição" stackId="a" fill="#6b7280" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Sem dados de atribuições
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Status por UF */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-blue-500" />
+            Status das Atribuições por UF
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stats.assignmentsByUf.length > 0 ? (
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.assignmentsByUf.slice(0, 8)} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis type="number" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    dataKey="uf"
+                    type="category"
+                    tick={{ fontSize: 11 }}
+                    width={35}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="concluidas" name="Concluídas" stackId="a" fill="#22c55e" />
+                  <Bar dataKey="emAndamento" name="Em Andamento" stackId="a" fill="#3b82f6" />
+                  <Bar dataKey="pendentes" name="Pendentes" stackId="a" fill="#f59e0b" />
+                  <Bar dataKey="semAtribuicao" name="Sem Atribuição" stackId="a" fill="#6b7280" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              Sem dados de atribuições
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Produtividade Diária por Técnico e UF */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
