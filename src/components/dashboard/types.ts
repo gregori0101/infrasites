@@ -91,14 +91,14 @@ export interface UfAssignmentStats {
 }
 
 export interface AutonomyRiskStats {
-  sitesOk: number;          // >= 6h
-  sitesMedioRisco: number;  // >= 4h < 6h
-  sitesAltoRisco: number;   // >= 2h < 4h
-  sitesCritico: number;     // < 2h
+  gabinetesOk: number;          // >= 6h
+  gabinetesMedioRisco: number;  // >= 4h < 6h
+  gabinetesAltoRisco: number;   // >= 2h < 4h
+  gabinetesCritico: number;     // < 2h
   // Com GMG
-  sitesOkComGMG: number;    // >= 4h
-  sitesAltoRiscoComGMG: number;  // >= 2h < 4h
-  sitesCriticoComGMG: number;     // < 2h
+  gabinetesOkComGMG: number;    // >= 4h
+  gabinetesAltoRiscoComGMG: number;  // >= 2h < 4h
+  gabinetesCriticoComGMG: number;     // < 2h
 }
 
 export interface PanelStats {
@@ -142,18 +142,18 @@ export interface PanelStats {
   // Autonomy Risk (New)
   autonomyRisk: AutonomyRiskStats;
   
-  // Obsolescence by Type (New Rules)
+  // Obsolescence by Type (New Rules) - per gabinete
   obsolescenciaChumbo: {
-    sitesOk: number;        // < 2 years
-    sitesMedioRisco: number; // >= 2 and < 3 years
-    sitesAltoRisco: number;  // >= 3 years
-    sitesSemBanco: number;   // No batteries
+    gabinetesOk: number;        // < 2 years
+    gabinetesMedioRisco: number; // >= 2 and < 3 years
+    gabinetesAltoRisco: number;  // >= 3 years
+    gabinetesSemBanco: number;   // No batteries
   };
   obsolescenciaLitio: {
-    sitesOk: number;        // < 5 years
-    sitesMedioRisco: number; // >= 5 and < 10 years
-    sitesAltoRisco: number;  // >= 10 years
-    sitesSemBanco: number;   // No batteries
+    gabinetesOk: number;        // < 5 years
+    gabinetesMedioRisco: number; // >= 5 and < 10 years
+    gabinetesAltoRisco: number;  // >= 10 years
+    gabinetesSemBanco: number;   // No batteries
   };
   
   // Climatização Panel
