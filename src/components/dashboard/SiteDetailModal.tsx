@@ -275,6 +275,29 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     if (evaporador) allPhotos.push({ url: evaporador, label: "Evaporador", category: `Gab ${g}` });
     if (controlador) allPhotos.push({ url: controlador, label: "Controlador", category: `Gab ${g}` });
   }
+  
+  // Fiber optic photos
+  if (report?.fibra_abord1_foto) {
+    allPhotos.push({ url: report.fibra_abord1_foto, label: "Abordagem 1", category: "Fibra Óptica" });
+  }
+  if (report?.fibra_abord2_foto) {
+    allPhotos.push({ url: report.fibra_abord2_foto, label: "Abordagem 2", category: "Fibra Óptica" });
+  }
+  if (report?.fibra_foto_caixas_passagem) {
+    allPhotos.push({ url: report.fibra_foto_caixas_passagem, label: "Caixas de Passagem", category: "Fibra Óptica" });
+  }
+  if (report?.fibra_foto_caixas_subterraneas) {
+    allPhotos.push({ url: report.fibra_foto_caixas_subterraneas, label: "Caixas Subterrâneas", category: "Fibra Óptica" });
+  }
+  if (report?.fibra_foto_subidas_laterais) {
+    allPhotos.push({ url: report.fibra_foto_subidas_laterais, label: "Subidas Laterais", category: "Fibra Óptica" });
+  }
+  for (let d = 1; d <= 4; d++) {
+    const dgoFoto = report?.[`fibra_dgo${d}_foto`];
+    const dgoCordoesFoto = report?.[`fibra_dgo${d}_cordoes_foto`];
+    if (dgoFoto) allPhotos.push({ url: dgoFoto, label: `DGO ${d}`, category: "Fibra Óptica" });
+    if (dgoCordoesFoto) allPhotos.push({ url: dgoCordoesFoto, label: `DGO ${d} - Cordões`, category: "Fibra Óptica" });
+  }
 
   // Calculate statistics and critical issues
   const calcStats = () => {
@@ -767,7 +790,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2">
                         <Cable className="w-4 h-4" />
-                        Fibra Óptica
+                        Resumo de Fibra Óptica
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -787,31 +810,97 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardContent>
                   </Card>
 
-                  {/* Abordagem 1 */}
-                  {report.fibra_abord1_tipo && (
+                  {/* Abordagens */}
+                  {(report.fibra_abord1_tipo || report.fibra_abord2_tipo) && (
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Abordagem 1</CardTitle>
+                        <CardTitle className="text-base">Abordagens de Fibra</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                          <InfoRow label="Tipo" value={report.fibra_abord1_tipo} />
-                          <InfoRow label="Descrição" value={report.fibra_abord1_descricao} />
-                        </div>
+                      <CardContent className="space-y-4">
+                        {report.fibra_abord1_tipo && (
+                          <div className="p-3 border rounded-lg bg-muted/30">
+                            <p className="font-medium mb-2">Abordagem 1</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                              <InfoRow label="Tipo" value={report.fibra_abord1_tipo} />
+                              <InfoRow label="Descrição" value={report.fibra_abord1_descricao} />
+                            </div>
+                            {report.fibra_abord1_foto && (
+                              <div className="mt-3">
+                                <PhotoViewer url={report.fibra_abord1_foto} label="Foto Abordagem 1" />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {report.fibra_abord2_tipo && (
+                          <div className="p-3 border rounded-lg bg-muted/30">
+                            <p className="font-medium mb-2">Abordagem 2</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                              <InfoRow label="Tipo" value={report.fibra_abord2_tipo} />
+                              <InfoRow label="Descrição" value={report.fibra_abord2_descricao} />
+                            </div>
+                            {report.fibra_abord2_foto && (
+                              <div className="mt-3">
+                                <PhotoViewer url={report.fibra_abord2_foto} label="Foto Abordagem 2" />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
 
-                  {/* Abordagem 2 */}
-                  {report.fibra_abord2_tipo && (
+                  {/* Infraestrutura de Fibra */}
+                  {(report.fibra_caixas_passagem_qtd || report.fibra_caixas_subterraneas_qtd || report.fibra_subidas_laterais_qtd) && (
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Abordagem 2</CardTitle>
+                        <CardTitle className="text-base">Infraestrutura de Fibra</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                          <InfoRow label="Tipo" value={report.fibra_abord2_tipo} />
-                          <InfoRow label="Descrição" value={report.fibra_abord2_descricao} />
+                        <PhotoGrid photos={[
+                          { url: report.fibra_foto_caixas_passagem, label: "Caixas de Passagem" },
+                          { url: report.fibra_foto_caixas_subterraneas, label: "Caixas Subterrâneas" },
+                          { url: report.fibra_foto_subidas_laterais, label: "Subidas Laterais" },
+                        ]} />
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* DGOs */}
+                  {(report.fibra_dgos_qtd ?? 0) > 0 && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">DGOs (Distribuidores Gerais Ópticos)</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Array.from({ length: 4 }, (_, i) => {
+                            const d = i + 1;
+                            const dgoId = report[`fibra_dgo${d}_id`];
+                            const dgoCapacidade = report[`fibra_dgo${d}_capacidade`];
+                            const dgoCordoes = report[`fibra_dgo${d}_cordoes`];
+                            const dgoFoto = report[`fibra_dgo${d}_foto`];
+                            const dgoCordoesFoto = report[`fibra_dgo${d}_cordoes_foto`];
+
+                            if (!dgoId && !dgoCapacidade && !dgoCordoes) return null;
+
+                            return (
+                              <div key={d} className="p-3 border rounded-lg bg-muted/30">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium">DGO {d}</span>
+                                  <StatusBadge status={dgoCordoes} />
+                                </div>
+                                <div className="text-xs text-muted-foreground space-y-0.5 mb-3">
+                                  <p>ID: {dgoId || "N/A"}</p>
+                                  <p>Capacidade: {dgoCapacidade || "N/A"}</p>
+                                  <p>Estado Cordões: {dgoCordoes || "N/A"}</p>
+                                </div>
+                                <PhotoGrid photos={[
+                                  { url: dgoFoto, label: `DGO ${d}` },
+                                  { url: dgoCordoesFoto, label: `Cordões DGO ${d}` },
+                                ]} />
+                              </div>
+                            );
+                          })}
                         </div>
                       </CardContent>
                     </Card>
