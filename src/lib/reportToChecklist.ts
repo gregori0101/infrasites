@@ -91,6 +91,38 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     gabinetes.push({ ...INITIAL_GABINETE });
   }
   
+  // Parse fiber optic data
+  const abordagens = [];
+  if (report.fibra_abord1_tipo) {
+    abordagens.push({
+      tipoEntrada: report.fibra_abord1_tipo as any,
+      descricao: report.fibra_abord1_descricao || '',
+      fotos: report.fibra_abord1_foto ? [report.fibra_abord1_foto] : [],
+    });
+  }
+  if (report.fibra_abord2_tipo) {
+    abordagens.push({
+      tipoEntrada: report.fibra_abord2_tipo as any,
+      descricao: report.fibra_abord2_descricao || '',
+      fotos: report.fibra_abord2_foto ? [report.fibra_abord2_foto] : [],
+    });
+  }
+
+  // Parse DGOs
+  const dgos = [];
+  for (let d = 1; d <= 4; d++) {
+    const dgoId = report[`fibra_dgo${d}_id`];
+    if (dgoId) {
+      dgos.push({
+        identificacao: dgoId,
+        capacidadeFO: parseInt(report[`fibra_dgo${d}_capacidade`]?.replace('FO', '')) || 12,
+        estadoCordoes: (report[`fibra_dgo${d}_cordoes`] || 'OK') as any,
+        fotoDGO: report[`fibra_dgo${d}_foto`] || null,
+        fotoCordesDetalhada: report[`fibra_dgo${d}_cordoes_foto`] || null,
+      });
+    }
+  }
+
   return {
     ...INITIAL_CHECKLIST,
     id: report.id || uuid(),
@@ -99,7 +131,19 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     qtdGabinetes: report.total_cabinets || 1,
     fotoPanoramica: report.panoramic_photo_url || null,
     gabinetes,
-    fibraOptica: { ...INITIAL_FIBRA_OPTICA },
+    fibraOptica: { 
+      ...INITIAL_FIBRA_OPTICA,
+      qtdAbordagens: report.fibra_qtd_abordagens || 1,
+      abordagens: abordagens.length > 0 ? abordagens : INITIAL_FIBRA_OPTICA.abordagens,
+      qtdCaixasPassagem: report.fibra_caixas_passagem_qtd || 0,
+      qtdCaixasSubterraneas: report.fibra_caixas_subterraneas_qtd || 0,
+      qtdSubidasLaterais: report.fibra_subidas_laterais_qtd || 0,
+      qtdDGOs: report.fibra_dgos_qtd || 0,
+      dgos,
+      fotosCaixasPassagem: report.fibra_foto_caixas_passagem ? [report.fibra_foto_caixas_passagem] : [],
+      fotosCaixasSubterraneas: report.fibra_foto_caixas_subterraneas ? [report.fibra_foto_caixas_subterraneas] : [],
+      fotosSubidasLaterais: report.fibra_foto_subidas_laterais ? [report.fibra_foto_subidas_laterais] : [],
+    },
     energia: { 
       ...INITIAL_ENERGIA,
       fotoTransformador: report.energia_foto_transformador || null,
@@ -115,6 +159,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fabricante: report.gmg_fabricante as any,
       potencia: parseInt(report.gmg_potencia) || undefined,
       ultimoTeste: report.gmg_ultimo_teste || undefined,
+      fotoGMG: report.gmg_foto_painel || null,
     },
     torre: {
       ninhos: report.torre_ninhos === 'SIM',
