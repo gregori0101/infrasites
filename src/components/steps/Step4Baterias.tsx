@@ -227,6 +227,8 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
           value={gabinete.baterias.fotoBanco}
           onChange={(value) => updateBaterias({ fotoBanco: value })}
           required
+          siteCode={data.siglaSite}
+          category={`gab${currentGabinete + 1}_bateria`}
         />
       </FormCard>
     </div>

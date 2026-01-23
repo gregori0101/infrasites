@@ -1,10 +1,11 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Camera, X, ZoomIn, Loader2 } from "lucide-react";
+import { Camera, X, ZoomIn, Loader2, Upload, CheckCircle } from "lucide-react";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogTrigger } from "./dialog";
-import { compressWithFallback } from "@/lib/imageCompression";
+import { usePhotoUpload } from "@/hooks/use-photo-upload";
 import { toast } from "sonner";
+import { Progress } from "./progress";
 
 interface PhotoCaptureProps {
   value: string | null;
@@ -12,11 +13,29 @@ interface PhotoCaptureProps {
   label: string;
   required?: boolean;
   className?: string;
+  siteCode?: string;
+  category?: string;
 }
 
-export function PhotoCapture({ value, onChange, label, required = false, className }: PhotoCaptureProps) {
+export function PhotoCapture({ 
+  value, 
+  onChange, 
+  label, 
+  required = false, 
+  className,
+  siteCode,
+  category = 'photo'
+}: PhotoCaptureProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  const { uploadPhoto, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
+    siteCode,
+    category,
+  });
+
+  // Determine if value is a URL (uploaded) or base64 (local)
+  const isUploaded = value?.startsWith('http') ?? false;
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,7 +53,7 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
       return;
     }
 
-    setIsLoading(true);
+    setIsProcessing(true);
 
     try {
       const reader = new FileReader();
@@ -46,17 +65,26 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
             throw new Error("Falha ao ler a imagem");
           }
           
-          // Compress image with multiple fallback attempts (max 300KB for localStorage compatibility)
-          const compressed = await compressWithFallback(dataURL, 300);
-          onChange(compressed);
-          toast.success("Foto adicionada com sucesso!");
+          // Upload to storage or compress for local storage
+          const result = await uploadPhoto(dataURL);
+          
+          if (result) {
+            onChange(result);
+            if (result.startsWith('http')) {
+              toast.success("Foto salva na nuvem!");
+            } else {
+              toast.success("Foto adicionada!");
+            }
+          } else {
+            throw new Error("Falha ao processar imagem");
+          }
         } catch (error) {
           console.error("Error processing image:", error);
           toast.error("Erro ao processar imagem", { 
             description: "Tente novamente ou use outra imagem." 
           });
         } finally {
-          setIsLoading(false);
+          setIsProcessing(false);
         }
       };
       
@@ -65,29 +93,41 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
         toast.error("Erro ao carregar imagem", { 
           description: "Verifique se o arquivo é válido." 
         });
-        setIsLoading(false);
+        setIsProcessing(false);
       };
       
       reader.readAsDataURL(file);
     } catch (error) {
       console.error("Error handling file:", error);
       toast.error("Erro ao processar arquivo");
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    if (value) {
+      // Try to delete from storage if it's a URL
+      await deletePhoto(value);
+    }
     onChange(null);
     if (inputRef.current) {
       inputRef.current.value = '';
     }
   };
 
+  const isLoading = isProcessing || isUploading;
+
   return (
     <div className={cn("space-y-2", className)}>
       <label className="text-sm font-medium flex items-center gap-1">
         {label}
         {required && <span className="text-destructive">*</span>}
+        {isUploaded && (
+          <span className="ml-2 text-xs text-success flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Salvo
+          </span>
+        )}
       </label>
       
       <input
@@ -101,7 +141,10 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
 
       {value ? (
         <div className="relative group animate-fade-in">
-          <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-success shadow-card">
+          <div className={cn(
+            "relative aspect-video rounded-lg overflow-hidden border-2 shadow-card",
+            isUploaded ? "border-success" : "border-warning"
+          )}>
             <img
               src={value}
               alt={label}
@@ -123,8 +166,11 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
               </Button>
             </div>
           </div>
-          <div className="absolute -top-2 -right-2 bg-success text-success-foreground rounded-full p-1">
-            <Camera className="w-3 h-3" />
+          <div className={cn(
+            "absolute -top-2 -right-2 rounded-full p-1",
+            isUploaded ? "bg-success text-success-foreground" : "bg-warning text-warning-foreground"
+          )}>
+            {isUploaded ? <CheckCircle className="w-3 h-3" /> : <Camera className="w-3 h-3" />}
           </div>
         </div>
       ) : (
@@ -140,10 +186,15 @@ export function PhotoCapture({ value, onChange, label, required = false, classNa
           )}
         >
           {isLoading ? (
-            <>
+            <div className="flex flex-col items-center gap-2 w-full px-4">
               <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="text-sm font-medium">Processando...</span>
-            </>
+              <span className="text-sm font-medium">
+                {uploadProgress > 0 ? 'Enviando...' : 'Processando...'}
+              </span>
+              {uploadProgress > 0 && (
+                <Progress value={uploadProgress} className="w-full max-w-32 h-2" />
+              )}
+            </div>
           ) : (
             <>
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -164,9 +215,18 @@ interface MultiPhotoCaptureProps {
   labels: string[];
   onChange: (index: number, value: string | null) => void;
   className?: string;
+  siteCode?: string;
+  categoryPrefix?: string;
 }
 
-export function MultiPhotoCapture({ photos, labels, onChange, className }: MultiPhotoCaptureProps) {
+export function MultiPhotoCapture({ 
+  photos, 
+  labels, 
+  onChange, 
+  className,
+  siteCode,
+  categoryPrefix = 'multi'
+}: MultiPhotoCaptureProps) {
   const completedCount = photos.filter(Boolean).length;
   
   return (
@@ -187,6 +247,8 @@ export function MultiPhotoCapture({ photos, labels, onChange, className }: Multi
             label={label}
             value={photos[index]}
             onChange={(value) => onChange(index, value)}
+            siteCode={siteCode}
+            category={`${categoryPrefix}_${index}`}
           />
         ))}
       </div>
