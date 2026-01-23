@@ -179,6 +179,12 @@ export interface PanelStats {
   bateriasChumboByUf: { uf: string; count: number }[];
   bateriasLitioTotal: number;
   bateriasLitioByUf: { uf: string; count: number }[];
+
+  // Baterias para troca (região Norte)
+  bateriasParaTroca: {
+    total: number;
+    byUf: { uf: string; count: number }[];
+  };
 }
 
 export interface DrillDownData {

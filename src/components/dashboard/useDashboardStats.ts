@@ -211,6 +211,11 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       bateriasChumboByUf: [],
       bateriasLitioTotal: 0,
       bateriasLitioByUf: [],
+      // Baterias para troca (região Norte)
+      bateriasParaTroca: {
+        total: 0,
+        byUf: [],
+      },
       // Obsolescência unificada (Chumbo + Lítio)
       obsolescencia: {
         gabinetesOk: 0,
@@ -243,6 +248,13 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     let bateriasLitioTotal = 0;
     const chumboByUf: Record<string, number> = {};
     const litioByUf: Record<string, number> = {};
+    
+    // Battery replacement tracking (região Norte: PA, MA, AM, RR, AP)
+    const UFS_NORTE = ["PA", "MA", "AM", "RR", "AP"];
+    let bateriasParaTrocaTotal = 0;
+    const bateriasParaTrocaByUf: Record<string, number> = {};
+    // Initialize Norte UFs
+    UFS_NORTE.forEach(uf => { bateriasParaTrocaByUf[uf] = 0; });
 
     filtered.forEach((report) => {
       const uf = report.state_uf || "N/A";
@@ -425,6 +437,32 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             if (obsolescencia === "critical") stats.batteriesOver8Years++;
             batteryAges[obsolescencia]++;
             
+            // Determine obsolescence status by battery type for replacement check
+            const tipoUpper = tipo.toUpperCase();
+            const isLitio = tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO");
+            const isChumbo = tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO");
+            
+            let obsolescenciaAlta = false;
+            if (isLitio) {
+              obsolescenciaAlta = getObsolescenciaLitio(idade) === "alto";
+            } else if (isChumbo) {
+              obsolescenciaAlta = getObsolescenciaChumbo(idade) === "alto";
+            }
+            
+            // Check battery state
+            const estadoLower = (estado || "").toLowerCase();
+            const needsReplacement = 
+              estadoLower.includes("estufada") ||
+              estadoLower.includes("vazando") ||
+              estadoLower.includes("carga") || // "Não segura carga"
+              obsolescenciaAlta;
+            
+            // Track batteries for replacement (only Norte region)
+            if (needsReplacement && UFS_NORTE.includes(uf)) {
+              bateriasParaTrocaTotal++;
+              bateriasParaTrocaByUf[uf] = (bateriasParaTrocaByUf[uf] || 0) + 1;
+            }
+            
             if (estado === "BOA" || !estado) {
               stats.batteriesOk++;
               batteryStates.ok++;
@@ -433,7 +471,6 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               batteryIssues++;
               hasProblems = true;
               
-              const estadoLower = estado.toLowerCase();
               if (estadoLower.includes("estufada")) batteryStates.estufada++;
               if (estadoLower.includes("vazando")) batteryStates.vazando++;
               if (estadoLower.includes("trincada")) batteryStates.trincada++;
@@ -454,16 +491,15 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               obsolescencia,
             });
 
-            // Classify battery by type (Chumbo vs Lítio)
-            const tipoUpper = tipo.toUpperCase();
-            if (tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO")) {
+            // Classify battery by type (Chumbo vs Lítio) - reuse isLitio/isChumbo from above
+            if (isLitio) {
               bateriasLitioTotal++;
               litioByUf[uf] = (litioByUf[uf] || 0) + 1;
               gabHasLitio = true;
               siteHasLitio = true;
               if (idade > gabLitioMaxAge) gabLitioMaxAge = idade;
               if (idade > siteLitioMaxAge) siteLitioMaxAge = idade;
-            } else if (tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO")) {
+            } else if (isChumbo) {
               bateriasChumboTotal++;
               chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
               gabHasChumbo = true;
@@ -714,6 +750,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     stats.bateriasLitioByUf = Object.entries(litioByUf)
       .map(([uf, count]) => ({ uf, count }))
       .sort((a, b) => b.count - a.count);
+    
+    // Build battery replacement stats (Norte region)
+    stats.bateriasParaTroca = {
+      total: bateriasParaTrocaTotal,
+      byUf: UFS_NORTE.map(uf => ({ uf, count: bateriasParaTrocaByUf[uf] || 0 })),
+    };
 
     // Apply status filter
     let finalSites = siteInfoList;

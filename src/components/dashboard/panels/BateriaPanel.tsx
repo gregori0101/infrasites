@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes } from "lucide-react";
+import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -454,6 +454,112 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* SEÇÃO 5: Regras de Troca de Bateria */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1 h-6 bg-destructive rounded-full" />
+          <h2 className="font-semibold text-lg">Regras de Troca de Bateria</h2>
+        </div>
+
+        {/* Regras Obrigatórias (texto explicativo) */}
+        <Card className="bg-destructive/5 border-destructive/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-destructive" />
+              Regras Obrigatórias de Troca
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background border border-destructive/20">
+                <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                <span><strong>Estado = "Estufada"</strong> → TROCA</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background border border-destructive/20">
+                <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                <span><strong>Estado = "Vazando"</strong> → TROCA</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background border border-destructive/20">
+                <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                <span><strong>Estado = "Não segura carga"</strong> → TROCA</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background border border-destructive/20">
+                <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                <span><strong>Obsolescência = "Alto risco"</strong> → TROCA</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Painel 1: Total Baterias para Troca */}
+        <Card className="bg-destructive/10 border-destructive">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5 text-destructive" />
+                  <h3 className="text-lg font-semibold text-destructive">TOTAL BATERIAS PARA TROCA</h3>
+                </div>
+                <p className="text-xs text-muted-foreground">Região Norte (PA, MA, AM, RR, AP)</p>
+              </div>
+              <div className="text-right">
+                <p className="text-5xl font-bold text-destructive">{stats.bateriasParaTroca.total}</p>
+                <p className="text-sm text-muted-foreground mt-1">unidades</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Painel 2: Cards por UF Norte */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Battery className="w-4 h-4" />
+            Baterias para Troca por UF (Região Norte)
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {/* Total Card */}
+            <Card className="bg-destructive/10 border-destructive/50">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <RefreshCw className="w-5 h-5 text-destructive" />
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">TOTAL</span>
+                </div>
+                <p className="text-3xl font-bold text-destructive">{stats.bateriasParaTroca.total}</p>
+                <p className="text-xs text-muted-foreground mt-1">para troca</p>
+              </CardContent>
+            </Card>
+
+            {/* UF Cards (PA, MA, AM, RR, AP) */}
+            {stats.bateriasParaTroca.byUf.map(({ uf, count }) => {
+              const getRiskColor = (c: number) => {
+                if (c === 0) return { text: "text-success", bg: "bg-success/10", border: "border-success/30" };
+                if (c < 5) return { text: "text-warning", bg: "bg-warning/10", border: "border-warning/30" };
+                if (c < 10) return { text: "text-accent", bg: "bg-accent/10", border: "border-accent/30" };
+                return { text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" };
+              };
+              const colors = getRiskColor(count);
+              
+              return (
+                <Card key={`troca-${uf}`} className={`transition-all hover:shadow-md ${colors.border}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-sm font-bold ${colors.text}`}>{uf}</span>
+                      <Battery className={`w-4 h-4 ${colors.text}`} />
+                    </div>
+                    <p className={`text-2xl font-bold ${count > 0 ? colors.text : ""}`}>{count}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stats.bateriasParaTroca.total > 0 
+                        ? `${Math.round((count / stats.bateriasParaTroca.total) * 100)}%` 
+                        : '0%'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
