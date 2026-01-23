@@ -254,7 +254,105 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </Card>
       </div>
 
-      {/* SEÇÃO 2: Obsolescência (existente) */}
+      {/* SEÇÃO 2: Baterias de Chumbo */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1 h-6 bg-slate-500 rounded-full" />
+          <h2 className="font-semibold text-lg">Baterias de Chumbo (Polímero e Monobloco)</h2>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {/* Total Card */}
+          <Card className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Battery className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">TOTAL</span>
+              </div>
+              <p className="text-3xl font-bold text-slate-700 dark:text-slate-200">{stats.bateriasChumboTotal}</p>
+              <p className="text-xs text-muted-foreground mt-1">unidades</p>
+            </CardContent>
+          </Card>
+
+          {/* UF Cards */}
+          {stats.bateriasChumboByUf.map(({ uf, count }) => (
+            <Card key={`chumbo-${uf}`} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{uf}</span>
+                  <Battery className="w-4 h-4 text-slate-400" />
+                </div>
+                <p className="text-2xl font-bold">{count}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.bateriasChumboTotal > 0 
+                    ? `${Math.round((count / stats.bateriasChumboTotal) * 100)}%` 
+                    : '0%'}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+
+          {stats.bateriasChumboByUf.length === 0 && (
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <Battery className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhuma bateria de chumbo registrada</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* SEÇÃO 3: Baterias de Lítio */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1 h-6 bg-emerald-500 rounded-full" />
+          <h2 className="font-semibold text-lg">Baterias de Lítio</h2>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {/* Total Card */}
+          <Card className="bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Zap className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-700 text-emerald-700 dark:text-emerald-300">TOTAL</span>
+              </div>
+              <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{stats.bateriasLitioTotal}</p>
+              <p className="text-xs text-muted-foreground mt-1">unidades</p>
+            </CardContent>
+          </Card>
+
+          {/* UF Cards */}
+          {stats.bateriasLitioByUf.map(({ uf, count }) => (
+            <Card key={`litio-${uf}`} className="hover:shadow-md transition-shadow border-emerald-100 dark:border-emerald-900/50">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{uf}</span>
+                  <Zap className="w-4 h-4 text-emerald-400" />
+                </div>
+                <p className="text-2xl font-bold">{count}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.bateriasLitioTotal > 0 
+                    ? `${Math.round((count / stats.bateriasLitioTotal) * 100)}%` 
+                    : '0%'}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+
+          {stats.bateriasLitioByUf.length === 0 && (
+            <Card className="col-span-full border-emerald-100 dark:border-emerald-900/50">
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhuma bateria de lítio registrada</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* SEÇÃO 4: Obsolescência (existente) */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1 h-6 bg-warning rounded-full" />
