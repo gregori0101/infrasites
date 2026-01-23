@@ -206,25 +206,35 @@ export function DrillDownModal({
 
           {type === "batteries" && paginatedBatteries && (
             <ScrollArea className="h-[calc(85vh-280px)] w-full">
-              <div className="min-w-[700px]">
+              <div className="min-w-[900px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[120px]">Site</TableHead>
-                      <TableHead className="min-w-[60px]">Gab</TableHead>
-                      <TableHead className="min-w-[120px]">Fabricante</TableHead>
-                      <TableHead className="min-w-[100px]">Capacidade</TableHead>
-                      <TableHead className="min-w-[100px]">Fabricação</TableHead>
-                      <TableHead className="min-w-[120px]">Idade</TableHead>
+                      <TableHead className="min-w-[50px]">UF</TableHead>
+                      <TableHead className="min-w-[50px]">Gab</TableHead>
+                      <TableHead className="min-w-[100px]">Fabricante</TableHead>
+                      <TableHead className="min-w-[80px]">Tipo</TableHead>
+                      <TableHead className="min-w-[80px]">Capacidade</TableHead>
+                      <TableHead className="min-w-[80px]">Fabricação</TableHead>
+                      <TableHead className="min-w-[80px]">Idade</TableHead>
                       <TableHead className="min-w-[100px]">Estado</TableHead>
+                      <TableHead className="min-w-[100px]">Autonomia</TableHead>
+                      <TableHead className="min-w-[60px]">Troca</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedBatteries.map((b, idx) => (
                       <TableRow key={`${b.siteCode}-${b.gabinete}-${b.banco}-${idx}`}>
                         <TableCell className="font-medium">{b.siteCode}</TableCell>
+                        <TableCell>{b.uf}</TableCell>
                         <TableCell>G{b.gabinete}</TableCell>
                         <TableCell>{b.fabricante}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">
+                            {b.tipoClassificado === "chumbo" ? "Chumbo" : b.tipoClassificado === "litio" ? "Lítio" : "Outro"}
+                          </Badge>
+                        </TableCell>
                         <TableCell>{b.capacidade}Ah</TableCell>
                         <TableCell>{b.dataFabricacao}</TableCell>
                         <TableCell>
@@ -234,6 +244,19 @@ export function DrillDownModal({
                           </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(b.estado)}</TableCell>
+                        <TableCell>
+                          {b.autonomyRisk === "ok" && <Badge className="bg-success text-success-foreground">OK</Badge>}
+                          {b.autonomyRisk === "medio" && <Badge className="bg-warning text-warning-foreground">Médio</Badge>}
+                          {b.autonomyRisk === "alto" && <Badge className="bg-orange-500 text-white">Alto</Badge>}
+                          {b.autonomyRisk === "critico" && <Badge className="bg-destructive text-destructive-foreground">Crítico</Badge>}
+                        </TableCell>
+                        <TableCell>
+                          {b.needsReplacement ? (
+                            <Badge className="bg-destructive text-destructive-foreground">Sim</Badge>
+                          ) : (
+                            <Badge variant="outline">Não</Badge>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

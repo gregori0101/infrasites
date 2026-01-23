@@ -420,6 +420,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         let gabHasChumbo = false;
         let gabHasLitio = false;
         
+        // Temporary storage for batteries in this gabinete (to update autonomyRisk later)
+        const gabBatteries: BatteryInfo[] = [];
+        
         // Batteries (6 per gabinete)
         for (let b = 1; b <= 6; b++) {
           const tipo = report[`${prefix}_bat${b}_tipo`] as string;
@@ -442,12 +445,18 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             const isLitio = tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO");
             const isChumbo = tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO");
             
-            let obsolescenciaAlta = false;
+            // Classify battery type
+            const tipoClassificado: "chumbo" | "litio" | "outro" = isLitio ? "litio" : (isChumbo ? "chumbo" : "outro");
+            
+            // Calculate obsolescence based on type
+            let obsolescenciaTipo: "ok" | "medio" | "alto" = "ok";
             if (isLitio) {
-              obsolescenciaAlta = getObsolescenciaLitio(idade) === "alto";
+              obsolescenciaTipo = getObsolescenciaLitio(idade);
             } else if (isChumbo) {
-              obsolescenciaAlta = getObsolescenciaChumbo(idade) === "alto";
+              obsolescenciaTipo = getObsolescenciaChumbo(idade);
             }
+            
+            const obsolescenciaAlta = obsolescenciaTipo === "alto";
             
             // Check battery state
             const estadoLower = (estado || "").toLowerCase();
@@ -477,19 +486,26 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               if (estadoLower.includes("carga")) batteryStates.semCarga++;
             }
             
-            batteryInfoList.push({
+            // Store battery with placeholder autonomyRisk (will be updated after gabinete processing)
+            const batteryInfo: BatteryInfo = {
               siteCode: report.site_code,
               uf,
               gabinete: g,
               banco: b,
               fabricante,
               tipo,
+              tipoClassificado,
               capacidade: capacidade || "N/A",
               dataFabricacao: dataFab || "N/A",
               estado: estado || "BOA",
               idade,
               obsolescencia,
-            });
+              obsolescenciaTipo,
+              autonomyRisk: "ok", // Placeholder, will be updated
+              needsReplacement,
+            };
+            
+            gabBatteries.push(batteryInfo);
 
             // Classify battery by type (Chumbo vs Lítio) - reuse isLitio/isChumbo from above
             if (isLitio) {
@@ -523,6 +539,11 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           // Calculate autonomy risk for this gabinete (unified, regardless of GMG)
           const gabAutonomyHours = calculateGabineteAutonomy(report, g);
           const gabAutonomyRisk = classifyAutonomyRisk(gabAutonomyHours, hasGMG);
+          
+          // Update all batteries in this gabinete with the calculated autonomyRisk
+          gabBatteries.forEach(bat => {
+            bat.autonomyRisk = gabAutonomyRisk;
+          });
           
           // Update unified autonomy risk counters per gabinete
           if (gabAutonomyRisk === "ok") stats.autonomyRisk.gabinetesOk++;
@@ -560,6 +581,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             stats.obsolescencia.gabinetesSemBanco++;
           }
         }
+        
+        // Add gabinete batteries to the main list
+        batteryInfoList.push(...gabBatteries);
       }
       
       // Check zeladoria

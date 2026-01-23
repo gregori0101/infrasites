@@ -15,11 +15,15 @@ export interface BatteryInfo {
   banco: number;
   fabricante: string;
   tipo: string;
+  tipoClassificado: "chumbo" | "litio" | "outro"; // Classified battery type
   capacidade: string;
   dataFabricacao: string;
   estado: string;
   idade: number;
   obsolescencia: "ok" | "warning" | "critical";
+  obsolescenciaTipo: "ok" | "medio" | "alto"; // Based on battery type rules
+  autonomyRisk: "ok" | "medio" | "alto" | "critico"; // Autonomy classification for the gabinete
+  needsReplacement: boolean; // Whether battery needs replacement
 }
 
 export interface ACInfo {

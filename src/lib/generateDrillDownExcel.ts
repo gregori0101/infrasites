@@ -53,6 +53,25 @@ export function generateBatteriesExcel(
     return "Alto Risco";
   };
 
+  const getObsolescenciaTipoText = (obs: "ok" | "medio" | "alto") => {
+    if (obs === "ok") return "OK";
+    if (obs === "medio") return "Médio Risco";
+    return "Alto Risco";
+  };
+
+  const getAutonomyRiskText = (risk: "ok" | "medio" | "alto" | "critico") => {
+    if (risk === "ok") return "OK";
+    if (risk === "medio") return "Médio Risco";
+    if (risk === "alto") return "Alto Risco";
+    return "Crítico";
+  };
+
+  const getTipoClassificadoText = (tipo: "chumbo" | "litio" | "outro") => {
+    if (tipo === "chumbo") return "Chumbo";
+    if (tipo === "litio") return "Lítio";
+    return "Outro";
+  };
+
   const rows = batteries.map((bat) => ({
     "Código do Site": bat.siteCode,
     "UF": bat.uf,
@@ -60,11 +79,15 @@ export function generateBatteriesExcel(
     "Banco": bat.banco,
     "Fabricante": bat.fabricante,
     "Tipo": bat.tipo,
+    "Classificação": getTipoClassificadoText(bat.tipoClassificado),
     "Capacidade (Ah)": bat.capacidade,
     "Data Fabricação": bat.dataFabricacao,
     "Idade (anos)": bat.idade > 0 ? bat.idade : "N/A",
     "Estado": bat.estado,
-    "Obsolescência": getObsolescenciaText(bat.obsolescencia),
+    "Obsolescência (Geral)": getObsolescenciaText(bat.obsolescencia),
+    "Obsolescência (por Tipo)": getObsolescenciaTipoText(bat.obsolescenciaTipo),
+    "Risco Autonomia": getAutonomyRiskText(bat.autonomyRisk),
+    "Requer Troca": bat.needsReplacement ? "Sim" : "Não",
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
