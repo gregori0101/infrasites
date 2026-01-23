@@ -142,6 +142,20 @@ export interface PanelStats {
   // Autonomy Risk (New)
   autonomyRisk: AutonomyRiskStats;
   
+  // Obsolescence by Type (New Rules)
+  obsolescenciaChumbo: {
+    sitesOk: number;        // < 2 years
+    sitesMedioRisco: number; // >= 2 and < 3 years
+    sitesAltoRisco: number;  // >= 3 years
+    sitesSemBanco: number;   // No batteries
+  };
+  obsolescenciaLitio: {
+    sitesOk: number;        // < 5 years
+    sitesMedioRisco: number; // >= 5 and < 10 years
+    sitesAltoRisco: number;  // >= 10 years
+    sitesSemBanco: number;   // No batteries
+  };
+  
   // Climatização Panel
   climatizacaoTotal: number;
   acTotal: number;
