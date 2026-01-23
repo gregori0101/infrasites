@@ -194,7 +194,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       climatizacaoChart: [],
       // Produtividade
       technicianRanking: [],
-      mediaPorTecnico: 0
+      mediaPorTecnico: 0,
+      // Baterias por tipo
+      bateriasChumboTotal: 0,
+      bateriasChumboByUf: [],
+      bateriasLitioTotal: 0,
+      bateriasLitioByUf: []
     };
 
     const siteInfoList: SiteInfo[] = [];
@@ -210,6 +215,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     const batteryStates = { ok: 0, estufada: 0, vazando: 0, trincada: 0, semCarga: 0 };
     const batteryAges = { ok: 0, warning: 0, critical: 0 };
     const technicianMap: Record<string, { count: number; ufs: Record<string, number>; name: string }> = {};
+    
+    // Battery type tracking (Chumbo vs Lítio)
+    let bateriasChumboTotal = 0;
+    let bateriasLitioTotal = 0;
+    const chumboByUf: Record<string, number> = {};
+    const litioByUf: Record<string, number> = {};
 
     filtered.forEach((report) => {
       const uf = report.state_uf || "N/A";
@@ -418,6 +429,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               idade,
               obsolescencia,
             });
+
+            // Classify battery by type (Chumbo vs Lítio)
+            const tipoUpper = tipo.toUpperCase();
+            if (tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO")) {
+              bateriasLitioTotal++;
+              litioByUf[uf] = (litioByUf[uf] || 0) + 1;
+            } else if (tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO")) {
+              bateriasChumboTotal++;
+              chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
+            }
           }
         }
       }
@@ -564,6 +585,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     stats.mediaPorTecnico = uniqueTechnicians > 0 
       ? stats.totalSites / uniqueTechnicians 
       : 0;
+
+    // Build battery type stats
+    stats.bateriasChumboTotal = bateriasChumboTotal;
+    stats.bateriasLitioTotal = bateriasLitioTotal;
+    stats.bateriasChumboByUf = Object.entries(chumboByUf)
+      .map(([uf, count]) => ({ uf, count }))
+      .sort((a, b) => b.count - a.count);
+    stats.bateriasLitioByUf = Object.entries(litioByUf)
+      .map(([uf, count]) => ({ uf, count }))
+      .sort((a, b) => b.count - a.count);
 
     // Apply status filter
     let finalSites = siteInfoList;

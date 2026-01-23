@@ -158,6 +158,12 @@ export interface PanelStats {
   // Produtividade Panel
   technicianRanking: TechnicianRanking[];
   mediaPorTecnico: number;
+
+  // Baterias por tipo
+  bateriasChumboTotal: number;
+  bateriasChumboByUf: { uf: string; count: number }[];
+  bateriasLitioTotal: number;
+  bateriasLitioByUf: { uf: string; count: number }[];
 }
 
 export interface DrillDownData {
