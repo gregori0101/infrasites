@@ -539,34 +539,26 @@ export default function Dashboard() {
                     else if (type === "nok") openDrillDown("batteries", "Baterias com Defeito", (b) => b.filter((bat: any) => bat.estado !== "BOA"));
                     else if (type === "obsolete-warning") openDrillDown("batteries", "Baterias Médio Risco Obsolescência", (b) => b.filter((bat: any) => bat.obsolescencia === "warning"));
                     else if (type === "obsolete-critical") openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
-                    // Autonomy types
-                    else if (type === "autonomy-ok") openDrillDown("batteries", "Baterias - Autonomia OK", (b) => b);
-                    else if (type === "autonomy-medio") openDrillDown("batteries", "Baterias - Médio Risco Autonomia", (b) => b);
-                    else if (type === "autonomy-alto") openDrillDown("batteries", "Baterias - Alto Risco Autonomia", (b) => b);
-                    else if (type === "autonomy-critico") openDrillDown("batteries", "Baterias - Autonomia Crítica", (b) => b);
-                    // Chumbo/Litio types
-                    else if (type === "chumbo-all") openDrillDown("batteries", "Baterias de Chumbo", (b) => b.filter((bat: any) => !bat.tipo?.toLowerCase().includes("litio") && !bat.tipo?.toLowerCase().includes("lítio")));
-                    else if (type === "chumbo-uf" && uf) openDrillDown("batteries", `Baterias de Chumbo - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && !bat.tipo?.toLowerCase().includes("litio") && !bat.tipo?.toLowerCase().includes("lítio")));
-                    else if (type === "litio-all") openDrillDown("batteries", "Baterias de Lítio", (b) => b.filter((bat: any) => bat.tipo?.toLowerCase().includes("litio") || bat.tipo?.toLowerCase().includes("lítio")));
-                    else if (type === "litio-uf" && uf) openDrillDown("batteries", `Baterias de Lítio - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && (bat.tipo?.toLowerCase().includes("litio") || bat.tipo?.toLowerCase().includes("lítio"))));
-                    // Troca types
-                    else if (type === "troca-all") openDrillDown("batteries", "Baterias para Troca (Região Norte)", (b) => b.filter((bat: any) => {
+                    // Autonomy types - use the new autonomyRisk field
+                    else if (type === "autonomy-ok") openDrillDown("batteries", "Baterias - Autonomia OK", (b) => b.filter((bat: any) => bat.autonomyRisk === "ok"));
+                    else if (type === "autonomy-medio") openDrillDown("batteries", "Baterias - Médio Risco Autonomia", (b) => b.filter((bat: any) => bat.autonomyRisk === "medio"));
+                    else if (type === "autonomy-alto") openDrillDown("batteries", "Baterias - Alto Risco Autonomia", (b) => b.filter((bat: any) => bat.autonomyRisk === "alto"));
+                    else if (type === "autonomy-critico") openDrillDown("batteries", "Baterias - Autonomia Crítica", (b) => b.filter((bat: any) => bat.autonomyRisk === "critico"));
+                    // Chumbo/Litio types - use tipoClassificado
+                    else if (type === "chumbo-all") openDrillDown("batteries", "Baterias de Chumbo", (b) => b.filter((bat: any) => bat.tipoClassificado === "chumbo"));
+                    else if (type === "chumbo-uf" && uf) openDrillDown("batteries", `Baterias de Chumbo - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && bat.tipoClassificado === "chumbo"));
+                    else if (type === "litio-all") openDrillDown("batteries", "Baterias de Lítio", (b) => b.filter((bat: any) => bat.tipoClassificado === "litio"));
+                    else if (type === "litio-uf" && uf) openDrillDown("batteries", `Baterias de Lítio - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && bat.tipoClassificado === "litio"));
+                    // Troca types - use needsReplacement field
+                    else if (type === "troca-all") openDrillDown("batteries", "Baterias para Troca (Região Norte)", (b) => {
                       const ufsNorte = ["PA", "MA", "AM", "RR", "AP"];
-                      if (!ufsNorte.includes(bat.uf)) return false;
-                      const estadoLower = bat.estado?.toLowerCase() || "";
-                      const needsReplacement = estadoLower.includes("estufada") || estadoLower.includes("vazando") || estadoLower.includes("carga") || bat.obsolescencia === "critical";
-                      return needsReplacement;
-                    }));
-                    else if (type === "troca-uf" && uf) openDrillDown("batteries", `Baterias para Troca - ${uf}`, (b) => b.filter((bat: any) => {
-                      if (bat.uf !== uf) return false;
-                      const estadoLower = bat.estado?.toLowerCase() || "";
-                      const needsReplacement = estadoLower.includes("estufada") || estadoLower.includes("vazando") || estadoLower.includes("carga") || bat.obsolescencia === "critical";
-                      return needsReplacement;
-                    }));
-                    // Obsolescence unified types
-                    else if (type === "obsolete-ok") openDrillDown("batteries", "Baterias OK (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescencia === "ok"));
-                    else if (type === "obsolete-medio") openDrillDown("batteries", "Baterias Médio Risco (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescencia === "warning"));
-                    else if (type === "obsolete-alto") openDrillDown("batteries", "Baterias Alto Risco (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
+                      return b.filter((bat: any) => ufsNorte.includes(bat.uf) && bat.needsReplacement);
+                    });
+                    else if (type === "troca-uf" && uf) openDrillDown("batteries", `Baterias para Troca - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && bat.needsReplacement));
+                    // Obsolescence unified types - use obsolescenciaTipo
+                    else if (type === "obsolete-ok") openDrillDown("batteries", "Baterias OK (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescenciaTipo === "ok"));
+                    else if (type === "obsolete-medio") openDrillDown("batteries", "Baterias Médio Risco (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescenciaTipo === "medio"));
+                    else if (type === "obsolete-alto") openDrillDown("batteries", "Baterias Alto Risco (Obsolescência)", (b) => b.filter((bat: any) => bat.obsolescenciaTipo === "alto"));
                   }}
                 />
               )}
