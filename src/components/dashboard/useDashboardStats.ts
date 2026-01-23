@@ -44,6 +44,60 @@ function getObsolescenceStatus(age: number): "ok" | "warning" | "critical" {
   return "ok";
 }
 
+// Calculate simulated autonomy in hours based on battery capacity (Ah)
+// Using simplified formula: Autonomy (h) = Total Capacity (Ah) / Average Load (A)
+// Assumption: Average load = 50A per cabinet, multiple batteries add capacity
+function calculateSiteAutonomy(report: ReportRow): number {
+  let totalCapacityAh = 0;
+  
+  for (let g = 1; g <= 7; g++) {
+    const prefix = `gab${g}`;
+    for (let b = 1; b <= 6; b++) {
+      const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
+      const tipo = report[`${prefix}_bat${b}_tipo`] as string;
+      
+      if (capacidade && tipo && tipo !== "NA") {
+        // Parse capacity string (e.g., "100Ah", "150 Ah", "200")
+        const match = capacidade.match(/(\d+)/);
+        if (match) {
+          totalCapacityAh += parseInt(match[1], 10);
+        }
+      }
+    }
+  }
+  
+  // Estimate load based on number of cabinets (simplified: 30A per cabinet average)
+  const numCabinets = report.total_cabinets || 1;
+  const estimatedLoad = numCabinets * 30;
+  
+  // Autonomy = Total Ah / Load
+  if (estimatedLoad > 0 && totalCapacityAh > 0) {
+    return totalCapacityAh / estimatedLoad;
+  }
+  
+  // Default: If no battery data, assume 4 hours (medium risk)
+  return 4;
+}
+
+// Classify site autonomy risk based on rules
+function classifyAutonomyRisk(
+  autonomyHours: number,
+  hasGMG: boolean
+): "ok" | "medio" | "alto" | "critico" {
+  if (hasGMG) {
+    // Sites with GMG
+    if (autonomyHours >= 4) return "ok";
+    if (autonomyHours >= 2) return "alto";
+    return "critico";
+  } else {
+    // Sites without GMG
+    if (autonomyHours >= 6) return "ok";
+    if (autonomyHours >= 4) return "medio";
+    if (autonomyHours >= 2) return "alto";
+    return "critico";
+  }
+}
+
 export function useDashboardStats(reports: ReportRow[], filters: DashboardFilters) {
   return useMemo(() => {
     // Apply filters
@@ -116,6 +170,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       batteriesOver8Years: 0,
       batteryStateChart: [],
       batteryAgeChart: [],
+      // Autonomy Risk
+      autonomyRisk: {
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesCritico: 0,
+        sitesOkComGMG: 0,
+        sitesAltoRiscoComGMG: 0,
+        sitesCriticoComGMG: 0,
+      },
       // Climatização
       climatizacaoTotal: 0,
       acTotal: 0,
@@ -192,10 +256,27 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       }
       
       // GMG
-      if (report.gmg_existe === "SIM") {
+      const hasGMG = report.gmg_existe === "SIM";
+      if (hasGMG) {
         stats.sitesWithGMG++;
       } else {
         stats.sitesWithoutGMG++;
+      }
+      
+      // Calculate autonomy risk for this site
+      const autonomyHours = calculateSiteAutonomy(report);
+      const autonomyRisk = classifyAutonomyRisk(autonomyHours, hasGMG);
+      
+      // Update autonomy risk counters
+      if (hasGMG) {
+        if (autonomyRisk === "ok") stats.autonomyRisk.sitesOkComGMG++;
+        else if (autonomyRisk === "alto") stats.autonomyRisk.sitesAltoRiscoComGMG++;
+        else if (autonomyRisk === "critico") stats.autonomyRisk.sitesCriticoComGMG++;
+      } else {
+        if (autonomyRisk === "ok") stats.autonomyRisk.sitesOk++;
+        else if (autonomyRisk === "medio") stats.autonomyRisk.sitesMedioRisco++;
+        else if (autonomyRisk === "alto") stats.autonomyRisk.sitesAltoRisco++;
+        else if (autonomyRisk === "critico") stats.autonomyRisk.sitesCritico++;
       }
       
       // Zeladoria
