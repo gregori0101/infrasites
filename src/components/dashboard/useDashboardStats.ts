@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ReportRow } from "@/lib/reportDatabase";
-import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo, ClimatizacaoInfo, OverviewStats } from "./types";
+import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo, ClimatizacaoInfo, OverviewStats, GabineteInfo } from "./types";
 import { format, isValid, differenceInYears, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -233,6 +233,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     const batteryInfoList: BatteryInfo[] = [];
     const acInfoList: ACInfo[] = [];
     const climatizacaoList: ClimatizacaoInfo[] = [];
+    const gabineteInfoList: GabineteInfo[] = [];
     
     const ufMap: Record<string, { count: number; ok: number; nok: number }> = {};
     const monthMap: Record<string, number> = {};
@@ -556,12 +557,14 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           const gabMaxAge = Math.max(gabChumboMaxAge, gabLitioMaxAge);
           const hasBattery = gabHasChumbo || gabHasLitio;
           
+          let gabObsolStatus: "ok" | "medio" | "alto" | "sem_banco" = "sem_banco";
+          
           if (hasBattery && gabMaxAge >= 0) {
             // Apply the stricter criteria (Chumbo rules since they have lower thresholds)
             // Chumbo: OK < 2y, Médio 2-3y, Alto >= 3y
             // Lítio: OK < 5y, Médio 5-10y, Alto >= 10y
             // We classify based on the type present, using worst case
-            let gabObsolStatus: "ok" | "medio" | "alto" = "ok";
+            gabObsolStatus = "ok";
             if (gabHasChumbo && gabHasLitio) {
               // Both types present - use worst status
               const chumboStatus = getObsolescenciaChumbo(gabChumboMaxAge);
@@ -580,6 +583,23 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           } else {
             stats.obsolescencia.gabinetesSemBanco++;
           }
+          
+          // Create GabineteInfo for drill-down
+          const batteryTypes: string[] = [];
+          if (gabHasChumbo) batteryTypes.push("chumbo");
+          if (gabHasLitio) batteryTypes.push("litio");
+          
+          gabineteInfoList.push({
+            siteCode: report.site_code,
+            uf,
+            gabinete: g,
+            autonomyRisk: gabAutonomyRisk,
+            obsolescenciaRisk: gabObsolStatus,
+            hasGMG,
+            autonomyHours: gabAutonomyHours,
+            totalBatteries: gabBatteries.length,
+            batteryTypes,
+          });
         }
         
         // Add gabinete batteries to the main list
@@ -614,21 +634,23 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       
       // Calculate unified site-level obsolescence
       const hasSiteBattery = siteHasChumbo || siteHasLitio;
+      let siteObsolRisk: "ok" | "medio" | "alto" | "sem_banco" = "sem_banco";
+      
       if (hasSiteBattery) {
-        let siteObsolStatus: "ok" | "medio" | "alto" = "ok";
+        siteObsolRisk = "ok";
         if (siteHasChumbo && siteHasLitio) {
           const chumboStatus = getObsolescenciaChumbo(siteChumboMaxAge);
           const litioStatus = getObsolescenciaLitio(siteLitioMaxAge);
-          if (chumboStatus === "alto" || litioStatus === "alto") siteObsolStatus = "alto";
-          else if (chumboStatus === "medio" || litioStatus === "medio") siteObsolStatus = "medio";
+          if (chumboStatus === "alto" || litioStatus === "alto") siteObsolRisk = "alto";
+          else if (chumboStatus === "medio" || litioStatus === "medio") siteObsolRisk = "medio";
         } else if (siteHasChumbo) {
-          siteObsolStatus = getObsolescenciaChumbo(siteChumboMaxAge);
+          siteObsolRisk = getObsolescenciaChumbo(siteChumboMaxAge);
         } else {
-          siteObsolStatus = getObsolescenciaLitio(siteLitioMaxAge);
+          siteObsolRisk = getObsolescenciaLitio(siteLitioMaxAge);
         }
         
-        if (siteObsolStatus === "ok") stats.obsolescencia.sitesOk++;
-        else if (siteObsolStatus === "medio") stats.obsolescencia.sitesMedioRisco++;
+        if (siteObsolRisk === "ok") stats.obsolescencia.sitesOk++;
+        else if (siteObsolRisk === "medio") stats.obsolescencia.sitesMedioRisco++;
         else stats.obsolescencia.sitesAltoRisco++;
       } else {
         stats.obsolescencia.sitesSemBanco++;
@@ -648,6 +670,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         acIssues,
         climatizacaoIssues,
         zeladoriaOk: zeladoriaIsOk,
+        autonomyRisk: siteAutonomyRisk,
+        obsolescenciaRisk: siteObsolRisk,
       });
     });
 
@@ -786,6 +810,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     let finalBatteries = batteryInfoList;
     let finalACs = acInfoList;
     let finalClimatizacao = climatizacaoList;
+    let finalGabinetes = gabineteInfoList;
     
     if (filters.status === "ok") {
       finalSites = siteInfoList.filter(s => !s.hasProblems);
@@ -803,6 +828,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       batteries: finalBatteries,
       acs: finalACs,
       climatizacao: finalClimatizacao,
+      gabinetes: finalGabinetes,
     };
   }, [reports, filters]);
 }

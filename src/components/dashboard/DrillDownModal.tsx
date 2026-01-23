@@ -18,12 +18,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { SiteInfo, BatteryInfo, ACInfo } from "./types";
+import { SiteInfo, BatteryInfo, ACInfo, GabineteInfo } from "./types";
 import { cn } from "@/lib/utils";
 import {
   generateSitesExcel,
   generateBatteriesExcel,
   generateACsExcel,
+  generateGabinetesExcel,
   downloadDrillDownExcel,
 } from "@/lib/generateDrillDownExcel";
 
@@ -31,10 +32,11 @@ interface Props {
   open: boolean;
   onClose: () => void;
   title: string;
-  type: "sites" | "batteries" | "acs";
+  type: "sites" | "batteries" | "acs" | "gabinetes";
   sites?: SiteInfo[];
   batteries?: BatteryInfo[];
   acs?: ACInfo[];
+  gabinetes?: GabineteInfo[];
   onSiteClick?: (siteId: string) => void;
 }
 
@@ -48,6 +50,7 @@ export function DrillDownModal({
   sites,
   batteries,
   acs,
+  gabinetes,
   onSiteClick,
 }: Props) {
   const [search, setSearch] = useState("");
@@ -75,11 +78,19 @@ export function DrillDownModal({
       a.uf.toLowerCase().includes(search.toLowerCase())
   );
 
+  const filteredGabinetes = gabinetes?.filter(
+    (g) =>
+      g.siteCode.toLowerCase().includes(search.toLowerCase()) ||
+      g.uf.toLowerCase().includes(search.toLowerCase())
+  );
+
   const totalItems =
     type === "sites"
       ? filteredSites?.length || 0
       : type === "batteries"
       ? filteredBatteries?.length || 0
+      : type === "gabinetes"
+      ? filteredGabinetes?.length || 0
       : filteredACs?.length || 0;
 
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
@@ -89,6 +100,7 @@ export function DrillDownModal({
   const paginatedSites = filteredSites?.slice(startIdx, endIdx);
   const paginatedBatteries = filteredBatteries?.slice(startIdx, endIdx);
   const paginatedACs = filteredACs?.slice(startIdx, endIdx);
+  const paginatedGabinetes = filteredGabinetes?.slice(startIdx, endIdx);
 
   const getStatusBadge = (status: string) => {
     const lower = status.toLowerCase();
@@ -133,6 +145,8 @@ export function DrillDownModal({
                     blob = generateBatteriesExcel(filteredBatteries, title);
                   } else if (type === "acs" && filteredACs) {
                     blob = generateACsExcel(filteredACs, title);
+                  } else if (type === "gabinetes" && filteredGabinetes) {
+                    blob = generateGabinetesExcel(filteredGabinetes, title);
                   } else {
                     return;
                   }
@@ -290,6 +304,59 @@ export function DrillDownModal({
                         <TableCell>AC {a.acNum}</TableCell>
                         <TableCell>{a.modelo}</TableCell>
                         <TableCell>{getStatusBadge(a.status)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="vertical" />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          )}
+
+          {type === "gabinetes" && paginatedGabinetes && (
+            <ScrollArea className="h-[calc(85vh-280px)] w-full">
+              <div className="min-w-[800px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Site</TableHead>
+                      <TableHead className="min-w-[60px]">UF</TableHead>
+                      <TableHead className="min-w-[80px]">Gabinete</TableHead>
+                      <TableHead className="min-w-[100px]">Autonomia</TableHead>
+                      <TableHead className="min-w-[80px]">Horas</TableHead>
+                      <TableHead className="min-w-[120px]">Obsolescência</TableHead>
+                      <TableHead className="min-w-[80px]">GMG</TableHead>
+                      <TableHead className="min-w-[100px]">Baterias</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedGabinetes.map((g, idx) => (
+                      <TableRow key={`${g.siteCode}-${g.gabinete}-${idx}`}>
+                        <TableCell className="font-medium">{g.siteCode}</TableCell>
+                        <TableCell>{g.uf}</TableCell>
+                        <TableCell>G{g.gabinete}</TableCell>
+                        <TableCell>
+                          {g.autonomyRisk === "ok" && <Badge className="bg-success text-success-foreground">OK</Badge>}
+                          {g.autonomyRisk === "medio" && <Badge className="bg-warning text-warning-foreground">Médio</Badge>}
+                          {g.autonomyRisk === "alto" && <Badge className="bg-orange-500 text-white">Alto</Badge>}
+                          {g.autonomyRisk === "critico" && <Badge className="bg-destructive text-destructive-foreground">Crítico</Badge>}
+                        </TableCell>
+                        <TableCell>{g.autonomyHours.toFixed(1)}h</TableCell>
+                        <TableCell>
+                          {g.obsolescenciaRisk === "ok" && <Badge className="bg-success text-success-foreground">OK</Badge>}
+                          {g.obsolescenciaRisk === "medio" && <Badge className="bg-warning text-warning-foreground">Médio</Badge>}
+                          {g.obsolescenciaRisk === "alto" && <Badge className="bg-destructive text-destructive-foreground">Alto</Badge>}
+                          {g.obsolescenciaRisk === "sem_banco" && <Badge variant="outline">Sem Banco</Badge>}
+                        </TableCell>
+                        <TableCell>
+                          {g.hasGMG ? (
+                            <Badge className="bg-success text-success-foreground">Sim</Badge>
+                          ) : (
+                            <Badge variant="outline">Não</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{g.totalBatteries}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

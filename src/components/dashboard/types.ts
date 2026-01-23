@@ -46,6 +46,18 @@ export interface ClimatizacaoInfo {
   acs: ACInfo[];
 }
 
+export interface GabineteInfo {
+  siteCode: string;
+  uf: string;
+  gabinete: number;
+  autonomyRisk: "ok" | "medio" | "alto" | "critico";
+  obsolescenciaRisk: "ok" | "medio" | "alto" | "sem_banco";
+  hasGMG: boolean;
+  autonomyHours: number;
+  totalBatteries: number;
+  batteryTypes: string[]; // e.g., ["chumbo", "litio"]
+}
+
 export interface SiteInfo {
   id: string;
   siteCode: string;
@@ -60,6 +72,8 @@ export interface SiteInfo {
   acIssues: number;
   climatizacaoIssues: number;
   zeladoriaOk: boolean;
+  autonomyRisk?: "ok" | "medio" | "alto" | "critico";
+  obsolescenciaRisk?: "ok" | "medio" | "alto" | "sem_banco";
 }
 
 export interface OverviewStats {
