@@ -273,7 +273,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 
   // Observations
   row.observacoes = data.observacoes || null;
-  row.observacao_foto_url = data.fotoObservacao || null;
+  // Store multiple observation photos as JSON array
+  const validPhotos = (data.fotosObservacao || []).filter(Boolean);
+  row.observacao_foto_url = validPhotos.length > 0 ? JSON.stringify(validPhotos) : null;
   
   // Assinatura
   row.assinatura_digital = data.assinaturaDigital || null;

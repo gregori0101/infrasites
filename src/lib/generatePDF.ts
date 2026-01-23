@@ -672,7 +672,13 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     y += 10;
   }
 
-  await addPhoto(data.fotoObservacao, 'Foto Observação');
+  // Add all observation photos
+  for (let i = 0; i < (data.fotosObservacao?.length || 0); i++) {
+    const foto = data.fotosObservacao[i];
+    if (foto) {
+      await addPhoto(foto, `Foto Observação ${i + 1}`);
+    }
+  }
 
   // ===== SIGNATURE =====
   if (data.assinaturaDigital) {

@@ -195,7 +195,7 @@ export interface ChecklistData {
   gmg: GMGData;
   torre: TorreData;
   observacoes: string;
-  fotoObservacao: string | null;
+  fotosObservacao: (string | null)[];
   assinaturaDigital: string | null;
   dataHora: string;
   tecnico: string;
@@ -313,7 +313,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
     zeladoria: 'OK',
   },
   observacoes: '',
-  fotoObservacao: null,
+  fotosObservacao: [],
   assinaturaDigital: null,
   dataHora: new Date().toISOString(),
   tecnico: '',
