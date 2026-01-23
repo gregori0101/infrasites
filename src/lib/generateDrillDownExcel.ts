@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { SiteInfo, BatteryInfo, ACInfo } from "@/components/dashboard/types";
+import { SiteInfo, BatteryInfo, ACInfo, GabineteInfo } from "@/components/dashboard/types";
 
 /**
  * Generate Excel file for Sites data
@@ -130,6 +130,57 @@ export function generateACsExcel(acs: ACInfo[], title: string): Blob {
   worksheet["!cols"] = cols;
 
   XLSX.utils.book_append_sheet(workbook, worksheet, "ACs");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  return new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+}
+
+/**
+ * Generate Excel file for Gabinetes data
+ */
+export function generateGabinetesExcel(
+  gabinetes: GabineteInfo[],
+  title: string
+): Blob {
+  const workbook = XLSX.utils.book_new();
+
+  const getAutonomyRiskText = (risk: "ok" | "medio" | "alto" | "critico") => {
+    if (risk === "ok") return "OK";
+    if (risk === "medio") return "Médio Risco";
+    if (risk === "alto") return "Alto Risco";
+    return "Crítico";
+  };
+
+  const getObsolescenciaRiskText = (risk: "ok" | "medio" | "alto" | "sem_banco") => {
+    if (risk === "ok") return "OK";
+    if (risk === "medio") return "Médio Risco";
+    if (risk === "alto") return "Alto Risco";
+    return "Sem Banco";
+  };
+
+  const rows = gabinetes.map((gab) => ({
+    "Código do Site": gab.siteCode,
+    "UF": gab.uf,
+    "Gabinete": `G${gab.gabinete}`,
+    "Risco Autonomia": getAutonomyRiskText(gab.autonomyRisk),
+    "Autonomia (horas)": gab.autonomyHours.toFixed(1),
+    "Risco Obsolescência": getObsolescenciaRiskText(gab.obsolescenciaRisk),
+    "Possui GMG": gab.hasGMG ? "Sim" : "Não",
+    "Total Baterias": gab.totalBatteries,
+    "Tipos de Bateria": gab.batteryTypes.join(", ") || "N/A",
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // Set column widths
+  const cols = Object.keys(rows[0] || {}).map((key) => ({
+    wch: Math.max(key.length, 15),
+  }));
+  worksheet["!cols"] = cols;
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Gabinetes");
 
   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
   return new Blob([excelBuffer], {
