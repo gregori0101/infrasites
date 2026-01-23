@@ -58,6 +58,10 @@ export default function Dashboard() {
   const [modalType, setModalType] = useState<"sites" | "batteries" | "acs" | "gabinetes">("sites");
   const [modalTitle, setModalTitle] = useState("");
   const [modalFilterFn, setModalFilterFn] = useState<(data: any) => any[]>(() => () => []);
+  // Extra state for dual-view (autonomy/obsolescence)
+  const [modalAllowSiteView, setModalAllowSiteView] = useState(false);
+  const [modalAutonomyFilter, setModalAutonomyFilter] = useState<"ok" | "medio" | "alto" | "critico" | undefined>(undefined);
+  const [modalObsolescenciaFilter, setModalObsolescenciaFilter] = useState<"ok" | "medio" | "alto" | undefined>(undefined);
 
   // Site detail modal state
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -161,11 +165,19 @@ export default function Dashboard() {
   const openDrillDown = (
     type: "sites" | "batteries" | "acs" | "gabinetes",
     title: string,
-    filterFn?: (data: any[]) => any[]
+    filterFn?: (data: any[]) => any[],
+    options?: {
+      allowSiteView?: boolean;
+      autonomyFilter?: "ok" | "medio" | "alto" | "critico";
+      obsolescenciaFilter?: "ok" | "medio" | "alto";
+    }
   ) => {
     setModalType(type);
     setModalTitle(title);
     setModalFilterFn(() => filterFn || ((d: any[]) => d));
+    setModalAllowSiteView(options?.allowSiteView || false);
+    setModalAutonomyFilter(options?.autonomyFilter);
+    setModalObsolescenciaFilter(options?.obsolescenciaFilter);
     setModalOpen(true);
   };
 
@@ -539,11 +551,11 @@ export default function Dashboard() {
                     else if (type === "nok") openDrillDown("batteries", "Baterias com Defeito", (b) => b.filter((bat: any) => bat.estado !== "BOA"));
                     else if (type === "obsolete-warning") openDrillDown("batteries", "Baterias Médio Risco Obsolescência", (b) => b.filter((bat: any) => bat.obsolescencia === "warning"));
                     else if (type === "obsolete-critical") openDrillDown("batteries", "Baterias +8 anos (CRÍTICO)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
-                    // Autonomy types - show GABINETES (not batteries)
-                    else if (type === "autonomy-ok") openDrillDown("gabinetes", "Gabinetes - Autonomia OK", (g) => g.filter((gab: any) => gab.autonomyRisk === "ok"));
-                    else if (type === "autonomy-medio") openDrillDown("gabinetes", "Gabinetes - Médio Risco Autonomia", (g) => g.filter((gab: any) => gab.autonomyRisk === "medio"));
-                    else if (type === "autonomy-alto") openDrillDown("gabinetes", "Gabinetes - Alto Risco Autonomia", (g) => g.filter((gab: any) => gab.autonomyRisk === "alto"));
-                    else if (type === "autonomy-critico") openDrillDown("gabinetes", "Gabinetes - Autonomia Crítica", (g) => g.filter((gab: any) => gab.autonomyRisk === "critico"));
+                    // Autonomy types - show GABINETES (with site view toggle)
+                    else if (type === "autonomy-ok") openDrillDown("gabinetes", "Autonomia OK", (g) => g.filter((gab: any) => gab.autonomyRisk === "ok"), { allowSiteView: true, autonomyFilter: "ok" });
+                    else if (type === "autonomy-medio") openDrillDown("gabinetes", "Médio Risco Autonomia", (g) => g.filter((gab: any) => gab.autonomyRisk === "medio"), { allowSiteView: true, autonomyFilter: "medio" });
+                    else if (type === "autonomy-alto") openDrillDown("gabinetes", "Alto Risco Autonomia", (g) => g.filter((gab: any) => gab.autonomyRisk === "alto"), { allowSiteView: true, autonomyFilter: "alto" });
+                    else if (type === "autonomy-critico") openDrillDown("gabinetes", "Autonomia Crítica", (g) => g.filter((gab: any) => gab.autonomyRisk === "critico"), { allowSiteView: true, autonomyFilter: "critico" });
                     // Chumbo/Litio types - use tipoClassificado
                     else if (type === "chumbo-all") openDrillDown("batteries", "Baterias de Chumbo", (b) => b.filter((bat: any) => bat.tipoClassificado === "chumbo"));
                     else if (type === "chumbo-uf" && uf) openDrillDown("batteries", `Baterias de Chumbo - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && bat.tipoClassificado === "chumbo"));
@@ -555,10 +567,10 @@ export default function Dashboard() {
                       return b.filter((bat: any) => ufsNorte.includes(bat.uf) && bat.needsReplacement);
                     });
                     else if (type === "troca-uf" && uf) openDrillDown("batteries", `Baterias para Troca - ${uf}`, (b) => b.filter((bat: any) => bat.uf === uf && bat.needsReplacement));
-                    // Obsolescence unified types - show GABINETES (not batteries)
-                    else if (type === "obsolete-ok") openDrillDown("gabinetes", "Gabinetes OK (Obsolescência)", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "ok"));
-                    else if (type === "obsolete-medio") openDrillDown("gabinetes", "Gabinetes Médio Risco (Obsolescência)", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "medio"));
-                    else if (type === "obsolete-alto") openDrillDown("gabinetes", "Gabinetes Alto Risco (Obsolescência)", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "alto"));
+                    // Obsolescence unified types - show GABINETES (with site view toggle)
+                    else if (type === "obsolete-ok") openDrillDown("gabinetes", "Obsolescência OK", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "ok"), { allowSiteView: true, obsolescenciaFilter: "ok" });
+                    else if (type === "obsolete-medio") openDrillDown("gabinetes", "Médio Risco Obsolescência", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "medio"), { allowSiteView: true, obsolescenciaFilter: "medio" });
+                    else if (type === "obsolete-alto") openDrillDown("gabinetes", "Alto Risco Obsolescência", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "alto"), { allowSiteView: true, obsolescenciaFilter: "alto" });
                   }}
                 />
               )}
@@ -617,10 +629,13 @@ export default function Dashboard() {
         onClose={() => setModalOpen(false)}
         title={modalTitle}
         type={modalType}
-        sites={modalType === "sites" ? modalFilterFn(sites) : undefined}
+        sites={modalAllowSiteView || modalType === "sites" ? sites : undefined}
         batteries={modalType === "batteries" ? modalFilterFn(batteries) : undefined}
         acs={modalType === "acs" ? modalFilterFn(acs) : undefined}
         gabinetes={modalType === "gabinetes" ? modalFilterFn(gabinetes) : undefined}
+        allowSiteView={modalAllowSiteView}
+        autonomyFilter={modalAutonomyFilter}
+        obsolescenciaFilter={modalObsolescenciaFilter}
         onSiteClick={(id) => {
           setSelectedReportId(id);
           setDetailModalOpen(true);

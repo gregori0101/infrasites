@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Download, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,10 @@ interface Props {
   acs?: ACInfo[];
   gabinetes?: GabineteInfo[];
   onSiteClick?: (siteId: string) => void;
+  // For dual-view modals (autonomy/obsolescence)
+  allowSiteView?: boolean;
+  autonomyFilter?: "ok" | "medio" | "alto" | "critico";
+  obsolescenciaFilter?: "ok" | "medio" | "alto";
 }
 
 const PAGE_SIZE = 10;
@@ -52,9 +57,36 @@ export function DrillDownModal({
   acs,
   gabinetes,
   onSiteClick,
+  allowSiteView = false,
+  autonomyFilter,
+  obsolescenciaFilter,
 }: Props) {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
   const [page, setPage] = useState(0);
+
+  // Check if this is an autonomy/obsolescence drill-down (which supports dual views)
+  const isDualViewEnabled = allowSiteView && type === "gabinetes" && sites && sites.length > 0;
+
+  // Filter sites based on autonomy/obsolescence filter when in site view mode
+  const filteredSitesForView = useMemo(() => {
+    if (!sites) return [];
+    let filtered = sites;
+    
+    if (autonomyFilter) {
+      filtered = filtered.filter(s => s.autonomyRisk === autonomyFilter);
+    }
+    if (obsolescenciaFilter) {
+      filtered = filtered.filter(s => s.obsolescenciaRisk === obsolescenciaFilter);
+    }
+    
+    return filtered.filter(
+      (s) =>
+        s.siteCode.toLowerCase().includes(search.toLowerCase()) ||
+        s.technician.toLowerCase().includes(search.toLowerCase()) ||
+        s.uf.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [sites, autonomyFilter, obsolescenciaFilter, search]);
 
   // Filter based on search
   const filteredSites = sites?.filter(
@@ -84,23 +116,48 @@ export function DrillDownModal({
       g.uf.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalItems =
-    type === "sites"
-      ? filteredSites?.length || 0
-      : type === "batteries"
-      ? filteredBatteries?.length || 0
-      : type === "gabinetes"
-      ? filteredGabinetes?.length || 0
-      : filteredACs?.length || 0;
+  // Determine which data to show based on view mode
+  const showingSites = isDualViewEnabled && viewMode === "site";
+  const currentFilteredSites = showingSites ? filteredSitesForView : filteredSites;
+  const currentFilteredGabinetes = filteredGabinetes;
+
+  const totalItems = showingSites
+    ? currentFilteredSites?.length || 0
+    : type === "sites"
+    ? filteredSites?.length || 0
+    : type === "batteries"
+    ? filteredBatteries?.length || 0
+    : type === "gabinetes"
+    ? currentFilteredGabinetes?.length || 0
+    : filteredACs?.length || 0;
 
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
   const startIdx = page * PAGE_SIZE;
   const endIdx = startIdx + PAGE_SIZE;
 
-  const paginatedSites = filteredSites?.slice(startIdx, endIdx);
+  const paginatedSites = showingSites 
+    ? currentFilteredSites?.slice(startIdx, endIdx)
+    : filteredSites?.slice(startIdx, endIdx);
   const paginatedBatteries = filteredBatteries?.slice(startIdx, endIdx);
   const paginatedACs = filteredACs?.slice(startIdx, endIdx);
-  const paginatedGabinetes = filteredGabinetes?.slice(startIdx, endIdx);
+  const paginatedGabinetes = currentFilteredGabinetes?.slice(startIdx, endIdx);
+
+  // Get autonomy/obsolescence risk badge helper
+  const getAutonomyRiskBadge = (risk: "ok" | "medio" | "alto" | "critico" | undefined) => {
+    if (risk === "ok") return <Badge className="bg-success text-success-foreground">OK</Badge>;
+    if (risk === "medio") return <Badge className="bg-warning text-warning-foreground">Médio</Badge>;
+    if (risk === "alto") return <Badge className="bg-orange-500 text-white">Alto</Badge>;
+    if (risk === "critico") return <Badge className="bg-destructive text-destructive-foreground">Crítico</Badge>;
+    return <Badge variant="outline">N/A</Badge>;
+  };
+
+  const getObsolescenciaRiskBadge = (risk: "ok" | "medio" | "alto" | "sem_banco" | undefined) => {
+    if (risk === "ok") return <Badge className="bg-success text-success-foreground">OK</Badge>;
+    if (risk === "medio") return <Badge className="bg-warning text-warning-foreground">Médio</Badge>;
+    if (risk === "alto") return <Badge className="bg-destructive text-destructive-foreground">Alto</Badge>;
+    if (risk === "sem_banco") return <Badge variant="outline">Sem Banco</Badge>;
+    return <Badge variant="outline">N/A</Badge>;
+  };
 
   const getStatusBadge = (status: string) => {
     const lower = status.toLowerCase();
@@ -136,17 +193,20 @@ export function DrillDownModal({
                 size="sm"
                 onClick={() => {
                   let blob: Blob;
+                  const viewLabel = showingSites ? "Sites" : "Gabinetes";
                   const sanitizedTitle = title.replace(/[^a-zA-Z0-9]/g, "_");
-                  const filename = `${sanitizedTitle}_${new Date().toISOString().split("T")[0]}.xlsx`;
+                  const filename = `${sanitizedTitle}_${viewLabel}_${new Date().toISOString().split("T")[0]}.xlsx`;
 
-                  if (type === "sites" && filteredSites) {
+                  if (showingSites && currentFilteredSites) {
+                    blob = generateSitesExcel(currentFilteredSites, `${title} (Sites)`);
+                  } else if (type === "sites" && filteredSites) {
                     blob = generateSitesExcel(filteredSites, title);
                   } else if (type === "batteries" && filteredBatteries) {
                     blob = generateBatteriesExcel(filteredBatteries, title);
                   } else if (type === "acs" && filteredACs) {
                     blob = generateACsExcel(filteredACs, title);
-                  } else if (type === "gabinetes" && filteredGabinetes) {
-                    blob = generateGabinetesExcel(filteredGabinetes, title);
+                  } else if (type === "gabinetes" && currentFilteredGabinetes) {
+                    blob = generateGabinetesExcel(currentFilteredGabinetes, title);
                   } else {
                     return;
                   }
@@ -158,6 +218,32 @@ export function DrillDownModal({
               </Button>
             </div>
           </div>
+          
+          {/* View Mode Toggle for Autonomy/Obsolescence */}
+          {isDualViewEnabled && (
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-sm text-muted-foreground">Visualizar por:</span>
+              <ToggleGroup
+                type="single"
+                value={viewMode}
+                onValueChange={(v) => {
+                  if (v) {
+                    setViewMode(v as "gabinete" | "site");
+                    setPage(0);
+                  }
+                }}
+                className="border rounded-md"
+              >
+                <ToggleGroupItem value="gabinete" className="text-sm px-3 py-1">
+                  Gabinete
+                </ToggleGroupItem>
+                <ToggleGroupItem value="site" className="text-sm px-3 py-1">
+                  Site
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
+
           <div className="relative mt-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -173,7 +259,48 @@ export function DrillDownModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden mt-4 min-h-0">
-          {type === "sites" && paginatedSites && (
+          {/* Site view for dual-view mode */}
+          {showingSites && paginatedSites && (
+            <ScrollArea className="h-[calc(85vh-320px)] w-full">
+              <div className="min-w-[700px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Site</TableHead>
+                      <TableHead className="min-w-[60px]">UF</TableHead>
+                      <TableHead className="min-w-[150px]">Técnico</TableHead>
+                      <TableHead className="min-w-[100px]">Data</TableHead>
+                      <TableHead className="min-w-[80px]">Gabinetes</TableHead>
+                      {autonomyFilter && <TableHead className="min-w-[100px]">Autonomia</TableHead>}
+                      {obsolescenciaFilter && <TableHead className="min-w-[120px]">Obsolescência</TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSites.map((s) => (
+                      <TableRow
+                        key={s.id}
+                        className={cn(onSiteClick && "cursor-pointer hover:bg-muted/50")}
+                        onClick={() => onSiteClick?.(s.id)}
+                      >
+                        <TableCell className="font-medium">{s.siteCode}</TableCell>
+                        <TableCell>{s.uf}</TableCell>
+                        <TableCell>{s.technician}</TableCell>
+                        <TableCell>{s.date}</TableCell>
+                        <TableCell>{s.totalCabinets}</TableCell>
+                        {autonomyFilter && <TableCell>{getAutonomyRiskBadge(s.autonomyRisk)}</TableCell>}
+                        {obsolescenciaFilter && <TableCell>{getObsolescenciaRiskBadge(s.obsolescenciaRisk)}</TableCell>}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <ScrollBar orientation="vertical" />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          )}
+
+          {/* Regular sites view (not dual mode) */}
+          {type === "sites" && !showingSites && paginatedSites && (
             <ScrollArea className="h-[calc(85vh-280px)] w-full">
               <div className="min-w-[600px]">
                 <Table>
@@ -314,8 +441,8 @@ export function DrillDownModal({
             </ScrollArea>
           )}
 
-          {type === "gabinetes" && paginatedGabinetes && (
-            <ScrollArea className="h-[calc(85vh-280px)] w-full">
+          {type === "gabinetes" && !showingSites && paginatedGabinetes && (
+            <ScrollArea className="h-[calc(85vh-320px)] w-full">
               <div className="min-w-[800px]">
                 <Table>
                   <TableHeader>
