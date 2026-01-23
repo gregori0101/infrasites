@@ -85,8 +85,8 @@ function calculateGabineteAutonomy(report: ReportRow, gabineteNum: number): numb
     return totalCapacityAh / estimatedLoad;
   }
   
-  // Default: If no battery data, assume 4 hours (medium risk)
-  return 4;
+  // CORREÇÃO: Se não há bateria, retornar 0 horas (será classificado como Crítico)
+  return 0;
 }
 
 // Classify gabinete autonomy risk based on rules
@@ -621,9 +621,10 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       // Calculate site-level autonomy (unified, regardless of GMG)
       const numCabinets = report.total_cabinets || 1;
       const siteEstimatedLoad = numCabinets * 30;
+      // CORREÇÃO: Se não há capacidade, autonomia = 0 (Crítico)
       const siteAutonomyHours = (siteEstimatedLoad > 0 && siteTotalCapacityAh > 0) 
         ? siteTotalCapacityAh / siteEstimatedLoad 
-        : 4;
+        : 0;
       const siteAutonomyRisk = classifyAutonomyRisk(siteAutonomyHours, hasGMG);
       
       // Update unified site-level autonomy counters
