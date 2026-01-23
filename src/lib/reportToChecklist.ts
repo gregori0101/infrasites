@@ -3,6 +3,20 @@ import { ReportRow } from "./reportDatabase";
 import { v4 as uuid } from "uuid";
 
 /**
+ * Parse a JSON string that might be a single URL or an array of URLs
+ */
+function parseJsonArray(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [value];
+  } catch {
+    // If not valid JSON, treat as single URL
+    return value ? [value] : [];
+  }
+}
+
+/**
  * Reconstruct ChecklistData from a database ReportRow
  * This allows regenerating PDF/Excel from saved reports
  */
@@ -169,7 +183,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotoNinhos: report.torre_foto_ninhos || null,
     },
     observacoes: report.observacoes || '',
-    fotoObservacao: report.observacao_foto_url || null,
+    fotosObservacao: report.observacao_foto_url ? parseJsonArray(report.observacao_foto_url) : [],
     assinaturaDigital: report.assinatura_digital || null,
     dataHora: report.created_at || new Date().toISOString(),
     tecnico: report.technician_name || '',

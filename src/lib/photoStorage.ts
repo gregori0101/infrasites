@@ -121,9 +121,9 @@ export async function uploadAllPhotos(
     'site_panoramica'
   );
 
-  // Upload observation photo
-  updatedData.fotoObservacao = await uploadSinglePhoto(
-    data.fotoObservacao,
+  // Upload observation photos (multiple)
+  updatedData.fotosObservacao = await uploadPhotoArray(
+    data.fotosObservacao,
     'observacao'
   );
 

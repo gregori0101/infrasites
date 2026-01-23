@@ -223,9 +223,20 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.panoramic_photo_url) {
     allPhotos.push({ url: report.panoramic_photo_url, label: "Panorâmica", category: "Geral" });
   }
-  if (report?.observacao_foto_url) {
-    allPhotos.push({ url: report.observacao_foto_url, label: "Observação", category: "Geral" });
-  }
+  // Parse observation photos (may be JSON array or single URL)
+  const parseObservationPhotos = (value: string | null): string[] => {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [value];
+    } catch {
+      return value ? [value] : [];
+    }
+  };
+  const observationPhotos = parseObservationPhotos(report?.observacao_foto_url);
+  observationPhotos.forEach((url, idx) => {
+    allPhotos.push({ url, label: `Observação ${idx + 1}`, category: "Geral" });
+  });
   // Energy photos
   if (report?.energia_foto_quadro_geral) {
     allPhotos.push({ url: report.energia_foto_quadro_geral, label: "Quadro Geral", category: "Energia" });
@@ -546,13 +557,23 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </Card>
                   )}
 
-                  {report.observacao_foto_url && (
+                  {observationPhotos.length > 0 && (
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Foto Observação</CardTitle>
+                        <CardTitle className="text-base">
+                          Fotos de Observação ({observationPhotos.length})
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <PhotoViewer url={report.observacao_foto_url} label="Observação" />
+                        <div className="grid grid-cols-2 gap-2">
+                          {observationPhotos.map((url, idx) => (
+                            <PhotoViewer 
+                              key={idx} 
+                              url={url} 
+                              label={`Observação ${idx + 1}`} 
+                            />
+                          ))}
+                        </div>
                       </CardContent>
                     </Card>
                   )}

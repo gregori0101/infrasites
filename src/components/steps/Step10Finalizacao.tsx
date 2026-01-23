@@ -168,12 +168,54 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         </div>
       </FormCard>
 
-      <FormCard title="Foto Adicional" icon={<Camera className="w-4 h-4" />}>
-        <PhotoCapture
-          label="Observação específica (opcional)"
-          value={data.fotoObservacao}
-          onChange={(value) => updateData('fotoObservacao', value)}
-        />
+      <FormCard title="Fotos de Observação" icon={<Camera className="w-4 h-4" />}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              Adicione quantas fotos precisar para documentar observações
+            </span>
+            <span className={cn(
+              "text-xs font-bold px-2 py-0.5 rounded-full",
+              (data.fotosObservacao?.filter(Boolean).length || 0) > 0 
+                ? "bg-success/20 text-success" 
+                : "bg-muted text-muted-foreground"
+            )}>
+              {data.fotosObservacao?.filter(Boolean).length || 0} foto(s)
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {(data.fotosObservacao || []).map((foto, index) => (
+              <PhotoCapture
+                key={index}
+                label={`Observação ${index + 1}`}
+                value={foto}
+                onChange={(value) => {
+                  const newFotos = [...(data.fotosObservacao || [])];
+                  if (value) {
+                    newFotos[index] = value;
+                  } else {
+                    // Remove the photo from array
+                    newFotos.splice(index, 1);
+                  }
+                  updateData('fotosObservacao', newFotos);
+                }}
+              />
+            ))}
+            
+            {/* Add new photo slot */}
+            <PhotoCapture
+              label={`Nova foto ${(data.fotosObservacao?.length || 0) + 1}`}
+              value={null}
+              onChange={(value) => {
+                if (value) {
+                  const newFotos = [...(data.fotosObservacao || []), value];
+                  updateData('fotosObservacao', newFotos);
+                }
+              }}
+            />
+          </div>
+        </div>
       </FormCard>
 
 

@@ -246,7 +246,8 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   
   // GRUPO OBSERVAÇÕES E FINALIZAÇÃO
   row['Observacoes_Gerais'] = data.observacoes || '';
-  row['Foto_Observacao'] = getPhotoValue(data.fotoObservacao);
+  row['Fotos_Observacao_Qtd'] = (data.fotosObservacao || []).filter(Boolean).length;
+  row['Fotos_Observacao'] = (data.fotosObservacao || []).filter(Boolean).map((p, i) => getPhotoValue(p)).join('; ');
   row['Assinatura_Digital'] = getPhotoValue(data.assinaturaDigital);
   row['Data_Hora_Checklist'] = data.dataHora ? format(new Date(data.dataHora), 'dd/MM/yyyy HH:mm:ss') : '';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
