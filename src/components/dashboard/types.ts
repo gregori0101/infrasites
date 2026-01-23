@@ -91,22 +91,16 @@ export interface UfAssignmentStats {
 }
 
 export interface AutonomyRiskStats {
-  // Per gabinete
+  // Per gabinete - unified (all, regardless of GMG)
   gabinetesOk: number;
   gabinetesMedioRisco: number;
   gabinetesAltoRisco: number;
   gabinetesCritico: number;
-  gabinetesOkComGMG: number;
-  gabinetesAltoRiscoComGMG: number;
-  gabinetesCriticoComGMG: number;
-  // Per site
+  // Per site - unified (all, regardless of GMG)
   sitesOk: number;
   sitesMedioRisco: number;
   sitesAltoRisco: number;
   sitesCritico: number;
-  sitesOkComGMG: number;
-  sitesAltoRiscoComGMG: number;
-  sitesCriticoComGMG: number;
 }
 
 export interface PanelStats {
@@ -150,24 +144,12 @@ export interface PanelStats {
   // Autonomy Risk (New)
   autonomyRisk: AutonomyRiskStats;
   
-  // Obsolescence by Type - per gabinete
-  obsolescenciaChumbo: {
+  // Obsolescence - unified (Chumbo + Lítio combined)
+  obsolescencia: {
     gabinetesOk: number;
     gabinetesMedioRisco: number;
     gabinetesAltoRisco: number;
     gabinetesSemBanco: number;
-    // Per site
-    sitesOk: number;
-    sitesMedioRisco: number;
-    sitesAltoRisco: number;
-    sitesSemBanco: number;
-  };
-  obsolescenciaLitio: {
-    gabinetesOk: number;
-    gabinetesMedioRisco: number;
-    gabinetesAltoRisco: number;
-    gabinetesSemBanco: number;
-    // Per site
     sitesOk: number;
     sitesMedioRisco: number;
     sitesAltoRisco: number;
