@@ -180,7 +180,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       batteriesOver8Years: 0,
       batteryStateChart: [],
       batteryAgeChart: [],
-      // Autonomy Risk - per gabinete
+      // Autonomy Risk - per gabinete and per site
       autonomyRisk: {
         gabinetesOk: 0,
         gabinetesMedioRisco: 0,
@@ -189,6 +189,13 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         gabinetesOkComGMG: 0,
         gabinetesAltoRiscoComGMG: 0,
         gabinetesCriticoComGMG: 0,
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesCritico: 0,
+        sitesOkComGMG: 0,
+        sitesAltoRiscoComGMG: 0,
+        sitesCriticoComGMG: 0,
       },
       // Climatização
       climatizacaoTotal: 0,
@@ -210,18 +217,26 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       bateriasChumboByUf: [],
       bateriasLitioTotal: 0,
       bateriasLitioByUf: [],
-      // Obsolescência por tipo - per gabinete
+      // Obsolescência por tipo - per gabinete and per site
       obsolescenciaChumbo: {
         gabinetesOk: 0,
         gabinetesMedioRisco: 0,
         gabinetesAltoRisco: 0,
         gabinetesSemBanco: 0,
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesSemBanco: 0,
       },
       obsolescenciaLitio: {
         gabinetesOk: 0,
         gabinetesMedioRisco: 0,
         gabinetesAltoRisco: 0,
         gabinetesSemBanco: 0,
+        sitesOk: 0,
+        sitesMedioRisco: 0,
+        sitesAltoRisco: 0,
+        sitesSemBanco: 0,
       }
     };
 
@@ -253,6 +268,15 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       let batteryIssues = 0;
       let acIssues = 0;
       let climatizacaoIssues = 0;
+      
+      // Track obsolescence per site for site-level aggregation
+      let siteChumboMaxAge = -1;
+      let siteLitioMaxAge = -1;
+      let siteHasChumbo = false;
+      let siteHasLitio = false;
+      
+      // Track site-level autonomy (sum of all gabinete capacities)
+      let siteTotalCapacityAh = 0;
       
       // Technician tracking by user_id
       if (!technicianMap[techId]) {
@@ -452,12 +476,24 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               bateriasLitioTotal++;
               litioByUf[uf] = (litioByUf[uf] || 0) + 1;
               gabHasLitio = true;
+              siteHasLitio = true;
               if (idade > gabLitioMaxAge) gabLitioMaxAge = idade;
+              if (idade > siteLitioMaxAge) siteLitioMaxAge = idade;
             } else if (tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO")) {
               bateriasChumboTotal++;
               chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
               gabHasChumbo = true;
+              siteHasChumbo = true;
               if (idade > gabChumboMaxAge) gabChumboMaxAge = idade;
+              if (idade > siteChumboMaxAge) siteChumboMaxAge = idade;
+            }
+            
+            // Track capacity for site-level autonomy
+            if (capacidade) {
+              const match = capacidade.match(/(\d+)/);
+              if (match) {
+                siteTotalCapacityAh += parseInt(match[1], 10);
+              }
             }
           }
         }
@@ -513,6 +549,45 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       } else {
         stats.sitesOk++;
         ufMap[uf].ok++;
+      }
+      
+      // Calculate site-level autonomy and obsolescence
+      const numCabinets = report.total_cabinets || 1;
+      const siteEstimatedLoad = numCabinets * 30;
+      const siteAutonomyHours = (siteEstimatedLoad > 0 && siteTotalCapacityAh > 0) 
+        ? siteTotalCapacityAh / siteEstimatedLoad 
+        : 4;
+      const siteAutonomyRisk = classifyAutonomyRisk(siteAutonomyHours, hasGMG);
+      
+      // Update site-level autonomy counters
+      if (hasGMG) {
+        if (siteAutonomyRisk === "ok") stats.autonomyRisk.sitesOkComGMG++;
+        else if (siteAutonomyRisk === "alto") stats.autonomyRisk.sitesAltoRiscoComGMG++;
+        else if (siteAutonomyRisk === "critico") stats.autonomyRisk.sitesCriticoComGMG++;
+      } else {
+        if (siteAutonomyRisk === "ok") stats.autonomyRisk.sitesOk++;
+        else if (siteAutonomyRisk === "medio") stats.autonomyRisk.sitesMedioRisco++;
+        else if (siteAutonomyRisk === "alto") stats.autonomyRisk.sitesAltoRisco++;
+        else if (siteAutonomyRisk === "critico") stats.autonomyRisk.sitesCritico++;
+      }
+      
+      // Calculate site-level obsolescence
+      if (siteHasChumbo) {
+        const chumboStatus = getObsolescenciaChumbo(siteChumboMaxAge);
+        if (chumboStatus === "ok") stats.obsolescenciaChumbo.sitesOk++;
+        else if (chumboStatus === "medio") stats.obsolescenciaChumbo.sitesMedioRisco++;
+        else stats.obsolescenciaChumbo.sitesAltoRisco++;
+      } else {
+        stats.obsolescenciaChumbo.sitesSemBanco++;
+      }
+      
+      if (siteHasLitio) {
+        const litioStatus = getObsolescenciaLitio(siteLitioMaxAge);
+        if (litioStatus === "ok") stats.obsolescenciaLitio.sitesOk++;
+        else if (litioStatus === "medio") stats.obsolescenciaLitio.sitesMedioRisco++;
+        else stats.obsolescenciaLitio.sitesAltoRisco++;
+      } else {
+        stats.obsolescenciaLitio.sitesSemBanco++;
       }
       
       siteInfoList.push({

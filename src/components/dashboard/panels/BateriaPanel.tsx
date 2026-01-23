@@ -1,7 +1,8 @@
-import React from "react";
-import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PanelStats, BatteryInfo } from "../types";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Props {
   stats: PanelStats;
@@ -10,11 +11,67 @@ interface Props {
 }
 
 export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
-  // Calculate totals for autonomy risk
-  const totalSemGMG = stats.autonomyRisk.gabinetesOk + stats.autonomyRisk.gabinetesMedioRisco + 
-    stats.autonomyRisk.gabinetesAltoRisco + stats.autonomyRisk.gabinetesCritico;
-  const totalComGMG = stats.autonomyRisk.gabinetesOkComGMG + stats.autonomyRisk.gabinetesAltoRiscoComGMG + 
-    stats.autonomyRisk.gabinetesCriticoComGMG;
+  const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
+  
+  // Calculate totals for autonomy risk based on view mode
+  const totalSemGMG = viewMode === "gabinete" 
+    ? stats.autonomyRisk.gabinetesOk + stats.autonomyRisk.gabinetesMedioRisco + 
+      stats.autonomyRisk.gabinetesAltoRisco + stats.autonomyRisk.gabinetesCritico
+    : stats.autonomyRisk.sitesOk + stats.autonomyRisk.sitesMedioRisco + 
+      stats.autonomyRisk.sitesAltoRisco + stats.autonomyRisk.sitesCritico;
+  
+  const totalComGMG = viewMode === "gabinete"
+    ? stats.autonomyRisk.gabinetesOkComGMG + stats.autonomyRisk.gabinetesAltoRiscoComGMG + 
+      stats.autonomyRisk.gabinetesCriticoComGMG
+    : stats.autonomyRisk.sitesOkComGMG + stats.autonomyRisk.sitesAltoRiscoComGMG + 
+      stats.autonomyRisk.sitesCriticoComGMG;
+
+  // Get correct values based on view mode
+  const autonomy = viewMode === "gabinete" ? {
+    ok: stats.autonomyRisk.gabinetesOk,
+    medioRisco: stats.autonomyRisk.gabinetesMedioRisco,
+    altoRisco: stats.autonomyRisk.gabinetesAltoRisco,
+    critico: stats.autonomyRisk.gabinetesCritico,
+    okComGMG: stats.autonomyRisk.gabinetesOkComGMG,
+    altoRiscoComGMG: stats.autonomyRisk.gabinetesAltoRiscoComGMG,
+    criticoComGMG: stats.autonomyRisk.gabinetesCriticoComGMG,
+  } : {
+    ok: stats.autonomyRisk.sitesOk,
+    medioRisco: stats.autonomyRisk.sitesMedioRisco,
+    altoRisco: stats.autonomyRisk.sitesAltoRisco,
+    critico: stats.autonomyRisk.sitesCritico,
+    okComGMG: stats.autonomyRisk.sitesOkComGMG,
+    altoRiscoComGMG: stats.autonomyRisk.sitesAltoRiscoComGMG,
+    criticoComGMG: stats.autonomyRisk.sitesCriticoComGMG,
+  };
+
+  const obsolChumbo = viewMode === "gabinete" ? {
+    ok: stats.obsolescenciaChumbo.gabinetesOk,
+    medioRisco: stats.obsolescenciaChumbo.gabinetesMedioRisco,
+    altoRisco: stats.obsolescenciaChumbo.gabinetesAltoRisco,
+    semBanco: stats.obsolescenciaChumbo.gabinetesSemBanco,
+  } : {
+    ok: stats.obsolescenciaChumbo.sitesOk,
+    medioRisco: stats.obsolescenciaChumbo.sitesMedioRisco,
+    altoRisco: stats.obsolescenciaChumbo.sitesAltoRisco,
+    semBanco: stats.obsolescenciaChumbo.sitesSemBanco,
+  };
+
+  const obsolLitio = viewMode === "gabinete" ? {
+    ok: stats.obsolescenciaLitio.gabinetesOk,
+    medioRisco: stats.obsolescenciaLitio.gabinetesMedioRisco,
+    altoRisco: stats.obsolescenciaLitio.gabinetesAltoRisco,
+    semBanco: stats.obsolescenciaLitio.gabinetesSemBanco,
+  } : {
+    ok: stats.obsolescenciaLitio.sitesOk,
+    medioRisco: stats.obsolescenciaLitio.sitesMedioRisco,
+    altoRisco: stats.obsolescenciaLitio.sitesAltoRisco,
+    semBanco: stats.obsolescenciaLitio.sitesSemBanco,
+  };
+
+  const unitLabel = viewMode === "gabinete" ? "gabinetes" : "sites";
+  const unitLabelSingular = viewMode === "gabinete" ? "Gabinetes" : "Sites";
+
   // Autonomy Risk Card Component
   const AutonomyRiskCard = ({ 
     title, 
@@ -49,6 +106,33 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Toggle para escolher visualização */}
+      <Card className="bg-muted/30">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Visualização de Risco de Autonomia e Obsolescência:</span>
+            </div>
+            <ToggleGroup 
+              type="single" 
+              value={viewMode} 
+              onValueChange={(value) => value && setViewMode(value as "gabinete" | "site")}
+              className="bg-background border rounded-lg"
+            >
+              <ToggleGroupItem value="gabinete" aria-label="Por Gabinete" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Boxes className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Gabinete</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="site" aria-label="Por Site" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Site</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* SEÇÃO 1: Risco de Autonomia */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
@@ -56,16 +140,16 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           <h2 className="font-semibold text-lg">Risco de Autonomia de Bateria</h2>
         </div>
 
-        {/* Gabinetes SEM GMG */}
+        {/* SEM GMG */}
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Battery className="w-4 h-4" />
-            Gabinetes SEM Gerador ({totalSemGMG} gabinetes)
+            {unitLabelSingular} SEM Gerador ({totalSemGMG} {unitLabel})
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <AutonomyRiskCard
               title="OK"
-              value={stats.autonomyRisk.gabinetesOk}
+              value={autonomy.ok}
               subtitle="≥ 6 horas de autonomia"
               icon={ShieldCheck}
               colorClass="text-success"
@@ -73,7 +157,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             />
             <AutonomyRiskCard
               title="Médio Risco"
-              value={stats.autonomyRisk.gabinetesMedioRisco}
+              value={autonomy.medioRisco}
               subtitle="≥ 4h e < 6h de autonomia"
               icon={ShieldAlert}
               colorClass="text-warning"
@@ -81,7 +165,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             />
             <AutonomyRiskCard
               title="Alto Risco"
-              value={stats.autonomyRisk.gabinetesAltoRisco}
+              value={autonomy.altoRisco}
               subtitle="≥ 2h e < 4h de autonomia"
               icon={ShieldAlert}
               colorClass="text-accent"
@@ -89,7 +173,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             />
             <AutonomyRiskCard
               title="Crítico"
-              value={stats.autonomyRisk.gabinetesCritico}
+              value={autonomy.critico}
               subtitle="< 2 horas de autonomia"
               icon={ShieldX}
               colorClass="text-destructive"
@@ -98,16 +182,16 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </div>
         </div>
 
-        {/* Gabinetes COM GMG */}
+        {/* COM GMG */}
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Zap className="w-4 h-4" />
-            Gabinetes COM Gerador ({totalComGMG} gabinetes)
+            {unitLabelSingular} COM Gerador ({totalComGMG} {unitLabel})
           </h3>
           <div className="grid grid-cols-3 gap-4">
             <AutonomyRiskCard
               title="OK"
-              value={stats.autonomyRisk.gabinetesOkComGMG}
+              value={autonomy.okComGMG}
               subtitle="≥ 4 horas de autonomia"
               icon={ShieldCheck}
               colorClass="text-success"
@@ -115,7 +199,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             />
             <AutonomyRiskCard
               title="Alto Risco"
-              value={stats.autonomyRisk.gabinetesAltoRiscoComGMG}
+              value={autonomy.altoRiscoComGMG}
               subtitle="≥ 2h e < 4h de autonomia"
               icon={ShieldAlert}
               colorClass="text-accent"
@@ -123,7 +207,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             />
             <AutonomyRiskCard
               title="Crítico"
-              value={stats.autonomyRisk.gabinetesCriticoComGMG}
+              value={autonomy.criticoComGMG}
               subtitle="< 2 horas de autonomia"
               icon={ShieldX}
               colorClass="text-destructive"
@@ -352,11 +436,11 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </Card>
         </div>
 
-        {/* Painel de Gabinetes por Obsolescência - Chumbo */}
+        {/* Painel de Obsolescência - Chumbo */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Battery className="w-4 h-4" />
-            Gabinetes por Obsolescência - Baterias de Chumbo
+            {unitLabelSingular} por Obsolescência - Baterias de Chumbo
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-success/50">
@@ -364,7 +448,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-success">OK</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.gabinetesOk}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.ok}</p>
                     <p className="text-xs text-muted-foreground">Baterias &lt; 2 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-success/10">
@@ -379,7 +463,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-warning">Médio Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.gabinetesMedioRisco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.medioRisco}</p>
                     <p className="text-xs text-muted-foreground">Baterias 2-3 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-warning/10">
@@ -394,7 +478,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-destructive">Alto Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.gabinetesAltoRisco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.altoRisco}</p>
                     <p className="text-xs text-muted-foreground">Baterias ≥ 3 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-destructive/10">
@@ -409,7 +493,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaChumbo.gabinetesSemBanco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolChumbo.semBanco}</p>
                     <p className="text-xs text-muted-foreground">Sem bateria de chumbo</p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted">
@@ -421,11 +505,11 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </div>
         </div>
 
-        {/* Painel de Gabinetes por Obsolescência - Lítio */}
+        {/* Painel de Obsolescência - Lítio */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Zap className="w-4 h-4" />
-            Gabinetes por Obsolescência - Baterias de Lítio
+            {unitLabelSingular} por Obsolescência - Baterias de Lítio
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-success/50">
@@ -433,7 +517,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-success">OK</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.gabinetesOk}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.ok}</p>
                     <p className="text-xs text-muted-foreground">Baterias &lt; 5 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-success/10">
@@ -448,7 +532,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-warning">Médio Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.gabinetesMedioRisco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.medioRisco}</p>
                     <p className="text-xs text-muted-foreground">Baterias 5-10 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-warning/10">
@@ -463,7 +547,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-destructive">Alto Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.gabinetesAltoRisco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.altoRisco}</p>
                     <p className="text-xs text-muted-foreground">Baterias ≥ 10 anos</p>
                   </div>
                   <div className="p-3 rounded-xl bg-destructive/10">
@@ -478,7 +562,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
-                    <p className="text-3xl font-bold tracking-tight">{stats.obsolescenciaLitio.gabinetesSemBanco}</p>
+                    <p className="text-3xl font-bold tracking-tight">{obsolLitio.semBanco}</p>
                     <p className="text-xs text-muted-foreground">Sem bateria de lítio</p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted">
@@ -496,8 +580,8 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada gabinete.
-                Gabinetes "Sem Banco" não possuem baterias daquela tecnologia registradas ou não têm data de fabricação informada.
+                A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada {viewMode === "gabinete" ? "gabinete" : "site"}.
+                {unitLabelSingular} "Sem Banco" não possuem baterias daquela tecnologia registradas ou não têm data de fabricação informada.
               </p>
             </div>
           </CardContent>

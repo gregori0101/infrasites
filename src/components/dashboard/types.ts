@@ -91,14 +91,22 @@ export interface UfAssignmentStats {
 }
 
 export interface AutonomyRiskStats {
-  gabinetesOk: number;          // >= 6h
-  gabinetesMedioRisco: number;  // >= 4h < 6h
-  gabinetesAltoRisco: number;   // >= 2h < 4h
-  gabinetesCritico: number;     // < 2h
-  // Com GMG
-  gabinetesOkComGMG: number;    // >= 4h
-  gabinetesAltoRiscoComGMG: number;  // >= 2h < 4h
-  gabinetesCriticoComGMG: number;     // < 2h
+  // Per gabinete
+  gabinetesOk: number;
+  gabinetesMedioRisco: number;
+  gabinetesAltoRisco: number;
+  gabinetesCritico: number;
+  gabinetesOkComGMG: number;
+  gabinetesAltoRiscoComGMG: number;
+  gabinetesCriticoComGMG: number;
+  // Per site
+  sitesOk: number;
+  sitesMedioRisco: number;
+  sitesAltoRisco: number;
+  sitesCritico: number;
+  sitesOkComGMG: number;
+  sitesAltoRiscoComGMG: number;
+  sitesCriticoComGMG: number;
 }
 
 export interface PanelStats {
@@ -142,18 +150,28 @@ export interface PanelStats {
   // Autonomy Risk (New)
   autonomyRisk: AutonomyRiskStats;
   
-  // Obsolescence by Type (New Rules) - per gabinete
+  // Obsolescence by Type - per gabinete
   obsolescenciaChumbo: {
-    gabinetesOk: number;        // < 2 years
-    gabinetesMedioRisco: number; // >= 2 and < 3 years
-    gabinetesAltoRisco: number;  // >= 3 years
-    gabinetesSemBanco: number;   // No batteries
+    gabinetesOk: number;
+    gabinetesMedioRisco: number;
+    gabinetesAltoRisco: number;
+    gabinetesSemBanco: number;
+    // Per site
+    sitesOk: number;
+    sitesMedioRisco: number;
+    sitesAltoRisco: number;
+    sitesSemBanco: number;
   };
   obsolescenciaLitio: {
-    gabinetesOk: number;        // < 5 years
-    gabinetesMedioRisco: number; // >= 5 and < 10 years
-    gabinetesAltoRisco: number;  // >= 10 years
-    gabinetesSemBanco: number;   // No batteries
+    gabinetesOk: number;
+    gabinetesMedioRisco: number;
+    gabinetesAltoRisco: number;
+    gabinetesSemBanco: number;
+    // Per site
+    sitesOk: number;
+    sitesMedioRisco: number;
+    sitesAltoRisco: number;
+    sitesSemBanco: number;
   };
   
   // Climatização Panel
