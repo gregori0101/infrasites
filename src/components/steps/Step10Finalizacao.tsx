@@ -200,6 +200,8 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
                   }
                   updateData('fotosObservacao', newFotos);
                 }}
+                siteCode={data.siglaSite}
+                category={`observacao_${index}`}
               />
             ))}
             
@@ -213,6 +215,8 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
                   updateData('fotosObservacao', newFotos);
                 }
               }}
+              siteCode={data.siglaSite}
+              category={`observacao_${data.fotosObservacao?.length || 0}`}
             />
           </div>
         </div>

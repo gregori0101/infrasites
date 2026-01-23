@@ -96,6 +96,8 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
             value={gabinete.fotoPanoramicaGabinete}
             onChange={(value) => updateGabinete(currentGabinete, { fotoPanoramicaGabinete: value })}
             required
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_panoramica`}
           />
           <p className="text-xs text-muted-foreground">
             Capture uma foto panorâmica externa do gabinete
@@ -106,6 +108,8 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
             value={gabinete.fotoTransmissao}
             onChange={(value) => updateGabinete(currentGabinete, { fotoTransmissao: value })}
             required
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_transmissao`}
           />
           <p className="text-xs text-muted-foreground">
             Capture uma foto clara dos equipamentos de transmissão com o gabinete aberto
@@ -116,6 +120,8 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
             value={gabinete.fotoAcesso}
             onChange={(value) => updateGabinete(currentGabinete, { fotoAcesso: value })}
             required
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_acesso`}
           />
           <p className="text-xs text-muted-foreground">
             Capture uma foto clara dos equipamentos de acesso com o gabinete aberto

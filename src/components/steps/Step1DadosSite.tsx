@@ -118,6 +118,8 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
           value={data.fotoPanoramica}
           onChange={(value) => updateData('fotoPanoramica', value)}
           required
+          siteCode={data.siglaSite}
+          category="site_panoramica"
         />
       </FormCard>
     </div>

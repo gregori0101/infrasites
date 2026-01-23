@@ -143,12 +143,16 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
             value={gabinete.fcc.fotoPanoramica}
             onChange={(value) => updateFCC({ fotoPanoramica: value })}
             required
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_fcc_panoramica`}
           />
           <PhotoCapture
             label="Painel de Instrumentos"
             value={gabinete.fcc.fotoPainel}
             onChange={(value) => updateFCC({ fotoPainel: value })}
             required
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_fcc_painel`}
           />
         </div>
       </FormCard>

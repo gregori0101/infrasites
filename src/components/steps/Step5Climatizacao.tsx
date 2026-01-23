@@ -233,21 +233,29 @@ export function Step5Climatizacao({ showErrors = false, validationErrors = [] }:
             label="AR 1"
             value={gabinete.climatizacao.fotoAR1}
             onChange={(value) => updateClimatizacao({ fotoAR1: value })}
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_ar1`}
           />
           <PhotoCapture
             label="AR 2"
             value={gabinete.climatizacao.fotoAR2}
             onChange={(value) => updateClimatizacao({ fotoAR2: value })}
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_ar2`}
           />
           <PhotoCapture
             label="Condensador"
             value={gabinete.climatizacao.fotoCondensador}
             onChange={(value) => updateClimatizacao({ fotoCondensador: value })}
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_condensador`}
           />
           <PhotoCapture
             label="Evaporador"
             value={gabinete.climatizacao.fotoEvaporador}
             onChange={(value) => updateClimatizacao({ fotoEvaporador: value })}
+            siteCode={data.siglaSite}
+            category={`gab${currentGabinete + 1}_evaporador`}
           />
         </div>
       </FormCard>

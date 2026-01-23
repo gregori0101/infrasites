@@ -208,6 +208,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                     value={null}
                     onChange={(photo) => photo && addAbordagemPhoto(index, photo)}
                     className="mt-2"
+                    siteCode={data.siglaSite}
+                    category={`fibra_abord${index + 1}`}
                   />
                 </div>
               </CardContent>
@@ -252,6 +254,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                 value={null}
                 onChange={(photo) => photo && addArrayPhoto('fotosCaixasPassagem', photo)}
                 className="mt-2"
+                siteCode={data.siglaSite}
+                category="fibra_caixa_passagem"
               />
             </div>
           )}
@@ -294,6 +298,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                 value={null}
                 onChange={(photo) => photo && addArrayPhoto('fotosCaixasSubterraneas', photo)}
                 className="mt-2"
+                siteCode={data.siglaSite}
+                category="fibra_caixa_subterranea"
               />
             </div>
           )}
@@ -336,6 +342,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                 value={null}
                 onChange={(photo) => photo && addArrayPhoto('fotosSubidasLaterais', photo)}
                 className="mt-2"
+                siteCode={data.siglaSite}
+                category="fibra_subida_lateral"
               />
             </div>
           )}
@@ -427,6 +435,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                   value={dgo.fotoDGO}
                   onChange={(photo) => updateDGO(index, { fotoDGO: photo })}
                   required
+                  siteCode={data.siglaSite}
+                  category={`dgo_${index + 1}_foto`}
                 />
 
                 {dgo.estadoCordoes === 'NOK' && (
@@ -435,6 +445,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                     value={dgo.fotoCordesDetalhada}
                     onChange={(photo) => updateDGO(index, { fotoCordesDetalhada: photo })}
                     required
+                    siteCode={data.siglaSite}
+                    category={`dgo_${index + 1}_cordoes`}
                   />
                 )}
               </CardContent>

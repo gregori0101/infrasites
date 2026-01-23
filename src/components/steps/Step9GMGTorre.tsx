@@ -137,6 +137,8 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 label="Foto do Painel do GMG"
                 value={data.gmg.fotoGMG || null}
                 onChange={(value) => updateGMG({ fotoGMG: value })}
+                siteCode={data.siglaSite}
+                category="gmg_painel"
               />
             </div>
           )}
@@ -159,6 +161,8 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 value={data.torre.fotoNinhos || null}
                 onChange={(value) => updateTorre({ fotoNinhos: value })}
                 required
+                siteCode={data.siglaSite}
+                category="torre_ninhos"
               />
             </div>
           )}

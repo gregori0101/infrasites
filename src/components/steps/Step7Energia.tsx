@@ -161,6 +161,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
               value={energia.fotoTransformador}
               onChange={(value) => updateEnergia({ fotoTransformador: value })}
               required
+              siteCode={data.siglaSite}
+              category="energia_transformador"
             />
           )}
         </div>
@@ -173,6 +175,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
           value={energia.fotoQuadroGeral}
           onChange={(value) => updateEnergia({ fotoQuadroGeral: value })}
           required
+          siteCode={data.siglaSite}
+          category="energia_quadro"
         />
       </FormCard>
 
@@ -242,6 +246,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
               value={energia.cabos.fotoCabos}
               onChange={(value) => updateCabos({ fotoCabos: value })}
               required
+              siteCode={data.siglaSite}
+              category="energia_cabos"
             />
           )}
         </div>
@@ -278,6 +284,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
               value={energia.fotoPlaca}
               onChange={(value) => updateEnergia({ fotoPlaca: value })}
               required
+              siteCode={data.siglaSite}
+              category="energia_placa"
             />
           )}
         </div>
