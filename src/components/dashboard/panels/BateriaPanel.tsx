@@ -99,6 +99,34 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* CARD DESTAQUE: Total de Baterias Cadastradas */}
+      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Battery className="w-6 h-6 text-primary" />
+                <h2 className="text-xl font-semibold">Total de Baterias Cadastradas</h2>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="text-5xl font-bold text-primary">{stats.totalBatteries}</p>
+                <span className="text-muted-foreground">unidades</span>
+              </div>
+            </div>
+            <div className="text-right text-sm text-muted-foreground space-y-1">
+              <div className="flex items-center justify-end gap-2">
+                <Battery className="w-4 h-4 text-slate-500" />
+                <span>Chumbo: <strong className="text-foreground">{stats.bateriasChumboTotal}</strong></span>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Zap className="w-4 h-4 text-emerald-500" />
+                <span>Lítio: <strong className="text-foreground">{stats.bateriasLitioTotal}</strong></span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* SEÇÃO 1: Baterias de Chumbo */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
@@ -479,58 +507,6 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           <h2 className="font-semibold text-lg">Risco de Obsolescência de Bateria</h2>
         </div>
 
-        {/* Regras de Obsolescência por Tecnologia */}
-        <Card className="bg-muted/30 border-dashed">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Info className="w-4 h-4 text-primary" />
-              Critérios de Obsolescência por Tecnologia
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="font-medium mb-2 flex items-center gap-2">
-                  <Battery className="w-4 h-4 text-slate-600" /> Baterias de Chumbo:
-                </p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-success" /> 
-                    <strong className="text-foreground">OK:</strong> &lt; 2 anos
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-warning" /> 
-                    <strong className="text-foreground">Médio Risco:</strong> ≥ 2 e &lt; 3 anos
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
-                    <strong className="text-foreground">Alto Risco:</strong> ≥ 3 anos
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium mb-2 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-emerald-600" /> Baterias de Lítio:
-                </p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-success" /> 
-                    <strong className="text-foreground">OK:</strong> &lt; 5 anos
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-warning" /> 
-                    <strong className="text-foreground">Médio Risco:</strong> ≥ 5 e &lt; 10 anos
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
-                    <strong className="text-foreground">Alto Risco:</strong> ≥ 10 anos
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Painel de Obsolescência - UNIFICADO */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -621,6 +597,58 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 A classificação de obsolescência considera a <strong className="text-foreground">pior bateria</strong> (mais antiga) cadastrada em cada {viewMode === "gabinete" ? "gabinete" : "site"}, independente da tecnologia (chumbo ou lítio).
                 {unitLabelSingular} "Sem Banco" não possuem baterias registradas ou não têm data de fabricação informada.
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Critérios de Obsolescência por Tecnologia - MOVIDO PARA O FINAL */}
+        <Card className="bg-muted/30 border-dashed">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Info className="w-4 h-4 text-primary" />
+              Critérios de Obsolescência por Tecnologia
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Battery className="w-4 h-4 text-slate-600" /> Baterias de Chumbo:
+                </p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-success" /> 
+                    <strong className="text-foreground">OK:</strong> &lt; 2 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-warning" /> 
+                    <strong className="text-foreground">Médio Risco:</strong> ≥ 2 e &lt; 3 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
+                    <strong className="text-foreground">Alto Risco:</strong> ≥ 3 anos
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-emerald-600" /> Baterias de Lítio:
+                </p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-success" /> 
+                    <strong className="text-foreground">OK:</strong> &lt; 5 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-warning" /> 
+                    <strong className="text-foreground">Médio Risco:</strong> ≥ 5 e &lt; 10 anos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-destructive" /> 
+                    <strong className="text-foreground">Alto Risco:</strong> ≥ 10 anos
+                  </li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
