@@ -183,6 +183,25 @@ export interface TorreData {
   zeladoria: StatusFuncionamento;
 }
 
+// Sections that can be marked as "Não se Aplica"
+export interface SecoesNaoAplicaveis {
+  gabinete: boolean;
+  fcc: boolean;
+  baterias: boolean;
+  climatizacao: boolean;
+  energia: boolean;
+  gmgTorre: boolean;
+}
+
+export const INITIAL_SECOES_NAO_APLICAVEIS: SecoesNaoAplicaveis = {
+  gabinete: false,
+  fcc: false,
+  baterias: false,
+  climatizacao: false,
+  energia: false,
+  gmgTorre: false,
+};
+
 export interface ChecklistData {
   id: string;
   siglaSite: string;
@@ -200,6 +219,7 @@ export interface ChecklistData {
   dataHora: string;
   tecnico: string;
   sincronizado: boolean;
+  secoesNaoAplicaveis: SecoesNaoAplicaveis;
   createdAt: string;
   updatedAt: string;
 }
@@ -318,4 +338,5 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   dataHora: new Date().toISOString(),
   tecnico: '',
   sincronizado: false,
+  secoesNaoAplicaveis: { ...INITIAL_SECOES_NAO_APLICAVEIS },
 };

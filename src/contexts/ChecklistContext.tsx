@@ -5,7 +5,9 @@ import {
   INITIAL_GABINETE,
   INITIAL_FIBRA_OPTICA,
   INITIAL_ABORDAGEM_FIBRA,
+  INITIAL_SECOES_NAO_APLICAVEIS,
   GabineteData,
+  SecoesNaoAplicaveis,
 } from '@/types/checklist';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,6 +19,7 @@ interface ChecklistContextType {
   data: ChecklistData;
   updateData: <K extends keyof ChecklistData>(key: K, value: ChecklistData[K]) => void;
   updateGabinete: (index: number, gabinete: Partial<GabineteData>) => void;
+  updateSecaoNaoAplicavel: (secao: keyof SecoesNaoAplicaveis, value: boolean) => void;
   addGabinete: () => void;
   removeGabinete: (index: number) => void;
   resetChecklist: () => void;
@@ -89,6 +92,10 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
                 fotosCaixasPassagem: Array.isArray(parsedFibra.fotosCaixasPassagem) ? parsedFibra.fotosCaixasPassagem : [],
                 fotosCaixasSubterraneas: Array.isArray(parsedFibra.fotosCaixasSubterraneas) ? parsedFibra.fotosCaixasSubterraneas : [],
                 fotosSubidasLaterais: Array.isArray(parsedFibra.fotosSubidasLaterais) ? parsedFibra.fotosSubidasLaterais : [],
+              },
+              secoesNaoAplicaveis: {
+                ...INITIAL_SECOES_NAO_APLICAVEIS,
+                ...(parsed.secoesNaoAplicaveis || {}),
               },
             } as ChecklistData;
           }
@@ -219,6 +226,17 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
         updatedAt: new Date().toISOString(),
       };
     });
+  }, []);
+
+  const updateSecaoNaoAplicavel = useCallback((secao: keyof SecoesNaoAplicaveis, value: boolean) => {
+    setData(prev => ({
+      ...prev,
+      secoesNaoAplicaveis: {
+        ...prev.secoesNaoAplicaveis,
+        [secao]: value,
+      },
+      updatedAt: new Date().toISOString(),
+    }));
   }, []);
 
   const addGabinete = useCallback(() => {
@@ -450,6 +468,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       data,
       updateData,
       updateGabinete,
+      updateSecaoNaoAplicavel,
       addGabinete,
       removeGabinete,
       resetChecklist,
