@@ -41,7 +41,7 @@ export type StatusFuncionamento = 'OK' | 'NOK' | 'NA';
 
 // Fibra types
 export type AbordagemFibra = 'AÉREA' | 'SUBTERRÂNEA';
-export type NumAbordagens = 1 | 2;
+export type NumAbordagens = 1 | 2 | 3 | 4;
 export type EstadoCordoes = 'OK' | 'NOK';
 
 // Energia types

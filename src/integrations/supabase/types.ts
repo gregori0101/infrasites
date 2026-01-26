@@ -33,6 +33,12 @@ export type Database = {
           fibra_abord2_descricao: string | null
           fibra_abord2_foto: string | null
           fibra_abord2_tipo: string | null
+          fibra_abord3_descricao: string | null
+          fibra_abord3_foto: string | null
+          fibra_abord3_tipo: string | null
+          fibra_abord4_descricao: string | null
+          fibra_abord4_foto: string | null
+          fibra_abord4_tipo: string | null
           fibra_caixas_passagem_qtd: number | null
           fibra_caixas_subterraneas_qtd: number | null
           fibra_dgo1_capacidade: string | null
@@ -565,6 +571,12 @@ export type Database = {
           fibra_abord2_descricao?: string | null
           fibra_abord2_foto?: string | null
           fibra_abord2_tipo?: string | null
+          fibra_abord3_descricao?: string | null
+          fibra_abord3_foto?: string | null
+          fibra_abord3_tipo?: string | null
+          fibra_abord4_descricao?: string | null
+          fibra_abord4_foto?: string | null
+          fibra_abord4_tipo?: string | null
           fibra_caixas_passagem_qtd?: number | null
           fibra_caixas_subterraneas_qtd?: number | null
           fibra_dgo1_capacidade?: string | null
@@ -1097,6 +1109,12 @@ export type Database = {
           fibra_abord2_descricao?: string | null
           fibra_abord2_foto?: string | null
           fibra_abord2_tipo?: string | null
+          fibra_abord3_descricao?: string | null
+          fibra_abord3_foto?: string | null
+          fibra_abord3_tipo?: string | null
+          fibra_abord4_descricao?: string | null
+          fibra_abord4_foto?: string | null
+          fibra_abord4_tipo?: string | null
           fibra_caixas_passagem_qtd?: number | null
           fibra_caixas_subterraneas_qtd?: number | null
           fibra_dgo1_capacidade?: string | null

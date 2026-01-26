@@ -260,12 +260,11 @@ export default function Dashboard() {
           sitesProtegidos++;
         }
         
-        if ((report as any).fibra_abord1_tipo === 'AÉREA') abordagensAereas++;
-        else if ((report as any).fibra_abord1_tipo === 'SUBTERRÂNEA') abordagensSubterraneas++;
-        
-        if (qtdAbord >= 2) {
-          if ((report as any).fibra_abord2_tipo === 'AÉREA') abordagensAereas++;
-          else if ((report as any).fibra_abord2_tipo === 'SUBTERRÂNEA') abordagensSubterraneas++;
+        // Count all abordagens (up to 4)
+        for (let i = 1; i <= Math.min(qtdAbord, 4); i++) {
+          const tipoAbord = (report as any)[`fibra_abord${i}_tipo`];
+          if (tipoAbord === 'AÉREA') abordagensAereas++;
+          else if (tipoAbord === 'SUBTERRÂNEA') abordagensSubterraneas++;
         }
       }
 
@@ -301,7 +300,7 @@ export default function Dashboard() {
         { name: "NOK", value: dgosNok, color: "#ef4444" },
       ].filter(d => d.value > 0),
       protecaoChart: [
-        { name: "Protegidos (2 abord.)", value: sitesProtegidos, color: "#22c55e" },
+        { name: "Protegidos (2+ abord.)", value: sitesProtegidos, color: "#22c55e" },
         { name: "Desprotegidos (1 abord.)", value: sitesDesprotegidos, color: "#f59e0b" },
       ].filter(d => d.value > 0),
       infraestruturaChart: [

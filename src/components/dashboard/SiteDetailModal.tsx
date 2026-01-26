@@ -832,40 +832,32 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                   </Card>
 
                   {/* Abordagens */}
-                  {(report.fibra_abord1_tipo || report.fibra_abord2_tipo) && (
+                  {(report.fibra_abord1_tipo || report.fibra_abord2_tipo || (report as any).fibra_abord3_tipo || (report as any).fibra_abord4_tipo) && (
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base">Abordagens de Fibra</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {report.fibra_abord1_tipo && (
-                          <div className="p-3 border rounded-lg bg-muted/30">
-                            <p className="font-medium mb-2">Abordagem 1</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                              <InfoRow label="Tipo" value={report.fibra_abord1_tipo} />
-                              <InfoRow label="Descrição" value={report.fibra_abord1_descricao} />
-                            </div>
-                            {report.fibra_abord1_foto && (
-                              <div className="mt-3">
-                                <PhotoViewer url={report.fibra_abord1_foto} label="Foto Abordagem 1" />
+                        {[1, 2, 3, 4].map((num) => {
+                          const tipo = report[`fibra_abord${num}_tipo`];
+                          const descricao = report[`fibra_abord${num}_descricao`];
+                          const foto = report[`fibra_abord${num}_foto`];
+                          if (!tipo) return null;
+                          return (
+                            <div key={num} className="p-3 border rounded-lg bg-muted/30">
+                              <p className="font-medium mb-2">Abordagem {num}</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                                <InfoRow label="Tipo" value={tipo} />
+                                <InfoRow label="Descrição" value={descricao} />
                               </div>
-                            )}
-                          </div>
-                        )}
-                        {report.fibra_abord2_tipo && (
-                          <div className="p-3 border rounded-lg bg-muted/30">
-                            <p className="font-medium mb-2">Abordagem 2</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                              <InfoRow label="Tipo" value={report.fibra_abord2_tipo} />
-                              <InfoRow label="Descrição" value={report.fibra_abord2_descricao} />
+                              {foto && (
+                                <div className="mt-3">
+                                  <PhotoViewer url={foto} label={`Foto Abordagem ${num}`} />
+                                </div>
+                              )}
                             </div>
-                            {report.fibra_abord2_foto && (
-                              <div className="mt-3">
-                                <PhotoViewer url={report.fibra_abord2_foto} label="Foto Abordagem 2" />
-                              </div>
-                            )}
-                          </div>
-                        )}
+                          );
+                        })}
                       </CardContent>
                     </Card>
                   )}
