@@ -57,7 +57,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
         <StatCard
           title="Sites Protegidos"
           value={stats.sitesProtegidos}
-          subtitle="2 abordagens de fibra"
+          subtitle="2+ abordagens de fibra"
           icon={CheckCircle2}
           iconBg="bg-success/10 text-success"
           badge={stats.sitesProtegidos > 0 ? { text: "Redundância", variant: "success" } : undefined}

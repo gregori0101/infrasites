@@ -282,13 +282,13 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 
   // Fibra Óptica
   row.fibra_qtd_abordagens = data.fibraOptica?.qtdAbordagens || 1;
-  if (data.fibraOptica?.abordagens?.[0]) {
-    row.fibra_abord1_tipo = data.fibraOptica.abordagens[0].tipoEntrada || null;
-    row.fibra_abord1_descricao = data.fibraOptica.abordagens[0].descricao || null;
-  }
-  if (data.fibraOptica?.abordagens?.[1]) {
-    row.fibra_abord2_tipo = data.fibraOptica.abordagens[1].tipoEntrada || null;
-    row.fibra_abord2_descricao = data.fibraOptica.abordagens[1].descricao || null;
+  // Map up to 4 abordagens
+  for (let i = 0; i < 4; i++) {
+    const abord = data.fibraOptica?.abordagens?.[i];
+    if (abord) {
+      row[`fibra_abord${i + 1}_tipo`] = abord.tipoEntrada || null;
+      row[`fibra_abord${i + 1}_descricao`] = abord.descricao || null;
+    }
   }
   row.fibra_caixas_passagem_qtd = data.fibraOptica?.qtdCaixasPassagem || 0;
   row.fibra_caixas_subterraneas_qtd = data.fibraOptica?.qtdCaixasSubterraneas || 0;
@@ -297,12 +297,12 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.fibra_dgos_ok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'OK').length || 0;
   row.fibra_dgos_nok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'NOK').length || 0;
   
-  // Abordagens photos
-  if (data.fibraOptica?.abordagens?.[0]?.fotos?.length) {
-    row.fibra_abord1_foto = data.fibraOptica.abordagens[0].fotos[0] || null;
-  }
-  if (data.fibraOptica?.abordagens?.[1]?.fotos?.length) {
-    row.fibra_abord2_foto = data.fibraOptica.abordagens[1].fotos[0] || null;
+  // Abordagens photos (up to 4)
+  for (let i = 0; i < 4; i++) {
+    const abord = data.fibraOptica?.abordagens?.[i];
+    if (abord?.fotos?.length) {
+      row[`fibra_abord${i + 1}_foto`] = abord.fotos[0] || null;
+    }
   }
 
   // Infrastructure photos (store first photo of each array)

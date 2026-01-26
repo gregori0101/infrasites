@@ -105,21 +105,17 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     gabinetes.push({ ...INITIAL_GABINETE });
   }
   
-  // Parse fiber optic data
+  // Parse fiber optic data (up to 4 abordagens)
   const abordagens = [];
-  if (report.fibra_abord1_tipo) {
-    abordagens.push({
-      tipoEntrada: report.fibra_abord1_tipo as any,
-      descricao: report.fibra_abord1_descricao || '',
-      fotos: report.fibra_abord1_foto ? [report.fibra_abord1_foto] : [],
-    });
-  }
-  if (report.fibra_abord2_tipo) {
-    abordagens.push({
-      tipoEntrada: report.fibra_abord2_tipo as any,
-      descricao: report.fibra_abord2_descricao || '',
-      fotos: report.fibra_abord2_foto ? [report.fibra_abord2_foto] : [],
-    });
+  for (let i = 1; i <= 4; i++) {
+    const tipo = report[`fibra_abord${i}_tipo`];
+    if (tipo) {
+      abordagens.push({
+        tipoEntrada: tipo as any,
+        descricao: report[`fibra_abord${i}_descricao`] || '',
+        fotos: report[`fibra_abord${i}_foto`] ? [report[`fibra_abord${i}_foto`]] : [],
+      });
+    }
   }
 
   // Parse DGOs

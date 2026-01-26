@@ -145,6 +145,8 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
               <SelectContent>
                 <SelectItem value="1">1 abordagem</SelectItem>
                 <SelectItem value="2">2 abordagens</SelectItem>
+                <SelectItem value="3">3 abordagens</SelectItem>
+                <SelectItem value="4">4 abordagens</SelectItem>
               </SelectContent>
             </Select>
           </div>
