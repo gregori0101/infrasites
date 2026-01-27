@@ -212,23 +212,13 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   });
   
   // GRUPO ENERGIA
-  row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro;
-  row['Energia_Fabricante'] = data.energia.fabricante;
-  row['Energia_Potencia_kVA'] = data.energia.potenciaKVA;
-  row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada;
-  row['Energia_Transformador_OK'] = data.energia.transformadorOK ? 'SIM' : 'NÃO';
+  row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro || '';
+  row['Energia_Fabricante'] = data.energia.fabricante || '';
+  row['Energia_Potencia_kVA'] = data.energia.potenciaKVA ?? '';
+  row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada || '';
+  row['Energia_Transformador_OK'] = data.energia.transformadorOK === null ? '' : (data.energia.transformadorOK ? 'SIM' : 'NÃO');
   row['Energia_Foto_Transformador'] = getPhotoValue(data.energia.fotoTransformador);
   row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
-  row['Energia_DR_OK'] = data.energia.protecoes.drOK ? 'SIM' : 'NÃO';
-  row['Energia_DPS_OK'] = data.energia.protecoes.dpsOK ? 'SIM' : 'NÃO';
-  row['Energia_Disjuntores_OK'] = data.energia.protecoes.disjuntoresOK ? 'SIM' : 'NÃO';
-  row['Energia_Termomagneticos_OK'] = data.energia.protecoes.termomagneticosOK ? 'SIM' : 'NÃO';
-  row['Energia_Chave_Geral_OK'] = data.energia.protecoes.chaveGeralOK ? 'SIM' : 'NÃO';
-  row['Energia_Terminais_Apertados'] = data.energia.cabos.terminaisApertados ? 'SIM' : 'NÃO';
-  row['Energia_Isolacao_OK'] = data.energia.cabos.isolacaoOK ? 'SIM' : 'NÃO';
-  row['Energia_Foto_Cabos'] = getPhotoValue(data.energia.cabos.fotoCabos);
-  row['Energia_Placa_Status'] = data.energia.placaStatus;
-  row['Energia_Foto_Placa'] = getPhotoValue(data.energia.fotoPlaca);
   
   // GRUPO GMG
   row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';

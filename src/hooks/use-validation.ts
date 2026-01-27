@@ -74,14 +74,8 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         if (!data.energia.fotoQuadroGeral) {
           errors.push({ field: 'energia.fotoQuadroGeral', message: 'Foto do quadro geral é obrigatória' });
         }
-        if (!data.energia.transformadorOK && !data.energia.fotoTransformador) {
+        if (data.energia.transformadorOK === false && !data.energia.fotoTransformador) {
           errors.push({ field: 'energia.fotoTransformador', message: 'Foto do transformador é obrigatória quando NOK' });
-        }
-        if ((!data.energia.cabos.terminaisApertados || !data.energia.cabos.isolacaoOK) && !data.energia.cabos.fotoCabos) {
-          errors.push({ field: 'energia.cabos.fotoCabos', message: 'Foto dos cabos é obrigatória quando NOK' });
-        }
-        if (data.energia.placaStatus !== 'OK' && !data.energia.fotoPlaca) {
-          errors.push({ field: 'energia.fotoPlaca', message: 'Foto da placa é obrigatória quando NOK/Ausente' });
         }
         break;
 

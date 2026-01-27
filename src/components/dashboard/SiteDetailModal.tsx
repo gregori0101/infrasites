@@ -244,12 +244,6 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.energia_foto_transformador) {
     allPhotos.push({ url: report.energia_foto_transformador, label: "Transformador", category: "Energia" });
   }
-  if (report?.energia_foto_placa) {
-    allPhotos.push({ url: report.energia_foto_placa, label: "Placa", category: "Energia" });
-  }
-  if (report?.energia_foto_cabos) {
-    allPhotos.push({ url: report.energia_foto_cabos, label: "Cabos", category: "Energia" });
-  }
   // Torre photos
   if (report?.torre_foto_ninhos) {
     allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
@@ -769,38 +763,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       <PhotoGrid photos={[
                         { url: report.energia_foto_quadro_geral, label: "Quadro Geral" },
                         { url: report.energia_foto_transformador, label: "Transformador" },
-                        { url: report.energia_foto_placa, label: "Placa" },
-                        { url: report.energia_foto_cabos, label: "Cabos" },
                       ]} />
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Zap className="w-4 h-4" />
-                        Proteções
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">DPS:</span>
-                          <StatusBadge status={report.energia_dps_status} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Aterramento:</span>
-                          <StatusBadge status={report.energia_aterramento_status} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Cabos:</span>
-                          <StatusBadge status={report.energia_cabos_status} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Nobreak:</span>
-                          <StatusBadge status={report.energia_nobreak_status} />
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>

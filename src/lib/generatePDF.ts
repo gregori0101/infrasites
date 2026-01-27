@@ -595,28 +595,6 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     { photo: data.energia.fotoTransformador, label: 'Transformador' },
   ]);
 
-  // Proteções
-  checkNewPage(40);
-  addSubSectionTitle('Proteções');
-  addFieldRow('DR', data.energia.protecoes.drOK, data.energia.protecoes.drOK ? 'ok' : 'error');
-  addFieldRow('DPS', data.energia.protecoes.dpsOK, data.energia.protecoes.dpsOK ? 'ok' : 'error');
-  addFieldRow('Disjuntores', data.energia.protecoes.disjuntoresOK, data.energia.protecoes.disjuntoresOK ? 'ok' : 'error');
-  addFieldRow('Termomagnéticos', data.energia.protecoes.termomagneticosOK, data.energia.protecoes.termomagneticosOK ? 'ok' : 'error');
-  addFieldRow('Chave Geral', data.energia.protecoes.chaveGeralOK, data.energia.protecoes.chaveGeralOK ? 'ok' : 'error');
-
-  // Cabos
-  checkNewPage(25);
-  addSubSectionTitle('Cabos');
-  addFieldRow('Terminais Apertados', data.energia.cabos.terminaisApertados, data.energia.cabos.terminaisApertados ? 'ok' : 'error');
-  addFieldRow('Isolação OK', data.energia.cabos.isolacaoOK, data.energia.cabos.isolacaoOK ? 'ok' : 'error');
-  await addPhoto(data.energia.cabos.fotoCabos, 'Foto Cabos');
-
-  // Placa
-  checkNewPage(25);
-  addSubSectionTitle('Placa');
-  addFieldRow('Status', data.energia.placaStatus, data.energia.placaStatus === 'OK' ? 'ok' : 'error');
-  await addPhoto(data.energia.fotoPlaca, 'Foto Placa');
-
   // ===== GMG & TOWER =====
   doc.addPage();
   addHeader();

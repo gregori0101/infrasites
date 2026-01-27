@@ -284,19 +284,6 @@ export async function uploadAllPhotos(
       data.energia.fotoQuadroGeral,
       'energia_quadro'
     );
-    updatedData.energia.fotoPlaca = await uploadSinglePhoto(
-      data.energia.fotoPlaca,
-      'energia_placa'
-    );
-    if (data.energia.cabos) {
-      if (!updatedData.energia.cabos) {
-        updatedData.energia.cabos = {};
-      }
-      updatedData.energia.cabos.fotoCabos = await uploadSinglePhoto(
-        data.energia.cabos.fotoCabos,
-        'energia_cabos'
-      );
-    }
   }
 
   // Upload tower photos
