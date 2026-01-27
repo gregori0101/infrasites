@@ -307,14 +307,19 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.fibra_foto_subidas_laterais = data.fibraOptica?.fotosSubidasLaterais?.[0] || null;
 
   // DGO details (up to 4)
+  const dgosArray = data.fibraOptica?.dgos || [];
+  console.log(`[ReportDB] Mapping ${dgosArray.length} DGOs to database`);
+  
   for (let i = 0; i < 4; i++) {
-    const dgo = data.fibraOptica?.dgos?.[i];
+    const dgo = dgosArray[i];
     if (dgo) {
       row[`fibra_dgo${i + 1}_id`] = dgo.identificacao || null;
-      row[`fibra_dgo${i + 1}_capacidade`] = `${dgo.capacidadeFO}FO`;
+      row[`fibra_dgo${i + 1}_capacidade`] = dgo.capacidadeFO ? `${dgo.capacidadeFO}FO` : null;
       row[`fibra_dgo${i + 1}_cordoes`] = dgo.estadoCordoes || null;
       row[`fibra_dgo${i + 1}_foto`] = dgo.fotoDGO || null;
       row[`fibra_dgo${i + 1}_cordoes_foto`] = dgo.fotoCordesDetalhada || null;
+      
+      console.log(`[ReportDB] DGO ${i + 1}: id=${dgo.identificacao}, foto=${dgo.fotoDGO ? 'set' : 'null'}, cordoes_foto=${dgo.fotoCordesDetalhada ? 'set' : 'null'}`);
     }
   }
 
