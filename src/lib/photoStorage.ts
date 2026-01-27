@@ -252,23 +252,56 @@ export async function uploadAllPhotos(
 
     // Upload DGO photos
     const dgos = Array.isArray(data.fibraOptica.dgos) ? data.fibraOptica.dgos : [];
+    console.log(`[PhotoUpload] Processing ${dgos.length} DGOs`);
+    
     if (!Array.isArray(updatedData.fibraOptica.dgos)) {
       updatedData.fibraOptica.dgos = [];
     }
+    
     for (let i = 0; i < dgos.length; i++) {
       const dgo = dgos[i];
+      if (!dgo) continue;
+      
+      // Ensure the DGO object exists in updatedData
       if (!updatedData.fibraOptica.dgos[i]) {
         updatedData.fibraOptica.dgos[i] = { ...dgo };
+      } else {
+        // Copy all properties from original dgo to preserve non-photo fields
+        updatedData.fibraOptica.dgos[i] = { 
+          ...dgo,
+          ...updatedData.fibraOptica.dgos[i]
+        };
       }
-      updatedData.fibraOptica.dgos[i].fotoDGO = await uploadSinglePhoto(
-        dgo?.fotoDGO,
-        `dgo_${i + 1}_foto`
-      );
-      updatedData.fibraOptica.dgos[i].fotoCordesDetalhada = await uploadSinglePhoto(
-        dgo?.fotoCordesDetalhada,
-        `dgo_${i + 1}_cordoes_detalhe`
-      );
+      
+      // Upload DGO main photo
+      if (dgo.fotoDGO) {
+        console.log(`[PhotoUpload] Uploading DGO ${i + 1} main photo`);
+        updatedData.fibraOptica.dgos[i].fotoDGO = await uploadSinglePhoto(
+          dgo.fotoDGO,
+          `dgo_${i + 1}_foto`
+        );
+      }
+      
+      // Upload cordões photo if exists
+      if (dgo.fotoCordesDetalhada) {
+        console.log(`[PhotoUpload] Uploading DGO ${i + 1} cordões photo`);
+        updatedData.fibraOptica.dgos[i].fotoCordesDetalhada = await uploadSinglePhoto(
+          dgo.fotoCordesDetalhada,
+          `dgo_${i + 1}_cordoes`
+        );
+      }
+      
+      // Preserve other fields from original DGO
+      updatedData.fibraOptica.dgos[i].identificacao = dgo.identificacao;
+      updatedData.fibraOptica.dgos[i].capacidadeFO = dgo.capacidadeFO;
+      updatedData.fibraOptica.dgos[i].estadoCordoes = dgo.estadoCordoes;
     }
+    
+    console.log(`[PhotoUpload] DGO upload complete. Result:`, updatedData.fibraOptica.dgos.map((d: any) => ({
+      id: d?.identificacao,
+      foto: d?.fotoDGO ? 'uploaded' : 'none',
+      cordoes: d?.fotoCordesDetalhada ? 'uploaded' : 'none'
+    })));
   }
 
   // Upload energy photos
