@@ -48,34 +48,16 @@ export type EstadoCordoes = 'OK' | 'NOK';
 export type TipoQuadro = 'QDCA' | 'QGBT' | 'SUBQUADRO';
 export type FabricanteQuadro = 'SIEMENS' | 'SCHNEIDER' | 'ABB' | 'WEG' | 'OUTRA';
 export type TensaoEntrada = '127V' | '220V' | '380V' | '440V';
-export type StatusPlaca = 'OK' | 'NOK' | 'AUSENTE';
 
-export interface ProtecoesData {
-  drOK: boolean;
-  dpsOK: boolean;
-  disjuntoresOK: boolean;
-  termomagneticosOK: boolean;
-  chaveGeralOK: boolean;
-}
-
-export interface CabosData {
-  terminaisApertados: boolean;
-  isolacaoOK: boolean;
-  fotoCabos: string | null;
-}
 
 export interface EnergiaData {
-  tipoQuadro: TipoQuadro;
-  fabricante: FabricanteQuadro;
-  potenciaKVA: number;
-  tensaoEntrada: TensaoEntrada;
-  transformadorOK: boolean;
+  tipoQuadro: TipoQuadro | null;
+  fabricante: FabricanteQuadro | null;
+  potenciaKVA: number | null;
+  tensaoEntrada: TensaoEntrada | null;
+  transformadorOK: boolean | null;
   fotoTransformador: string | null;
   fotoQuadroGeral: string | null;
-  protecoes: ProtecoesData;
-  cabos: CabosData;
-  placaStatus: StatusPlaca;
-  fotoPlaca: string | null;
 }
 
 // New Fibra Óptica structures
@@ -292,27 +274,13 @@ export const INITIAL_FIBRA_OPTICA: FibraOpticaData = {
 };
 
 export const INITIAL_ENERGIA: EnergiaData = {
-  tipoQuadro: 'QDCA',
-  fabricante: 'SCHNEIDER',
-  potenciaKVA: 75,
-  tensaoEntrada: '220V',
-  transformadorOK: true,
+  tipoQuadro: null,
+  fabricante: null,
+  potenciaKVA: null,
+  tensaoEntrada: null,
+  transformadorOK: null,
   fotoTransformador: null,
   fotoQuadroGeral: null,
-  protecoes: {
-    drOK: true,
-    dpsOK: true,
-    disjuntoresOK: true,
-    termomagneticosOK: true,
-    chaveGeralOK: true,
-  },
-  cabos: {
-    terminaisApertados: true,
-    isolacaoOK: true,
-    fotoCabos: null,
-  },
-  placaStatus: 'OK',
-  fotoPlaca: null,
 };
 
 export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'updatedAt'> = {

@@ -158,11 +158,6 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       ...INITIAL_ENERGIA,
       fotoTransformador: report.energia_foto_transformador || null,
       fotoQuadroGeral: report.energia_foto_quadro_geral || null,
-      fotoPlaca: report.energia_foto_placa || null,
-      cabos: {
-        ...INITIAL_ENERGIA.cabos,
-        fotoCabos: report.energia_foto_cabos || null,
-      },
     },
     gmg: {
       informar: report.gmg_existe === 'SIM',

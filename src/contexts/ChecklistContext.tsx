@@ -147,8 +147,6 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
               ...data.energia,
               fotoTransformador: null,
               fotoQuadroGeral: null,
-              fotoPlaca: null,
-              cabos: { ...data.energia.cabos, fotoCabos: null },
             },
             torre: { ...data.torre, fotoNinhos: null },
           };
@@ -420,13 +418,11 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     const energiaFields = [
       !!data.energia.tipoQuadro,
       !!data.energia.fabricante,
-      data.energia.potenciaKVA > 0,
+      data.energia.potenciaKVA !== null && data.energia.potenciaKVA > 0,
       !!data.energia.tensaoEntrada,
       !!data.energia.fotoQuadroGeral,
       // Fotos condicionais
-      data.energia.transformadorOK || !!data.energia.fotoTransformador,
-      (data.energia.cabos.terminaisApertados && data.energia.cabos.isolacaoOK) || !!data.energia.cabos.fotoCabos,
-      data.energia.placaStatus === 'OK' || !!data.energia.fotoPlaca,
+      data.energia.transformadorOK !== false || !!data.energia.fotoTransformador,
     ];
     const energiaProgress = energiaFields.filter(Boolean).length / energiaFields.length;
     progress += energiaProgress * WEIGHTS.energia;

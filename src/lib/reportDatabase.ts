@@ -129,8 +129,6 @@ function buildPhotoColumns(): string {
     'assinatura_digital',
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
-    'energia_foto_placa',
-    'energia_foto_cabos',
     'torre_foto_ninhos',
     'gmg_foto_painel',
     // Fiber optic photos
@@ -265,8 +263,6 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   // Energia photos
   row.energia_foto_transformador = data.energia?.fotoTransformador || null;
   row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
-  row.energia_foto_placa = data.energia?.fotoPlaca || null;
-  row.energia_foto_cabos = data.energia?.cabos?.fotoCabos || null;
 
   // Torre photos
   row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
