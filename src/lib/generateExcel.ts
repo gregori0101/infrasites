@@ -82,12 +82,14 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
           row[`${prefix}_Banco${j + 1}_CapAh`] = banco.capacidadeAh || '';
           row[`${prefix}_Banco${j + 1}_DataFab`] = banco.dataFabricacao || '';
           row[`${prefix}_Banco${j + 1}_Estado`] = banco.estado;
+          row[`${prefix}_Banco${j + 1}_Colada`] = banco.colada || 'NA';
         } else {
           row[`${prefix}_Banco${j + 1}_Tipo`] = '';
           row[`${prefix}_Banco${j + 1}_Fabricante`] = '';
           row[`${prefix}_Banco${j + 1}_CapAh`] = '';
           row[`${prefix}_Banco${j + 1}_DataFab`] = '';
           row[`${prefix}_Banco${j + 1}_Estado`] = '';
+          row[`${prefix}_Banco${j + 1}_Colada`] = '';
         }
       }
       

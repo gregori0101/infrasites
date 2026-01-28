@@ -78,6 +78,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
           capacidadeAh: parseInt(report[`${prefix}_bat${j + 1}_capacidade`]) || null,
           dataFabricacao: report[`${prefix}_bat${j + 1}_data_fabricacao`] || '',
           estado: (report[`${prefix}_bat${j + 1}_estado`] || 'OK') as any,
+          colada: (report[`${prefix}_bat${j + 1}_colada`] || 'NA') as any,
         });
       }
     }

@@ -99,6 +99,7 @@ function buildDashboardColumns(): string {
         `${prefix}_bat${b}_capacidade`,
         `${prefix}_bat${b}_data_fabricacao`,
         `${prefix}_bat${b}_estado`,
+        `${prefix}_bat${b}_colada`,
       );
     }
 
@@ -213,6 +214,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
           row[`${prefix}_bat${j + 1}_capacidade`] = banco.capacidadeAh?.toString() || null;
           row[`${prefix}_bat${j + 1}_data_fabricacao`] = banco.dataFabricacao || null;
           row[`${prefix}_bat${j + 1}_estado`] = banco.estado || null;
+          row[`${prefix}_bat${j + 1}_colada`] = banco.colada || null;
         }
       }
       row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados ? 'SIM' : 'NÃO';
