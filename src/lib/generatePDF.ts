@@ -455,6 +455,7 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
       addFieldRow('  Capacidade (Ah)', banco.capacidadeAh);
       addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
       addFieldRow('  Estado', banco.estado, banco.estado === 'OK' ? 'ok' : 'error');
+      addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'warning' : banco.colada === 'NÃO' ? 'ok' : undefined);
     }
 
     await addPhoto(gab.baterias.fotoBanco, 'Foto Banco de Baterias');

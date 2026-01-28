@@ -81,31 +81,37 @@ export type Database = {
           gab1_bancos_interligados: string | null
           gab1_bat_foto: string | null
           gab1_bat1_capacidade: string | null
+          gab1_bat1_colada: string | null
           gab1_bat1_data_fabricacao: string | null
           gab1_bat1_estado: string | null
           gab1_bat1_fabricante: string | null
           gab1_bat1_tipo: string | null
           gab1_bat2_capacidade: string | null
+          gab1_bat2_colada: string | null
           gab1_bat2_data_fabricacao: string | null
           gab1_bat2_estado: string | null
           gab1_bat2_fabricante: string | null
           gab1_bat2_tipo: string | null
           gab1_bat3_capacidade: string | null
+          gab1_bat3_colada: string | null
           gab1_bat3_data_fabricacao: string | null
           gab1_bat3_estado: string | null
           gab1_bat3_fabricante: string | null
           gab1_bat3_tipo: string | null
           gab1_bat4_capacidade: string | null
+          gab1_bat4_colada: string | null
           gab1_bat4_data_fabricacao: string | null
           gab1_bat4_estado: string | null
           gab1_bat4_fabricante: string | null
           gab1_bat4_tipo: string | null
           gab1_bat5_capacidade: string | null
+          gab1_bat5_colada: string | null
           gab1_bat5_data_fabricacao: string | null
           gab1_bat5_estado: string | null
           gab1_bat5_fabricante: string | null
           gab1_bat5_tipo: string | null
           gab1_bat6_capacidade: string | null
+          gab1_bat6_colada: string | null
           gab1_bat6_data_fabricacao: string | null
           gab1_bat6_estado: string | null
           gab1_bat6_fabricante: string | null
@@ -147,31 +153,37 @@ export type Database = {
           gab2_bancos_interligados: string | null
           gab2_bat_foto: string | null
           gab2_bat1_capacidade: string | null
+          gab2_bat1_colada: string | null
           gab2_bat1_data_fabricacao: string | null
           gab2_bat1_estado: string | null
           gab2_bat1_fabricante: string | null
           gab2_bat1_tipo: string | null
           gab2_bat2_capacidade: string | null
+          gab2_bat2_colada: string | null
           gab2_bat2_data_fabricacao: string | null
           gab2_bat2_estado: string | null
           gab2_bat2_fabricante: string | null
           gab2_bat2_tipo: string | null
           gab2_bat3_capacidade: string | null
+          gab2_bat3_colada: string | null
           gab2_bat3_data_fabricacao: string | null
           gab2_bat3_estado: string | null
           gab2_bat3_fabricante: string | null
           gab2_bat3_tipo: string | null
           gab2_bat4_capacidade: string | null
+          gab2_bat4_colada: string | null
           gab2_bat4_data_fabricacao: string | null
           gab2_bat4_estado: string | null
           gab2_bat4_fabricante: string | null
           gab2_bat4_tipo: string | null
           gab2_bat5_capacidade: string | null
+          gab2_bat5_colada: string | null
           gab2_bat5_data_fabricacao: string | null
           gab2_bat5_estado: string | null
           gab2_bat5_fabricante: string | null
           gab2_bat5_tipo: string | null
           gab2_bat6_capacidade: string | null
+          gab2_bat6_colada: string | null
           gab2_bat6_data_fabricacao: string | null
           gab2_bat6_estado: string | null
           gab2_bat6_fabricante: string | null
@@ -213,31 +225,37 @@ export type Database = {
           gab3_bancos_interligados: string | null
           gab3_bat_foto: string | null
           gab3_bat1_capacidade: string | null
+          gab3_bat1_colada: string | null
           gab3_bat1_data_fabricacao: string | null
           gab3_bat1_estado: string | null
           gab3_bat1_fabricante: string | null
           gab3_bat1_tipo: string | null
           gab3_bat2_capacidade: string | null
+          gab3_bat2_colada: string | null
           gab3_bat2_data_fabricacao: string | null
           gab3_bat2_estado: string | null
           gab3_bat2_fabricante: string | null
           gab3_bat2_tipo: string | null
           gab3_bat3_capacidade: string | null
+          gab3_bat3_colada: string | null
           gab3_bat3_data_fabricacao: string | null
           gab3_bat3_estado: string | null
           gab3_bat3_fabricante: string | null
           gab3_bat3_tipo: string | null
           gab3_bat4_capacidade: string | null
+          gab3_bat4_colada: string | null
           gab3_bat4_data_fabricacao: string | null
           gab3_bat4_estado: string | null
           gab3_bat4_fabricante: string | null
           gab3_bat4_tipo: string | null
           gab3_bat5_capacidade: string | null
+          gab3_bat5_colada: string | null
           gab3_bat5_data_fabricacao: string | null
           gab3_bat5_estado: string | null
           gab3_bat5_fabricante: string | null
           gab3_bat5_tipo: string | null
           gab3_bat6_capacidade: string | null
+          gab3_bat6_colada: string | null
           gab3_bat6_data_fabricacao: string | null
           gab3_bat6_estado: string | null
           gab3_bat6_fabricante: string | null
@@ -279,31 +297,37 @@ export type Database = {
           gab4_bancos_interligados: string | null
           gab4_bat_foto: string | null
           gab4_bat1_capacidade: string | null
+          gab4_bat1_colada: string | null
           gab4_bat1_data_fabricacao: string | null
           gab4_bat1_estado: string | null
           gab4_bat1_fabricante: string | null
           gab4_bat1_tipo: string | null
           gab4_bat2_capacidade: string | null
+          gab4_bat2_colada: string | null
           gab4_bat2_data_fabricacao: string | null
           gab4_bat2_estado: string | null
           gab4_bat2_fabricante: string | null
           gab4_bat2_tipo: string | null
           gab4_bat3_capacidade: string | null
+          gab4_bat3_colada: string | null
           gab4_bat3_data_fabricacao: string | null
           gab4_bat3_estado: string | null
           gab4_bat3_fabricante: string | null
           gab4_bat3_tipo: string | null
           gab4_bat4_capacidade: string | null
+          gab4_bat4_colada: string | null
           gab4_bat4_data_fabricacao: string | null
           gab4_bat4_estado: string | null
           gab4_bat4_fabricante: string | null
           gab4_bat4_tipo: string | null
           gab4_bat5_capacidade: string | null
+          gab4_bat5_colada: string | null
           gab4_bat5_data_fabricacao: string | null
           gab4_bat5_estado: string | null
           gab4_bat5_fabricante: string | null
           gab4_bat5_tipo: string | null
           gab4_bat6_capacidade: string | null
+          gab4_bat6_colada: string | null
           gab4_bat6_data_fabricacao: string | null
           gab4_bat6_estado: string | null
           gab4_bat6_fabricante: string | null
@@ -345,31 +369,37 @@ export type Database = {
           gab5_bancos_interligados: string | null
           gab5_bat_foto: string | null
           gab5_bat1_capacidade: string | null
+          gab5_bat1_colada: string | null
           gab5_bat1_data_fabricacao: string | null
           gab5_bat1_estado: string | null
           gab5_bat1_fabricante: string | null
           gab5_bat1_tipo: string | null
           gab5_bat2_capacidade: string | null
+          gab5_bat2_colada: string | null
           gab5_bat2_data_fabricacao: string | null
           gab5_bat2_estado: string | null
           gab5_bat2_fabricante: string | null
           gab5_bat2_tipo: string | null
           gab5_bat3_capacidade: string | null
+          gab5_bat3_colada: string | null
           gab5_bat3_data_fabricacao: string | null
           gab5_bat3_estado: string | null
           gab5_bat3_fabricante: string | null
           gab5_bat3_tipo: string | null
           gab5_bat4_capacidade: string | null
+          gab5_bat4_colada: string | null
           gab5_bat4_data_fabricacao: string | null
           gab5_bat4_estado: string | null
           gab5_bat4_fabricante: string | null
           gab5_bat4_tipo: string | null
           gab5_bat5_capacidade: string | null
+          gab5_bat5_colada: string | null
           gab5_bat5_data_fabricacao: string | null
           gab5_bat5_estado: string | null
           gab5_bat5_fabricante: string | null
           gab5_bat5_tipo: string | null
           gab5_bat6_capacidade: string | null
+          gab5_bat6_colada: string | null
           gab5_bat6_data_fabricacao: string | null
           gab5_bat6_estado: string | null
           gab5_bat6_fabricante: string | null
@@ -411,31 +441,37 @@ export type Database = {
           gab6_bancos_interligados: string | null
           gab6_bat_foto: string | null
           gab6_bat1_capacidade: string | null
+          gab6_bat1_colada: string | null
           gab6_bat1_data_fabricacao: string | null
           gab6_bat1_estado: string | null
           gab6_bat1_fabricante: string | null
           gab6_bat1_tipo: string | null
           gab6_bat2_capacidade: string | null
+          gab6_bat2_colada: string | null
           gab6_bat2_data_fabricacao: string | null
           gab6_bat2_estado: string | null
           gab6_bat2_fabricante: string | null
           gab6_bat2_tipo: string | null
           gab6_bat3_capacidade: string | null
+          gab6_bat3_colada: string | null
           gab6_bat3_data_fabricacao: string | null
           gab6_bat3_estado: string | null
           gab6_bat3_fabricante: string | null
           gab6_bat3_tipo: string | null
           gab6_bat4_capacidade: string | null
+          gab6_bat4_colada: string | null
           gab6_bat4_data_fabricacao: string | null
           gab6_bat4_estado: string | null
           gab6_bat4_fabricante: string | null
           gab6_bat4_tipo: string | null
           gab6_bat5_capacidade: string | null
+          gab6_bat5_colada: string | null
           gab6_bat5_data_fabricacao: string | null
           gab6_bat5_estado: string | null
           gab6_bat5_fabricante: string | null
           gab6_bat5_tipo: string | null
           gab6_bat6_capacidade: string | null
+          gab6_bat6_colada: string | null
           gab6_bat6_data_fabricacao: string | null
           gab6_bat6_estado: string | null
           gab6_bat6_fabricante: string | null
@@ -477,31 +513,37 @@ export type Database = {
           gab7_bancos_interligados: string | null
           gab7_bat_foto: string | null
           gab7_bat1_capacidade: string | null
+          gab7_bat1_colada: string | null
           gab7_bat1_data_fabricacao: string | null
           gab7_bat1_estado: string | null
           gab7_bat1_fabricante: string | null
           gab7_bat1_tipo: string | null
           gab7_bat2_capacidade: string | null
+          gab7_bat2_colada: string | null
           gab7_bat2_data_fabricacao: string | null
           gab7_bat2_estado: string | null
           gab7_bat2_fabricante: string | null
           gab7_bat2_tipo: string | null
           gab7_bat3_capacidade: string | null
+          gab7_bat3_colada: string | null
           gab7_bat3_data_fabricacao: string | null
           gab7_bat3_estado: string | null
           gab7_bat3_fabricante: string | null
           gab7_bat3_tipo: string | null
           gab7_bat4_capacidade: string | null
+          gab7_bat4_colada: string | null
           gab7_bat4_data_fabricacao: string | null
           gab7_bat4_estado: string | null
           gab7_bat4_fabricante: string | null
           gab7_bat4_tipo: string | null
           gab7_bat5_capacidade: string | null
+          gab7_bat5_colada: string | null
           gab7_bat5_data_fabricacao: string | null
           gab7_bat5_estado: string | null
           gab7_bat5_fabricante: string | null
           gab7_bat5_tipo: string | null
           gab7_bat6_capacidade: string | null
+          gab7_bat6_colada: string | null
           gab7_bat6_data_fabricacao: string | null
           gab7_bat6_estado: string | null
           gab7_bat6_fabricante: string | null
@@ -619,31 +661,37 @@ export type Database = {
           gab1_bancos_interligados?: string | null
           gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
+          gab1_bat1_colada?: string | null
           gab1_bat1_data_fabricacao?: string | null
           gab1_bat1_estado?: string | null
           gab1_bat1_fabricante?: string | null
           gab1_bat1_tipo?: string | null
           gab1_bat2_capacidade?: string | null
+          gab1_bat2_colada?: string | null
           gab1_bat2_data_fabricacao?: string | null
           gab1_bat2_estado?: string | null
           gab1_bat2_fabricante?: string | null
           gab1_bat2_tipo?: string | null
           gab1_bat3_capacidade?: string | null
+          gab1_bat3_colada?: string | null
           gab1_bat3_data_fabricacao?: string | null
           gab1_bat3_estado?: string | null
           gab1_bat3_fabricante?: string | null
           gab1_bat3_tipo?: string | null
           gab1_bat4_capacidade?: string | null
+          gab1_bat4_colada?: string | null
           gab1_bat4_data_fabricacao?: string | null
           gab1_bat4_estado?: string | null
           gab1_bat4_fabricante?: string | null
           gab1_bat4_tipo?: string | null
           gab1_bat5_capacidade?: string | null
+          gab1_bat5_colada?: string | null
           gab1_bat5_data_fabricacao?: string | null
           gab1_bat5_estado?: string | null
           gab1_bat5_fabricante?: string | null
           gab1_bat5_tipo?: string | null
           gab1_bat6_capacidade?: string | null
+          gab1_bat6_colada?: string | null
           gab1_bat6_data_fabricacao?: string | null
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
@@ -685,31 +733,37 @@ export type Database = {
           gab2_bancos_interligados?: string | null
           gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
+          gab2_bat1_colada?: string | null
           gab2_bat1_data_fabricacao?: string | null
           gab2_bat1_estado?: string | null
           gab2_bat1_fabricante?: string | null
           gab2_bat1_tipo?: string | null
           gab2_bat2_capacidade?: string | null
+          gab2_bat2_colada?: string | null
           gab2_bat2_data_fabricacao?: string | null
           gab2_bat2_estado?: string | null
           gab2_bat2_fabricante?: string | null
           gab2_bat2_tipo?: string | null
           gab2_bat3_capacidade?: string | null
+          gab2_bat3_colada?: string | null
           gab2_bat3_data_fabricacao?: string | null
           gab2_bat3_estado?: string | null
           gab2_bat3_fabricante?: string | null
           gab2_bat3_tipo?: string | null
           gab2_bat4_capacidade?: string | null
+          gab2_bat4_colada?: string | null
           gab2_bat4_data_fabricacao?: string | null
           gab2_bat4_estado?: string | null
           gab2_bat4_fabricante?: string | null
           gab2_bat4_tipo?: string | null
           gab2_bat5_capacidade?: string | null
+          gab2_bat5_colada?: string | null
           gab2_bat5_data_fabricacao?: string | null
           gab2_bat5_estado?: string | null
           gab2_bat5_fabricante?: string | null
           gab2_bat5_tipo?: string | null
           gab2_bat6_capacidade?: string | null
+          gab2_bat6_colada?: string | null
           gab2_bat6_data_fabricacao?: string | null
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
@@ -751,31 +805,37 @@ export type Database = {
           gab3_bancos_interligados?: string | null
           gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
+          gab3_bat1_colada?: string | null
           gab3_bat1_data_fabricacao?: string | null
           gab3_bat1_estado?: string | null
           gab3_bat1_fabricante?: string | null
           gab3_bat1_tipo?: string | null
           gab3_bat2_capacidade?: string | null
+          gab3_bat2_colada?: string | null
           gab3_bat2_data_fabricacao?: string | null
           gab3_bat2_estado?: string | null
           gab3_bat2_fabricante?: string | null
           gab3_bat2_tipo?: string | null
           gab3_bat3_capacidade?: string | null
+          gab3_bat3_colada?: string | null
           gab3_bat3_data_fabricacao?: string | null
           gab3_bat3_estado?: string | null
           gab3_bat3_fabricante?: string | null
           gab3_bat3_tipo?: string | null
           gab3_bat4_capacidade?: string | null
+          gab3_bat4_colada?: string | null
           gab3_bat4_data_fabricacao?: string | null
           gab3_bat4_estado?: string | null
           gab3_bat4_fabricante?: string | null
           gab3_bat4_tipo?: string | null
           gab3_bat5_capacidade?: string | null
+          gab3_bat5_colada?: string | null
           gab3_bat5_data_fabricacao?: string | null
           gab3_bat5_estado?: string | null
           gab3_bat5_fabricante?: string | null
           gab3_bat5_tipo?: string | null
           gab3_bat6_capacidade?: string | null
+          gab3_bat6_colada?: string | null
           gab3_bat6_data_fabricacao?: string | null
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
@@ -817,31 +877,37 @@ export type Database = {
           gab4_bancos_interligados?: string | null
           gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
+          gab4_bat1_colada?: string | null
           gab4_bat1_data_fabricacao?: string | null
           gab4_bat1_estado?: string | null
           gab4_bat1_fabricante?: string | null
           gab4_bat1_tipo?: string | null
           gab4_bat2_capacidade?: string | null
+          gab4_bat2_colada?: string | null
           gab4_bat2_data_fabricacao?: string | null
           gab4_bat2_estado?: string | null
           gab4_bat2_fabricante?: string | null
           gab4_bat2_tipo?: string | null
           gab4_bat3_capacidade?: string | null
+          gab4_bat3_colada?: string | null
           gab4_bat3_data_fabricacao?: string | null
           gab4_bat3_estado?: string | null
           gab4_bat3_fabricante?: string | null
           gab4_bat3_tipo?: string | null
           gab4_bat4_capacidade?: string | null
+          gab4_bat4_colada?: string | null
           gab4_bat4_data_fabricacao?: string | null
           gab4_bat4_estado?: string | null
           gab4_bat4_fabricante?: string | null
           gab4_bat4_tipo?: string | null
           gab4_bat5_capacidade?: string | null
+          gab4_bat5_colada?: string | null
           gab4_bat5_data_fabricacao?: string | null
           gab4_bat5_estado?: string | null
           gab4_bat5_fabricante?: string | null
           gab4_bat5_tipo?: string | null
           gab4_bat6_capacidade?: string | null
+          gab4_bat6_colada?: string | null
           gab4_bat6_data_fabricacao?: string | null
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
@@ -883,31 +949,37 @@ export type Database = {
           gab5_bancos_interligados?: string | null
           gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
+          gab5_bat1_colada?: string | null
           gab5_bat1_data_fabricacao?: string | null
           gab5_bat1_estado?: string | null
           gab5_bat1_fabricante?: string | null
           gab5_bat1_tipo?: string | null
           gab5_bat2_capacidade?: string | null
+          gab5_bat2_colada?: string | null
           gab5_bat2_data_fabricacao?: string | null
           gab5_bat2_estado?: string | null
           gab5_bat2_fabricante?: string | null
           gab5_bat2_tipo?: string | null
           gab5_bat3_capacidade?: string | null
+          gab5_bat3_colada?: string | null
           gab5_bat3_data_fabricacao?: string | null
           gab5_bat3_estado?: string | null
           gab5_bat3_fabricante?: string | null
           gab5_bat3_tipo?: string | null
           gab5_bat4_capacidade?: string | null
+          gab5_bat4_colada?: string | null
           gab5_bat4_data_fabricacao?: string | null
           gab5_bat4_estado?: string | null
           gab5_bat4_fabricante?: string | null
           gab5_bat4_tipo?: string | null
           gab5_bat5_capacidade?: string | null
+          gab5_bat5_colada?: string | null
           gab5_bat5_data_fabricacao?: string | null
           gab5_bat5_estado?: string | null
           gab5_bat5_fabricante?: string | null
           gab5_bat5_tipo?: string | null
           gab5_bat6_capacidade?: string | null
+          gab5_bat6_colada?: string | null
           gab5_bat6_data_fabricacao?: string | null
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
@@ -949,31 +1021,37 @@ export type Database = {
           gab6_bancos_interligados?: string | null
           gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
+          gab6_bat1_colada?: string | null
           gab6_bat1_data_fabricacao?: string | null
           gab6_bat1_estado?: string | null
           gab6_bat1_fabricante?: string | null
           gab6_bat1_tipo?: string | null
           gab6_bat2_capacidade?: string | null
+          gab6_bat2_colada?: string | null
           gab6_bat2_data_fabricacao?: string | null
           gab6_bat2_estado?: string | null
           gab6_bat2_fabricante?: string | null
           gab6_bat2_tipo?: string | null
           gab6_bat3_capacidade?: string | null
+          gab6_bat3_colada?: string | null
           gab6_bat3_data_fabricacao?: string | null
           gab6_bat3_estado?: string | null
           gab6_bat3_fabricante?: string | null
           gab6_bat3_tipo?: string | null
           gab6_bat4_capacidade?: string | null
+          gab6_bat4_colada?: string | null
           gab6_bat4_data_fabricacao?: string | null
           gab6_bat4_estado?: string | null
           gab6_bat4_fabricante?: string | null
           gab6_bat4_tipo?: string | null
           gab6_bat5_capacidade?: string | null
+          gab6_bat5_colada?: string | null
           gab6_bat5_data_fabricacao?: string | null
           gab6_bat5_estado?: string | null
           gab6_bat5_fabricante?: string | null
           gab6_bat5_tipo?: string | null
           gab6_bat6_capacidade?: string | null
+          gab6_bat6_colada?: string | null
           gab6_bat6_data_fabricacao?: string | null
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
@@ -1015,31 +1093,37 @@ export type Database = {
           gab7_bancos_interligados?: string | null
           gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
+          gab7_bat1_colada?: string | null
           gab7_bat1_data_fabricacao?: string | null
           gab7_bat1_estado?: string | null
           gab7_bat1_fabricante?: string | null
           gab7_bat1_tipo?: string | null
           gab7_bat2_capacidade?: string | null
+          gab7_bat2_colada?: string | null
           gab7_bat2_data_fabricacao?: string | null
           gab7_bat2_estado?: string | null
           gab7_bat2_fabricante?: string | null
           gab7_bat2_tipo?: string | null
           gab7_bat3_capacidade?: string | null
+          gab7_bat3_colada?: string | null
           gab7_bat3_data_fabricacao?: string | null
           gab7_bat3_estado?: string | null
           gab7_bat3_fabricante?: string | null
           gab7_bat3_tipo?: string | null
           gab7_bat4_capacidade?: string | null
+          gab7_bat4_colada?: string | null
           gab7_bat4_data_fabricacao?: string | null
           gab7_bat4_estado?: string | null
           gab7_bat4_fabricante?: string | null
           gab7_bat4_tipo?: string | null
           gab7_bat5_capacidade?: string | null
+          gab7_bat5_colada?: string | null
           gab7_bat5_data_fabricacao?: string | null
           gab7_bat5_estado?: string | null
           gab7_bat5_fabricante?: string | null
           gab7_bat5_tipo?: string | null
           gab7_bat6_capacidade?: string | null
+          gab7_bat6_colada?: string | null
           gab7_bat6_data_fabricacao?: string | null
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
@@ -1157,31 +1241,37 @@ export type Database = {
           gab1_bancos_interligados?: string | null
           gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
+          gab1_bat1_colada?: string | null
           gab1_bat1_data_fabricacao?: string | null
           gab1_bat1_estado?: string | null
           gab1_bat1_fabricante?: string | null
           gab1_bat1_tipo?: string | null
           gab1_bat2_capacidade?: string | null
+          gab1_bat2_colada?: string | null
           gab1_bat2_data_fabricacao?: string | null
           gab1_bat2_estado?: string | null
           gab1_bat2_fabricante?: string | null
           gab1_bat2_tipo?: string | null
           gab1_bat3_capacidade?: string | null
+          gab1_bat3_colada?: string | null
           gab1_bat3_data_fabricacao?: string | null
           gab1_bat3_estado?: string | null
           gab1_bat3_fabricante?: string | null
           gab1_bat3_tipo?: string | null
           gab1_bat4_capacidade?: string | null
+          gab1_bat4_colada?: string | null
           gab1_bat4_data_fabricacao?: string | null
           gab1_bat4_estado?: string | null
           gab1_bat4_fabricante?: string | null
           gab1_bat4_tipo?: string | null
           gab1_bat5_capacidade?: string | null
+          gab1_bat5_colada?: string | null
           gab1_bat5_data_fabricacao?: string | null
           gab1_bat5_estado?: string | null
           gab1_bat5_fabricante?: string | null
           gab1_bat5_tipo?: string | null
           gab1_bat6_capacidade?: string | null
+          gab1_bat6_colada?: string | null
           gab1_bat6_data_fabricacao?: string | null
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
@@ -1223,31 +1313,37 @@ export type Database = {
           gab2_bancos_interligados?: string | null
           gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
+          gab2_bat1_colada?: string | null
           gab2_bat1_data_fabricacao?: string | null
           gab2_bat1_estado?: string | null
           gab2_bat1_fabricante?: string | null
           gab2_bat1_tipo?: string | null
           gab2_bat2_capacidade?: string | null
+          gab2_bat2_colada?: string | null
           gab2_bat2_data_fabricacao?: string | null
           gab2_bat2_estado?: string | null
           gab2_bat2_fabricante?: string | null
           gab2_bat2_tipo?: string | null
           gab2_bat3_capacidade?: string | null
+          gab2_bat3_colada?: string | null
           gab2_bat3_data_fabricacao?: string | null
           gab2_bat3_estado?: string | null
           gab2_bat3_fabricante?: string | null
           gab2_bat3_tipo?: string | null
           gab2_bat4_capacidade?: string | null
+          gab2_bat4_colada?: string | null
           gab2_bat4_data_fabricacao?: string | null
           gab2_bat4_estado?: string | null
           gab2_bat4_fabricante?: string | null
           gab2_bat4_tipo?: string | null
           gab2_bat5_capacidade?: string | null
+          gab2_bat5_colada?: string | null
           gab2_bat5_data_fabricacao?: string | null
           gab2_bat5_estado?: string | null
           gab2_bat5_fabricante?: string | null
           gab2_bat5_tipo?: string | null
           gab2_bat6_capacidade?: string | null
+          gab2_bat6_colada?: string | null
           gab2_bat6_data_fabricacao?: string | null
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
@@ -1289,31 +1385,37 @@ export type Database = {
           gab3_bancos_interligados?: string | null
           gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
+          gab3_bat1_colada?: string | null
           gab3_bat1_data_fabricacao?: string | null
           gab3_bat1_estado?: string | null
           gab3_bat1_fabricante?: string | null
           gab3_bat1_tipo?: string | null
           gab3_bat2_capacidade?: string | null
+          gab3_bat2_colada?: string | null
           gab3_bat2_data_fabricacao?: string | null
           gab3_bat2_estado?: string | null
           gab3_bat2_fabricante?: string | null
           gab3_bat2_tipo?: string | null
           gab3_bat3_capacidade?: string | null
+          gab3_bat3_colada?: string | null
           gab3_bat3_data_fabricacao?: string | null
           gab3_bat3_estado?: string | null
           gab3_bat3_fabricante?: string | null
           gab3_bat3_tipo?: string | null
           gab3_bat4_capacidade?: string | null
+          gab3_bat4_colada?: string | null
           gab3_bat4_data_fabricacao?: string | null
           gab3_bat4_estado?: string | null
           gab3_bat4_fabricante?: string | null
           gab3_bat4_tipo?: string | null
           gab3_bat5_capacidade?: string | null
+          gab3_bat5_colada?: string | null
           gab3_bat5_data_fabricacao?: string | null
           gab3_bat5_estado?: string | null
           gab3_bat5_fabricante?: string | null
           gab3_bat5_tipo?: string | null
           gab3_bat6_capacidade?: string | null
+          gab3_bat6_colada?: string | null
           gab3_bat6_data_fabricacao?: string | null
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
@@ -1355,31 +1457,37 @@ export type Database = {
           gab4_bancos_interligados?: string | null
           gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
+          gab4_bat1_colada?: string | null
           gab4_bat1_data_fabricacao?: string | null
           gab4_bat1_estado?: string | null
           gab4_bat1_fabricante?: string | null
           gab4_bat1_tipo?: string | null
           gab4_bat2_capacidade?: string | null
+          gab4_bat2_colada?: string | null
           gab4_bat2_data_fabricacao?: string | null
           gab4_bat2_estado?: string | null
           gab4_bat2_fabricante?: string | null
           gab4_bat2_tipo?: string | null
           gab4_bat3_capacidade?: string | null
+          gab4_bat3_colada?: string | null
           gab4_bat3_data_fabricacao?: string | null
           gab4_bat3_estado?: string | null
           gab4_bat3_fabricante?: string | null
           gab4_bat3_tipo?: string | null
           gab4_bat4_capacidade?: string | null
+          gab4_bat4_colada?: string | null
           gab4_bat4_data_fabricacao?: string | null
           gab4_bat4_estado?: string | null
           gab4_bat4_fabricante?: string | null
           gab4_bat4_tipo?: string | null
           gab4_bat5_capacidade?: string | null
+          gab4_bat5_colada?: string | null
           gab4_bat5_data_fabricacao?: string | null
           gab4_bat5_estado?: string | null
           gab4_bat5_fabricante?: string | null
           gab4_bat5_tipo?: string | null
           gab4_bat6_capacidade?: string | null
+          gab4_bat6_colada?: string | null
           gab4_bat6_data_fabricacao?: string | null
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
@@ -1421,31 +1529,37 @@ export type Database = {
           gab5_bancos_interligados?: string | null
           gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
+          gab5_bat1_colada?: string | null
           gab5_bat1_data_fabricacao?: string | null
           gab5_bat1_estado?: string | null
           gab5_bat1_fabricante?: string | null
           gab5_bat1_tipo?: string | null
           gab5_bat2_capacidade?: string | null
+          gab5_bat2_colada?: string | null
           gab5_bat2_data_fabricacao?: string | null
           gab5_bat2_estado?: string | null
           gab5_bat2_fabricante?: string | null
           gab5_bat2_tipo?: string | null
           gab5_bat3_capacidade?: string | null
+          gab5_bat3_colada?: string | null
           gab5_bat3_data_fabricacao?: string | null
           gab5_bat3_estado?: string | null
           gab5_bat3_fabricante?: string | null
           gab5_bat3_tipo?: string | null
           gab5_bat4_capacidade?: string | null
+          gab5_bat4_colada?: string | null
           gab5_bat4_data_fabricacao?: string | null
           gab5_bat4_estado?: string | null
           gab5_bat4_fabricante?: string | null
           gab5_bat4_tipo?: string | null
           gab5_bat5_capacidade?: string | null
+          gab5_bat5_colada?: string | null
           gab5_bat5_data_fabricacao?: string | null
           gab5_bat5_estado?: string | null
           gab5_bat5_fabricante?: string | null
           gab5_bat5_tipo?: string | null
           gab5_bat6_capacidade?: string | null
+          gab5_bat6_colada?: string | null
           gab5_bat6_data_fabricacao?: string | null
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
@@ -1487,31 +1601,37 @@ export type Database = {
           gab6_bancos_interligados?: string | null
           gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
+          gab6_bat1_colada?: string | null
           gab6_bat1_data_fabricacao?: string | null
           gab6_bat1_estado?: string | null
           gab6_bat1_fabricante?: string | null
           gab6_bat1_tipo?: string | null
           gab6_bat2_capacidade?: string | null
+          gab6_bat2_colada?: string | null
           gab6_bat2_data_fabricacao?: string | null
           gab6_bat2_estado?: string | null
           gab6_bat2_fabricante?: string | null
           gab6_bat2_tipo?: string | null
           gab6_bat3_capacidade?: string | null
+          gab6_bat3_colada?: string | null
           gab6_bat3_data_fabricacao?: string | null
           gab6_bat3_estado?: string | null
           gab6_bat3_fabricante?: string | null
           gab6_bat3_tipo?: string | null
           gab6_bat4_capacidade?: string | null
+          gab6_bat4_colada?: string | null
           gab6_bat4_data_fabricacao?: string | null
           gab6_bat4_estado?: string | null
           gab6_bat4_fabricante?: string | null
           gab6_bat4_tipo?: string | null
           gab6_bat5_capacidade?: string | null
+          gab6_bat5_colada?: string | null
           gab6_bat5_data_fabricacao?: string | null
           gab6_bat5_estado?: string | null
           gab6_bat5_fabricante?: string | null
           gab6_bat5_tipo?: string | null
           gab6_bat6_capacidade?: string | null
+          gab6_bat6_colada?: string | null
           gab6_bat6_data_fabricacao?: string | null
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
@@ -1553,31 +1673,37 @@ export type Database = {
           gab7_bancos_interligados?: string | null
           gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
+          gab7_bat1_colada?: string | null
           gab7_bat1_data_fabricacao?: string | null
           gab7_bat1_estado?: string | null
           gab7_bat1_fabricante?: string | null
           gab7_bat1_tipo?: string | null
           gab7_bat2_capacidade?: string | null
+          gab7_bat2_colada?: string | null
           gab7_bat2_data_fabricacao?: string | null
           gab7_bat2_estado?: string | null
           gab7_bat2_fabricante?: string | null
           gab7_bat2_tipo?: string | null
           gab7_bat3_capacidade?: string | null
+          gab7_bat3_colada?: string | null
           gab7_bat3_data_fabricacao?: string | null
           gab7_bat3_estado?: string | null
           gab7_bat3_fabricante?: string | null
           gab7_bat3_tipo?: string | null
           gab7_bat4_capacidade?: string | null
+          gab7_bat4_colada?: string | null
           gab7_bat4_data_fabricacao?: string | null
           gab7_bat4_estado?: string | null
           gab7_bat4_fabricante?: string | null
           gab7_bat4_tipo?: string | null
           gab7_bat5_capacidade?: string | null
+          gab7_bat5_colada?: string | null
           gab7_bat5_data_fabricacao?: string | null
           gab7_bat5_estado?: string | null
           gab7_bat5_fabricante?: string | null
           gab7_bat5_tipo?: string | null
           gab7_bat6_capacidade?: string | null
+          gab7_bat6_colada?: string | null
           gab7_bat6_data_fabricacao?: string | null
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
