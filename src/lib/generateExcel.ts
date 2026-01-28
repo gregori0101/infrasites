@@ -287,13 +287,42 @@ export function generateConsolidatedExcel(dataList: ChecklistData[]): Blob {
   return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
 
+/**
+ * Detects if the browser is running on iOS
+ */
+function isIOS(): boolean {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * Downloads an Excel file with iOS/Safari compatibility
+ */
 export function downloadExcel(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
+  
+  // For iOS devices, open in new tab since download attribute doesn't work reliably
+  if (isIOS()) {
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+      window.location.href = url;
+    }
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 10000);
+    return;
+  }
+  
+  // Standard download for non-iOS browsers
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 250);
 }
