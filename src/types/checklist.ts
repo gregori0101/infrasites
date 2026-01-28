@@ -30,6 +30,8 @@ export type CapacidadeAh = 100 | 105 | 170 | 200 | 300 | 400 | 430 | 500 | 600 |
 
 export type BateriaEstado = 'OK' | 'ESTUFADA' | 'VAZANDO' | 'TRINCADA' | 'NÃO SEGURA CARGA' | 'NA';
 
+export type BateriaColada = 'SIM' | 'NÃO' | 'NA';
+
 export type ClimatizacaoTipo = 'AR CONDICIONADO' | 'FAN' | 'NA';
 
 export type ACModelo = 
@@ -94,6 +96,7 @@ export interface BancoBateria {
   capacidadeAh: CapacidadeAh | null;
   dataFabricacao: string;
   estado: BateriaEstado;
+  colada: BateriaColada;
 }
 
 export interface ArCondicionado {
