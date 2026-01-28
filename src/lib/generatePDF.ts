@@ -699,13 +699,46 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
   return doc.output('blob');
 }
 
+/**
+ * Detects if the browser is running on iOS
+ */
+function isIOS(): boolean {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * Downloads a PDF file with iOS/Safari compatibility
+ */
 export function downloadPDF(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
+  
+  // For iOS devices, open in new tab since download attribute doesn't work
+  if (isIOS()) {
+    // Create a new window/tab with the PDF
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+      // Fallback: try using location.href
+      window.location.href = url;
+    }
+    // Don't revoke immediately for iOS
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 10000);
+    return;
+  }
+  
+  // Standard download for non-iOS browsers
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  
+  // Cleanup after a short delay
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 250);
 }

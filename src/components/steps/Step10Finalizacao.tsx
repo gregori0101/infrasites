@@ -58,27 +58,78 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       // 1. Upload das fotos para o Storage
       setUploadProgress('Fazendo upload das fotos...');
       const siteCode = data.siglaSite || `site_${Date.now()}`;
-      const dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
+      
+      let dataWithUrls;
+      try {
+        dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
+      } catch (uploadError) {
+        console.error('Photo upload error:', uploadError);
+        toast.error('Erro no upload das fotos', {
+          description: 'Verifique sua conexão e tente novamente.'
+        });
+        setIsSending(false);
+        setUploadProgress('');
+        return;
+      }
       
       // 2. Gerar PDF
       setUploadProgress('Gerando PDF...');
-      const pdfBlob = await generatePDF(dataWithUrls);
+      let pdfBlob;
+      try {
+        pdfBlob = await generatePDF(dataWithUrls);
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        toast.error('Erro ao gerar PDF', {
+          description: 'Continuando sem download do PDF.'
+        });
+        pdfBlob = null;
+      }
       
-      // 3. Download do PDF
-      const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
-      downloadPDF(pdfBlob, pdfFilename);
-      
-      // 4. Gerar e baixar Excel
+      // 3. Gerar Excel
       setUploadProgress('Gerando Excel...');
-      const excelBlob = generateExcel(dataWithUrls);
-      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
-      downloadExcel(excelBlob, excelFilename);
+      let excelBlob;
+      try {
+        excelBlob = generateExcel(dataWithUrls);
+      } catch (excelError) {
+        console.error('Excel generation error:', excelError);
+        toast.error('Erro ao gerar Excel', {
+          description: 'Continuando sem download do Excel.'
+        });
+        excelBlob = null;
+      }
 
-      // 5. Salvar no banco de dados
+      // 4. Salvar no banco de dados
       setUploadProgress('Salvando no banco de dados...');
+      const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
+      
       const result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
       
       if (result.success) {
+        // 5. Download dos arquivos (após salvar com sucesso)
+        setUploadProgress('Baixando arquivos...');
+        
+        if (pdfBlob) {
+          try {
+            downloadPDF(pdfBlob, pdfFilename);
+          } catch (downloadError) {
+            console.error('PDF download error:', downloadError);
+            toast.warning('Não foi possível baixar o PDF automaticamente');
+          }
+        }
+        
+        // Small delay between downloads for iOS
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (excelBlob) {
+          try {
+            downloadExcel(excelBlob, excelFilename);
+          } catch (downloadError) {
+            console.error('Excel download error:', downloadError);
+            toast.warning('Não foi possível baixar o Excel automaticamente');
+          }
+        }
+        
         // 6. Vincular à atribuição se houver
         const assignmentId = sessionStorage.getItem('currentAssignmentId');
         if (assignmentId && result.id) {
@@ -93,7 +144,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         }
         
         toast.success('Relatório enviado com sucesso!', {
-          description: 'Os dados foram salvos e os arquivos foram baixados.'
+          description: 'Os dados foram salvos no servidor.'
         });
         
         // Reset do formulário após envio bem-sucedido
@@ -106,7 +157,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     } catch (error) {
       console.error('Error sending report:', error);
       toast.error('Erro ao enviar relatório', {
-        description: 'Tente novamente.'
+        description: error instanceof Error ? error.message : 'Tente novamente.'
       });
     } finally {
       setIsSending(false);
