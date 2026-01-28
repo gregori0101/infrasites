@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Battery, Plus, Trash2 } from "lucide-react";
-import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BancoBateria, BateriasData } from "@/types/checklist";
+import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BateriaColada, BancoBateria, BateriasData } from "@/types/checklist";
 import { ValidationError } from "@/hooks/use-validation";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
@@ -19,13 +19,15 @@ const BATERIA_FABRICANTES: BateriaFabricante[] = [
 ];
 const CAPACIDADES: CapacidadeAh[] = [100, 105, 170, 200, 300, 400, 430, 500, 600, 640, 750, 800, 1000, 1250, 1500, 2000, 2500];
 const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA', 'NA'];
+const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
   tipo: 'NA',
   fabricante: 'NA',
   capacidadeAh: null,
   dataFabricacao: '',
-  estado: 'OK'
+  estado: 'OK',
+  colada: 'NA'
 };
 
 interface Step4Props {
@@ -207,6 +209,29 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                         }`}
                       >
                         {estado}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Bateria Colada?</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {COLADA_OPTIONS.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => updateBanco(index, { colada: option })}
+                        className={`px-3 py-1 text-xs rounded-full border transition-all ${
+                          banco.colada === option
+                            ? option === 'SIM'
+                              ? 'bg-warning text-warning-foreground border-warning'
+                              : option === 'NÃO'
+                              ? 'bg-success text-success-foreground border-success'
+                              : 'bg-muted text-muted-foreground border-muted'
+                            : 'bg-card border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {option}
                       </button>
                     ))}
                   </div>
