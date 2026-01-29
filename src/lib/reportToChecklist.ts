@@ -137,6 +137,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
   return {
     ...INITIAL_CHECKLIST,
     id: report.id || uuid(),
+    operadora: (report.operadora || 'VIVO') as any,
     siglaSite: report.site_code || '',
     uf: (report.state_uf || 'PA') as any,
     qtdGabinetes: report.total_cabinets || 1,

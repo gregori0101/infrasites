@@ -53,7 +53,7 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     // Site info on right
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${data.siglaSite || 'N/A'} | ${data.uf}`, pageWidth - margin, 13, { align: 'right' });
+    doc.text(`${data.operadora || 'VIVO'} | ${data.siglaSite || 'N/A'} | ${data.uf}`, pageWidth - margin, 13, { align: 'right' });
 
     y = 28;
   };

@@ -28,6 +28,7 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   
   // GRUPO 1: IDENTIFICAÇÃO
   row['ID_Relatorio'] = data.id;
+  row['Operadora'] = data.operadora || 'VIVO';
   row['Data_Preenchimento'] = format(new Date(data.createdAt), 'dd/MM/yyyy');
   row['Hora_Preenchimento'] = format(new Date(data.createdAt), 'HH:mm');
   row['Tecnico'] = data.tecnico || '';

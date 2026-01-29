@@ -182,6 +182,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     state_uf: data.uf || null,
     total_cabinets: data.qtdGabinetes,
     panoramic_photo_url: data.fotoPanoramica || null,
+    operadora: data.operadora || 'VIVO',
   };
 
   // For each gabinete (1-7)
