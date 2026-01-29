@@ -5,16 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
-import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Radio } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet';
+import { cn } from '@/lib/utils';
+
+type Operadora = 'VIVO' | 'TEL';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [operadora, setOperadora] = useState<Operadora>('VIVO');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -68,18 +72,25 @@ export default function Login() {
           }
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { error, data: signUpData } = await signUp(email, password);
         if (error) {
           if (error.message.includes('User already registered')) {
             setError('Este email já está cadastrado');
           } else {
             setError(error.message);
           }
-        } else {
+        } else if (signUpData?.user) {
+          // Update user_roles with operadora after signup
+          await supabase
+            .from('user_roles')
+            .update({ operadora })
+            .eq('user_id', signUpData.user.id);
+          
           setSuccess('Cadastro realizado! Aguarde a aprovação de um gestor para acessar o sistema.');
           setEmail('');
           setPassword('');
           setConfirmPassword('');
+          setOperadora('VIVO');
         }
       }
     } catch (err) {
@@ -145,6 +156,34 @@ export default function Login() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
+                </div>
+              )}
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Radio className="w-4 h-4" />
+                    Operadora <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex gap-3">
+                    {(['VIVO', 'TEL'] as Operadora[]).map((op) => (
+                      <button
+                        key={op}
+                        type="button"
+                        onClick={() => setOperadora(op)}
+                        className={cn(
+                          "flex-1 py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200",
+                          operadora === op
+                            ? op === 'VIVO' 
+                              ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background'
+                              : 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 ring-offset-background'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        )}
+                      >
+                        {op}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 

@@ -23,12 +23,12 @@ const getPhotosValue = (photos: string[] | undefined): string => {
   }).join(' | ');
 };
 
-function buildRowFromChecklist(data: ChecklistData): Record<string, string | number | boolean> {
+function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Record<string, string | number | boolean> {
   const row: Record<string, string | number | boolean> = {};
   
   // GRUPO 1: IDENTIFICAÇÃO
   row['ID_Relatorio'] = data.id;
-  row['Operadora'] = data.operadora || 'VIVO';
+  row['Operadora'] = userOperadora || data.operadora || 'VIVO';
   row['Data_Preenchimento'] = format(new Date(data.createdAt), 'dd/MM/yyyy');
   row['Hora_Preenchimento'] = format(new Date(data.createdAt), 'HH:mm');
   row['Tecnico'] = data.tecnico || '';
@@ -248,9 +248,9 @@ function buildRowFromChecklist(data: ChecklistData): Record<string, string | num
   return row;
 }
 
-export function generateExcel(data: ChecklistData): Blob {
+export function generateExcel(data: ChecklistData, userOperadora?: string): Blob {
   const workbook = XLSX.utils.book_new();
-  const row = buildRowFromChecklist(data);
+  const row = buildRowFromChecklist(data, userOperadora);
   
   // Create worksheet
   const worksheet = XLSX.utils.json_to_sheet([row]);

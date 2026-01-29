@@ -338,11 +338,26 @@ export async function saveReportToDatabase(
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     
+    // Fetch user's operadora from user_roles
+    let userOperadora = 'VIVO';
+    if (user?.id) {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('operadora')
+        .eq('user_id', user.id)
+        .single();
+      if (roleData?.operadora) {
+        userOperadora = roleData.operadora;
+      }
+    }
+    
     const row = buildReportRow(data);
     row.pdf_file_path = pdfPath || null;
     row.excel_file_path = excelPath || null;
     row.email_sent = false;
     row.user_id = user?.id || null;
+    // Use user's operadora instead of data.operadora
+    row.operadora = userOperadora;
 
     const { data: inserted, error } = await supabase
       .from('reports')

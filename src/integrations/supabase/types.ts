@@ -1848,6 +1848,7 @@ export type Database = {
           approved_by: string | null
           created_at: string
           id: string
+          operadora: string | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
@@ -1857,6 +1858,7 @@ export type Database = {
           approved_by?: string | null
           created_at?: string
           id?: string
+          operadora?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
@@ -1866,6 +1868,7 @@ export type Database = {
           approved_by?: string | null
           created_at?: string
           id?: string
+          operadora?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
