@@ -5,14 +5,13 @@ import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Building2, Image, AlertCircle } from "lucide-react";
-import { UF } from "@/types/checklist";
+import { MapPin, Building2, Image, Radio } from "lucide-react";
+import { UF, Operadora } from "@/types/checklist";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 
 const UF_OPTIONS: UF[] = ['PA', 'AM', 'MA', 'RR', 'AP'];
-
-
+const OPERADORA_OPTIONS: Operadora[] = ['VIVO', 'TEL'];
 interface Step1Props {
   showErrors?: boolean;
   validationErrors?: ValidationError[];
@@ -34,6 +33,33 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
 
   return (
     <div className="space-y-4 animate-slide-up">
+      {/* Operadora Selection */}
+      <FormCard title="Operadora" icon={<Radio className="w-4 h-4" />}>
+        <div className="space-y-2">
+          <Label>
+            Selecione a Operadora <span className="text-destructive">*</span>
+          </Label>
+          <div className="flex items-center gap-3">
+            {OPERADORA_OPTIONS.map((op) => (
+              <button
+                key={op}
+                onClick={() => updateData('operadora', op)}
+                className={cn(
+                  "flex-1 py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200",
+                  data.operadora === op
+                    ? op === 'VIVO' 
+                      ? 'bg-purple-600 text-white ring-2 ring-purple-600 ring-offset-2 ring-offset-background'
+                      : 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 ring-offset-background'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                )}
+              >
+                {op}
+              </button>
+            ))}
+          </div>
+        </div>
+      </FormCard>
+
       <FormCard title="Identificação do Site" icon={<MapPin className="w-4 h-4" />}>
         <div className="space-y-4">
           <div className="space-y-2">

@@ -1,3 +1,5 @@
+export type Operadora = 'VIVO' | 'TEL';
+
 export type UF = 'PA' | 'AM' | 'MA' | 'RR' | 'AP';
 
 export type GabineteType =
@@ -189,6 +191,7 @@ export const INITIAL_SECOES_NAO_APLICAVEIS: SecoesNaoAplicaveis = {
 
 export interface ChecklistData {
   id: string;
+  operadora: Operadora;
   siglaSite: string;
   uf: UF;
   qtdGabinetes: number;
@@ -287,6 +290,7 @@ export const INITIAL_ENERGIA: EnergiaData = {
 };
 
 export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'updatedAt'> = {
+  operadora: 'VIVO',
   siglaSite: '',
   uf: 'PA',
   qtdGabinetes: 1,
