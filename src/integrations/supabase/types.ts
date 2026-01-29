@@ -582,6 +582,7 @@ export type Database = {
           id: string
           observacao_foto_url: string | null
           observacoes: string | null
+          operadora: string | null
           panoramic_photo_url: string | null
           pdf_file_path: string | null
           site_code: string
@@ -1162,6 +1163,7 @@ export type Database = {
           id?: string
           observacao_foto_url?: string | null
           observacoes?: string | null
+          operadora?: string | null
           panoramic_photo_url?: string | null
           pdf_file_path?: string | null
           site_code: string
@@ -1742,6 +1744,7 @@ export type Database = {
           id?: string
           observacao_foto_url?: string | null
           observacoes?: string | null
+          operadora?: string | null
           panoramic_photo_url?: string | null
           pdf_file_path?: string | null
           site_code?: string
