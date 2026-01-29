@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { FormCard } from "@/components/ui/form-card";
 import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Step10Props {
   showErrors?: boolean;
@@ -28,10 +30,29 @@ interface Step10Props {
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist } = useChecklist();
+  const { user } = useAuth();
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
+  const [userOperadora, setUserOperadora] = React.useState<string>('VIVO');
 
   const progress = calculateProgress();
+
+  // Fetch user operadora on mount
+  React.useEffect(() => {
+    const fetchOperadora = async () => {
+      if (user?.id) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('operadora')
+          .eq('user_id', user.id)
+          .single();
+        if (roleData?.operadora) {
+          setUserOperadora(roleData.operadora);
+        }
+      }
+    };
+    fetchOperadora();
+  }, [user?.id]);
 
   const handleDirectSend = async () => {
     if (progress < 50) {
@@ -76,7 +97,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       setUploadProgress('Gerando PDF...');
       let pdfBlob;
       try {
-        pdfBlob = await generatePDF(dataWithUrls);
+        pdfBlob = await generatePDF(dataWithUrls, userOperadora);
       } catch (pdfError) {
         console.error('PDF generation error:', pdfError);
         toast.error('Erro ao gerar PDF', {
@@ -89,7 +110,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       setUploadProgress('Gerando Excel...');
       let excelBlob;
       try {
-        excelBlob = generateExcel(dataWithUrls);
+        excelBlob = generateExcel(dataWithUrls, userOperadora);
       } catch (excelError) {
         console.error('Excel generation error:', excelError);
         toast.error('Erro ao gerar Excel', {

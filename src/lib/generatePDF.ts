@@ -16,7 +16,8 @@ const SUCCESS: [number, number, number] = [34, 197, 94];
 const WARNING: [number, number, number] = [234, 179, 8];
 const DANGER: [number, number, number] = [239, 68, 68];
 
-export async function generatePDF(data: ChecklistData): Promise<Blob> {
+export async function generatePDF(data: ChecklistData, userOperadora?: string): Promise<Blob> {
+  const operadora = userOperadora || data.operadora || 'VIVO';
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -53,7 +54,7 @@ export async function generatePDF(data: ChecklistData): Promise<Blob> {
     // Site info on right
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${data.operadora || 'VIVO'} | ${data.siglaSite || 'N/A'} | ${data.uf}`, pageWidth - margin, 13, { align: 'right' });
+    doc.text(`${operadora} | ${data.siglaSite || 'N/A'} | ${data.uf}`, pageWidth - margin, 13, { align: 'right' });
 
     y = 28;
   };
