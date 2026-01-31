@@ -39,18 +39,23 @@ import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/Fibr
 import { ProdutividadePanel, ProdutividadeStats } from "@/components/dashboard/panels/ProdutividadePanel";
 import { fetchAssignmentStatsForDashboard } from "@/lib/assignmentDatabase";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { userOperadora } = useAuth();
   const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
+  // TEL users can only see TEL reports; VIVO users can see all by default
+  const isVivoUser = userOperadora === 'VIVO';
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: { from: undefined, to: undefined },
     technician: "",
     stateUf: "all",
     status: "all",
     siteType: "all",
+    operadora: isVivoUser ? "all" : "TEL", // TEL users default to TEL only
   });
 
   // Drill-down modal state
@@ -67,6 +72,10 @@ export default function Dashboard() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
+  // Determine the operadora filter to use in query
+  // TEL users always see TEL only; VIVO users can filter or see all
+  const effectiveOperadoraFilter = isVivoUser ? filters.operadora : 'TEL';
+  
   // Fetch reports using React Query
   const {
     data: reports = [],
@@ -75,8 +84,8 @@ export default function Dashboard() {
     refetch,
     dataUpdatedAt,
   } = useQuery({
-    queryKey: ["dashboard-reports"],
-    queryFn: () => fetchReportsForDashboard({}),
+    queryKey: ["dashboard-reports", effectiveOperadoraFilter],
+    queryFn: () => fetchReportsForDashboard({ operadora: effectiveOperadoraFilter }),
     staleTime: 1000 * 60 * 5,
     retry: 3,
     refetchOnWindowFocus: true,
@@ -448,6 +457,7 @@ export default function Dashboard() {
             uniqueUFs={uniqueUFs}
             uniqueTechnicians={uniqueTechnicians}
             uniqueSiteTypes={uniqueSiteTypes}
+            showOperadoraFilter={isVivoUser}
           />
 
           {/* Loading State */}
