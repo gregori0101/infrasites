@@ -242,10 +242,10 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
                 </Select>
               </div>
 
-              {/* Operadora - only for VIVO users */}
+              {/* Empresa - only for VIVO users */}
               {showOperadoraFilter && (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Operadora</Label>
+                  <Label className="text-xs text-muted-foreground">Empresa</Label>
                   <Select
                     value={filters.operadora}
                     onValueChange={(v) =>
