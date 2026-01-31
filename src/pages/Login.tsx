@@ -163,7 +163,7 @@ export default function Login() {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Radio className="w-4 h-4" />
-                    Operadora <span className="text-destructive">*</span>
+                    Empresa <span className="text-destructive">*</span>
                   </Label>
                   <div className="flex gap-3">
                     {(['VIVO', 'TEL'] as Operadora[]).map((op) => (

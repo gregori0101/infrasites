@@ -46,6 +46,7 @@ interface UserWithRole {
   user_id: string;
   email: string;
   role: 'administrador' | 'gestor' | 'tecnico';
+  operadora: 'VIVO' | 'TEL';
   approved: boolean;
   created_at: string;
   approved_at: string | null;
@@ -101,6 +102,7 @@ export default function UserManagement() {
         user_id: role.user_id,
         email: emailMap[role.user_id] || role.user_id.slice(0, 8) + '...',
         role: role.role as 'administrador' | 'gestor' | 'tecnico',
+        operadora: (role.operadora as 'VIVO' | 'TEL') || 'VIVO',
         approved: role.approved,
         created_at: role.created_at,
         approved_at: role.approved_at,
@@ -221,6 +223,34 @@ export default function UserManagement() {
       toast({
         title: 'Erro',
         description: 'Não foi possível alterar o perfil',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleOperadoraChange = async (userId: string, newOperadora: 'VIVO' | 'TEL') => {
+    setActionLoading(userId);
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ operadora: newOperadora })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Empresa alterada',
+        description: `Usuário agora pertence à ${newOperadora}`,
+      });
+      
+      fetchUsers();
+    } catch (err) {
+      console.error('Error changing operadora:', err);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar a empresa',
         variant: 'destructive',
       });
     } finally {
@@ -394,7 +424,20 @@ export default function UserManagement() {
                           </div>
                         </div>
                         {u.user_id !== user?.id && (
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                            <Select
+                              value={u.operadora}
+                              onValueChange={(value) => handleOperadoraChange(u.user_id, value as 'VIVO' | 'TEL')}
+                              disabled={actionLoading === u.user_id}
+                            >
+                              <SelectTrigger className="w-24 h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="VIVO">VIVO</SelectItem>
+                                <SelectItem value="TEL">TEL</SelectItem>
+                              </SelectContent>
+                            </Select>
                             <Select
                               value={u.role}
                               onValueChange={(value) => handleRoleChange(u.user_id, value as 'administrador' | 'gestor' | 'tecnico')}
