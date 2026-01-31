@@ -4,10 +4,13 @@ import { User, Session } from '@supabase/supabase-js';
 
 type AppRole = 'administrador' | 'gestor' | 'tecnico';
 
+type Operadora = 'VIVO' | 'TEL';
+
 interface UserRole {
   id: string;
   user_id: string;
   role: AppRole;
+  operadora: Operadora;
   approved: boolean;
   approved_by: string | null;
   approved_at: string | null;
@@ -18,6 +21,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   userRole: UserRole | null;
+  userOperadora: Operadora;
   isApproved: boolean;
   isAdmin: boolean;
   isGestor: boolean;
@@ -138,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = userRole?.role === 'administrador' && isApproved;
   const isGestor = (userRole?.role === 'gestor' || userRole?.role === 'administrador') && isApproved;
   const isTecnico = userRole?.role === 'tecnico' && isApproved;
+  const userOperadora: Operadora = userRole?.operadora || 'VIVO';
 
   return (
     <AuthContext.Provider
@@ -145,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         session,
         userRole,
+        userOperadora,
         isApproved,
         isAdmin,
         isGestor,

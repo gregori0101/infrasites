@@ -32,9 +32,10 @@ interface Props {
   uniqueUFs: string[];
   uniqueTechnicians: string[];
   uniqueSiteTypes: string[];
+  showOperadoraFilter?: boolean; // Only show for VIVO users
 }
 
-export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes }: Props) {
+export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, showOperadoraFilter = false }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   const hasActiveFilters = 
@@ -42,6 +43,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.stateUf !== "all" || 
     filters.status !== "all" ||
     filters.siteType !== "all" ||
+    filters.operadora !== "all" ||
     filters.dateRange.from ||
     filters.dateRange.to;
 
@@ -50,6 +52,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.stateUf !== "all" ? filters.stateUf : null,
     filters.status !== "all" ? filters.status : null,
     filters.siteType !== "all" ? filters.siteType : null,
+    filters.operadora !== "all" ? filters.operadora : null,
     filters.dateRange.from,
   ].filter(Boolean).length;
 
@@ -60,6 +63,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
       stateUf: "all",
       status: "all",
       siteType: "all",
+      operadora: "all",
     });
   };
 
@@ -105,7 +109,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
         {/* Collapsible Content */}
         <CollapsibleContent>
           <div className="px-4 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${showOperadoraFilter ? '6' : '5'} gap-4`}>
               {/* Date Range */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Período</Label>
@@ -237,6 +241,28 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Operadora - only for VIVO users */}
+              {showOperadoraFilter && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Operadora</Label>
+                  <Select
+                    value={filters.operadora}
+                    onValueChange={(v) =>
+                      onFiltersChange({ ...filters, operadora: v as "all" | "VIVO" | "TEL" })
+                    }
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      <SelectItem value="VIVO">VIVO</SelectItem>
+                      <SelectItem value="TEL">TEL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
         </CollapsibleContent>

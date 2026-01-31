@@ -6,6 +6,7 @@ export interface DashboardFilters {
   stateUf: string;
   status: "all" | "ok" | "nok";
   siteType: string; // e.g., "DWDM", "HL3", "HL4", "all"
+  operadora: "all" | "VIVO" | "TEL"; // Operator filter
 }
 
 export interface BatteryInfo {

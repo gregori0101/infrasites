@@ -403,6 +403,7 @@ export async function fetchReportsSummary(filters?: {
   stateUf?: string;
   startDate?: string;
   endDate?: string;
+  operadora?: string; // 'VIVO', 'TEL', or 'all'
 }): Promise<ReportRow[]> {
   const pageSize = 1000;
   let page = 0;
@@ -411,7 +412,7 @@ export async function fetchReportsSummary(filters?: {
   while (true) {
     let query = supabase
       .from('reports')
-      .select(SUMMARY_COLUMNS)
+      .select(SUMMARY_COLUMNS + ',operadora')
       .order('created_at', { ascending: false });
 
     if (filters?.siteCode) {
@@ -425,6 +426,10 @@ export async function fetchReportsSummary(filters?: {
     }
     if (filters?.endDate) {
       query = query.lte('created_at', filters.endDate);
+    }
+    // Filter by operadora if specified and not 'all'
+    if (filters?.operadora && filters.operadora !== 'all') {
+      query = query.eq('operadora', filters.operadora);
     }
 
     const from = page * pageSize;
@@ -456,11 +461,12 @@ export async function fetchReportsForDashboard(filters?: {
   stateUf?: string;
   startDate?: string;
   endDate?: string;
+  operadora?: string; // 'VIVO', 'TEL', or 'all'
 }): Promise<ReportRow[]> {
   const pageSize = 1000;
   let page = 0;
   let all: ReportRow[] = [];
-  const columns = buildDashboardColumns();
+  const columns = buildDashboardColumns() + ',operadora';
 
   while (true) {
     let query = supabase
@@ -479,6 +485,10 @@ export async function fetchReportsForDashboard(filters?: {
     }
     if (filters?.endDate) {
       query = query.lte('created_at', filters.endDate);
+    }
+    // Filter by operadora if specified and not 'all'
+    if (filters?.operadora && filters.operadora !== 'all') {
+      query = query.eq('operadora', filters.operadora);
     }
 
     const from = page * pageSize;

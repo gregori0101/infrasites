@@ -52,7 +52,8 @@ const ESTADOS_BR = [
 export default function ReportsHistory() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAdmin } = useAuth();
+  const { isAdmin, userOperadora } = useAuth();
+  const isVivoUser = userOperadora === 'VIVO';
 
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -67,6 +68,7 @@ export default function ReportsHistory() {
   const [stateFilter, setStateFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [operadoraFilter, setOperadoraFilter] = useState<"all" | "VIVO" | "TEL">(isVivoUser ? "all" : "TEL");
   
   // Applied filters (only update when user clicks "Filtrar")
   const [appliedFilters, setAppliedFilters] = useState({
@@ -74,6 +76,7 @@ export default function ReportsHistory() {
     stateUf: "",
     startDate: "",
     endDate: "",
+    operadora: isVivoUser ? "all" : "TEL",
   });
 
   // TanStack Query for robust data fetching with retries
@@ -91,6 +94,7 @@ export default function ReportsHistory() {
       stateUf: appliedFilters.stateUf || undefined,
       startDate: appliedFilters.startDate ? new Date(appliedFilters.startDate).toISOString() : undefined,
       endDate: appliedFilters.endDate ? new Date(appliedFilters.endDate + 'T23:59:59').toISOString() : undefined,
+      operadora: appliedFilters.operadora,
     }),
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
@@ -105,6 +109,7 @@ export default function ReportsHistory() {
       stateUf: stateFilter,
       startDate: dateFrom,
       endDate: dateTo,
+      operadora: operadoraFilter,
     });
   };
 
@@ -113,11 +118,13 @@ export default function ReportsHistory() {
     setStateFilter("");
     setDateFrom("");
     setDateTo("");
+    setOperadoraFilter(isVivoUser ? "all" : "TEL");
     setAppliedFilters({
       siteCode: "",
       stateUf: "",
       startDate: "",
       endDate: "",
+      operadora: isVivoUser ? "all" : "TEL",
     });
   };
 
@@ -372,6 +379,22 @@ Por favor, anexe-os a este email antes de enviar.
                 />
               </div>
             </div>
+            {/* Operadora Filter - only for VIVO users */}
+            {isVivoUser && (
+              <div className="space-y-1">
+                <Label className="text-xs">Operadora</Label>
+                <Select value={operadoraFilter} onValueChange={(val) => setOperadoraFilter(val as "all" | "VIVO" | "TEL")}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="VIVO">VIVO</SelectItem>
+                    <SelectItem value="TEL">TEL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex gap-2">
               <Button onClick={handleFilter} className="flex-1 h-9">
                 <Search className="w-4 h-4 mr-2" />
