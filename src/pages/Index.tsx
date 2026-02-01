@@ -7,19 +7,27 @@ import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, Inbox } from "lucide-react";
+import { ChecklistData } from "@/types/checklist";
 
 const Index = () => {
   const { isTecnico, isGestor, isAdmin } = useAuth();
-  const { updateData, setCurrentStep, setCurrentGabinete } = useChecklist();
+  const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport } = useChecklist();
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
   const [selectedAssignment, setSelectedAssignment] = React.useState<SiteAssignment | null>(null);
 
   // Handle starting checklist from assignment
-  const handleStartChecklist = (assignment: SiteAssignment) => {
+  const handleStartChecklist = (assignment: SiteAssignment, prefillData?: ChecklistData) => {
     if (assignment.site) {
-      // Pre-fill site data
-      updateData('siglaSite', assignment.site.site_code);
-      updateData('uf', assignment.site.uf as any);
+      if (prefillData) {
+        // Load pre-filled data from previous report
+        loadFromPreviousReport(prefillData);
+        // Override the site code and UF from the assignment
+        // (already set in prefillData, but ensuring consistency)
+      } else {
+        // Start fresh - just pre-fill site data
+        updateData('siglaSite', assignment.site.site_code);
+        updateData('uf', assignment.site.uf as any);
+      }
       
       // Switch to checklist tab and start from beginning
       setCurrentStep(0);
