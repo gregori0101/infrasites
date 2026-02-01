@@ -170,6 +170,35 @@ function buildPhotoColumns(): string {
   return cols.join(',');
 }
 
+/**
+ * Fetch the latest report for a specific site code
+ * Respects RLS and operadora filtering
+ */
+export async function fetchLatestReportBySiteCode(siteCode: string): Promise<ReportRow | null> {
+  try {
+    // All columns needed for pre-fill (excluding photos)
+    const columns = buildDashboardColumns() + ',operadora';
+    
+    const { data, error } = await supabase
+      .from('reports')
+      .select(columns)
+      .ilike('site_code', siteCode)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching latest report by site code:', error);
+      return null;
+    }
+
+    return data as unknown as ReportRow | null;
+  } catch (err) {
+    console.error('Exception fetching latest report:', err);
+    return null;
+  }
+}
+
 // --- Build report row from checklist data ---
 
 export function buildReportRow(data: ChecklistData): ReportRow {

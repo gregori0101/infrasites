@@ -6,21 +6,30 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Clock, CheckCircle, AlertCircle, Play, Eye, Calendar
+  Clock, CheckCircle, AlertCircle, Play, Eye, Calendar, History, Loader2
 } from "lucide-react";
 import { 
   fetchTechnicianAssignments, 
   updateAssignmentStatus,
   SiteAssignment 
 } from "@/lib/assignmentDatabase";
+import { fetchLatestReportBySiteCode } from "@/lib/reportDatabase";
+import { reportToChecklistWithoutPhotos } from "@/lib/reportToChecklist";
+import { PrefillDialog } from "@/components/ui/prefill-dialog";
 import { toast } from "sonner";
+import { ChecklistData } from "@/types/checklist";
 
 interface TechnicianInboxProps {
-  onStartChecklist: (assignment: SiteAssignment) => void;
+  onStartChecklist: (assignment: SiteAssignment, prefillData?: ChecklistData) => void;
 }
 
 export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
   const { user } = useAuth();
+  const [checkingPrefill, setCheckingPrefill] = React.useState<string | null>(null);
+  const [pendingAssignment, setPendingAssignment] = React.useState<SiteAssignment | null>(null);
+  const [prefillData, setPrefillData] = React.useState<ChecklistData | null>(null);
+  const [lastInspectionDate, setLastInspectionDate] = React.useState<string | null>(null);
+  const [showPrefillDialog, setShowPrefillDialog] = React.useState(false);
   
   const { data: assignments = [], isLoading, refetch } = useQuery({
     queryKey: ['technician-assignments', user?.id],
@@ -88,6 +97,38 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
   };
 
   const handleStartChecklist = async (assignment: SiteAssignment) => {
+    if (!assignment.site?.site_code) {
+      toast.error('Site inválido');
+      return;
+    }
+
+    setCheckingPrefill(assignment.id);
+    
+    try {
+      // Check for previous report
+      const previousReport = await fetchLatestReportBySiteCode(assignment.site.site_code);
+      
+      if (previousReport) {
+        // Found previous report - show dialog
+        const checklistData = reportToChecklistWithoutPhotos(previousReport);
+        setPrefillData(checklistData);
+        setLastInspectionDate(previousReport.created_at || null);
+        setPendingAssignment(assignment);
+        setShowPrefillDialog(true);
+      } else {
+        // No previous report - start directly
+        await startChecklist(assignment);
+      }
+    } catch (error) {
+      console.error('Error checking for previous report:', error);
+      // On error, just start without prefill
+      await startChecklist(assignment);
+    } finally {
+      setCheckingPrefill(null);
+    }
+  };
+
+  const startChecklist = async (assignment: SiteAssignment, withPrefillData?: ChecklistData) => {
     try {
       // Store assignment ID for linking after completion
       sessionStorage.setItem('currentAssignmentId', assignment.id);
@@ -96,10 +137,31 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
         await updateAssignmentStatus(assignment.id, 'em_andamento');
         refetch();
       }
-      onStartChecklist(assignment);
+      onStartChecklist(assignment, withPrefillData);
     } catch (error) {
       toast.error('Erro ao iniciar checklist');
     }
+  };
+
+  const handleUsePreviousData = async () => {
+    if (pendingAssignment && prefillData) {
+      await startChecklist(pendingAssignment, prefillData);
+      toast.success('Dados da vistoria anterior carregados!', {
+        description: 'As fotos e assinatura precisam ser capturadas novamente.',
+      });
+    }
+    setShowPrefillDialog(false);
+    setPendingAssignment(null);
+    setPrefillData(null);
+  };
+
+  const handleStartFresh = async () => {
+    if (pendingAssignment) {
+      await startChecklist(pendingAssignment);
+    }
+    setShowPrefillDialog(false);
+    setPendingAssignment(null);
+    setPrefillData(null);
   };
 
   // Separate assignments by status
@@ -173,8 +235,13 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
                 <Button
                   size="sm"
                   onClick={() => handleStartChecklist(assignment)}
+                  disabled={checkingPrefill === assignment.id}
                 >
-                  <Play className="h-4 w-4 mr-1" />
+                  {checkingPrefill === assignment.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Play className="h-4 w-4 mr-1" />
+                  )}
                   {assignment.status === 'em_andamento' ? 'Continuar' : 'Iniciar'}
                 </Button>
               </div>
@@ -222,6 +289,16 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
           )}
         </div>
       )}
+
+      {/* Prefill Dialog */}
+      <PrefillDialog
+        open={showPrefillDialog}
+        onOpenChange={setShowPrefillDialog}
+        siteCode={pendingAssignment?.site?.site_code || ''}
+        lastInspectionDate={lastInspectionDate}
+        onUsePreviousData={handleUsePreviousData}
+        onStartFresh={handleStartFresh}
+      />
     </div>
   );
 }

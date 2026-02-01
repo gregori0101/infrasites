@@ -23,6 +23,7 @@ interface ChecklistContextType {
   addGabinete: () => void;
   removeGabinete: (index: number) => void;
   resetChecklist: () => void;
+  loadFromPreviousReport: (checklistData: ChecklistData) => void;
   saveToLocal: () => void;
   loadFromLocal: (id: string) => boolean;
   getAllLocal: () => ChecklistData[];
@@ -282,6 +283,32 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Load data from a previous report (pre-fill feature)
+  const loadFromPreviousReport = useCallback((checklistData: ChecklistData) => {
+    // Ensure the data has a new ID and updated timestamps
+    const now = new Date().toISOString();
+    const newData = {
+      ...checklistData,
+      id: uuidv4(),
+      createdAt: now,
+      updatedAt: now,
+      sincronizado: false,
+    };
+    
+    setData(newData);
+    setCurrentStep(0);
+    setCurrentGabinete(0);
+    
+    // Update localStorage with pre-filled session
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_step`);
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_gabinete`);
+      localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newData));
+    }
+    
+    console.log('[ChecklistContext] Loaded data from previous report for site:', checklistData.siglaSite);
+  }, []);
+
   const saveToLocal = useCallback(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     const checklists: ChecklistData[] = stored ? JSON.parse(stored) : [];
@@ -468,6 +495,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       addGabinete,
       removeGabinete,
       resetChecklist,
+      loadFromPreviousReport,
       saveToLocal,
       loadFromLocal,
       getAllLocal,

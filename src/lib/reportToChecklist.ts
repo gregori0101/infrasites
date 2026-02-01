@@ -3,6 +3,101 @@ import { ReportRow } from "./reportDatabase";
 import { v4 as uuid } from "uuid";
 
 /**
+ * Strip all photos and signature from ChecklistData
+ * Used for pre-filling forms without carrying over old photos
+ */
+function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
+  return {
+    ...data,
+    // Generate new ID and timestamps for the new checklist
+    id: uuid(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    sincronizado: false,
+    
+    // Clear site-level photos
+    fotoPanoramica: null,
+    fotosObservacao: [],
+    assinaturaDigital: null,
+    
+    // Clear technician name (new inspection, new technician)
+    tecnico: '',
+    
+    // Clear gabinete photos
+    gabinetes: data.gabinetes.map(gab => ({
+      ...gab,
+      fotoPanoramicaGabinete: null,
+      fotoTransmissao: null,
+      fotoAcesso: null,
+      fcc: {
+        ...gab.fcc,
+        fotoPanoramica: null,
+        fotoPainel: null,
+      },
+      baterias: {
+        ...gab.baterias,
+        fotoBanco: null,
+      },
+      climatizacao: {
+        ...gab.climatizacao,
+        fotoAR1: null,
+        fotoAR2: null,
+        fotoAR3: null,
+        fotoAR4: null,
+        fotoCondensador: null,
+        fotoEvaporador: null,
+        fotoControlador: null,
+      },
+    })),
+    
+    // Clear fiber optic photos
+    fibraOptica: {
+      ...data.fibraOptica,
+      abordagens: data.fibraOptica.abordagens.map(ab => ({
+        ...ab,
+        fotos: [],
+      })),
+      fotosCaixasPassagem: [],
+      fotosCaixasSubterraneas: [],
+      fotosSubidasLaterais: [],
+      dgos: data.fibraOptica.dgos.map(dgo => ({
+        ...dgo,
+        fotoDGO: null,
+        fotoCordesDetalhada: null,
+      })),
+    },
+    
+    // Clear energia photos
+    energia: {
+      ...data.energia,
+      fotoTransformador: null,
+      fotoQuadroGeral: null,
+    },
+    
+    // Clear GMG photo
+    gmg: {
+      ...data.gmg,
+      fotoGMG: null,
+    },
+    
+    // Clear torre photo
+    torre: {
+      ...data.torre,
+      fotoNinhos: null,
+    },
+  };
+}
+
+/**
+ * Convert a report row back to ChecklistData WITHOUT photos
+ * This is used for pre-filling forms with previous inspection data
+ */
+export function reportToChecklistWithoutPhotos(report: ReportRow): ChecklistData {
+  const fullData = reportToChecklist(report);
+  return stripPhotosFromChecklist(fullData);
+}
+
+/**
  * Parse a JSON string that might be a single URL or an array of URLs
  */
 function parseJsonArray(value: string | null): string[] {
