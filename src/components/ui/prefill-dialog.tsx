@@ -59,9 +59,9 @@ export function PrefillDialog({
           <div className="p-3 rounded-lg border bg-primary/5 border-primary/20">
             <h4 className="font-medium text-sm mb-1">Carregar dados anteriores</h4>
             <p className="text-xs text-muted-foreground">
-              Pré-preenche o formulário com as informações da última vistoria.
+              Pré-preenche o formulário com as informações e fotos da última vistoria.
               <span className="block mt-1 text-primary">
-                Fotos e assinatura precisarão ser capturadas novamente.
+                Apenas a assinatura e o nome do técnico precisarão ser preenchidos novamente.
               </span>
             </p>
           </div>

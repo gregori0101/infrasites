@@ -98,6 +98,25 @@ export function reportToChecklistWithoutPhotos(report: ReportRow): ChecklistData
 }
 
 /**
+ * Convert a report row back to ChecklistData WITH photos
+ * This is used for pre-filling forms including photos from previous inspection
+ */
+export function reportToChecklistWithPhotos(report: ReportRow): ChecklistData {
+  const fullData = reportToChecklist(report);
+  // Generate new ID and timestamps for the new checklist, but keep photos
+  return {
+    ...fullData,
+    id: uuid(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    sincronizado: false,
+    // Clear only technician name and signature (new inspection, new technician)
+    tecnico: '',
+    assinaturaDigital: null,
+  };
+}
+
+/**
  * Parse a JSON string that might be a single URL or an array of URLs
  */
 function parseJsonArray(value: string | null): string[] {

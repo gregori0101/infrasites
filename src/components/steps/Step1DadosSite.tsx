@@ -57,7 +57,7 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
     if (previousChecklistData) {
       loadFromPreviousReport(previousChecklistData);
       toast.success('Dados da vistoria anterior carregados!', {
-        description: 'As fotos e assinatura precisam ser capturadas novamente.',
+        description: 'Todos os dados e fotos foram carregados. Apenas a assinatura precisa ser capturada novamente.',
       });
     }
     setShowPrefillDialog(false);

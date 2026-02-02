@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchLatestReportBySiteCode, ReportRow } from '@/lib/reportDatabase';
-import { reportToChecklistWithoutPhotos } from '@/lib/reportToChecklist';
+import { reportToChecklistWithPhotos } from '@/lib/reportToChecklist';
 import { ChecklistData } from '@/types/checklist';
 
 interface UsePreviousReportResult {
@@ -33,7 +33,7 @@ export function usePreviousReport(): UsePreviousReportResult {
       
       if (report) {
         setPreviousReport(report);
-        const checklistData = reportToChecklistWithoutPhotos(report);
+        const checklistData = reportToChecklistWithPhotos(report);
         setPreviousChecklistData(checklistData);
         setLastInspectionDate(report.created_at || null);
       } else {
