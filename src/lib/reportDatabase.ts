@@ -202,47 +202,14 @@ export async function fetchLatestReportBySiteCode(siteCode: string): Promise<Rep
 /**
  * Fetch the latest report for a specific site code INCLUDING all photos
  * Used for pre-filling forms with complete data from previous inspection
+ * Uses a security definer function to bypass RLS - allows technicians to access previous reports
  */
 export async function fetchLatestReportWithPhotosBySiteCode(siteCode: string): Promise<ReportRow | null> {
   try {
-    // Include all columns: dashboard data + photo columns + DGO details + abordagens
-    const dataColumns = buildDashboardColumns();
-    const photoColumns = buildPhotoColumns();
-    
-    // Add extra columns needed for complete reconstruction
-    const extraColumns = [
-      'operadora',
-      // Abordagens 3 and 4
-      'fibra_abord3_tipo',
-      'fibra_abord3_descricao',
-      'fibra_abord3_foto',
-      'fibra_abord4_tipo',
-      'fibra_abord4_descricao',
-      'fibra_abord4_foto',
-      // DGO data (IDs and capacities are in dashboard, but cordoes status needed)
-      'fibra_dgo1_id',
-      'fibra_dgo1_capacidade',
-      'fibra_dgo1_cordoes',
-      'fibra_dgo2_id',
-      'fibra_dgo2_capacidade',
-      'fibra_dgo2_cordoes',
-      'fibra_dgo3_id',
-      'fibra_dgo3_capacidade',
-      'fibra_dgo3_cordoes',
-      'fibra_dgo4_id',
-      'fibra_dgo4_capacidade',
-      'fibra_dgo4_cordoes',
-    ].join(',');
-    
-    // Combine all columns (removing duplicates by using a Set would be ideal but Supabase handles it)
-    const allColumns = `${dataColumns},${photoColumns},${extraColumns}`;
-    
+    // Use the security definer function to bypass RLS restrictions
+    // This allows technicians to access previous inspection data for pre-filling
     const { data, error } = await supabase
-      .from('reports')
-      .select(allColumns)
-      .ilike('site_code', siteCode)
-      .order('created_at', { ascending: false })
-      .limit(1)
+      .rpc('get_latest_report_for_prefill', { p_site_code: siteCode })
       .maybeSingle();
 
     if (error) {
