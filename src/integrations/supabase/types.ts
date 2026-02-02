@@ -22,10 +22,15 @@ export type Database = {
           created_time: string
           email_sent: boolean | null
           email_sent_at: string | null
+          energia_fabricante: string | null
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
           energia_foto_transformador: string | null
+          energia_potencia_kva: number | null
+          energia_tensao_entrada: string | null
+          energia_tipo_quadro: string | null
+          energia_transformador_ok: string | null
           excel_file_path: string | null
           fibra_abord1_descricao: string | null
           fibra_abord1_foto: string | null
@@ -78,6 +83,7 @@ export type Database = {
           gab1_ac4_modelo: string | null
           gab1_ac4_status: string | null
           gab1_alarme_status: string | null
+          gab1_ativo: string | null
           gab1_bancos_interligados: string | null
           gab1_bat_foto: string | null
           gab1_bat1_capacidade: string | null
@@ -150,6 +156,7 @@ export type Database = {
           gab2_ac4_modelo: string | null
           gab2_ac4_status: string | null
           gab2_alarme_status: string | null
+          gab2_ativo: string | null
           gab2_bancos_interligados: string | null
           gab2_bat_foto: string | null
           gab2_bat1_capacidade: string | null
@@ -222,6 +229,7 @@ export type Database = {
           gab3_ac4_modelo: string | null
           gab3_ac4_status: string | null
           gab3_alarme_status: string | null
+          gab3_ativo: string | null
           gab3_bancos_interligados: string | null
           gab3_bat_foto: string | null
           gab3_bat1_capacidade: string | null
@@ -294,6 +302,7 @@ export type Database = {
           gab4_ac4_modelo: string | null
           gab4_ac4_status: string | null
           gab4_alarme_status: string | null
+          gab4_ativo: string | null
           gab4_bancos_interligados: string | null
           gab4_bat_foto: string | null
           gab4_bat1_capacidade: string | null
@@ -366,6 +375,7 @@ export type Database = {
           gab5_ac4_modelo: string | null
           gab5_ac4_status: string | null
           gab5_alarme_status: string | null
+          gab5_ativo: string | null
           gab5_bancos_interligados: string | null
           gab5_bat_foto: string | null
           gab5_bat1_capacidade: string | null
@@ -438,6 +448,7 @@ export type Database = {
           gab6_ac4_modelo: string | null
           gab6_ac4_status: string | null
           gab6_alarme_status: string | null
+          gab6_ativo: string | null
           gab6_bancos_interligados: string | null
           gab6_bat_foto: string | null
           gab6_bat1_capacidade: string | null
@@ -510,6 +521,7 @@ export type Database = {
           gab7_ac4_modelo: string | null
           gab7_ac4_status: string | null
           gab7_alarme_status: string | null
+          gab7_ativo: string | null
           gab7_bancos_interligados: string | null
           gab7_bat_foto: string | null
           gab7_bat1_capacidade: string | null
@@ -603,10 +615,15 @@ export type Database = {
           created_time: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_fabricante?: string | null
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
           energia_foto_transformador?: string | null
+          energia_potencia_kva?: number | null
+          energia_tensao_entrada?: string | null
+          energia_tipo_quadro?: string | null
+          energia_transformador_ok?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
           fibra_abord1_foto?: string | null
@@ -659,6 +676,7 @@ export type Database = {
           gab1_ac4_modelo?: string | null
           gab1_ac4_status?: string | null
           gab1_alarme_status?: string | null
+          gab1_ativo?: string | null
           gab1_bancos_interligados?: string | null
           gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
@@ -731,6 +749,7 @@ export type Database = {
           gab2_ac4_modelo?: string | null
           gab2_ac4_status?: string | null
           gab2_alarme_status?: string | null
+          gab2_ativo?: string | null
           gab2_bancos_interligados?: string | null
           gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
@@ -803,6 +822,7 @@ export type Database = {
           gab3_ac4_modelo?: string | null
           gab3_ac4_status?: string | null
           gab3_alarme_status?: string | null
+          gab3_ativo?: string | null
           gab3_bancos_interligados?: string | null
           gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
@@ -875,6 +895,7 @@ export type Database = {
           gab4_ac4_modelo?: string | null
           gab4_ac4_status?: string | null
           gab4_alarme_status?: string | null
+          gab4_ativo?: string | null
           gab4_bancos_interligados?: string | null
           gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
@@ -947,6 +968,7 @@ export type Database = {
           gab5_ac4_modelo?: string | null
           gab5_ac4_status?: string | null
           gab5_alarme_status?: string | null
+          gab5_ativo?: string | null
           gab5_bancos_interligados?: string | null
           gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
@@ -1019,6 +1041,7 @@ export type Database = {
           gab6_ac4_modelo?: string | null
           gab6_ac4_status?: string | null
           gab6_alarme_status?: string | null
+          gab6_ativo?: string | null
           gab6_bancos_interligados?: string | null
           gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
@@ -1091,6 +1114,7 @@ export type Database = {
           gab7_ac4_modelo?: string | null
           gab7_ac4_status?: string | null
           gab7_alarme_status?: string | null
+          gab7_ativo?: string | null
           gab7_bancos_interligados?: string | null
           gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
@@ -1184,10 +1208,15 @@ export type Database = {
           created_time?: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_fabricante?: string | null
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
           energia_foto_transformador?: string | null
+          energia_potencia_kva?: number | null
+          energia_tensao_entrada?: string | null
+          energia_tipo_quadro?: string | null
+          energia_transformador_ok?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
           fibra_abord1_foto?: string | null
@@ -1240,6 +1269,7 @@ export type Database = {
           gab1_ac4_modelo?: string | null
           gab1_ac4_status?: string | null
           gab1_alarme_status?: string | null
+          gab1_ativo?: string | null
           gab1_bancos_interligados?: string | null
           gab1_bat_foto?: string | null
           gab1_bat1_capacidade?: string | null
@@ -1312,6 +1342,7 @@ export type Database = {
           gab2_ac4_modelo?: string | null
           gab2_ac4_status?: string | null
           gab2_alarme_status?: string | null
+          gab2_ativo?: string | null
           gab2_bancos_interligados?: string | null
           gab2_bat_foto?: string | null
           gab2_bat1_capacidade?: string | null
@@ -1384,6 +1415,7 @@ export type Database = {
           gab3_ac4_modelo?: string | null
           gab3_ac4_status?: string | null
           gab3_alarme_status?: string | null
+          gab3_ativo?: string | null
           gab3_bancos_interligados?: string | null
           gab3_bat_foto?: string | null
           gab3_bat1_capacidade?: string | null
@@ -1456,6 +1488,7 @@ export type Database = {
           gab4_ac4_modelo?: string | null
           gab4_ac4_status?: string | null
           gab4_alarme_status?: string | null
+          gab4_ativo?: string | null
           gab4_bancos_interligados?: string | null
           gab4_bat_foto?: string | null
           gab4_bat1_capacidade?: string | null
@@ -1528,6 +1561,7 @@ export type Database = {
           gab5_ac4_modelo?: string | null
           gab5_ac4_status?: string | null
           gab5_alarme_status?: string | null
+          gab5_ativo?: string | null
           gab5_bancos_interligados?: string | null
           gab5_bat_foto?: string | null
           gab5_bat1_capacidade?: string | null
@@ -1600,6 +1634,7 @@ export type Database = {
           gab6_ac4_modelo?: string | null
           gab6_ac4_status?: string | null
           gab6_alarme_status?: string | null
+          gab6_ativo?: string | null
           gab6_bancos_interligados?: string | null
           gab6_bat_foto?: string | null
           gab6_bat1_capacidade?: string | null
@@ -1672,6 +1707,7 @@ export type Database = {
           gab7_ac4_modelo?: string | null
           gab7_ac4_status?: string | null
           gab7_alarme_status?: string | null
+          gab7_ativo?: string | null
           gab7_bancos_interligados?: string | null
           gab7_bat_foto?: string | null
           gab7_bat1_capacidade?: string | null
@@ -1888,10 +1924,15 @@ export type Database = {
           created_time: string
           email_sent: boolean | null
           email_sent_at: string | null
+          energia_fabricante: string | null
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
           energia_foto_transformador: string | null
+          energia_potencia_kva: number | null
+          energia_tensao_entrada: string | null
+          energia_tipo_quadro: string | null
+          energia_transformador_ok: string | null
           excel_file_path: string | null
           fibra_abord1_descricao: string | null
           fibra_abord1_foto: string | null
@@ -1944,6 +1985,7 @@ export type Database = {
           gab1_ac4_modelo: string | null
           gab1_ac4_status: string | null
           gab1_alarme_status: string | null
+          gab1_ativo: string | null
           gab1_bancos_interligados: string | null
           gab1_bat_foto: string | null
           gab1_bat1_capacidade: string | null
@@ -2016,6 +2058,7 @@ export type Database = {
           gab2_ac4_modelo: string | null
           gab2_ac4_status: string | null
           gab2_alarme_status: string | null
+          gab2_ativo: string | null
           gab2_bancos_interligados: string | null
           gab2_bat_foto: string | null
           gab2_bat1_capacidade: string | null
@@ -2088,6 +2131,7 @@ export type Database = {
           gab3_ac4_modelo: string | null
           gab3_ac4_status: string | null
           gab3_alarme_status: string | null
+          gab3_ativo: string | null
           gab3_bancos_interligados: string | null
           gab3_bat_foto: string | null
           gab3_bat1_capacidade: string | null
@@ -2160,6 +2204,7 @@ export type Database = {
           gab4_ac4_modelo: string | null
           gab4_ac4_status: string | null
           gab4_alarme_status: string | null
+          gab4_ativo: string | null
           gab4_bancos_interligados: string | null
           gab4_bat_foto: string | null
           gab4_bat1_capacidade: string | null
@@ -2232,6 +2277,7 @@ export type Database = {
           gab5_ac4_modelo: string | null
           gab5_ac4_status: string | null
           gab5_alarme_status: string | null
+          gab5_ativo: string | null
           gab5_bancos_interligados: string | null
           gab5_bat_foto: string | null
           gab5_bat1_capacidade: string | null
@@ -2304,6 +2350,7 @@ export type Database = {
           gab6_ac4_modelo: string | null
           gab6_ac4_status: string | null
           gab6_alarme_status: string | null
+          gab6_ativo: string | null
           gab6_bancos_interligados: string | null
           gab6_bat_foto: string | null
           gab6_bat1_capacidade: string | null
@@ -2376,6 +2423,7 @@ export type Database = {
           gab7_ac4_modelo: string | null
           gab7_ac4_status: string | null
           gab7_alarme_status: string | null
+          gab7_ativo: string | null
           gab7_bancos_interligados: string | null
           gab7_bat_foto: string | null
           gab7_bat1_capacidade: string | null
