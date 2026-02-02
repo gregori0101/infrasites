@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchLatestReportBySiteCode, ReportRow } from '@/lib/reportDatabase';
+import { useState, useCallback } from 'react';
+import { fetchLatestReportWithPhotosBySiteCode, ReportRow } from '@/lib/reportDatabase';
 import { reportToChecklistWithPhotos } from '@/lib/reportToChecklist';
 import { ChecklistData } from '@/types/checklist';
 
@@ -29,7 +29,8 @@ export function usePreviousReport(): UsePreviousReportResult {
 
     setIsLoading(true);
     try {
-      const report = await fetchLatestReportBySiteCode(siteCode);
+      // Use the version that includes all photo columns
+      const report = await fetchLatestReportWithPhotosBySiteCode(siteCode);
       
       if (report) {
         setPreviousReport(report);
