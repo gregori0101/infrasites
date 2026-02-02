@@ -141,6 +141,7 @@ export interface ClimatizacaoData {
 
 export interface GabineteData {
   tipo: GabineteType;
+  ativo: boolean;
   comProtecao: boolean;
   tecnologiasAcesso: TecnologiaAcesso[];
   tecnologiasTransporte: TecnologiaTransporte[];
@@ -214,6 +215,7 @@ export interface ChecklistData {
 
 export const INITIAL_GABINETE: GabineteData = {
   tipo: 'CONTAINER',
+  ativo: true,
   comProtecao: false,
   tecnologiasAcesso: [],
   tecnologiasTransporte: [],

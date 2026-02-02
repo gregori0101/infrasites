@@ -66,6 +66,13 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
             </div>
 
             <ToggleSwitch
+              label="Gabinete Ativo"
+              description="Indica se o gabinete está em operação"
+              value={gabinete.ativo}
+              onChange={(value) => updateGabinete(currentGabinete, { ativo: value })}
+            />
+
+            <ToggleSwitch
               label="Com Proteção"
               description="Tranca ou cadeado instalado"
               value={gabinete.comProtecao}
