@@ -246,6 +246,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 
     if (gab) {
       row[`${prefix}_tipo`] = gab.tipo || null;
+      row[`${prefix}_ativo`] = gab.ativo ? 'SIM' : 'NÃO';
       row[`${prefix}_protecao`] = gab.comProtecao ? 'SIM' : 'NÃO';
       row[`${prefix}_tecnologias_acesso`] = gab.tecnologiasAcesso.join(', ') || null;
       row[`${prefix}_tecnologias_transporte`] = gab.tecnologiasTransporte.join(', ') || null;
@@ -317,7 +318,12 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.torre_aterramento = data.torre.aterramento || null;
   row.torre_housekeeping = data.torre.zeladoria || null;
 
-  // Energia photos
+  // Energia data
+  row.energia_tipo_quadro = data.energia?.tipoQuadro || null;
+  row.energia_fabricante = data.energia?.fabricante || null;
+  row.energia_potencia_kva = data.energia?.potenciaKVA || null;
+  row.energia_tensao_entrada = data.energia?.tensaoEntrada || null;
+  row.energia_transformador_ok = data.energia?.transformadorOK === true ? 'SIM' : data.energia?.transformadorOK === false ? 'NÃO' : null;
   row.energia_foto_transformador = data.energia?.fotoTransformador || null;
   row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
 
