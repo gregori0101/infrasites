@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
-import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Radio } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet';
-import { cn } from '@/lib/utils';
+
 
 type Operadora = 'VIVO' | 'TEL';
 
@@ -162,28 +163,18 @@ export default function Login() {
               {!isLogin && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <Radio className="w-4 h-4" />
+                    <Building2 className="w-4 h-4" />
                     Empresa <span className="text-destructive">*</span>
                   </Label>
-                  <div className="flex gap-3">
-                    {(['VIVO', 'TEL'] as Operadora[]).map((op) => (
-                      <button
-                        key={op}
-                        type="button"
-                        onClick={() => setOperadora(op)}
-                        className={cn(
-                          "flex-1 py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200",
-                          operadora === op
-                            ? op === 'VIVO' 
-                              ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background'
-                              : 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 ring-offset-background'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        )}
-                      >
-                        {op}
-                      </button>
-                    ))}
-                  </div>
+                  <Select value={operadora} onValueChange={(value: Operadora) => setOperadora(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a empresa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="VIVO">VIVO</SelectItem>
+                      <SelectItem value="TEL">TEL</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
