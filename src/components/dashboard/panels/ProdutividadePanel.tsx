@@ -239,7 +239,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
           title="Vistorias Realizadas"
           value={stats.totalRealizadas}
@@ -259,14 +259,6 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
           onClick={() => onDrillDown?.("pendentes")}
         />
         <StatCard
-          title="Taxa de Conclusão"
-          value={`${stats.taxaConclusao}%`}
-          subtitle={`${stats.totalRealizadas} de ${totalAtribuidas} atribuídas`}
-          icon={Target}
-          iconBg="bg-blue-100"
-          trend={stats.taxaConclusao >= 80 ? { value: stats.taxaConclusao, label: "bom" } : { value: -stats.taxaConclusao, label: "baixo" }}
-        />
-        <StatCard
           title="Média por Técnico"
           value={stats.mediaPorTecnico.toFixed(1)}
           subtitle={`${stats.technicianRanking.length} técnicos ativos`}
@@ -274,6 +266,73 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
           iconBg="bg-purple-100"
         />
       </div>
+
+      {/* Tabela Detalhada por UF - Movida para cima */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Detalhamento por UF</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[250px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>UF</TableHead>
+                  <TableHead className="text-center">Total Sites</TableHead>
+                  <TableHead className="text-center">Concluídas</TableHead>
+                  <TableHead className="text-center">Pendentes</TableHead>
+                  <TableHead className="text-center">Sem Atribuição</TableHead>
+                  <TableHead className="text-right">% Concluído</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stats.assignmentsByUf.map((row) => {
+                  const percentConcluido = row.totalSites > 0
+                    ? Math.round((row.concluidas / row.totalSites) * 100)
+                    : 0;
+                  return (
+                    <TableRow key={row.uf}>
+                      <TableCell className="font-medium">{row.uf}</TableCell>
+                      <TableCell className="text-center">{row.totalSites}</TableCell>
+                      <TableCell className="text-center text-green-600 font-medium">
+                        {row.concluidas}
+                      </TableCell>
+                      <TableCell className="text-center text-amber-600">
+                        {row.pendentes}
+                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        {row.semAtribuicao}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge
+                          variant={percentConcluido >= 80 ? "default" : percentConcluido >= 50 ? "secondary" : "destructive"}
+                          className={
+                            percentConcluido >= 80
+                              ? "bg-green-500"
+                              : percentConcluido >= 50
+                              ? "bg-amber-500"
+                              : ""
+                          }
+                        >
+                          {percentConcluido}%
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {stats.assignmentsByUf.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      Sem dados disponíveis
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="vertical" />
+          </ScrollArea>
+        </CardContent>
+      </Card>
 
       {/* Gráficos de Evolução */}
       {/* Evolução Diária - Full Width */}
@@ -674,72 +733,6 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
         </Card>
       </div>
 
-      {/* Tabela Detalhada por UF */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Detalhamento por UF</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[250px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>UF</TableHead>
-                  <TableHead className="text-center">Total Sites</TableHead>
-                  <TableHead className="text-center">Concluídas</TableHead>
-                  <TableHead className="text-center">Pendentes</TableHead>
-                  <TableHead className="text-center">Sem Atribuição</TableHead>
-                  <TableHead className="text-right">% Concluído</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stats.assignmentsByUf.map((row) => {
-                  const percentConcluido = row.totalSites > 0
-                    ? Math.round((row.concluidas / row.totalSites) * 100)
-                    : 0;
-                  return (
-                    <TableRow key={row.uf}>
-                      <TableCell className="font-medium">{row.uf}</TableCell>
-                      <TableCell className="text-center">{row.totalSites}</TableCell>
-                      <TableCell className="text-center text-green-600 font-medium">
-                        {row.concluidas}
-                      </TableCell>
-                      <TableCell className="text-center text-amber-600">
-                        {row.pendentes}
-                      </TableCell>
-                      <TableCell className="text-center text-muted-foreground">
-                        {row.semAtribuicao}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={percentConcluido >= 80 ? "default" : percentConcluido >= 50 ? "secondary" : "destructive"}
-                          className={
-                            percentConcluido >= 80
-                              ? "bg-green-500"
-                              : percentConcluido >= 50
-                              ? "bg-amber-500"
-                              : ""
-                          }
-                        >
-                          {percentConcluido}%
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {stats.assignmentsByUf.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      Sem dados disponíveis
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="vertical" />
-          </ScrollArea>
-        </CardContent>
-      </Card>
     </div>
   );
 }
