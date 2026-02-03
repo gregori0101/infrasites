@@ -56,7 +56,7 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
               <Label>Fabricante</Label>
               <Select 
                 value={gabinete.fcc.fabricante} 
-                onValueChange={(value: FCCFabricante) => updateFCC({ fabricante: value })}
+                onValueChange={(value: FCCFabricante) => updateFCC({ fabricante: value, fabricanteOutra: value === 'OUTRA' ? gabinete.fcc.fabricanteOutra : '' })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o fabricante" />
@@ -70,6 +70,17 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
                 </SelectContent>
               </Select>
             </div>
+
+            {gabinete.fcc.fabricante === 'OUTRA' && (
+              <div className="space-y-2">
+                <Label>Especifique o fabricante</Label>
+                <Input
+                  placeholder="Digite o nome do fabricante"
+                  value={gabinete.fcc.fabricanteOutra || ''}
+                  onChange={(e) => updateFCC({ fabricanteOutra: e.target.value })}
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">

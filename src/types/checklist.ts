@@ -109,6 +109,7 @@ export interface ArCondicionado {
 
 export interface FCCData {
   fabricante: FCCFabricante;
+  fabricanteOutra?: string;
   tensaoDC: TensaoDC;
   gerenciadaSG: boolean;
   gerenciavel: boolean;
@@ -239,6 +240,7 @@ export const INITIAL_GABINETE: GabineteData = {
   tecnologiasTransporte: [],
   fcc: {
     fabricante: null as unknown as FCCFabricante,
+    fabricanteOutra: '',
     tensaoDC: null as unknown as TensaoDC,
     gerenciadaSG: false,
     gerenciavel: false,
