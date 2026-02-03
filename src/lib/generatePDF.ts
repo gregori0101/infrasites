@@ -80,7 +80,10 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   };
 
   const addSectionTitle = (title: string, icon?: string) => {
-    checkNewPage(20);
+    checkNewPage(25);
+    
+    // Add spacing before section
+    y += 3;
     
     // Section background with gradient effect
     doc.setFillColor(...VIVO_ORANGE);
@@ -92,12 +95,15 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.setFont('helvetica', 'bold');
     doc.text((icon ? icon + ' ' : '') + title.toUpperCase(), margin + 4, y + 6);
     
-    y += 13;
+    y += 14;
     doc.setTextColor(...GRAY_DARK);
   };
 
   const addSubSectionTitle = (title: string) => {
-    checkNewPage(15);
+    checkNewPage(18);
+    
+    // Add spacing before subsection
+    y += 2;
     
     doc.setFillColor(...VIVO_BLUE);
     doc.roundedRect(margin, y, contentWidth, 7, 0.5, 0.5, 'F');
@@ -107,13 +113,13 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.setFont('helvetica', 'bold');
     doc.text(title, margin + 3, y + 5);
     
-    y += 10;
+    y += 12;
     doc.setTextColor(...GRAY_DARK);
   };
 
   const addInfoCard = (title: string, items: { label: string; value: string | number | boolean | null | undefined }[]) => {
-    const cardHeight = 6 + items.length * 5 + 3;
-    checkNewPage(cardHeight);
+    const cardHeight = 8 + items.length * 6 + 4;
+    checkNewPage(cardHeight + 5);
 
     // Card background
     doc.setFillColor(...GRAY_LIGHT);
@@ -126,15 +132,15 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
     // Card title
     doc.setFillColor(...VIVO_PURPLE);
-    doc.roundedRect(margin, y, contentWidth, 6, 2, 2, 'F');
-    doc.rect(margin, y + 3, contentWidth, 3, 'F'); // Fill bottom corners
+    doc.roundedRect(margin, y, contentWidth, 8, 2, 2, 'F');
+    doc.rect(margin, y + 4, contentWidth, 4, 'F'); // Fill bottom corners
     
     doc.setTextColor(...WHITE);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
-    doc.text(title.toUpperCase(), margin + 3, y + 4.2);
+    doc.text(title.toUpperCase(), margin + 3, y + 5.5);
 
-    y += 8;
+    y += 12;
 
     // Card items
     items.forEach(item => {
@@ -149,14 +155,14 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
         typeof item.value === 'boolean' ? (item.value ? 'Sim' : 'Não') :
         String(item.value);
       doc.text(displayValue, margin + 50, y);
-      y += 5;
+      y += 6;
     });
 
-    y += 4;
+    y += 6;
   };
 
   const addFieldRow = (label: string, value: string | number | boolean | null | undefined, status?: 'ok' | 'warning' | 'error') => {
-    checkNewPage(7);
+    checkNewPage(8);
     
     // Alternating row background
     const rowIndex = Math.floor(y / 6) % 2;
