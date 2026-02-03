@@ -163,28 +163,8 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
           </div>
         </FormCard>
 
-        <FormCard title="Torre e Ninhos" icon={<Radio className="w-4 h-4" />}>
+        <FormCard title="Torre" icon={<Radio className="w-4 h-4" />}>
           <div className="space-y-4">
-            <ToggleSwitch
-              label="Ninhos na Torre"
-              description="Presença de ninhos de pássaros"
-              value={data.torre.ninhos}
-              onChange={(value) => updateTorre({ ninhos: value })}
-            />
-
-            {data.torre.ninhos && (
-              <div className="animate-slide-up">
-                <PhotoCapture
-                  label="Foto dos ninhos"
-                  value={data.torre.fotoNinhos || null}
-                  onChange={(value) => updateTorre({ fotoNinhos: value })}
-                  required
-                  siteCode={data.siglaSite}
-                  category="torre_ninhos"
-                />
-              </div>
-            )}
-
             <ToggleSwitch
               label="Fibras Protegidas"
               description="Proteção contra caturritas"
