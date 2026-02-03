@@ -213,13 +213,18 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     for (let j = 0; j < 6; j++) {
       const tipo = report[`${prefix}_bat${j + 1}_tipo`];
       if (tipo) {
+        const estadoRaw = report[`${prefix}_bat${j + 1}_estado`] || 'OK';
+        const estados = estadoRaw.includes(',') 
+          ? estadoRaw.split(',').map((e: string) => e.trim()) 
+          : [estadoRaw];
         bancos.push({
           tipo: tipo as any,
           fabricante: (report[`${prefix}_bat${j + 1}_fabricante`] || 'NA') as any,
           capacidadeAh: parseInt(report[`${prefix}_bat${j + 1}_capacidade`]) || null,
           dataFabricacao: report[`${prefix}_bat${j + 1}_data_fabricacao`] || '',
-          estado: (report[`${prefix}_bat${j + 1}_estado`] || 'OK') as any,
+          estados: estados as any,
           colada: (report[`${prefix}_bat${j + 1}_colada`] || 'NA') as any,
+          fotoBanco: report[`${prefix}_bat${j + 1}_foto`] || null,
         });
       }
     }

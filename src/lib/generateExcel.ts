@@ -99,7 +99,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           row[`${prefix}_Banco${j + 1}_Fabricante`] = banco.fabricante;
           row[`${prefix}_Banco${j + 1}_CapAh`] = banco.capacidadeAh || '';
           row[`${prefix}_Banco${j + 1}_DataFab`] = banco.dataFabricacao || '';
-          row[`${prefix}_Banco${j + 1}_Estado`] = banco.estado;
+          row[`${prefix}_Banco${j + 1}_Estado`] = banco.estados?.join(', ') || '';
           row[`${prefix}_Banco${j + 1}_Colada`] = banco.colada || 'NA';
           row[`${prefix}_Banco${j + 1}_Foto`] = getPhotoValue(banco.fotoBanco);
         } else {

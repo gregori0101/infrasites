@@ -478,7 +478,8 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       addFieldRow('  Fabricante', banco.fabricante);
       addFieldRow('  Capacidade (Ah)', banco.capacidadeAh);
       addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
-      addFieldRow('  Estado', banco.estado, banco.estado === 'OK' ? 'ok' : 'error');
+      const estadoStr = banco.estados?.join(', ') || '-';
+      addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
       addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
 
       await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
