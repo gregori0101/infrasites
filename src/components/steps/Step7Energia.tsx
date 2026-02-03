@@ -25,8 +25,16 @@ interface Step7Props {
 
 export function Step7Energia({ showErrors = false, validationErrors = [] }: Step7Props) {
   const { data, updateData, updateSecaoNaoAplicavel } = useChecklist();
-  const energia = data.energia;
-  const isSkipped = data.secoesNaoAplicaveis.energia;
+  const energia = data.energia ?? {
+    tipoQuadro: null,
+    fabricante: null,
+    potenciaKVA: null,
+    tensaoEntrada: null,
+    transformadorOK: null,
+    fotoTransformador: null,
+    fotoQuadroGeral: null,
+  };
+  const isSkipped = data.secoesNaoAplicaveis?.energia ?? false;
 
   const updateEnergia = (updates: Partial<EnergiaData>) => {
     updateData('energia', { ...energia, ...updates });

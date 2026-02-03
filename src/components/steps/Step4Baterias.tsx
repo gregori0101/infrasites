@@ -40,8 +40,8 @@ interface Step4Props {
 
 export function Step4Baterias({ showErrors = false, validationErrors = [] }: Step4Props) {
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
-  const gabinete = data.gabinetes[currentGabinete];
-  const isSkipped = data.secoesNaoAplicaveis.baterias;
+  const gabinete = data.gabinetes?.[currentGabinete];
+  const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
 
   if (!gabinete) return null;
 

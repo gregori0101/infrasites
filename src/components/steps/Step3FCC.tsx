@@ -40,8 +40,8 @@ interface Step3Props {
 
 export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Props) {
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
-  const gabinete = data.gabinetes[currentGabinete];
-  const isSkipped = data.secoesNaoAplicaveis.fcc;
+  const gabinete = data.gabinetes?.[currentGabinete];
+  const isSkipped = data.secoesNaoAplicaveis?.fcc ?? false;
 
   if (!gabinete) return null;
 
