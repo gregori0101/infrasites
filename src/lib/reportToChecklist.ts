@@ -156,6 +156,15 @@ function parseFotosObservacao(value: string | null): { foto: string | null; desc
 }
 
 /**
+ * Safe parseInt helper to avoid NaN
+ */
+function safeParseInt(value: string | null | undefined): number | null {
+  if (value == null || value === '') return null;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? null : parsed;
+}
+
+/**
  * Reconstruct ChecklistData from a database ReportRow
  * This allows regenerating PDF/Excel from saved reports
  */
@@ -178,9 +187,9 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
           tensaoDC: (report[`${prefix}_fcc_tensao`] || '48V') as any,
           gerenciadaSG: report[`${prefix}_fcc_gerenciado`] === 'SIM',
           gerenciavel: report[`${prefix}_fcc_gerenciavel`] === 'SIM',
-          consumoDC: parseInt(report[`${prefix}_fcc_consumo`]) || 0,
-          qtdURSuportadas: parseInt(report[`${prefix}_fcc_qtd_ur`]) || null,
-          qtdURInstaladas: parseInt(report[`${prefix}_fcc_qtd_ur_instaladas`]) || null,
+          consumoDC: safeParseInt(report[`${prefix}_fcc_consumo`]) || 0,
+          qtdURSuportadas: safeParseInt(report[`${prefix}_fcc_qtd_ur`]),
+          qtdURInstaladas: safeParseInt(report[`${prefix}_fcc_qtd_ur_instaladas`]),
           fotoPanoramica: report[`${prefix}_fcc_foto_panoramica`] || null,
           fotoPainel: report[`${prefix}_fcc_foto_painel`] || null,
         }],
