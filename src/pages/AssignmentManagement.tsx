@@ -112,6 +112,15 @@ export default function AssignmentManagement() {
     queryFn: fetchTechnicians,
   });
 
+  // Build a map of technician_id to email
+  const technicianEmailMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    technicians.forEach((tech) => {
+      map.set(tech.id, tech.email);
+    });
+    return map;
+  }, [technicians]);
+
   const createMutation = useMutation({
     mutationFn: createAssignment,
     onSuccess: () => {
@@ -194,9 +203,11 @@ export default function AssignmentManagement() {
   };
 
   const filteredAssignments = assignments.filter(assignment => {
+    const techEmail = technicianEmailMap.get(assignment.technician_id) || '';
     const matchesSearch = 
       assignment.site?.site_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assignment.site?.uf.toLowerCase().includes(searchTerm.toLowerCase());
+      assignment.site?.uf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      techEmail.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = filterStatus === 'all' || assignment.status === filterStatus;
     
@@ -264,7 +275,7 @@ export default function AssignmentManagement() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por site ou UF..."
+              placeholder="Buscar por site, UF ou técnico..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -303,6 +314,7 @@ export default function AssignmentManagement() {
                     <TableHead>Site</TableHead>
                     <TableHead>UF</TableHead>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Técnico</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Prazo</TableHead>
                     <TableHead>Tempo</TableHead>
@@ -319,6 +331,10 @@ export default function AssignmentManagement() {
                         <Badge variant="outline">{assignment.site?.uf}</Badge>
                       </TableCell>
                       <TableCell>{assignment.site?.tipo}</TableCell>
+                      <TableCell className="text-sm">
+                        {technicianEmailMap.get(assignment.technician_id) || 
+                          <span className="text-muted-foreground">—</span>}
+                      </TableCell>
                       <TableCell>
                         {getStatusBadge(assignment.status, assignment.deadline)}
                       </TableCell>
