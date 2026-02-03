@@ -19,6 +19,24 @@ import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Helper to parse JSON photo arrays stored in database
+function parsePhotoJson(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    // Try to parse as JSON array
+    if (value.startsWith('[')) {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((p): p is string => typeof p === 'string' && p.length > 0);
+      }
+    }
+    // Fallback: treat as single URL
+    return [value];
+  } catch {
+    return [value];
+  }
+}
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -288,15 +306,16 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.fibra_abord2_foto) {
     allPhotos.push({ url: report.fibra_abord2_foto, label: "Abordagem 2", category: "Fibra Óptica" });
   }
-  if (report?.fibra_foto_caixas_passagem) {
-    allPhotos.push({ url: report.fibra_foto_caixas_passagem, label: "Caixas de Passagem", category: "Fibra Óptica" });
-  }
-  if (report?.fibra_foto_caixas_subterraneas) {
-    allPhotos.push({ url: report.fibra_foto_caixas_subterraneas, label: "Caixas Subterrâneas", category: "Fibra Óptica" });
-  }
-  if (report?.fibra_foto_subidas_laterais) {
-    allPhotos.push({ url: report.fibra_foto_subidas_laterais, label: "Subidas Laterais", category: "Fibra Óptica" });
-  }
+  // Parse JSON arrays for fiber photos
+  parsePhotoJson(report?.fibra_foto_caixas_passagem).forEach((url, idx) => {
+    allPhotos.push({ url, label: `Caixas de Passagem ${idx + 1}`, category: "Fibra Óptica" });
+  });
+  parsePhotoJson(report?.fibra_foto_caixas_subterraneas).forEach((url, idx) => {
+    allPhotos.push({ url, label: `Caixas Subterrâneas ${idx + 1}`, category: "Fibra Óptica" });
+  });
+  parsePhotoJson(report?.fibra_foto_subidas_laterais).forEach((url, idx) => {
+    allPhotos.push({ url, label: `Subidas Laterais ${idx + 1}`, category: "Fibra Óptica" });
+  });
   for (let d = 1; d <= 4; d++) {
     const dgoFoto = report?.[`fibra_dgo${d}_foto`];
     const dgoCordoesFoto = report?.[`fibra_dgo${d}_cordoes_foto`];
@@ -833,9 +852,9 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       </CardHeader>
                       <CardContent>
                         <PhotoGrid photos={[
-                          { url: report.fibra_foto_caixas_passagem, label: "Caixas de Passagem" },
-                          { url: report.fibra_foto_caixas_subterraneas, label: "Caixas Subterrâneas" },
-                          { url: report.fibra_foto_subidas_laterais, label: "Subidas Laterais" },
+                          ...parsePhotoJson(report.fibra_foto_caixas_passagem).map((url, i) => ({ url, label: `Caixas de Passagem ${i + 1}` })),
+                          ...parsePhotoJson(report.fibra_foto_caixas_subterraneas).map((url, i) => ({ url, label: `Caixas Subterrâneas ${i + 1}` })),
+                          ...parsePhotoJson(report.fibra_foto_subidas_laterais).map((url, i) => ({ url, label: `Subidas Laterais ${i + 1}` })),
                         ]} />
                       </CardContent>
                     </Card>

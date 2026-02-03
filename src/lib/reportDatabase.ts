@@ -398,9 +398,15 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     }
   }
 
-  row.fibra_foto_caixas_passagem = data.fibraOptica?.fotosCaixasPassagem?.[0] || null;
-  row.fibra_foto_caixas_subterraneas = data.fibraOptica?.fotosCaixasSubterraneas?.[0] || null;
-  row.fibra_foto_subidas_laterais = data.fibraOptica?.fotosSubidasLaterais?.[0] || null;
+  // Store fiber photos as JSON arrays to support multiple photos per category
+  const validCaixasPassagem = (data.fibraOptica?.fotosCaixasPassagem || []).filter((f): f is string => !!f);
+  row.fibra_foto_caixas_passagem = validCaixasPassagem.length > 0 ? JSON.stringify(validCaixasPassagem) : null;
+  
+  const validCaixasSubterraneas = (data.fibraOptica?.fotosCaixasSubterraneas || []).filter((f): f is string => !!f);
+  row.fibra_foto_caixas_subterraneas = validCaixasSubterraneas.length > 0 ? JSON.stringify(validCaixasSubterraneas) : null;
+  
+  const validSubidasLaterais = (data.fibraOptica?.fotosSubidasLaterais || []).filter((f): f is string => !!f);
+  row.fibra_foto_subidas_laterais = validSubidasLaterais.length > 0 ? JSON.stringify(validSubidasLaterais) : null;
 
   const dgosArray = data.fibraOptica?.dgos || [];
   for (let i = 0; i < 4; i++) {

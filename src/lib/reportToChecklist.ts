@@ -309,9 +309,9 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       qtdSubidasLaterais: report.fibra_subidas_laterais_qtd || 0,
       qtdDGOs: report.fibra_dgos_qtd || 0,
       dgos,
-      fotosCaixasPassagem: report.fibra_foto_caixas_passagem ? [report.fibra_foto_caixas_passagem] : [],
-      fotosCaixasSubterraneas: report.fibra_foto_caixas_subterraneas ? [report.fibra_foto_caixas_subterraneas] : [],
-      fotosSubidasLaterais: report.fibra_foto_subidas_laterais ? [report.fibra_foto_subidas_laterais] : [],
+      fotosCaixasPassagem: parseJsonArray(report.fibra_foto_caixas_passagem),
+      fotosCaixasSubterraneas: parseJsonArray(report.fibra_foto_caixas_subterraneas),
+      fotosSubidasLaterais: parseJsonArray(report.fibra_foto_subidas_laterais),
     },
     energia: { 
       ...INITIAL_ENERGIA,
