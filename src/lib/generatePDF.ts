@@ -456,7 +456,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       addFieldRow('  Capacidade (Ah)', banco.capacidadeAh);
       addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
       addFieldRow('  Estado', banco.estado, banco.estado === 'OK' ? 'ok' : 'error');
-      addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'warning' : banco.colada === 'NÃO' ? 'ok' : undefined);
+      addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
     }
 
     await addPhoto(gab.baterias.fotoBanco, 'Foto Banco de Baterias');
@@ -618,14 +618,9 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
   y += 10;
   addSectionTitle('TORRE E ZELADORIA', '🗼');
-  addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'error' : 'ok');
   addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
   addFieldRow('Aterramento', data.torre.aterramento, data.torre.aterramento === 'OK' ? 'ok' : 'error');
   addFieldRow('Zeladoria', data.torre.zeladoria, data.torre.zeladoria === 'OK' ? 'ok' : 'error');
-
-  if (data.torre.ninhos && data.torre.fotoNinhos) {
-    await addPhoto(data.torre.fotoNinhos, 'Foto Ninhos na Torre');
-  }
 
   // ===== OBSERVATIONS =====
   doc.addPage();
