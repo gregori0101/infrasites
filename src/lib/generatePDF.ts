@@ -400,131 +400,145 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   }
 
   // ===== GABINETES =====
-  for (let i = 0; i < data.gabinetes.length; i++) {
-    const gab = data.gabinetes[i];
-    
-    doc.addPage();
-    addHeader();
-
-    addSectionTitle(`GABINETE ${i + 1}`, '🏢');
-
-    // Gabinete Info
-    addInfoCard(`Gabinete ${i + 1} - Informações`, [
-      { label: 'Tipo', value: gab.tipo },
-      { label: 'Com Proteção', value: gab.comProtecao },
-      { label: 'Tecnologias Acesso', value: gab.tecnologiasAcesso.join(', ') || '-' },
-      { label: 'Tecnologias Transporte', value: gab.tecnologiasTransporte.join(', ') || '-' },
-    ]);
-
-    // FCC Section
-    addSubSectionTitle('FCC - Fonte de Corrente Contínua');
-    addFieldRow('Número de FCCs', gab.fcc.numFCCs);
-
-    for (let f = 0; f < gab.fcc.fccs.length; f++) {
-      const fcc = gab.fcc.fccs[f];
-      checkNewPage(50);
+  const skipped = data.secoesNaoAplicaveis ?? { gabinete: false, fcc: false, baterias: false, climatizacao: false, energia: false, gmgTorre: false };
+  const skipGabinete = skipped.gabinete;
+  const skipFCC = skipped.fcc;
+  const skipBaterias = skipped.baterias;
+  const skipClimatizacao = skipped.climatizacao;
+  
+  if (!skipGabinete) {
+    for (let i = 0; i < data.gabinetes.length; i++) {
+      const gab = data.gabinetes[i];
       
-      y += 2;
-      doc.setFillColor(...GRAY_LIGHT);
-      doc.roundedRect(margin, y, contentWidth, 35, 1, 1, 'F');
-      
-      doc.setTextColor(...VIVO_PURPLE);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`FCC ${f + 1}`, margin + 3, y + 5);
-      
-      doc.setTextColor(...GRAY_DARK);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      
-      doc.text(`Fabricante: ${fcc.fabricante || '-'}`, margin + 3, y + 11);
-      doc.text(`Tensão DC: ${fcc.tensaoDC || '-'}`, margin + contentWidth/2, y + 11);
-      doc.text(`Consumo DC: ${fcc.consumoDC || 0}W`, margin + 3, y + 17);
-      doc.text(`URs Suportadas: ${fcc.qtdURSuportadas ?? 'N/A'}`, margin + contentWidth/2, y + 17);
-      doc.text(`URs Instaladas: ${fcc.qtdURInstaladas ?? 'N/A'}`, margin + 3, y + 23);
-      doc.text(`Gerenciada SG: ${fcc.gerenciadaSG ? 'Sim' : 'Não'}`, margin + contentWidth/2, y + 23);
-      doc.text(`Gerenciável: ${fcc.gerenciavel ? 'Sim' : 'Não'}`, margin + 3, y + 29);
-      
-      y += 38;
+      doc.addPage();
+      addHeader();
 
+      addSectionTitle(`GABINETE ${i + 1}`, '🏢');
+
+      // Gabinete Info
+      addInfoCard(`Gabinete ${i + 1} - Informações`, [
+        { label: 'Tipo', value: gab.tipo },
+        { label: 'Com Proteção', value: gab.comProtecao },
+        { label: 'Tecnologias Acesso', value: gab.tecnologiasAcesso.join(', ') || '-' },
+        { label: 'Tecnologias Transporte', value: gab.tecnologiasTransporte.join(', ') || '-' },
+      ]);
+
+      // FCC Section - skip if marked NA
+      if (!skipFCC) {
+        addSubSectionTitle('FCC - Fonte de Corrente Contínua');
+        addFieldRow('Número de FCCs', gab.fcc.numFCCs);
+
+        for (let f = 0; f < gab.fcc.fccs.length; f++) {
+          const fcc = gab.fcc.fccs[f];
+          checkNewPage(50);
+          
+          y += 2;
+          doc.setFillColor(...GRAY_LIGHT);
+          doc.roundedRect(margin, y, contentWidth, 35, 1, 1, 'F');
+          
+          doc.setTextColor(...VIVO_PURPLE);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`FCC ${f + 1}`, margin + 3, y + 5);
+          
+          doc.setTextColor(...GRAY_DARK);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          
+          doc.text(`Fabricante: ${fcc.fabricante || '-'}`, margin + 3, y + 11);
+          doc.text(`Tensão DC: ${fcc.tensaoDC || '-'}`, margin + contentWidth/2, y + 11);
+          doc.text(`Consumo DC: ${fcc.consumoDC || 0}W`, margin + 3, y + 17);
+          doc.text(`URs Suportadas: ${fcc.qtdURSuportadas ?? 'N/A'}`, margin + contentWidth/2, y + 17);
+          doc.text(`URs Instaladas: ${fcc.qtdURInstaladas ?? 'N/A'}`, margin + 3, y + 23);
+          doc.text(`Gerenciada SG: ${fcc.gerenciadaSG ? 'Sim' : 'Não'}`, margin + contentWidth/2, y + 23);
+          doc.text(`Gerenciável: ${fcc.gerenciavel ? 'Sim' : 'Não'}`, margin + 3, y + 29);
+          
+          y += 38;
+
+          await addPhotoGrid([
+            { photo: fcc.fotoPanoramica, label: `FCC ${f + 1} Panorâmica` },
+            { photo: fcc.fotoPainel, label: `FCC ${f + 1} Painel` },
+          ]);
+        }
+      }
+
+      // Batteries Section - skip if marked NA
+      if (!skipBaterias) {
+        checkNewPage(40);
+        addSubSectionTitle('BATERIAS');
+        addFieldRow('Número de Bancos', gab.baterias.numBancos);
+        addFieldRow('Bancos Interligados', gab.baterias.bancosInterligados, gab.baterias.bancosInterligados ? 'ok' : 'warning');
+
+        for (let b = 0; b < gab.baterias.bancos.length; b++) {
+          const banco = gab.baterias.bancos[b];
+          checkNewPage(35);
+          
+          y += 2;
+          doc.setFillColor(...GRAY_LIGHT);
+          doc.roundedRect(margin, y, contentWidth, 28, 1, 1, 'F');
+          
+          doc.setTextColor(...VIVO_PURPLE);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Banco ${b + 1}`, margin + 3, y + 5);
+          
+          y += 7;
+          doc.setTextColor(...GRAY_DARK);
+          addFieldRow('  Tipo', banco.tipo);
+          addFieldRow('  Fabricante', banco.fabricante);
+          addFieldRow('  Capacidade (Ah)', banco.capacidadeAh);
+          addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
+          const estadoStr = banco.estados?.join(', ') || '-';
+          addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
+          addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
+          addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
+
+          await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
+        }
+      }
+
+      // Climate Section - skip if marked NA
+      if (!skipClimatizacao) {
+        checkNewPage(50);
+        addSubSectionTitle('CLIMATIZAÇÃO');
+        addFieldRow('Tipo', gab.climatizacao.tipo);
+        addFieldRow('Fan OK', gab.climatizacao.fanOK, gab.climatizacao.fanOK ? 'ok' : 'error');
+        addFieldRow('PLC Lead-Lag', gab.climatizacao.plcLeadLag, gab.climatizacao.plcLeadLag === 'OK' ? 'ok' : 'warning');
+        addFieldRow('Alarmística', gab.climatizacao.alarmistica);
+
+        if (gab.climatizacao.acs.length > 0) {
+          y += 3;
+          doc.setTextColor(...VIVO_BLUE);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Ar Condicionados:', margin + 2, y);
+          y += 4;
+          
+          gab.climatizacao.acs.forEach((ac, idx) => {
+            addFieldRow(`  AC ${idx + 1} - Modelo`, ac.modelo);
+            addFieldRow(`  AC ${idx + 1} - Status`, ac.funcionamento, ac.funcionamento === 'OK' ? 'ok' : 'error');
+          });
+        }
+
+        await addPhotoGrid([
+          { photo: gab.climatizacao.fotoAR1, label: 'AR 1' },
+          { photo: gab.climatizacao.fotoAR2, label: 'AR 2' },
+          { photo: gab.climatizacao.fotoAR3, label: 'AR 3' },
+          { photo: gab.climatizacao.fotoAR4, label: 'AR 4' },
+          { photo: gab.climatizacao.fotoCondensador, label: 'Condensador' },
+          { photo: gab.climatizacao.fotoEvaporador, label: 'Evaporador' },
+          { photo: gab.climatizacao.fotoControlador, label: 'Controlador' },
+        ]);
+      }
+
+      // Equipment Section (always include if gabinete active)
+      checkNewPage(60);
+      addSubSectionTitle('EQUIPAMENTOS');
       await addPhotoGrid([
-        { photo: fcc.fotoPanoramica, label: `FCC ${f + 1} Panorâmica` },
-        { photo: fcc.fotoPainel, label: `FCC ${f + 1} Painel` },
+        { photo: gab.fotoTransmissao, label: 'Equipamentos de Transmissão' },
+        { photo: gab.fotoAcesso, label: 'Equipamentos de Acesso' },
       ]);
     }
-
-    // Batteries Section
-    checkNewPage(40);
-    addSubSectionTitle('BATERIAS');
-    addFieldRow('Número de Bancos', gab.baterias.numBancos);
-    addFieldRow('Bancos Interligados', gab.baterias.bancosInterligados, gab.baterias.bancosInterligados ? 'ok' : 'warning');
-
-    for (let b = 0; b < gab.baterias.bancos.length; b++) {
-      const banco = gab.baterias.bancos[b];
-      checkNewPage(35);
-      
-      y += 2;
-      doc.setFillColor(...GRAY_LIGHT);
-      doc.roundedRect(margin, y, contentWidth, 28, 1, 1, 'F');
-      
-      doc.setTextColor(...VIVO_PURPLE);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Banco ${b + 1}`, margin + 3, y + 5);
-      
-      y += 7;
-      doc.setTextColor(...GRAY_DARK);
-      addFieldRow('  Tipo', banco.tipo);
-      addFieldRow('  Fabricante', banco.fabricante);
-      addFieldRow('  Capacidade (Ah)', banco.capacidadeAh);
-      addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
-      const estadoStr = banco.estados?.join(', ') || '-';
-      addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
-      addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
-      addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
-
-      await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
-    }
-
-    // Climate Section
-    checkNewPage(50);
-    addSubSectionTitle('CLIMATIZAÇÃO');
-    addFieldRow('Tipo', gab.climatizacao.tipo);
-    addFieldRow('Fan OK', gab.climatizacao.fanOK, gab.climatizacao.fanOK ? 'ok' : 'error');
-    addFieldRow('PLC Lead-Lag', gab.climatizacao.plcLeadLag, gab.climatizacao.plcLeadLag === 'OK' ? 'ok' : 'warning');
-    addFieldRow('Alarmística', gab.climatizacao.alarmistica);
-
-    if (gab.climatizacao.acs.length > 0) {
-      y += 3;
-      doc.setTextColor(...VIVO_BLUE);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Ar Condicionados:', margin + 2, y);
-      y += 4;
-      
-      gab.climatizacao.acs.forEach((ac, idx) => {
-        addFieldRow(`  AC ${idx + 1} - Modelo`, ac.modelo);
-        addFieldRow(`  AC ${idx + 1} - Status`, ac.funcionamento, ac.funcionamento === 'OK' ? 'ok' : 'error');
-      });
-    }
-
-    await addPhotoGrid([
-      { photo: gab.climatizacao.fotoAR1, label: 'AR 1' },
-      { photo: gab.climatizacao.fotoAR2, label: 'AR 2' },
-      { photo: gab.climatizacao.fotoAR3, label: 'AR 3' },
-      { photo: gab.climatizacao.fotoAR4, label: 'AR 4' },
-      { photo: gab.climatizacao.fotoCondensador, label: 'Condensador' },
-      { photo: gab.climatizacao.fotoEvaporador, label: 'Evaporador' },
-      { photo: gab.climatizacao.fotoControlador, label: 'Controlador' },
-    ]);
-
-    // Equipment Section
-    checkNewPage(60);
-    addSubSectionTitle('EQUIPAMENTOS');
-    await addPhotoGrid([
-      { photo: gab.fotoTransmissao, label: 'Equipamentos de Transmissão' },
-      { photo: gab.fotoAcesso, label: 'Equipamentos de Acesso' },
-    ]);
   }
 
   // ===== FIBER OPTICS SECTION =====
@@ -604,58 +618,64 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     addSubSectionTitle('Fotos de Fibra Óptica');
     await addPhotoGrid(fibraPhotos);
   }
-  doc.addPage();
-  addHeader();
+  // ===== ENERGIA ===== - skip if marked NA
+  const skipEnergia = skipped.energia;
+  if (!skipEnergia) {
+    doc.addPage();
+    addHeader();
 
-  addSectionTitle('ENERGIA', '⚡');
+    addSectionTitle('ENERGIA', '⚡');
 
-  addInfoCard('Quadro de Energia', [
-    { label: 'Tipo de Quadro', value: data.energia.tipoQuadro },
-    { label: 'Fabricante', value: data.energia.fabricante },
-    { label: 'Potência (kVA)', value: data.energia.potenciaKVA },
-    { label: 'Tensão de Entrada', value: data.energia.tensaoEntrada },
-    { label: 'Transformador', value: data.energia.transformadorOK ? 'OK' : 'NOK' },
-  ]);
+    addInfoCard('Quadro de Energia', [
+      { label: 'Tipo de Quadro', value: data.energia.tipoQuadro },
+      { label: 'Fabricante', value: data.energia.fabricante },
+      { label: 'Potência (kVA)', value: data.energia.potenciaKVA },
+      { label: 'Tensão de Entrada', value: data.energia.tensaoEntrada },
+      { label: 'Transformador', value: data.energia.transformadorOK ? 'OK' : 'NOK' },
+    ]);
 
-  await addPhotoGrid([
-    { photo: data.energia.fotoQuadroGeral, label: 'Quadro Geral' },
-    { photo: data.energia.fotoTransformador, label: 'Transformador' },
-  ]);
+    await addPhotoGrid([
+      { photo: data.energia.fotoQuadroGeral, label: 'Quadro Geral' },
+      { photo: data.energia.fotoTransformador, label: 'Transformador' },
+    ]);
+  }
 
-  // ===== GMG & TOWER =====
-  doc.addPage();
-  addHeader();
+  // ===== GMG & TOWER ===== - skip if marked NA
+  const skipGmgTorre = skipped.gmgTorre;
+  if (!skipGmgTorre) {
+    doc.addPage();
+    addHeader();
 
-  addSectionTitle('GMG - GRUPO MOTOR GERADOR', '🔋');
-  addFieldRow('Possui GMG', data.gmg.informar, data.gmg.informar ? 'ok' : 'warning');
-  if (data.gmg.informar) {
-    addFieldRow('Fabricante', data.gmg.fabricante);
-    addFieldRow('Potência (kVA)', data.gmg.potencia);
-    addFieldRow('Autonomia (h)', data.gmg.autonomia);
-    addFieldRow('Status', data.gmg.status, data.gmg.status === 'OK' ? 'ok' : 'error');
-    addFieldRow('Último Teste', data.gmg.ultimoTeste);
-    
-    // Foto do Painel do GMG
-    if (data.gmg.fotoGMG) {
-      await addPhoto(data.gmg.fotoGMG, 'Foto do Painel do GMG');
+    addSectionTitle('GMG - GRUPO MOTOR GERADOR', '🔋');
+    addFieldRow('Possui GMG', data.gmg.informar, data.gmg.informar ? 'ok' : 'warning');
+    if (data.gmg.informar) {
+      addFieldRow('Fabricante', data.gmg.fabricante);
+      addFieldRow('Potência (kVA)', data.gmg.potencia);
+      addFieldRow('Autonomia (h)', data.gmg.autonomia);
+      addFieldRow('Status', data.gmg.status, data.gmg.status === 'OK' ? 'ok' : 'error');
+      addFieldRow('Último Teste', data.gmg.ultimoTeste);
+      
+      if (data.gmg.fotoGMG) {
+        await addPhoto(data.gmg.fotoGMG, 'Foto do Painel do GMG');
+      }
     }
-  }
 
-  y += 10;
-  addSectionTitle('TORRE E ZELADORIA', '🗼');
-  
-  addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'warning' : 'ok');
-  if (data.torre.ninhos && data.torre.fotoNinhos) {
-    await addPhoto(data.torre.fotoNinhos, 'Foto dos Ninhos');
+    y += 10;
+    addSectionTitle('TORRE E ZELADORIA', '🗼');
+    
+    addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'warning' : 'ok');
+    if (data.torre.ninhos && data.torre.fotoNinhos) {
+      await addPhoto(data.torre.fotoNinhos, 'Foto dos Ninhos');
+    }
+    
+    addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
+    if (data.torre.fotoFibrasProtegidas) {
+      await addPhoto(data.torre.fotoFibrasProtegidas, 'Foto das Fibras Protegidas');
+    }
+    
+    addFieldRow('Aterramento', data.torre.aterramento, data.torre.aterramento === 'OK' ? 'ok' : 'error');
+    addFieldRow('Zeladoria', data.torre.zeladoria, data.torre.zeladoria === 'OK' ? 'ok' : 'error');
   }
-  
-  addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
-  if (data.torre.fotoFibrasProtegidas) {
-    await addPhoto(data.torre.fotoFibrasProtegidas, 'Foto das Fibras Protegidas');
-  }
-  
-  addFieldRow('Aterramento', data.torre.aterramento, data.torre.aterramento === 'OK' ? 'ok' : 'error');
-  addFieldRow('Zeladoria', data.torre.zeladoria, data.torre.zeladoria === 'OK' ? 'ok' : 'error');
 
   // ===== OBSERVATIONS =====
   doc.addPage();
