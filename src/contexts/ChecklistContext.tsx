@@ -142,36 +142,87 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(CURRENT_SESSION_KEY, dataToSave);
       } catch (error) {
         // localStorage quota exceeded - try to save without photos
-        console.warn('localStorage quota exceeded, saving without photos:', error);
+        console.warn('localStorage quota exceeded, saving without base64 photos:', error);
         try {
-          const dataWithoutPhotos = {
+          // Helper to keep only URLs (not base64), as URLs are already in cloud storage
+          const keepOnlyUrls = (photo: string | null | undefined): string | null => {
+            if (!photo) return null;
+            return photo.startsWith('http') ? photo : null;
+          };
+          
+          const dataWithoutBase64 = {
             ...data,
-            fotoPanoramica: null,
-            fotoObservacao: null,
-            assinaturaDigital: null,
+            fotoPanoramica: keepOnlyUrls(data.fotoPanoramica),
+            // Fix: correct field name is fotosObservacao (array with objects)
+            fotosObservacao: (data.fotosObservacao || []).map(item => ({
+              ...item,
+              foto: keepOnlyUrls(item.foto),
+            })).filter(item => item.foto), // Only keep items with valid URLs
+            assinaturaDigital: keepOnlyUrls(data.assinaturaDigital),
             gabinetes: data.gabinetes.map(gab => ({
               ...gab,
-              fotoPanoramicaGabinete: null,
-              fotoTransmissao: null,
-              fotoAcesso: null,
-              fcc: { ...gab.fcc, fotoPanoramica: null, fotoPainel: null },
-              baterias: { ...gab.baterias, fotoBanco: null },
+              fotoPanoramicaGabinete: keepOnlyUrls(gab.fotoPanoramicaGabinete),
+              fotoTransmissao: keepOnlyUrls(gab.fotoTransmissao),
+              fotoAcesso: keepOnlyUrls(gab.fotoAcesso),
+              fcc: { 
+                ...gab.fcc, 
+                fccs: gab.fcc.fccs.map(fcc => ({
+                  ...fcc,
+                  fotoPanoramica: keepOnlyUrls(fcc.fotoPanoramica),
+                  fotoPainel: keepOnlyUrls(fcc.fotoPainel),
+                })),
+              },
+              baterias: { 
+                ...gab.baterias, 
+                bancos: gab.baterias.bancos.map(banco => ({
+                  ...banco,
+                  fotoBanco: keepOnlyUrls(banco.fotoBanco),
+                })),
+              },
               climatizacao: { 
                 ...gab.climatizacao, 
-                fotoAR1: null, fotoAR2: null, fotoAR3: null, fotoAR4: null,
-                fotoCondensador: null, fotoEvaporador: null, fotoControlador: null 
+                fotoAR1: keepOnlyUrls(gab.climatizacao.fotoAR1), 
+                fotoAR2: keepOnlyUrls(gab.climatizacao.fotoAR2), 
+                fotoAR3: keepOnlyUrls(gab.climatizacao.fotoAR3), 
+                fotoAR4: keepOnlyUrls(gab.climatizacao.fotoAR4),
+                fotoCondensador: keepOnlyUrls(gab.climatizacao.fotoCondensador), 
+                fotoEvaporador: keepOnlyUrls(gab.climatizacao.fotoEvaporador), 
+                fotoControlador: keepOnlyUrls(gab.climatizacao.fotoControlador),
               },
             })),
             energia: {
               ...data.energia,
-              fotoTransformador: null,
-              fotoQuadroGeral: null,
+              fotoTransformador: keepOnlyUrls(data.energia?.fotoTransformador),
+              fotoQuadroGeral: keepOnlyUrls(data.energia?.fotoQuadroGeral),
             },
-            torre: { ...data.torre, fotoNinhos: null },
+            torre: { 
+              ...data.torre, 
+              fotoNinhos: keepOnlyUrls(data.torre?.fotoNinhos),
+              fotoFibrasProtegidas: keepOnlyUrls(data.torre?.fotoFibrasProtegidas),
+            },
+            gmg: {
+              ...data.gmg,
+              fotoGMG: keepOnlyUrls(data.gmg?.fotoGMG),
+            },
+            fibraOptica: {
+              ...data.fibraOptica,
+              abordagens: (data.fibraOptica?.abordagens || []).map(ab => ({
+                ...ab,
+                fotos: (ab.fotos || []).map(f => keepOnlyUrls(f)).filter(Boolean),
+              })),
+              fotosCaixasPassagem: (data.fibraOptica?.fotosCaixasPassagem || []).map(f => keepOnlyUrls(f)).filter(Boolean),
+              fotosCaixasSubterraneas: (data.fibraOptica?.fotosCaixasSubterraneas || []).map(f => keepOnlyUrls(f)).filter(Boolean),
+              fotosSubidasLaterais: (data.fibraOptica?.fotosSubidasLaterais || []).map(f => keepOnlyUrls(f)).filter(Boolean),
+              dgos: (data.fibraOptica?.dgos || []).map(dgo => ({
+                ...dgo,
+                fotoDGO: keepOnlyUrls(dgo.fotoDGO),
+                fotoCordesDetalhada: keepOnlyUrls(dgo.fotoCordesDetalhada),
+              })),
+            },
           };
-          localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(dataWithoutPhotos));
+          localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(dataWithoutBase64));
         } catch (innerError) {
-          console.error('Failed to save even without photos:', innerError);
+          console.error('Failed to save even without base64 photos:', innerError);
         }
       }
     }
