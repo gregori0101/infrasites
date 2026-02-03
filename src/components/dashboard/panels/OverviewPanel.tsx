@@ -8,7 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 interface Props {
   stats: PanelStats;
   sites: SiteInfo[];
-  onDrillDown: (type: "total" | "ok" | "nok") => void;
+  onDrillDown: (type: "total" | "ok" | "nok" | "batteries" | "batteries-critical" | "acs" | "acs-nok" | "gmg" | "zeladoria-ok") => void;
 }
 
 export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
@@ -71,6 +71,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle={`${overview.batteriesCritical} críticas`}
           icon={Battery}
           iconBg={overview.batteriesCritical > 0 ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}
+          onClick={() => onDrillDown("batteries")}
         />
         <StatCard
           title="ACs Total"
@@ -78,6 +79,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle={`${overview.acsNok} com defeito`}
           icon={Thermometer}
           iconBg={overview.acsNok > 0 ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}
+          onClick={() => onDrillDown("acs")}
         />
         <StatCard
           title="Com GMG"
@@ -85,6 +87,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle="Backup de energia"
           icon={Zap}
           iconBg="bg-success/10 text-success"
+          onClick={() => onDrillDown("gmg")}
         />
         <StatCard
           title="Zeladoria OK"
@@ -92,6 +95,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle={`de ${overview.totalSites} sites`}
           icon={ClipboardCheck}
           iconBg="bg-primary/10 text-primary"
+          onClick={() => onDrillDown("zeladoria-ok")}
         />
         <StatCard
           title="Última Atualização"

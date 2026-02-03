@@ -564,7 +564,13 @@ export default function Dashboard() {
                   onDrillDown={(type) => {
                     if (type === "total") openDrillDown("sites", "Todos os Sites", (s) => s);
                     else if (type === "ok") openDrillDown("sites", "Sites OK", (s) => s.filter((site: any) => !site.hasProblems));
-                    else openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
+                    else if (type === "nok") openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
+                    else if (type === "batteries") openDrillDown("batteries", "Todas as Baterias", (b) => b);
+                    else if (type === "batteries-critical") openDrillDown("batteries", "Baterias Críticas (+8 anos)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
+                    else if (type === "acs") openDrillDown("acs", "Todos os ACs", (a) => a);
+                    else if (type === "acs-nok") openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
+                    else if (type === "zeladoria-ok") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
                   }}
                 />
               )}
@@ -575,6 +581,8 @@ export default function Dashboard() {
                   onDrillDown={(type) => {
                     if (type === "realizadas") openDrillDown("sites", "Vistorias Realizadas", (s) => s);
                     else if (type === "pendentes") openDrillDown("sites", "Sites com Atribuições Pendentes", (s) => s);
+                    else if (type === "nao-vistoriados") openDrillDown("sites", "Sites Não Vistoriados", () => []);
+                    else if (type === "base") openDrillDown("sites", "Todos os Sites da Base", (s) => s);
                   }}
                 />
               )}
@@ -597,8 +605,10 @@ export default function Dashboard() {
                   acs={acs}
                   onDrillDown={(type) => {
                     if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
+                    else if (type === "gmg-no") openDrillDown("sites", "Sites sem GMG", (s) => s.filter((site: any) => !site.gmgExists));
+                    else if (type === "ac-all") openDrillDown("acs", "Todos os ACs", (a) => a);
                     else if (type === "ac-ok") openDrillDown("acs", "ACs Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
-                    else openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "ac-nok") openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
                   }}
                 />
               )}
@@ -610,9 +620,13 @@ export default function Dashboard() {
                   acs={acs}
                   onDrillDown={(type) => {
                     if (type === "all") openDrillDown("sites", "Todos Gabinetes", (s) => s);
+                    else if (type === "ac") openDrillDown("sites", "Sites com Ar Condicionado", (s) => s);
+                    else if (type === "fan") openDrillDown("sites", "Sites com Ventilação/Fan", (s) => s);
                     else if (type === "ac-ok") openDrillDown("acs", "ACs OK", (a) => a.filter((ac: any) => ac.status === "OK"));
                     else if (type === "ac-nok") openDrillDown("acs", "ACs NOK", (a) => a.filter((ac: any) => ac.status === "NOK"));
-                    else openDrillDown("sites", "Sites", (s) => s);
+                    else if (type === "plc-ok") openDrillDown("sites", "Sites com PLC OK", (s) => s);
+                    else if (type === "plc-nok") openDrillDown("sites", "Sites com PLC NOK", (s) => s);
+                    else if (type === "na") openDrillDown("sites", "Sites sem Climatização", (s) => s);
                   }}
                 />
               )}
