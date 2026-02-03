@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, Send, 
-  CheckCircle, Loader2, AlertCircle, Upload
+  CheckCircle, Loader2, AlertCircle, Upload, FileDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
@@ -21,6 +21,16 @@ import { format } from "date-fns";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Step10Props {
   showErrors?: boolean;
@@ -34,6 +44,8 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
   const [userOperadora, setUserOperadora] = React.useState<string>('VIVO');
+  const [showDownloadDialog, setShowDownloadDialog] = React.useState(false);
+  const [downloadPdfOption, setDownloadPdfOption] = React.useState<boolean | null>(null);
 
   const progress = calculateProgress();
 
@@ -54,7 +66,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
     fetchOperadora();
   }, [user?.id]);
 
-  const handleDirectSend = async () => {
+  const handleSendClick = () => {
     if (progress < 50) {
       toast.error('Checklist incompleto', {
         description: 'Preencha pelo menos 50% dos campos para enviar.'
@@ -68,6 +80,14 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       });
       return;
     }
+
+    // Show dialog to ask about PDF download
+    setShowDownloadDialog(true);
+  };
+
+  const handleConfirmSend = async (shouldDownloadPdf: boolean) => {
+    setShowDownloadDialog(false);
+    setDownloadPdfOption(shouldDownloadPdf);
 
     setIsSending(true);
     
@@ -93,29 +113,28 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         return;
       }
       
-      // 2. Gerar PDF
-      setUploadProgress('Gerando PDF...');
-      let pdfBlob;
-      try {
-        pdfBlob = await generatePDF(dataWithUrls, userOperadora);
-      } catch (pdfError) {
-        console.error('PDF generation error:', pdfError);
-        toast.error('Erro ao gerar PDF', {
-          description: 'Continuando sem download do PDF.'
-        });
-        pdfBlob = null;
+      // 2. Gerar PDF (apenas se o usuário quiser baixar)
+      let pdfBlob = null;
+      if (shouldDownloadPdf) {
+        setUploadProgress('Gerando PDF...');
+        try {
+          pdfBlob = await generatePDF(dataWithUrls, userOperadora);
+        } catch (pdfError) {
+          console.error('PDF generation error:', pdfError);
+          toast.error('Erro ao gerar PDF', {
+            description: 'Continuando sem download do PDF.'
+          });
+          pdfBlob = null;
+        }
       }
       
-      // 3. Gerar Excel
+      // 3. Gerar Excel (sempre para salvar no banco)
       setUploadProgress('Gerando Excel...');
       let excelBlob;
       try {
         excelBlob = generateExcel(dataWithUrls, userOperadora);
       } catch (excelError) {
         console.error('Excel generation error:', excelError);
-        toast.error('Erro ao gerar Excel', {
-          description: 'Continuando sem download do Excel.'
-        });
         excelBlob = null;
       }
 
@@ -127,27 +146,14 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       const result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
       
       if (result.success) {
-        // 5. Download dos arquivos (após salvar com sucesso)
-        setUploadProgress('Baixando arquivos...');
-        
-        if (pdfBlob) {
+        // 5. Download dos arquivos (apenas se solicitado)
+        if (shouldDownloadPdf && pdfBlob) {
+          setUploadProgress('Baixando PDF...');
           try {
             downloadPDF(pdfBlob, pdfFilename);
           } catch (downloadError) {
             console.error('PDF download error:', downloadError);
             toast.warning('Não foi possível baixar o PDF automaticamente');
-          }
-        }
-        
-        // Small delay between downloads for iOS
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        if (excelBlob) {
-          try {
-            downloadExcel(excelBlob, excelFilename);
-          } catch (downloadError) {
-            console.error('Excel download error:', downloadError);
-            toast.warning('Não foi possível baixar o Excel automaticamente');
           }
         }
         
@@ -324,7 +330,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
 
       <Button
         className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
-        onClick={handleDirectSend}
+        onClick={handleSendClick}
         disabled={isSending || progress < 50}
       >
         {isSending ? (
@@ -341,12 +347,40 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        As fotos serão comprimidas e salvas no servidor. O PDF e Excel serão baixados automaticamente.
+        As fotos serão comprimidas e salvas no servidor.
       </p>
 
       <p className="text-xs text-center text-muted-foreground">
         Data/Hora: {new Date().toLocaleString('pt-BR')}
       </p>
+
+      <AlertDialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <FileDown className="w-5 h-5 text-primary" />
+              Baixar PDF do Relatório?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja baixar o PDF do relatório após o envio? O relatório será salvo no servidor de qualquer forma.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel 
+              onClick={() => handleConfirmSend(false)}
+              className="w-full sm:w-auto"
+            >
+              Não, apenas enviar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleConfirmSend(true)}
+              className="w-full sm:w-auto bg-primary"
+            >
+              Sim, baixar PDF
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );
