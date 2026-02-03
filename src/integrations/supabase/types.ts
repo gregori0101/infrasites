@@ -1990,6 +1990,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          municipio: string | null
           site_code: string
           tipo: string
           uf: string
@@ -1998,6 +1999,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          municipio?: string | null
           site_code: string
           tipo: string
           uf: string
@@ -2006,6 +2008,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          municipio?: string | null
           site_code?: string
           tipo?: string
           uf?: string

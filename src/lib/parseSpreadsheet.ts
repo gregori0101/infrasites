@@ -4,6 +4,7 @@ export interface SpreadsheetSite {
   site_code: string;
   uf: string;
   tipo: string;
+  municipio?: string;
 }
 
 export interface ParseResult {
@@ -42,6 +43,7 @@ export function parseSpreadsheet(file: File): Promise<ParseResult> {
         const siteIdx = headers.findIndex(h => h === 'SITE' || h === 'SIGLA' || h === 'SITE_CODE');
         const ufIdx = headers.findIndex(h => h === 'UF' || h === 'ESTADO');
         const tipoIdx = headers.findIndex(h => h === 'TIPO' || h === 'TYPE');
+        const municipioIdx = headers.findIndex(h => h === 'MUNICIPIO' || h === 'MUNICÍPIO' || h === 'CIDADE');
 
         const errors: string[] = [];
 
@@ -68,6 +70,7 @@ export function parseSpreadsheet(file: File): Promise<ParseResult> {
           const site_code = String(row[siteIdx] || '').toUpperCase().trim();
           const uf = String(row[ufIdx] || '').toUpperCase().trim();
           const tipo = String(row[tipoIdx] || '').trim();
+          const municipio = municipioIdx !== -1 ? String(row[municipioIdx] || '').trim() : undefined;
 
           // Validate row
           if (!site_code) {
@@ -90,7 +93,7 @@ export function parseSpreadsheet(file: File): Promise<ParseResult> {
             continue;
           }
 
-          sites.push({ site_code, uf, tipo });
+          sites.push({ site_code, uf, tipo, municipio });
         }
 
         resolve({ sites, errors });
@@ -111,10 +114,10 @@ export function generateTemplateSpreadsheet(): Blob {
   const wb = XLSX.utils.book_new();
   
   const data = [
-    ['SITE', 'UF', 'TIPO'],
-    ['PACRE', 'PA', 'Indoor'],
-    ['AMBEL', 'AM', 'Outdoor'],
-    ['MAPRO', 'MA', 'Rooftop'],
+    ['SITE', 'UF', 'TIPO', 'MUNICIPIO'],
+    ['PACRE', 'PA', 'Indoor', 'Belém'],
+    ['AMBEL', 'AM', 'Outdoor', 'Manaus'],
+    ['MAPRO', 'MA', 'Rooftop', 'São Luís'],
   ];
   
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -123,7 +126,8 @@ export function generateTemplateSpreadsheet(): Blob {
   ws['!cols'] = [
     { wch: 10 },
     { wch: 5 },
-    { wch: 15 }
+    { wch: 15 },
+    { wch: 20 }
   ];
   
   XLSX.utils.book_append_sheet(wb, ws, 'Sites');

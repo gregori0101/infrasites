@@ -153,7 +153,8 @@ export default function SiteManagement() {
   const filteredSites = sites.filter(site => 
     site.site_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     site.uf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    site.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+    site.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.municipio?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   // Pagination
@@ -303,6 +304,7 @@ export default function SiteManagement() {
                     <TableRow>
                       <TableHead>Site</TableHead>
                       <TableHead>UF</TableHead>
+                      <TableHead>Município</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Data Cadastro</TableHead>
                       <TableHead className="w-[80px]">Ações</TableHead>
@@ -316,6 +318,9 @@ export default function SiteManagement() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{site.uf}</Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {site.municipio || <span className="text-muted-foreground">—</span>}
                         </TableCell>
                         <TableCell>{site.tipo}</TableCell>
                         <TableCell className="text-muted-foreground text-sm">
