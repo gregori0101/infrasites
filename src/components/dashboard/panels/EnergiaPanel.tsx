@@ -15,7 +15,7 @@ import {
 interface Props {
   stats: PanelStats;
   acs: ACInfo[];
-  onDrillDown: (type: "gmg" | "ac-ok" | "ac-nok") => void;
+  onDrillDown: (type: "gmg" | "gmg-no" | "ac-all" | "ac-ok" | "ac-nok") => void;
 }
 
 export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
@@ -31,7 +31,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           title="Sites com GMG"
           value={stats.sitesWithGMG}
@@ -41,11 +41,20 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
           onClick={() => onDrillDown("gmg")}
         />
         <StatCard
+          title="Sites sem GMG"
+          value={stats.sitesWithoutGMG}
+          subtitle="Sem backup energia"
+          icon={Zap}
+          iconBg="bg-warning/10 text-warning"
+          onClick={() => onDrillDown("gmg-no")}
+        />
+        <StatCard
           title="Total de ACs"
           value={stats.totalACs}
           subtitle="Unidades instaladas"
           icon={Wind}
           iconBg="bg-primary/10 text-primary"
+          onClick={() => onDrillDown("ac-all")}
         />
         <StatCard
           title="ACs Funcionando"

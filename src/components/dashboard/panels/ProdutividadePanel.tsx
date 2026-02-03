@@ -91,7 +91,7 @@ export interface ProdutividadeStats {
 
 interface Props {
   stats: ProdutividadeStats;
-  onDrillDown?: (type: string) => void;
+  onDrillDown?: (type: "realizadas" | "pendentes" | "nao-vistoriados" | "base") => void;
 }
 
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
@@ -248,6 +248,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
           subtitle="Total cadastrado"
           icon={Target}
           iconBg="bg-blue-100"
+          onClick={() => onDrillDown?.("base")}
         />
         <StatCard
           title="Vistorias Realizadas"
@@ -265,6 +266,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
           icon={Clock}
           iconBg="bg-amber-100"
           badge={{ text: "Pendentes", variant: "warning" }}
+          onClick={() => onDrillDown?.("nao-vistoriados")}
         />
         <StatCard
           title="Média por Técnico"

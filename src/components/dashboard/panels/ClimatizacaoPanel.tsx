@@ -9,7 +9,7 @@ interface Props {
   stats: PanelStats;
   climatizacao: ClimatizacaoInfo[];
   acs: ACInfo[];
-  onDrillDown: (type: "all" | "ac" | "fan" | "ac-ok" | "ac-nok") => void;
+  onDrillDown: (type: "all" | "ac" | "fan" | "ac-ok" | "ac-nok" | "plc-ok" | "plc-nok" | "na") => void;
 }
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
@@ -61,6 +61,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           subtitle="Sem climatização"
           icon={XCircle}
           iconBg="bg-muted text-muted-foreground"
+          onClick={() => onDrillDown("na")}
         />
       </div>
 
@@ -90,6 +91,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           subtitle="Lead-Lag funcional"
           icon={Gauge}
           iconBg="bg-violet-500/10 text-violet-500"
+          onClick={() => onDrillDown("plc-ok")}
         />
         <StatCard
           title="PLC NOK"
@@ -98,6 +100,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           icon={Gauge}
           iconBg="bg-pink-500/10 text-pink-500"
           badge={stats.plcNokCount > 0 ? { text: "Verificar", variant: "warning" } : undefined}
+          onClick={() => onDrillDown("plc-nok")}
         />
       </div>
 
