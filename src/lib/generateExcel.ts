@@ -101,6 +101,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           row[`${prefix}_Banco${j + 1}_DataFab`] = banco.dataFabricacao || '';
           row[`${prefix}_Banco${j + 1}_Estado`] = banco.estado;
           row[`${prefix}_Banco${j + 1}_Colada`] = banco.colada || 'NA';
+          row[`${prefix}_Banco${j + 1}_Foto`] = getPhotoValue(banco.fotoBanco);
         } else {
           row[`${prefix}_Banco${j + 1}_Tipo`] = '';
           row[`${prefix}_Banco${j + 1}_Fabricante`] = '';
@@ -108,10 +109,9 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           row[`${prefix}_Banco${j + 1}_DataFab`] = '';
           row[`${prefix}_Banco${j + 1}_Estado`] = '';
           row[`${prefix}_Banco${j + 1}_Colada`] = '';
+          row[`${prefix}_Banco${j + 1}_Foto`] = '';
         }
       }
-      
-      row[`${prefix}_Foto_Banco`] = getPhotoValue(gab.baterias.fotoBanco);
       
       // GRUPO 7: CLIMATIZAÇÃO
       row[`${prefix}_Clim_Tipo`] = gab.climatizacao.tipo;

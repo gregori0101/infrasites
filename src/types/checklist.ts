@@ -101,6 +101,7 @@ export interface BancoBateria {
   dataFabricacao: string;
   estado: BateriaEstado;
   colada: BateriaColada;
+  fotoBanco: string | null;
 }
 
 export interface ArCondicionado {
@@ -130,7 +131,6 @@ export interface BateriasData {
   numBancos: number;
   bancos: BancoBateria[];
   bancosInterligados: boolean;
-  fotoBanco: string | null;
 }
 
 export interface ClimatizacaoData {
@@ -259,7 +259,6 @@ export const INITIAL_GABINETE: GabineteData = {
     numBancos: 0,
     bancos: [],
     bancosInterligados: false,
-    fotoBanco: null,
   },
   climatizacao: {
     tipo: 'NA',

@@ -28,7 +28,8 @@ const EMPTY_BANCO: BancoBateria = {
   capacidadeAh: null,
   dataFabricacao: '',
   estado: 'OK',
-  colada: 'NA'
+  colada: 'NA',
+  fotoBanco: null
 };
 
 interface Step4Props {
@@ -245,6 +246,15 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     ))}
                   </div>
                 </div>
+
+                <PhotoCapture
+                  label="Foto do Banco"
+                  value={banco.fotoBanco}
+                  onChange={(value) => updateBanco(index, { fotoBanco: value })}
+                  required
+                  siteCode={data.siglaSite}
+                  category={`gab${currentGabinete + 1}_bateria_banco${index + 1}`}
+                />
               </div>
             ))}
 
@@ -257,17 +267,6 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
               />
             )}
           </div>
-        </FormCard>
-
-        <FormCard title="Foto do Banco" icon={<Battery className="w-4 h-4" />} variant="accent">
-          <PhotoCapture
-            label="Banco de Baterias"
-            value={gabinete.baterias.fotoBanco}
-            onChange={(value) => updateBaterias({ fotoBanco: value })}
-            required
-            siteCode={data.siglaSite}
-            category={`gab${currentGabinete + 1}_bateria`}
-          />
         </FormCard>
       </div>
     </SectionSkipToggle>

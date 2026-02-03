@@ -60,12 +60,14 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
 
       case 3: // Step4Baterias
         if (!gabinete) break;
-        if (gabinete.baterias.numBancos < 1) {
-          errors.push({ field: 'numBancos', message: 'Informe o número de bancos' });
+        if (gabinete.baterias.bancos.length === 0) {
+          errors.push({ field: 'numBancos', message: 'Adicione pelo menos um banco de bateria' });
         }
-        if (!gabinete.baterias.fotoBanco) {
-          errors.push({ field: 'fotoBanco', message: 'Foto do banco de baterias é obrigatória' });
-        }
+        gabinete.baterias.bancos.forEach((banco, index) => {
+          if (!banco.fotoBanco) {
+            errors.push({ field: `banco.${index}.fotoBanco`, message: `Banco ${index + 1}: Foto obrigatória` });
+          }
+        });
         break;
 
       case 4: // Step5Climatizacao
