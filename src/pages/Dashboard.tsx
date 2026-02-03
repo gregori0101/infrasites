@@ -56,6 +56,7 @@ export default function Dashboard() {
     status: "all",
     siteType: "all",
     operadora: isVivoUser ? "all" : "TEL", // TEL users default to TEL only
+    areaAtuacao: "all",
   });
 
   // Drill-down modal state
@@ -294,14 +295,21 @@ export default function Dashboard() {
       count: uf.count
     })).sort((a, b) => b.count - a.count);
 
-    // Map technician emails to ranking
+    // Map technician emails and area_atuacao to ranking
     const emailMap = new Map<string, string>(
       (technicianEmails || []).map((t: { id: string; email: string }) => [t.id, t.email] as [string, string])
     );
     
+    const areaMap = new Map<string, 'PI' | 'REDE' | null>(
+      (technicianEmails || []).map((t: { id: string; email: string; area_atuacao?: string | null }) => 
+        [t.id, (t.area_atuacao as 'PI' | 'REDE' | null) || null] as [string, 'PI' | 'REDE' | null]
+      )
+    );
+    
     const technicianRankingWithEmails = stats.technicianRanking.map(tech => ({
       ...tech,
-      email: emailMap.get(tech.id) as string | undefined
+      email: emailMap.get(tech.id) as string | undefined,
+      areaAtuacao: areaMap.get(tech.id) as 'PI' | 'REDE' | null | undefined
     }));
 
     return {
@@ -537,6 +545,7 @@ export default function Dashboard() {
             uniqueTechnicians={uniqueTechnicians}
             uniqueSiteTypes={uniqueSiteTypes}
             showOperadoraFilter={isVivoUser}
+            showAreaAtuacaoFilter={activePanel === "produtividade"}
           />
 
           {/* Loading State */}
@@ -578,6 +587,7 @@ export default function Dashboard() {
               {activePanel === "produtividade" && (
                 <ProdutividadePanel
                   stats={produtividadeStats}
+                  areaAtuacaoFilter={filters.areaAtuacao}
                   onDrillDown={(type) => {
                     if (type === "realizadas") openDrillDown("sites", "Vistorias Realizadas", (s) => s);
                     else if (type === "pendentes") openDrillDown("sites", "Sites com Atribuições Pendentes", (s) => s);

@@ -2041,6 +2041,7 @@ export type Database = {
           approved: boolean
           approved_at: string | null
           approved_by: string | null
+          area_atuacao: string | null
           created_at: string
           id: string
           operadora: string | null
@@ -2051,6 +2052,7 @@ export type Database = {
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
+          area_atuacao?: string | null
           created_at?: string
           id?: string
           operadora?: string | null
@@ -2061,6 +2063,7 @@ export type Database = {
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
+          area_atuacao?: string | null
           created_at?: string
           id?: string
           operadora?: string | null

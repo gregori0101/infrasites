@@ -48,6 +48,7 @@ interface UserWithRole {
   email: string;
   role: 'administrador' | 'gestor' | 'tecnico';
   operadora: 'VIVO' | 'TEL';
+  area_atuacao: 'PI' | 'REDE' | null;
   approved: boolean;
   created_at: string;
   approved_at: string | null;
@@ -106,6 +107,7 @@ export default function UserManagement() {
         email: emailMap[role.user_id] || role.user_id.slice(0, 8) + '...',
         role: role.role as 'administrador' | 'gestor' | 'tecnico',
         operadora: (role.operadora as 'VIVO' | 'TEL') || 'VIVO',
+        area_atuacao: (role as any).area_atuacao as 'PI' | 'REDE' | null,
         approved: role.approved,
         created_at: role.created_at,
         approved_at: role.approved_at,
@@ -254,6 +256,34 @@ export default function UserManagement() {
       toast({
         title: 'Erro',
         description: 'Não foi possível alterar a empresa',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleAreaAtuacaoChange = async (userId: string, newArea: 'PI' | 'REDE' | null) => {
+    setActionLoading(userId);
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ area_atuacao: newArea })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Área de atuação alterada',
+        description: newArea ? `Área definida como ${newArea}` : 'Área de atuação removida',
+      });
+      
+      fetchUsers();
+    } catch (err) {
+      console.error('Error changing area_atuacao:', err);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar a área de atuação',
         variant: 'destructive',
       });
     } finally {
@@ -460,6 +490,22 @@ export default function UserManagement() {
                                   <SelectItem value="administrador">Administrador</SelectItem>
                                 </SelectContent>
                               </Select>
+                              {u.role === 'tecnico' && (
+                                <Select
+                                  value={u.area_atuacao || "_none_"}
+                                  onValueChange={(value) => handleAreaAtuacaoChange(u.user_id, value === "_none_" ? null : value as 'PI' | 'REDE')}
+                                  disabled={actionLoading === u.user_id}
+                                >
+                                  <SelectTrigger className="w-24 h-8">
+                                    <SelectValue placeholder="Área" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="_none_">Área</SelectItem>
+                                    <SelectItem value="PI">PI</SelectItem>
+                                    <SelectItem value="REDE">REDE</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"

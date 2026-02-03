@@ -51,6 +51,7 @@ export interface TechnicianRanking {
   email?: string;
   count: number;
   mainUf: string;
+  areaAtuacao?: 'PI' | 'REDE' | null;
 }
 
 export interface TechnicianProductivity {
@@ -58,6 +59,7 @@ export interface TechnicianProductivity {
   name: string;
   email?: string;
   mainUf: string;
+  areaAtuacao?: 'PI' | 'REDE' | null;
   today: number;
   thisMonth: number;
   total: number;
@@ -92,11 +94,12 @@ export interface ProdutividadeStats {
 interface Props {
   stats: ProdutividadeStats;
   onDrillDown?: (type: "realizadas" | "pendentes" | "nao-vistoriados" | "base") => void;
+  areaAtuacaoFilter?: "all" | "PI" | "REDE";
 }
 
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
-export function ProdutividadePanel({ stats, onDrillDown }: Props) {
+export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "all" }: Props) {
   const [metaDiaria, setMetaDiaria] = useState<number>(10);
   const [searchTechnician, setSearchTechnician] = useState("");
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
@@ -124,6 +127,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
         name: tech.name,
         email: tech.email,
         mainUf: tech.mainUf,
+        areaAtuacao: tech.areaAtuacao,
         today: 0,
         thisMonth: 0,
         total: tech.count,
@@ -146,9 +150,14 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
       }
     });
     
-    return Array.from(productivityMap.values())
-      .sort((a, b) => b.total - a.total);
-  }, [stats.technicianRanking, stats.vistoriasPorDiaTecnico, todayFormatted]);
+    // Apply area filter
+    let result = Array.from(productivityMap.values());
+    if (areaAtuacaoFilter !== "all") {
+      result = result.filter(tech => tech.areaAtuacao === areaAtuacaoFilter);
+    }
+    
+    return result.sort((a, b) => b.total - a.total);
+  }, [stats.technicianRanking, stats.vistoriasPorDiaTecnico, todayFormatted, areaAtuacaoFilter]);
 
   // Filtered technicians based on search
   const filteredTechnicians = useMemo(() => {
@@ -167,6 +176,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
       'Posição': index + 1,
       'Técnico': tech.email || tech.name,
       'UF Principal': tech.mainUf,
+      'Área': tech.areaAtuacao || '-',
       'Hoje': tech.today,
       'Este Mês': tech.thisMonth,
       'Total': tech.total,
@@ -181,6 +191,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
       { wch: 8 },  // Posição
       { wch: 35 }, // Técnico
       { wch: 12 }, // UF Principal
+      { wch: 8 },  // Área
       { wch: 8 },  // Hoje
       { wch: 10 }, // Este Mês
       { wch: 8 },  // Total
@@ -500,6 +511,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                     <TableHead className="w-12">#</TableHead>
                     <TableHead>Técnico</TableHead>
                     <TableHead className="text-center w-16">UF</TableHead>
+                    <TableHead className="text-center w-16">Área</TableHead>
                     <TableHead className="text-right w-20">
                       <div className="flex flex-col items-end">
                         <span>Hoje</span>
@@ -550,6 +562,18 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                         <TableCell className="text-center">
                           <Badge variant="outline">{tech.mainUf}</Badge>
                         </TableCell>
+                        <TableCell className="text-center">
+                          {tech.areaAtuacao ? (
+                            <Badge 
+                              variant="secondary" 
+                              className={tech.areaAtuacao === 'PI' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}
+                            >
+                              {tech.areaAtuacao}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           {tech.today > 0 ? (
                             <Badge className="bg-green-500 text-white">{tech.today}</Badge>
@@ -568,7 +592,7 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
                   })}
                   {filteredTechnicians.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
                         {searchTechnician ? "Nenhum técnico encontrado" : "Sem dados de técnicos"}
                       </TableCell>
                     </TableRow>
