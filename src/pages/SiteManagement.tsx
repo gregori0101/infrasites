@@ -27,8 +27,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { 
   Upload, Download, Trash2, ArrowLeft, FileSpreadsheet, 
-  AlertCircle, CheckCircle, Search, Building2
+  AlertCircle, CheckCircle, Search, Building2, Pencil
 } from "lucide-react";
+import { SiteEditDialog } from "@/components/sites/SiteEditDialog";
 import { toast } from "sonner";
 import { fetchSites, insertSites, deleteSite, Site } from "@/lib/siteDatabase";
 import { parseSpreadsheet, generateTemplateSpreadsheet } from "@/lib/parseSpreadsheet";
@@ -46,6 +47,8 @@ export default function SiteManagement() {
   const [isUploading, setIsUploading] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [siteToDelete, setSiteToDelete] = React.useState<Site | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [siteToEdit, setSiteToEdit] = React.useState<Site | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -142,6 +145,15 @@ export default function SiteManagement() {
   const handleDeleteClick = (site: Site) => {
     setSiteToDelete(site);
     setDeleteDialogOpen(true);
+  };
+
+  const handleEditClick = (site: Site) => {
+    setSiteToEdit(site);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['sites'] });
   };
 
   const confirmDelete = () => {
@@ -327,13 +339,24 @@ export default function SiteManagement() {
                           {new Date(site.created_at).toLocaleDateString('pt-BR')}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteClick(site)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditClick(site)}
+                              title="Editar site"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteClick(site)}
+                              title="Excluir site"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -374,6 +397,14 @@ export default function SiteManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Dialog */}
+      <SiteEditDialog
+        site={siteToEdit}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 }
