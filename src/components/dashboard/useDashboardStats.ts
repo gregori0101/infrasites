@@ -431,6 +431,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
           const dataFab = report[`${prefix}_bat${b}_data_fabricacao`] as string;
           const estado = report[`${prefix}_bat${b}_estado`] as string;
+          const colada = report[`${prefix}_bat${b}_colada`] as string;
+          const comGradil = report[`${prefix}_bat${b}_com_gradil`] as string;
           
           if (tipo && tipo !== "NA" && fabricante) {
             stats.totalBatteries++;
@@ -504,6 +506,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               obsolescenciaTipo,
               autonomyRisk: "ok", // Placeholder, will be updated
               needsReplacement,
+              colada: colada || "N/A",
+              comGradil: comGradil || "N/A",
+              reportId: report.id || "",
             };
             
             gabBatteries.push(batteryInfo);

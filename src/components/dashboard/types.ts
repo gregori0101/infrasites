@@ -25,6 +25,10 @@ export interface BatteryInfo {
   obsolescenciaTipo: "ok" | "medio" | "alto"; // Based on battery type rules
   autonomyRisk: "ok" | "medio" | "alto" | "critico"; // Autonomy classification for the gabinete
   needsReplacement: boolean; // Whether battery needs replacement
+  // Additional fields for detail modal
+  colada: string;
+  comGradil: string;
+  reportId: string; // Reference to fetch photo on demand
 }
 
 export interface ACInfo {
