@@ -147,24 +147,32 @@ export async function uploadAllPhotos(
     
     const prefix = `gabinete_${i + 1}`;
 
-    // FCC photos
-    if (gab.fcc) {
-      gab.fcc.fotoPanoramica = await uploadSinglePhoto(
-        gab.fcc.fotoPanoramica,
-        `${prefix}_fcc_panoramica`
-      );
-      gab.fcc.fotoPainel = await uploadSinglePhoto(
-        gab.fcc.fotoPainel,
-        `${prefix}_fcc_painel`
-      );
+    // FCC photos (array of FCCs)
+    if (gab.fcc?.fccs && Array.isArray(gab.fcc.fccs)) {
+      for (let j = 0; j < gab.fcc.fccs.length; j++) {
+        const fcc = gab.fcc.fccs[j];
+        if (!fcc) continue;
+        gab.fcc.fccs[j].fotoPanoramica = await uploadSinglePhoto(
+          fcc.fotoPanoramica,
+          `${prefix}_fcc${j + 1}_panoramica`
+        );
+        gab.fcc.fccs[j].fotoPainel = await uploadSinglePhoto(
+          fcc.fotoPainel,
+          `${prefix}_fcc${j + 1}_painel`
+        );
+      }
     }
 
-    // Battery photo
-    if (gab.baterias) {
-      gab.baterias.fotoBanco = await uploadSinglePhoto(
-        gab.baterias.fotoBanco,
-        `${prefix}_bateria`
-      );
+    // Battery photos (array of bancos)
+    if (gab.baterias?.bancos && Array.isArray(gab.baterias.bancos)) {
+      for (let j = 0; j < gab.baterias.bancos.length; j++) {
+        const banco = gab.baterias.bancos[j];
+        if (!banco) continue;
+        gab.baterias.bancos[j].fotoBanco = await uploadSinglePhoto(
+          banco.fotoBanco,
+          `${prefix}_bateria${j + 1}`
+        );
+      }
     }
 
     // Climate photos
@@ -326,13 +334,32 @@ export async function uploadAllPhotos(
   }
 
   // Upload tower photos
-  if (data.torre?.fotoNinhos) {
+  if (data.torre) {
     if (!updatedData.torre) {
-      updatedData.torre = {};
+      updatedData.torre = { ...data.torre };
     }
-    updatedData.torre.fotoNinhos = await uploadSinglePhoto(
-      data.torre.fotoNinhos,
-      'torre_ninhos'
+    if (data.torre.fotoNinhos) {
+      updatedData.torre.fotoNinhos = await uploadSinglePhoto(
+        data.torre.fotoNinhos,
+        'torre_ninhos'
+      );
+    }
+    if (data.torre.fotoFibrasProtegidas) {
+      updatedData.torre.fotoFibrasProtegidas = await uploadSinglePhoto(
+        data.torre.fotoFibrasProtegidas,
+        'torre_fibras_protegidas'
+      );
+    }
+  }
+
+  // Upload GMG photos
+  if (data.gmg?.fotoGMG) {
+    if (!updatedData.gmg) {
+      updatedData.gmg = { ...data.gmg };
+    }
+    updatedData.gmg.fotoGMG = await uploadSinglePhoto(
+      data.gmg.fotoGMG,
+      'gmg_painel'
     );
   }
 
