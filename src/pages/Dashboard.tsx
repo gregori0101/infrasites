@@ -168,8 +168,40 @@ export default function Dashboard() {
     return reports.filter(r => siteTypeMap.get(r.site_code) === filters.siteType);
   }, [reports, filters.siteType, siteTypeMap]);
 
-  // Process stats based on filters (using reports already filtered by site type)
-  const { stats, sites, batteries, acs, climatizacao, gabinetes } = useDashboardStats(filteredReportsBySiteType, filters);
+  // Build reverse map: email -> user_ids for technician filtering
+  const emailToUserIdMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    (technicianEmails || []).forEach((t: { id: string; email: string }) => {
+      const email = t.email.toLowerCase();
+      if (!map.has(email)) {
+        map.set(email, new Set());
+      }
+      map.get(email)!.add(t.id);
+    });
+    return map;
+  }, [technicianEmails]);
+
+  // Filter reports by technician email (applied before useDashboardStats)
+  const filteredReportsByTechnician = useMemo(() => {
+    if (!filters.technician || filters.technician === "all") {
+      return filteredReportsBySiteType;
+    }
+    const targetEmail = filters.technician.toLowerCase();
+    const userIds = emailToUserIdMap.get(targetEmail);
+    if (!userIds || userIds.size === 0) {
+      return filteredReportsBySiteType;
+    }
+    return filteredReportsBySiteType.filter(r => r.user_id && userIds.has(r.user_id));
+  }, [filteredReportsBySiteType, filters.technician, emailToUserIdMap]);
+
+  // Pass filters without technician (already filtered above) to avoid double filtering
+  const filtersForStats = useMemo(() => ({
+    ...filters,
+    technician: "", // Already filtered by email above
+  }), [filters]);
+
+  // Process stats based on filters (using reports already filtered by site type and technician)
+  const { stats, sites, batteries, acs, climatizacao, gabinetes } = useDashboardStats(filteredReportsByTechnician, filtersForStats);
 
   // Extract unique values for filter dropdowns
   const uniqueUFs = useMemo(() => {
@@ -177,10 +209,28 @@ export default function Dashboard() {
     return Array.from(ufs).sort() as string[];
   }, [reports]);
 
+  // Build a map of user_id to email for technician filter
+  const technicianEmailMap = useMemo(() => {
+    const map = new Map<string, string>();
+    (technicianEmails || []).forEach((t: { id: string; email: string }) => {
+      map.set(t.id, t.email);
+    });
+    return map;
+  }, [technicianEmails]);
+
+  // Extract unique technician emails from reports
   const uniqueTechnicians = useMemo(() => {
-    const techs = new Set(filteredReportsBySiteType.map((r) => r.technician_name).filter(Boolean));
-    return Array.from(techs).sort() as string[];
-  }, [filteredReportsBySiteType]);
+    const emailsSet = new Set<string>();
+    filteredReportsBySiteType.forEach((r) => {
+      if (r.user_id) {
+        const email = technicianEmailMap.get(r.user_id);
+        if (email) {
+          emailsSet.add(email);
+        }
+      }
+    });
+    return Array.from(emailsSet).sort();
+  }, [filteredReportsBySiteType, technicianEmailMap]);
 
   // Extract unique site types
   const uniqueSiteTypes = useMemo(() => {
@@ -232,7 +282,7 @@ export default function Dashboard() {
     // Total de sites na base
     const totalSitesBase = sitesData.length;
     
-    // Sites únicos já vistoriados (usando site_code único)
+    // Sites únicos já vistoriados (usando site_code único) - sem filtro de técnico para mostrar progresso geral
     const sitesVistoriados = new Set(filteredReportsBySiteType.map(r => r.site_code)).size;
     
     // Sites não vistoriados = total base - sites únicos vistoriados
