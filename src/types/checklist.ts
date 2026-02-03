@@ -11,7 +11,8 @@ export type GabineteType =
   | 'HUAWEI MTS9000A'
   | 'ILLIS-194'
   | 'INDOOR MINI SHELTER 2X2'
-  | 'OUTDOOR';
+  | 'OUTDOOR'
+  | 'OUTROS';
 
 export type TecnologiaAcesso = '2G' | '3G' | '4G' | '5G';
 export type TecnologiaTransporte = 'DWDM' | 'GPON' | 'HL4' | 'HL5D' | 'HL5G' | 'PDH' | 'SDH' | 'GWS' | 'GWD' | 'SWA';
@@ -141,6 +142,7 @@ export interface ClimatizacaoData {
 
 export interface GabineteData {
   tipo: GabineteType;
+  tipoOutro?: string;
   ativo: boolean;
   comProtecao: boolean;
   tecnologiasAcesso: TecnologiaAcesso[];
@@ -230,6 +232,7 @@ export interface ChecklistData {
 
 export const INITIAL_GABINETE: GabineteData = {
   tipo: null as unknown as GabineteType,
+  tipoOutro: '',
   ativo: true,
   comProtecao: false,
   tecnologiasAcesso: [],
