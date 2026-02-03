@@ -280,10 +280,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
           row[`${prefix}_bat${j + 1}_data_fabricacao`] = banco.dataFabricacao || null;
           row[`${prefix}_bat${j + 1}_estado`] = banco.estado || null;
           row[`${prefix}_bat${j + 1}_colada`] = banco.colada || null;
+          row[`${prefix}_bat${j + 1}_foto`] = banco.fotoBanco || null;
         }
       }
       row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados === true ? 'SIM' : gab.baterias.bancosInterligados === false ? 'NÃO' : null;
-      row[`${prefix}_bat_foto`] = gab.baterias.fotoBanco || null;
       
       // Climatization
       row[`${prefix}_climatizacao_tipo`] = gab.climatizacao.tipo || null;

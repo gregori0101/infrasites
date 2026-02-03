@@ -188,7 +188,6 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         numBancos: 0,
         bancos: [],
         bancosInterligados: report[`${prefix}_bancos_interligados`] === 'SIM',
-        fotoBanco: report[`${prefix}_bat_foto`] || null,
       },
       climatizacao: {
         tipo: (report[`${prefix}_climatizacao_tipo`] || 'NA') as any,

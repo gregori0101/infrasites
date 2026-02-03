@@ -480,9 +480,9 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
       addFieldRow('  Estado', banco.estado, banco.estado === 'OK' ? 'ok' : 'error');
       addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
-    }
 
-    await addPhoto(gab.baterias.fotoBanco, 'Foto Banco de Baterias');
+      await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
+    }
 
     // Climate Section
     checkNewPage(50);
