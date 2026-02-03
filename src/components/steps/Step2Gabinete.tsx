@@ -5,6 +5,7 @@ import { ChipSelect } from "@/components/ui/chip-select";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Server, Radio, Wifi, Camera } from "lucide-react";
 import { GabineteType, TecnologiaAcesso, TecnologiaTransporte } from "@/types/checklist";
@@ -13,7 +14,7 @@ import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
 const GABINETE_TYPES: GabineteType[] = [
   'CONTAINER', 'SHARING', 'HUAWEI 3012', 'HUAWEI APM30', 'HUAWEI APM5930',
-  'HUAWEI MTS9000A', 'ILLIS-194', 'INDOOR MINI SHELTER 2X2', 'OUTDOOR'
+  'HUAWEI MTS9000A', 'ILLIS-194', 'INDOOR MINI SHELTER 2X2', 'OUTDOOR', 'OUTROS'
 ];
 
 const TECNOLOGIAS_ACESSO: TecnologiaAcesso[] = ['2G', '3G', '4G', '5G'];
@@ -50,7 +51,7 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
               <Label>Tipo do Gabinete</Label>
               <Select 
                 value={gabinete.tipo} 
-                onValueChange={(value: GabineteType) => updateGabinete(currentGabinete, { tipo: value })}
+                onValueChange={(value: GabineteType) => updateGabinete(currentGabinete, { tipo: value, tipoOutro: value === 'OUTROS' ? gabinete.tipoOutro : '' })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -64,6 +65,17 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
                 </SelectContent>
               </Select>
             </div>
+
+            {gabinete.tipo === 'OUTROS' && (
+              <div className="space-y-2">
+                <Label>Especifique o tipo de gabinete</Label>
+                <Input
+                  placeholder="Digite o tipo de gabinete"
+                  value={gabinete.tipoOutro || ''}
+                  onChange={(e) => updateGabinete(currentGabinete, { tipoOutro: e.target.value })}
+                />
+              </div>
+            )}
 
             <ToggleSwitch
               label={gabinete.ativo ? "Gabinete Ativo" : "Gabinete Desativado"}
