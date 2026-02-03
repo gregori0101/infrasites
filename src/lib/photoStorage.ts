@@ -6,19 +6,37 @@ const BUCKET_NAME = 'report-photos';
 const MAX_IMAGE_SIZE_KB = 500; // Target max size for compressed images
 
 /**
- * Converts a base64 data URL to a Blob
+ * Converts a base64 data URL to a Blob - iOS Safari compatible
+ * Uses chunked processing to avoid memory issues on mobile devices
  */
 function dataURLToBlob(dataURL: string): Blob {
-  const arr = dataURL.split(',');
-  const mimeMatch = arr[0].match(/:(.*?);/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
+  try {
+    const arr = dataURL.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    
+    const base64 = arr[1];
+    const byteCharacters = atob(base64);
+    
+    // Process in smaller chunks to avoid memory issues on iOS
+    const sliceSize = 512;
+    const byteArrays: BlobPart[] = [];
+    
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray.buffer);
+    }
+    
+    return new Blob(byteArrays, { type: mime });
+  } catch (error) {
+    console.error('[dataURLToBlob] Error:', error);
+    throw new Error('Falha ao processar imagem para upload.');
   }
-  return new Blob([u8arr], { type: mime });
 }
 
 /**
