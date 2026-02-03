@@ -406,6 +406,7 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                     <SelectContent>
                       <SelectItem value="12">12 FO</SelectItem>
                       <SelectItem value="24">24 FO</SelectItem>
+                      <SelectItem value="36">36 FO</SelectItem>
                       <SelectItem value="48">48 FO</SelectItem>
                       <SelectItem value="72">72 FO</SelectItem>
                       <SelectItem value="144">144 FO</SelectItem>
