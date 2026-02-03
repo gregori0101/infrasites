@@ -5,6 +5,7 @@ export interface Site {
   site_code: string;
   uf: string;
   tipo: string;
+  municipio: string | null;
   created_at: string;
   created_by: string | null;
 }
@@ -13,6 +14,7 @@ export interface SiteInsert {
   site_code: string;
   uf: string;
   tipo: string;
+  municipio?: string;
 }
 
 export async function fetchSites(): Promise<Site[]> {
@@ -73,6 +75,7 @@ export async function insertSites(sites: SiteInsert[]): Promise<{ inserted: numb
     site_code: site.site_code.toUpperCase().trim(),
     uf: site.uf.toUpperCase().trim(),
     tipo: site.tipo.trim(),
+    municipio: site.municipio?.trim() || null,
     created_by: user.user!.id
   }));
 
