@@ -159,6 +159,7 @@ export interface GabineteData {
 export interface GMGData {
   informar: boolean;
   fabricante?: FCCFabricante;
+  fabricanteOutra?: string;
   potencia?: number;
   autonomia?: number;
   status?: StatusFuncionamento;
