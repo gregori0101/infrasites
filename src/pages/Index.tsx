@@ -2,7 +2,7 @@ import * as React from "react";
 import { ChecklistWizard } from "@/components/ChecklistWizard";
 import { TechnicianInbox } from "@/components/technician/TechnicianInbox";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChecklistProvider, useChecklist } from "@/contexts/ChecklistContext";
+import { useChecklist } from "@/contexts/ChecklistContext";
 import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -104,11 +104,5 @@ const IndexInner = () => {
 };
 
 export default function Index() {
-  // Fail-safe: ensures this page always has Checklist context,
-  // even if the app-level provider tree changes.
-  return (
-    <ChecklistProvider>
-      <IndexInner />
-    </ChecklistProvider>
-  );
+  return <IndexInner />;
 }
