@@ -6,6 +6,7 @@ import {
   INITIAL_FIBRA_OPTICA,
   INITIAL_ABORDAGEM_FIBRA,
   INITIAL_SECOES_NAO_APLICAVEIS,
+  INITIAL_GEOLOCALIZACAO,
   GabineteData,
   SecoesNaoAplicaveis,
 } from '@/types/checklist';
@@ -81,6 +82,10 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
               ...INITIAL_CHECKLIST,
               ...parsed,
               // Ensure nested structures exist even for older saved sessions
+              geolocalizacao: {
+                ...INITIAL_GEOLOCALIZACAO,
+                ...(parsed.geolocalizacao || {}),
+              },
               gabinetes: Array.isArray(parsed.gabinetes) && parsed.gabinetes.length > 0 ? parsed.gabinetes : [{ ...INITIAL_GABINETE }],
               fibraOptica: {
                 ...INITIAL_FIBRA_OPTICA,
