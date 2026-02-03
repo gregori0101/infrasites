@@ -55,10 +55,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get all approved technicians
+    // Get all approved technicians with area_atuacao
     const { data: technicians, error: techError } = await supabaseAdmin
       .from('user_roles')
-      .select('user_id')
+      .select('user_id, area_atuacao')
       .eq('role', 'tecnico')
       .eq('approved', true)
 
@@ -67,6 +67,12 @@ Deno.serve(async (req) => {
     }
 
     const approvedTechnicianIds = technicians?.map(t => t.user_id) || []
+    
+    // Build area_atuacao map from technician data
+    const areaAtuacaoMap: Record<string, string | null> = {}
+    technicians?.forEach(t => {
+      areaAtuacaoMap[t.user_id] = (t as any).area_atuacao || null
+    })
 
     // Also get user_ids from reports to include technicians who submitted reports
     // but might not be in the approved list
@@ -103,7 +109,8 @@ Deno.serve(async (req) => {
       .filter(u => allUserIds.includes(u.id))
       .map(u => ({
         id: u.id,
-        email: u.email || u.id
+        email: u.email || u.id,
+        area_atuacao: areaAtuacaoMap[u.id] || null
       }))
 
     return new Response(JSON.stringify({ technicians: technicianEmails }), {

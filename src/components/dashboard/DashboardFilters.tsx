@@ -33,9 +33,10 @@ interface Props {
   uniqueTechnicians: string[];
   uniqueSiteTypes: string[];
   showOperadoraFilter?: boolean; // Only show for VIVO users
+  showAreaAtuacaoFilter?: boolean; // Show PI/REDE filter in productivity
 }
 
-export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, showOperadoraFilter = false }: Props) {
+export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, showOperadoraFilter = false, showAreaAtuacaoFilter = false }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   const hasActiveFilters = 
@@ -44,6 +45,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.status !== "all" ||
     filters.siteType !== "all" ||
     filters.operadora !== "all" ||
+    filters.areaAtuacao !== "all" ||
     filters.dateRange.from ||
     filters.dateRange.to;
 
@@ -53,6 +55,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.status !== "all" ? filters.status : null,
     filters.siteType !== "all" ? filters.siteType : null,
     filters.operadora !== "all" ? filters.operadora : null,
+    filters.areaAtuacao !== "all" ? filters.areaAtuacao : null,
     filters.dateRange.from,
   ].filter(Boolean).length;
 
@@ -64,6 +67,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
       status: "all",
       siteType: "all",
       operadora: "all",
+      areaAtuacao: "all",
     });
   };
 
@@ -259,6 +263,28 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
                       <SelectItem value="all">Todas</SelectItem>
                       <SelectItem value="VIVO">VIVO</SelectItem>
                       <SelectItem value="TEL">TEL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Área de Atuação - for productivity panel */}
+              {showAreaAtuacaoFilter && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Área de Atuação</Label>
+                  <Select
+                    value={filters.areaAtuacao}
+                    onValueChange={(v) =>
+                      onFiltersChange({ ...filters, areaAtuacao: v as "all" | "PI" | "REDE" })
+                    }
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      <SelectItem value="PI">PI</SelectItem>
+                      <SelectItem value="REDE">REDE</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
