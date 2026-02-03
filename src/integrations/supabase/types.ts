@@ -143,6 +143,7 @@ export type Database = {
           gab1_fcc_gerenciado: string | null
           gab1_fcc_gerenciavel: string | null
           gab1_fcc_qtd_ur: string | null
+          gab1_fcc_qtd_ur_instaladas: string | null
           gab1_fcc_tensao: string | null
           gab1_foto_acesso: string | null
           gab1_foto_panoramica: string | null
@@ -222,6 +223,7 @@ export type Database = {
           gab2_fcc_gerenciado: string | null
           gab2_fcc_gerenciavel: string | null
           gab2_fcc_qtd_ur: string | null
+          gab2_fcc_qtd_ur_instaladas: string | null
           gab2_fcc_tensao: string | null
           gab2_foto_acesso: string | null
           gab2_foto_panoramica: string | null
@@ -301,6 +303,7 @@ export type Database = {
           gab3_fcc_gerenciado: string | null
           gab3_fcc_gerenciavel: string | null
           gab3_fcc_qtd_ur: string | null
+          gab3_fcc_qtd_ur_instaladas: string | null
           gab3_fcc_tensao: string | null
           gab3_foto_acesso: string | null
           gab3_foto_panoramica: string | null
@@ -380,6 +383,7 @@ export type Database = {
           gab4_fcc_gerenciado: string | null
           gab4_fcc_gerenciavel: string | null
           gab4_fcc_qtd_ur: string | null
+          gab4_fcc_qtd_ur_instaladas: string | null
           gab4_fcc_tensao: string | null
           gab4_foto_acesso: string | null
           gab4_foto_panoramica: string | null
@@ -459,6 +463,7 @@ export type Database = {
           gab5_fcc_gerenciado: string | null
           gab5_fcc_gerenciavel: string | null
           gab5_fcc_qtd_ur: string | null
+          gab5_fcc_qtd_ur_instaladas: string | null
           gab5_fcc_tensao: string | null
           gab5_foto_acesso: string | null
           gab5_foto_panoramica: string | null
@@ -538,6 +543,7 @@ export type Database = {
           gab6_fcc_gerenciado: string | null
           gab6_fcc_gerenciavel: string | null
           gab6_fcc_qtd_ur: string | null
+          gab6_fcc_qtd_ur_instaladas: string | null
           gab6_fcc_tensao: string | null
           gab6_foto_acesso: string | null
           gab6_foto_panoramica: string | null
@@ -617,6 +623,7 @@ export type Database = {
           gab7_fcc_gerenciado: string | null
           gab7_fcc_gerenciavel: string | null
           gab7_fcc_qtd_ur: string | null
+          gab7_fcc_qtd_ur_instaladas: string | null
           gab7_fcc_tensao: string | null
           gab7_foto_acesso: string | null
           gab7_foto_panoramica: string | null
@@ -781,6 +788,7 @@ export type Database = {
           gab1_fcc_gerenciado?: string | null
           gab1_fcc_gerenciavel?: string | null
           gab1_fcc_qtd_ur?: string | null
+          gab1_fcc_qtd_ur_instaladas?: string | null
           gab1_fcc_tensao?: string | null
           gab1_foto_acesso?: string | null
           gab1_foto_panoramica?: string | null
@@ -860,6 +868,7 @@ export type Database = {
           gab2_fcc_gerenciado?: string | null
           gab2_fcc_gerenciavel?: string | null
           gab2_fcc_qtd_ur?: string | null
+          gab2_fcc_qtd_ur_instaladas?: string | null
           gab2_fcc_tensao?: string | null
           gab2_foto_acesso?: string | null
           gab2_foto_panoramica?: string | null
@@ -939,6 +948,7 @@ export type Database = {
           gab3_fcc_gerenciado?: string | null
           gab3_fcc_gerenciavel?: string | null
           gab3_fcc_qtd_ur?: string | null
+          gab3_fcc_qtd_ur_instaladas?: string | null
           gab3_fcc_tensao?: string | null
           gab3_foto_acesso?: string | null
           gab3_foto_panoramica?: string | null
@@ -1018,6 +1028,7 @@ export type Database = {
           gab4_fcc_gerenciado?: string | null
           gab4_fcc_gerenciavel?: string | null
           gab4_fcc_qtd_ur?: string | null
+          gab4_fcc_qtd_ur_instaladas?: string | null
           gab4_fcc_tensao?: string | null
           gab4_foto_acesso?: string | null
           gab4_foto_panoramica?: string | null
@@ -1097,6 +1108,7 @@ export type Database = {
           gab5_fcc_gerenciado?: string | null
           gab5_fcc_gerenciavel?: string | null
           gab5_fcc_qtd_ur?: string | null
+          gab5_fcc_qtd_ur_instaladas?: string | null
           gab5_fcc_tensao?: string | null
           gab5_foto_acesso?: string | null
           gab5_foto_panoramica?: string | null
@@ -1176,6 +1188,7 @@ export type Database = {
           gab6_fcc_gerenciado?: string | null
           gab6_fcc_gerenciavel?: string | null
           gab6_fcc_qtd_ur?: string | null
+          gab6_fcc_qtd_ur_instaladas?: string | null
           gab6_fcc_tensao?: string | null
           gab6_foto_acesso?: string | null
           gab6_foto_panoramica?: string | null
@@ -1255,6 +1268,7 @@ export type Database = {
           gab7_fcc_gerenciado?: string | null
           gab7_fcc_gerenciavel?: string | null
           gab7_fcc_qtd_ur?: string | null
+          gab7_fcc_qtd_ur_instaladas?: string | null
           gab7_fcc_tensao?: string | null
           gab7_foto_acesso?: string | null
           gab7_foto_panoramica?: string | null
@@ -1419,6 +1433,7 @@ export type Database = {
           gab1_fcc_gerenciado?: string | null
           gab1_fcc_gerenciavel?: string | null
           gab1_fcc_qtd_ur?: string | null
+          gab1_fcc_qtd_ur_instaladas?: string | null
           gab1_fcc_tensao?: string | null
           gab1_foto_acesso?: string | null
           gab1_foto_panoramica?: string | null
@@ -1498,6 +1513,7 @@ export type Database = {
           gab2_fcc_gerenciado?: string | null
           gab2_fcc_gerenciavel?: string | null
           gab2_fcc_qtd_ur?: string | null
+          gab2_fcc_qtd_ur_instaladas?: string | null
           gab2_fcc_tensao?: string | null
           gab2_foto_acesso?: string | null
           gab2_foto_panoramica?: string | null
@@ -1577,6 +1593,7 @@ export type Database = {
           gab3_fcc_gerenciado?: string | null
           gab3_fcc_gerenciavel?: string | null
           gab3_fcc_qtd_ur?: string | null
+          gab3_fcc_qtd_ur_instaladas?: string | null
           gab3_fcc_tensao?: string | null
           gab3_foto_acesso?: string | null
           gab3_foto_panoramica?: string | null
@@ -1656,6 +1673,7 @@ export type Database = {
           gab4_fcc_gerenciado?: string | null
           gab4_fcc_gerenciavel?: string | null
           gab4_fcc_qtd_ur?: string | null
+          gab4_fcc_qtd_ur_instaladas?: string | null
           gab4_fcc_tensao?: string | null
           gab4_foto_acesso?: string | null
           gab4_foto_panoramica?: string | null
@@ -1735,6 +1753,7 @@ export type Database = {
           gab5_fcc_gerenciado?: string | null
           gab5_fcc_gerenciavel?: string | null
           gab5_fcc_qtd_ur?: string | null
+          gab5_fcc_qtd_ur_instaladas?: string | null
           gab5_fcc_tensao?: string | null
           gab5_foto_acesso?: string | null
           gab5_foto_panoramica?: string | null
@@ -1814,6 +1833,7 @@ export type Database = {
           gab6_fcc_gerenciado?: string | null
           gab6_fcc_gerenciavel?: string | null
           gab6_fcc_qtd_ur?: string | null
+          gab6_fcc_qtd_ur_instaladas?: string | null
           gab6_fcc_tensao?: string | null
           gab6_foto_acesso?: string | null
           gab6_foto_panoramica?: string | null
@@ -1893,6 +1913,7 @@ export type Database = {
           gab7_fcc_gerenciado?: string | null
           gab7_fcc_gerenciavel?: string | null
           gab7_fcc_qtd_ur?: string | null
+          gab7_fcc_qtd_ur_instaladas?: string | null
           gab7_fcc_tensao?: string | null
           gab7_foto_acesso?: string | null
           gab7_foto_panoramica?: string | null
@@ -2183,6 +2204,7 @@ export type Database = {
           gab1_fcc_gerenciado: string | null
           gab1_fcc_gerenciavel: string | null
           gab1_fcc_qtd_ur: string | null
+          gab1_fcc_qtd_ur_instaladas: string | null
           gab1_fcc_tensao: string | null
           gab1_foto_acesso: string | null
           gab1_foto_panoramica: string | null
@@ -2262,6 +2284,7 @@ export type Database = {
           gab2_fcc_gerenciado: string | null
           gab2_fcc_gerenciavel: string | null
           gab2_fcc_qtd_ur: string | null
+          gab2_fcc_qtd_ur_instaladas: string | null
           gab2_fcc_tensao: string | null
           gab2_foto_acesso: string | null
           gab2_foto_panoramica: string | null
@@ -2341,6 +2364,7 @@ export type Database = {
           gab3_fcc_gerenciado: string | null
           gab3_fcc_gerenciavel: string | null
           gab3_fcc_qtd_ur: string | null
+          gab3_fcc_qtd_ur_instaladas: string | null
           gab3_fcc_tensao: string | null
           gab3_foto_acesso: string | null
           gab3_foto_panoramica: string | null
@@ -2420,6 +2444,7 @@ export type Database = {
           gab4_fcc_gerenciado: string | null
           gab4_fcc_gerenciavel: string | null
           gab4_fcc_qtd_ur: string | null
+          gab4_fcc_qtd_ur_instaladas: string | null
           gab4_fcc_tensao: string | null
           gab4_foto_acesso: string | null
           gab4_foto_panoramica: string | null
@@ -2499,6 +2524,7 @@ export type Database = {
           gab5_fcc_gerenciado: string | null
           gab5_fcc_gerenciavel: string | null
           gab5_fcc_qtd_ur: string | null
+          gab5_fcc_qtd_ur_instaladas: string | null
           gab5_fcc_tensao: string | null
           gab5_foto_acesso: string | null
           gab5_foto_panoramica: string | null
@@ -2578,6 +2604,7 @@ export type Database = {
           gab6_fcc_gerenciado: string | null
           gab6_fcc_gerenciavel: string | null
           gab6_fcc_qtd_ur: string | null
+          gab6_fcc_qtd_ur_instaladas: string | null
           gab6_fcc_tensao: string | null
           gab6_foto_acesso: string | null
           gab6_foto_panoramica: string | null
@@ -2657,6 +2684,7 @@ export type Database = {
           gab7_fcc_gerenciado: string | null
           gab7_fcc_gerenciavel: string | null
           gab7_fcc_qtd_ur: string | null
+          gab7_fcc_qtd_ur_instaladas: string | null
           gab7_fcc_tensao: string | null
           gab7_foto_acesso: string | null
           gab7_foto_panoramica: string | null
