@@ -246,18 +246,19 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 
     if (gab) {
       row[`${prefix}_tipo`] = gab.tipo || null;
-      row[`${prefix}_ativo`] = gab.ativo ? 'SIM' : 'NÃO';
-      row[`${prefix}_protecao`] = gab.comProtecao ? 'SIM' : 'NÃO';
-      row[`${prefix}_tecnologias_acesso`] = gab.tecnologiasAcesso.join(', ') || null;
-      row[`${prefix}_tecnologias_transporte`] = gab.tecnologiasTransporte.join(', ') || null;
+      // Allow null for boolean fields when not explicitly set
+      row[`${prefix}_ativo`] = gab.ativo === true ? 'SIM' : gab.ativo === false ? 'NÃO' : null;
+      row[`${prefix}_protecao`] = gab.comProtecao === true ? 'SIM' : gab.comProtecao === false ? 'NÃO' : null;
+      row[`${prefix}_tecnologias_acesso`] = gab.tecnologiasAcesso?.length ? gab.tecnologiasAcesso.join(', ') : null;
+      row[`${prefix}_tecnologias_transporte`] = gab.tecnologiasTransporte?.length ? gab.tecnologiasTransporte.join(', ') : null;
       
       // FCC
       row[`${prefix}_fcc_fabricante`] = gab.fcc.fabricante || null;
       row[`${prefix}_fcc_tensao`] = gab.fcc.tensaoDC || null;
-      row[`${prefix}_fcc_gerenciado`] = gab.fcc.gerenciadaSG ? 'SIM' : 'NÃO';
-      row[`${prefix}_fcc_gerenciavel`] = gab.fcc.gerenciavel ? 'SIM' : 'NÃO';
-      row[`${prefix}_fcc_consumo`] = gab.fcc.consumoDC?.toString() || null;
-      row[`${prefix}_fcc_qtd_ur`] = gab.fcc.qtdURSuportadas?.toString() || null;
+      row[`${prefix}_fcc_gerenciado`] = gab.fcc.gerenciadaSG === true ? 'SIM' : gab.fcc.gerenciadaSG === false ? 'NÃO' : null;
+      row[`${prefix}_fcc_gerenciavel`] = gab.fcc.gerenciavel === true ? 'SIM' : gab.fcc.gerenciavel === false ? 'NÃO' : null;
+      row[`${prefix}_fcc_consumo`] = gab.fcc.consumoDC != null ? gab.fcc.consumoDC.toString() : null;
+      row[`${prefix}_fcc_qtd_ur`] = gab.fcc.qtdURSuportadas != null ? gab.fcc.qtdURSuportadas.toString() : null;
       row[`${prefix}_fcc_foto_panoramica`] = gab.fcc.fotoPanoramica || null;
       row[`${prefix}_fcc_foto_painel`] = gab.fcc.fotoPainel || null;
       
@@ -267,18 +268,18 @@ export function buildReportRow(data: ChecklistData): ReportRow {
         if (banco) {
           row[`${prefix}_bat${j + 1}_tipo`] = banco.tipo || null;
           row[`${prefix}_bat${j + 1}_fabricante`] = banco.fabricante || null;
-          row[`${prefix}_bat${j + 1}_capacidade`] = banco.capacidadeAh?.toString() || null;
+          row[`${prefix}_bat${j + 1}_capacidade`] = banco.capacidadeAh != null ? banco.capacidadeAh.toString() : null;
           row[`${prefix}_bat${j + 1}_data_fabricacao`] = banco.dataFabricacao || null;
           row[`${prefix}_bat${j + 1}_estado`] = banco.estado || null;
           row[`${prefix}_bat${j + 1}_colada`] = banco.colada || null;
         }
       }
-      row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados ? 'SIM' : 'NÃO';
+      row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados === true ? 'SIM' : gab.baterias.bancosInterligados === false ? 'NÃO' : null;
       row[`${prefix}_bat_foto`] = gab.baterias.fotoBanco || null;
       
       // Climatization
       row[`${prefix}_climatizacao_tipo`] = gab.climatizacao.tipo || null;
-      row[`${prefix}_ventiladores_status`] = gab.climatizacao.fanOK ? 'OK' : 'NOK';
+      row[`${prefix}_ventiladores_status`] = gab.climatizacao.fanOK === true ? 'OK' : gab.climatizacao.fanOK === false ? 'NOK' : null;
       
       // ACs (up to 4)
       for (let j = 0; j < 4; j++) {
@@ -306,22 +307,22 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     }
   }
 
-  // GMG and Tower
-  row.gmg_existe = data.gmg.informar ? 'SIM' : 'NÃO';
-  row.gmg_fabricante = data.gmg.fabricante || null;
-  row.gmg_potencia = data.gmg.potencia || null;
+  // GMG and Tower - allow null for unfilled boolean fields
+  row.gmg_existe = data.gmg?.informar === true ? 'SIM' : data.gmg?.informar === false ? 'NÃO' : null;
+  row.gmg_fabricante = data.gmg?.fabricante || null;
+  row.gmg_potencia = data.gmg?.potencia != null ? data.gmg.potencia : null;
   row.gmg_combustivel = null; // Not in current data structure
-  row.gmg_ultimo_teste = data.gmg.ultimoTeste || null;
-  row.gmg_foto_painel = data.gmg.fotoGMG || null;
-  row.torre_ninhos = data.torre.ninhos ? 'SIM' : 'NÃO';
-  row.torre_protecao_fibra = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
-  row.torre_aterramento = data.torre.aterramento || null;
-  row.torre_housekeeping = data.torre.zeladoria || null;
+  row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
+  row.gmg_foto_painel = data.gmg?.fotoGMG || null;
+  row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
+  row.torre_protecao_fibra = data.torre?.fibrasProtegidas === true ? 'SIM' : data.torre?.fibrasProtegidas === false ? 'NÃO' : null;
+  row.torre_aterramento = data.torre?.aterramento || null;
+  row.torre_housekeeping = data.torre?.zeladoria || null;
 
   // Energia data
   row.energia_tipo_quadro = data.energia?.tipoQuadro || null;
   row.energia_fabricante = data.energia?.fabricante || null;
-  row.energia_potencia_kva = data.energia?.potenciaKVA || null;
+  row.energia_potencia_kva = data.energia?.potenciaKVA != null ? data.energia.potenciaKVA : null;
   row.energia_tensao_entrada = data.energia?.tensaoEntrada || null;
   row.energia_transformador_ok = data.energia?.transformadorOK === true ? 'SIM' : data.energia?.transformadorOK === false ? 'NÃO' : null;
   row.energia_foto_transformador = data.energia?.fotoTransformador || null;
@@ -339,8 +340,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   // Assinatura
   row.assinatura_digital = data.assinaturaDigital || null;
 
-  // Fibra Óptica
-  row.fibra_qtd_abordagens = data.fibraOptica?.qtdAbordagens || 1;
+  // Fibra Óptica - allow null for unfilled numeric fields
+  row.fibra_qtd_abordagens = data.fibraOptica?.qtdAbordagens != null ? data.fibraOptica.qtdAbordagens : null;
   // Map up to 4 abordagens
   for (let i = 0; i < 4; i++) {
     const abord = data.fibraOptica?.abordagens?.[i];
@@ -349,12 +350,12 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`fibra_abord${i + 1}_descricao`] = abord.descricao || null;
     }
   }
-  row.fibra_caixas_passagem_qtd = data.fibraOptica?.qtdCaixasPassagem || 0;
-  row.fibra_caixas_subterraneas_qtd = data.fibraOptica?.qtdCaixasSubterraneas || 0;
-  row.fibra_subidas_laterais_qtd = data.fibraOptica?.qtdSubidasLaterais || 0;
-  row.fibra_dgos_qtd = data.fibraOptica?.qtdDGOs || 0;
-  row.fibra_dgos_ok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'OK').length || 0;
-  row.fibra_dgos_nok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'NOK').length || 0;
+  row.fibra_caixas_passagem_qtd = data.fibraOptica?.qtdCaixasPassagem != null ? data.fibraOptica.qtdCaixasPassagem : null;
+  row.fibra_caixas_subterraneas_qtd = data.fibraOptica?.qtdCaixasSubterraneas != null ? data.fibraOptica.qtdCaixasSubterraneas : null;
+  row.fibra_subidas_laterais_qtd = data.fibraOptica?.qtdSubidasLaterais != null ? data.fibraOptica.qtdSubidasLaterais : null;
+  row.fibra_dgos_qtd = data.fibraOptica?.qtdDGOs != null ? data.fibraOptica.qtdDGOs : null;
+  row.fibra_dgos_ok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'OK').length ?? null;
+  row.fibra_dgos_nok_qtd = data.fibraOptica?.dgos?.filter(d => d.estadoCordoes === 'NOK').length ?? null;
   
   // Abordagens photos (up to 4)
   for (let i = 0; i < 4; i++) {
