@@ -287,7 +287,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
           row[`${prefix}_bat${j + 1}_estado`] = banco.estados?.join(', ') || null;
           row[`${prefix}_bat${j + 1}_colada`] = banco.colada || null;
           row[`${prefix}_bat${j + 1}_com_gradil`] = banco.comGradil || null;
-          row[`${prefix}_bat${j + 1}_foto`] = banco.fotoBanco || null;
+          // Save first banco's photo to gabinete-level bat_foto field
+          if (j === 0 && banco.fotoBanco) {
+            row[`${prefix}_bat_foto`] = banco.fotoBanco;
+          }
         }
       }
       row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados === true ? 'SIM' : gab.baterias.bancosInterligados === false ? 'NÃO' : null;
