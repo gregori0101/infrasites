@@ -1,163 +1,58 @@
 
-# Plano: Modal de Detalhes de Bateria com Foto
+Objetivo
+- Corrigir a falha ao enviar relatório (erro: “Could not find the 'gab1_fcc_qtd_ur_instaladas' column of 'reports' in the schema cache”) adicionando a coluna que o app está tentando gravar e garantindo que leituras (prefill/dashboard) também incluam esse novo campo.
 
-## Resumo
-Implementar um modal popup que exibe todas as informacoes de uma bateria individual quando o usuario clicar em uma linha da tabela de baterias no DrillDownModal do painel de Baterias.
+Causa raiz (confirmada pelo print + código)
+- O app monta a linha para inserir em public.reports com o campo:
+  - gab{N}_fcc_qtd_ur_instaladas
+- Porém a tabela reports atualmente só possui gab{N}_fcc_qtd_ur (qtd suportadas) e não possui gab{N}_fcc_qtd_ur_instaladas.
+- Ao inserir um objeto com uma coluna inexistente, o backend rejeita e o cliente mostra “column … not found in schema cache”.
 
----
+Solução (abordagem escolhida)
+- Adicionar no banco (Lovable Cloud) as colunas faltantes gab1..gab7_fcc_qtd_ur_instaladas (TEXT, nullable) para manter compatibilidade com o modelo “horizontal” já usado na tabela reports.
+- Atualizar o “select de colunas” usado em consultas do dashboard/prefill para incluir essas colunas (para que o dado possa ser lido depois de salvo).
 
-## Analise Tecnica
+Mudanças planejadas (sequência)
 
-### Estrutura de Dados Atual
-O sistema armazena informacoes de baterias no banco de dados com a seguinte estrutura:
-- Cada gabinete pode ter ate 6 bancos de bateria
-- Campos por bateria: tipo, fabricante, capacidade, data_fabricacao, estado, colada, com_gradil
-- Foto: existe apenas uma foto por gabinete (`gab{n}_bat_foto`), nao por bateria individual
+1) Migração de banco de dados: adicionar colunas faltantes
+- Criar uma nova migration SQL que execute:
+  - ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS gab1_fcc_qtd_ur_instaladas TEXT;
+  - …
+  - ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS gab7_fcc_qtd_ur_instaladas TEXT;
+- Justificativa:
+  - Resolve o erro imediatamente sem alterar o fluxo do formulário.
+  - Mantém o padrão atual (colunas por gabinete) e evita refatoração grande.
 
-### Interface BatteryInfo Atual
-```text
-BatteryInfo {
-  siteCode, uf, gabinete, banco, fabricante, tipo, tipoClassificado,
-  capacidade, dataFabricacao, estado, idade, obsolescencia,
-  obsolescenciaTipo, autonomyRisk, needsReplacement
-}
-```
+2) Ajuste de queries no código para incluir as novas colunas (leitura/prefill)
+Arquivo: src/lib/reportDatabase.ts
+- Em buildDashboardColumns(), incluir também:
+  - `${prefix}_fcc_qtd_ur_instaladas`
+- Isso garante que:
+  - fetchLatestReportBySiteCode (prefill sem fotos) traga esse campo.
+  - Qualquer tela que use “dashboard columns” possa enxergar o valor.
 
-### Fluxo Atual
-1. BateriaPanel exibe cards com metricas de baterias
-2. Ao clicar em um card, abre DrillDownModal com lista de baterias
-3. Lista exibe informacoes basicas em uma tabela
-4. Nao ha acao ao clicar em uma bateria individual
+3) (Opcional, mas recomendado) Robustez no parser de prefill
+Arquivo: src/lib/reportToChecklist.ts
+- Verificar se já está tolerante a undefined (está), mas ajustar para evitar parseInt(undefined) gerar NaN:
+  - Usar um helper safeParseInt (ou fallback) para qtdURInstaladas.
+- Isso não é obrigatório para corrigir o envio, mas melhora a estabilidade do prefill.
 
----
+4) Validação e teste ponta a ponta
+- Depois da migração e ajuste de colunas:
+  - Recarregar a aplicação (hard refresh no mobile/Chrome) para limpar cache do schema no cliente.
+  - Testar envio com FCC preenchida (qtd suportadas e instaladas) em pelo menos 1 gabinete.
+  - Confirmar que o relatório salva e que ao abrir o prefill do mesmo site o valor de “UR instaladas” aparece.
 
-## Solucao Proposta
+Riscos / observações
+- “Schema cache” no cliente pode persistir até recarregar a aba; por isso o hard refresh é importante após a migração.
+- As políticas de segurança (RLS) já exigem user_id = auth.uid() no INSERT; como o erro atual é de coluna inexistente, o foco é a migração. Se após isso surgir erro de permissão, aí investigaremos RLS/autenticação do usuário que está tentando enviar.
 
-### 1. Criar Novo Componente BatteryDetailModal
-Criar modal dedicado em `src/components/dashboard/BatteryDetailModal.tsx`
+Critérios de pronto
+- Envio do relatório não apresenta mais o erro da coluna ausente.
+- O relatório é inserido com sucesso em reports.
+- Prefill e/ou telas de detalhes conseguem ler e mostrar gab{N}_fcc_qtd_ur_instaladas quando existir.
 
-**Recursos do modal:**
-- Header com codigo do site e identificacao do gabinete/banco
-- Secoes organizadas para exibir todas as informacoes
-- Foto do banco de baterias (quando disponivel)
-- Badges coloridos para status (estado, obsolescencia, autonomia)
-- Botao para fechar
-
-**Layout proposto:**
-```text
-+------------------------------------------+
-| [X] Bateria - SITE123 - G1 Banco 1       |
-+------------------------------------------+
-| [FOTO DO BANCO DE BATERIAS]              |
-|                                          |
-| IDENTIFICACAO                            |
-| Site: SITE123    UF: PA                  |
-| Gabinete: G1     Banco: 1                |
-|                                          |
-| ESPECIFICACOES TECNICAS                  |
-| Tipo: Litio     Fabricante: HUAWEI       |
-| Capacidade: 200Ah                        |
-| Data Fabricacao: 01/2024                 |
-| Idade: 2 anos                            |
-|                                          |
-| STATUS                                   |
-| Estado: [OK]                             |
-| Colada: [NAO]   Gradil: [SIM]            |
-| Obsolescencia: [Medio Risco]             |
-| Autonomia: [OK]                          |
-| Requer Troca: [Nao]                      |
-+------------------------------------------+
-```
-
-### 2. Atualizar Interface BatteryInfo
-Adicionar campos para suportar informacoes adicionais:
-
-```text
-+ colada: string
-+ comGradil: string
-+ fotoUrl: string | null (foto do gabinete)
-+ reportId: string (para buscar foto se necessario)
-```
-
-### 3. Atualizar useDashboardStats
-Modificar a funcao para extrair e incluir os novos campos:
-- colada, com_gradil para cada bateria
-- Armazenar referencia ao report.id para buscar foto posteriormente
-
-### 4. Atualizar DrillDownModal
-Adicionar:
-- Estado para controlar abertura do BatteryDetailModal
-- Estado para armazenar bateria selecionada
-- Handler de clique nas linhas da tabela de baterias
-- Estilo de cursor pointer nas linhas
-
-### 5. Buscar Foto da Bateria
-Como a foto e por gabinete (nao por bateria individual):
-- Opcao A: Incluir fotoUrl diretamente no BatteryInfo durante processamento (requer fetch adicional)
-- Opcao B: Buscar foto sob demanda quando modal abrir (melhor performance)
-
-**Recomendacao:** Opcao B - buscar sob demanda usando reportId e gabinete
-
----
-
-## Arquivos a Modificar/Criar
-
-| Arquivo | Acao | Descricao |
-|---------|------|-----------|
-| `src/components/dashboard/types.ts` | Modificar | Adicionar campos colada, comGradil, reportId ao BatteryInfo |
-| `src/components/dashboard/useDashboardStats.ts` | Modificar | Extrair campos adicionais e incluir reportId |
-| `src/components/dashboard/BatteryDetailModal.tsx` | Criar | Novo componente de modal de detalhes |
-| `src/components/dashboard/DrillDownModal.tsx` | Modificar | Adicionar estado e handler para abrir modal de detalhes |
-| `src/lib/reportDatabase.ts` | Modificar | Adicionar funcao para buscar foto da bateria por reportId e gabinete |
-
----
-
-## Detalhes de Implementacao
-
-### BatteryDetailModal
-```text
-Props:
-- open: boolean
-- onClose: () => void
-- battery: BatteryInfo | null
-
-Funcionalidades:
-- Fetch da foto ao abrir (usando reportId e gabinete)
-- Loading state para foto
-- Fallback se foto nao disponivel
-- Lightbox ao clicar na foto
-```
-
-### Busca de Foto
-Criar funcao `fetchBatteryPhoto(reportId, gabinete)`:
-- Busca campo `gab{n}_bat_foto` do report
-- Retorna URL da foto ou null
-
-### Integracao no DrillDownModal
-```text
-+ const [batteryDetailOpen, setBatteryDetailOpen] = useState(false)
-+ const [selectedBattery, setSelectedBattery] = useState<BatteryInfo | null>(null)
-
-Na TableRow de baterias:
-+ onClick={() => { setSelectedBattery(b); setBatteryDetailOpen(true); }}
-+ className="cursor-pointer hover:bg-muted/50"
-```
-
----
-
-## Estimativa de Esforco
-- Criar BatteryDetailModal: componente principal
-- Atualizar types.ts: 3 campos novos
-- Atualizar useDashboardStats: extrair campos adicionais
-- Atualizar DrillDownModal: estado e handler
-- Funcao de busca de foto: 1 funcao nova
-- Testes e ajustes de UI
-
----
-
-## Resultado Esperado
-Usuario clica em qualquer linha de bateria na tabela do DrillDownModal e visualiza um popup elegante com:
-- Todas as informacoes da bateria
-- Foto do banco de baterias (se disponivel)
-- Status visuais com badges coloridos
-- Possibilidade de ampliar a foto via lightbox
+Arquivos envolvidos
+- Banco (migration): adicionar colunas gab1..gab7_fcc_qtd_ur_instaladas
+- src/lib/reportDatabase.ts: incluir colunas no buildDashboardColumns()
+- (Opcional) src/lib/reportToChecklist.ts: parse mais robusto
