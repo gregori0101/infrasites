@@ -178,6 +178,7 @@ export interface TorreData {
   ninhos: boolean;
   fotoNinhos?: string | null;
   fibrasProtegidas: boolean;
+  fotoFibrasProtegidas?: string | null;
   aterramento: StatusFuncionamento;
   zeladoria: StatusFuncionamento;
 }

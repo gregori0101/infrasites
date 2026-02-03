@@ -171,6 +171,18 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
               value={data.torre.fibrasProtegidas}
               onChange={(value) => updateTorre({ fibrasProtegidas: value })}
             />
+
+            {data.torre.fibrasProtegidas && (
+              <div className="pt-2 animate-slide-up">
+                <PhotoCapture
+                  label="Foto das Fibras Protegidas"
+                  value={data.torre.fotoFibrasProtegidas || null}
+                  onChange={(value) => updateTorre({ fotoFibrasProtegidas: value })}
+                  siteCode={data.siglaSite}
+                  category="torre_fibras_protegidas"
+                />
+              </div>
+            )}
           </div>
         </FormCard>
 
