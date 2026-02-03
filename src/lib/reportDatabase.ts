@@ -689,3 +689,33 @@ export async function deleteReportById(reportId: string): Promise<void> {
     throw new Error(`Erro ao excluir relatório: ${error.message}`);
   }
 }
+
+/**
+ * Fetch battery photo for a specific gabinete from a report
+ * Used for on-demand photo loading in battery detail modal
+ */
+export async function fetchBatteryPhoto(reportId: string, gabineteNum: number): Promise<string | null> {
+  try {
+    const photoColumn = `gab${gabineteNum}_bat_foto`;
+    
+    const { data, error } = await supabase
+      .from('reports')
+      .select(photoColumn)
+      .eq('id', reportId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching battery photo:', error);
+      return null;
+    }
+
+    if (!data) return null;
+    
+    // Access the photo column dynamically
+    const photoUrl = (data as unknown as Record<string, string | null>)[photoColumn];
+    return photoUrl || null;
+  } catch (err) {
+    console.error('Exception fetching battery photo:', err);
+    return null;
+  }
+}
