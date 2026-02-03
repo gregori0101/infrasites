@@ -4,6 +4,7 @@ import { FormCard } from "@/components/ui/form-card";
 import { PhotoCapture } from "@/components/ui/photo-capture";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Fuel, Radio, Shield, AlertCircle } from "lucide-react";
 import { StatusFuncionamento, GMGData, TorreData, FCCFabricante } from "@/types/checklist";
@@ -56,7 +57,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                   <Label>Fabricante</Label>
                   <Select
                     value={data.gmg.fabricante || ''}
-                    onValueChange={(value: FCCFabricante) => updateGMG({ fabricante: value })}
+                    onValueChange={(value: FCCFabricante) => updateGMG({ fabricante: value, fabricanteOutra: value === 'OUTRA' ? data.gmg.fabricanteOutra : '' })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
@@ -68,6 +69,17 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                     </SelectContent>
                   </Select>
                 </div>
+
+                {data.gmg.fabricante === 'OUTRA' && (
+                  <div className="space-y-2">
+                    <Label>Especifique o fabricante</Label>
+                    <Input
+                      placeholder="Digite o nome do fabricante"
+                      value={data.gmg.fabricanteOutra || ''}
+                      onChange={(e) => updateGMG({ fabricanteOutra: e.target.value })}
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
