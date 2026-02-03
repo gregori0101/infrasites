@@ -80,20 +80,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch users from auth.users
-    const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (usersError) {
-      throw usersError;
+    // Fetch ALL users from auth.users with pagination
+    const allUsers: { id: string; email?: string }[] = [];
+    let page = 1;
+    const perPage = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage
+      });
+      
+      if (usersError) {
+        throw usersError;
+      }
+
+      if (users && users.length > 0) {
+        allUsers.push(...users);
+        page++;
+        // If we got fewer than perPage, we've reached the end
+        hasMore = users.length === perPage;
+      } else {
+        hasMore = false;
+      }
     }
+
+    console.log(`Fetched ${allUsers.length} total users from auth`);
 
     // Create a map of user_id to email
     const emailMap: Record<string, string> = {};
-    for (const authUser of users) {
+    for (const authUser of allUsers) {
       if (userIds.includes(authUser.id)) {
         emailMap[authUser.id] = authUser.email || 'Email não disponível';
       }
     }
+
+    console.log(`Matched ${Object.keys(emailMap).length} emails for ${userIds.length} requested user IDs`);
 
     return new Response(
       JSON.stringify({ emails: emailMap }),
