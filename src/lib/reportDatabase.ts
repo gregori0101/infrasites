@@ -252,16 +252,19 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`${prefix}_tecnologias_acesso`] = gab.tecnologiasAcesso?.length ? gab.tecnologiasAcesso.join(', ') : null;
       row[`${prefix}_tecnologias_transporte`] = gab.tecnologiasTransporte?.length ? gab.tecnologiasTransporte.join(', ') : null;
       
-      // FCC
-      row[`${prefix}_fcc_fabricante`] = gab.fcc.fabricante || null;
-      row[`${prefix}_fcc_tensao`] = gab.fcc.tensaoDC || null;
-      row[`${prefix}_fcc_gerenciado`] = gab.fcc.gerenciadaSG === true ? 'SIM' : gab.fcc.gerenciadaSG === false ? 'NÃO' : null;
-      row[`${prefix}_fcc_gerenciavel`] = gab.fcc.gerenciavel === true ? 'SIM' : gab.fcc.gerenciavel === false ? 'NÃO' : null;
-      row[`${prefix}_fcc_consumo`] = gab.fcc.consumoDC != null ? gab.fcc.consumoDC.toString() : null;
-      row[`${prefix}_fcc_qtd_ur`] = gab.fcc.qtdURSuportadas != null ? gab.fcc.qtdURSuportadas.toString() : null;
-      row[`${prefix}_fcc_qtd_ur_instaladas`] = gab.fcc.qtdURInstaladas != null ? gab.fcc.qtdURInstaladas.toString() : null;
-      row[`${prefix}_fcc_foto_panoramica`] = gab.fcc.fotoPanoramica || null;
-      row[`${prefix}_fcc_foto_painel`] = gab.fcc.fotoPainel || null;
+      // FCC (first FCC for backwards compatibility)
+      const firstFCC = gab.fcc.fccs[0];
+      if (firstFCC) {
+        row[`${prefix}_fcc_fabricante`] = firstFCC.fabricante || null;
+        row[`${prefix}_fcc_tensao`] = firstFCC.tensaoDC || null;
+        row[`${prefix}_fcc_gerenciado`] = firstFCC.gerenciadaSG === true ? 'SIM' : firstFCC.gerenciadaSG === false ? 'NÃO' : null;
+        row[`${prefix}_fcc_gerenciavel`] = firstFCC.gerenciavel === true ? 'SIM' : firstFCC.gerenciavel === false ? 'NÃO' : null;
+        row[`${prefix}_fcc_consumo`] = firstFCC.consumoDC != null ? firstFCC.consumoDC.toString() : null;
+        row[`${prefix}_fcc_qtd_ur`] = firstFCC.qtdURSuportadas != null ? firstFCC.qtdURSuportadas.toString() : null;
+        row[`${prefix}_fcc_qtd_ur_instaladas`] = firstFCC.qtdURInstaladas != null ? firstFCC.qtdURInstaladas.toString() : null;
+        row[`${prefix}_fcc_foto_panoramica`] = firstFCC.fotoPanoramica || null;
+        row[`${prefix}_fcc_foto_painel`] = firstFCC.fotoPainel || null;
+      }
       
       // Batteries (up to 6)
       for (let j = 0; j < 6; j++) {

@@ -108,7 +108,7 @@ export interface ArCondicionado {
   funcionamento: StatusFuncionamento;
 }
 
-export interface FCCData {
+export interface FCCItem {
   fabricante: FCCFabricante;
   fabricanteOutra?: string;
   tensaoDC: TensaoDC;
@@ -119,6 +119,11 @@ export interface FCCData {
   qtdURInstaladas: number | null;
   fotoPanoramica: string | null;
   fotoPainel: string | null;
+}
+
+export interface FCCData {
+  numFCCs: number;
+  fccs: FCCItem[];
 }
 
 export interface BateriasData {
@@ -247,16 +252,8 @@ export const INITIAL_GABINETE: GabineteData = {
   tecnologiasAcesso: [],
   tecnologiasTransporte: [],
   fcc: {
-    fabricante: null as unknown as FCCFabricante,
-    fabricanteOutra: '',
-    tensaoDC: null as unknown as TensaoDC,
-    gerenciadaSG: false,
-    gerenciavel: false,
-    consumoDC: 0,
-    qtdURSuportadas: null,
-    qtdURInstaladas: null,
-    fotoPanoramica: null,
-    fotoPainel: null,
+    numFCCs: 0,
+    fccs: [],
   },
   baterias: {
     numBancos: 0,

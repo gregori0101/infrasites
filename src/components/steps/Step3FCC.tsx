@@ -6,8 +6,9 @@ import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, Settings, Camera } from "lucide-react";
-import { FCCFabricante, TensaoDC, FCCData } from "@/types/checklist";
+import { Button } from "@/components/ui/button";
+import { Zap, Settings, Camera, Plus, Trash2 } from "lucide-react";
+import { FCCFabricante, TensaoDC, FCCData, FCCItem } from "@/types/checklist";
 import { ValidationError } from "@/hooks/use-validation";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
@@ -18,6 +19,19 @@ const FCC_FABRICANTES: FCCFabricante[] = [
 
 const TENSAO_OPTIONS: TensaoDC[] = ['24V', '48V'];
 const UR_OPTIONS = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
+
+const EMPTY_FCC: FCCItem = {
+  fabricante: null as unknown as FCCFabricante,
+  fabricanteOutra: '',
+  tensaoDC: null as unknown as TensaoDC,
+  gerenciadaSG: false,
+  gerenciavel: false,
+  consumoDC: 0,
+  qtdURSuportadas: null,
+  qtdURInstaladas: null,
+  fotoPanoramica: null,
+  fotoPainel: null,
+};
 
 interface Step3Props {
   showErrors?: boolean;
@@ -31,9 +45,32 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
 
   if (!gabinete) return null;
 
-  const updateFCC = (updates: Partial<FCCData>) => {
+  const updateFCCData = (updates: Partial<FCCData>) => {
     updateGabinete(currentGabinete, {
       fcc: { ...gabinete.fcc, ...updates }
+    });
+  };
+
+  const updateFCC = (index: number, updates: Partial<FCCItem>) => {
+    const newFCCs = [...gabinete.fcc.fccs];
+    newFCCs[index] = { ...newFCCs[index], ...updates };
+    updateFCCData({ fccs: newFCCs });
+  };
+
+  const addFCC = () => {
+    if (gabinete.fcc.fccs.length < 4) {
+      updateFCCData({
+        fccs: [...gabinete.fcc.fccs, { ...EMPTY_FCC }],
+        numFCCs: gabinete.fcc.numFCCs + 1
+      });
+    }
+  };
+
+  const removeFCC = (index: number) => {
+    const newFCCs = gabinete.fcc.fccs.filter((_, i) => i !== index);
+    updateFCCData({
+      fccs: newFCCs,
+      numFCCs: Math.max(0, gabinete.fcc.numFCCs - 1)
     });
   };
 
@@ -48,146 +85,188 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
           <span className="text-sm font-medium text-primary">
             FCC - Gabinete {currentGabinete + 1}
           </span>
+          <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
+            {gabinete.fcc.fccs.length}/4 FCCs
+          </span>
         </div>
 
-        <FormCard title="Dados da FCC" icon={<Zap className="w-4 h-4" />}>
+        <FormCard title="FCCs - Fontes de Corrente Contínua" icon={<Zap className="w-4 h-4" />}>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Fabricante</Label>
-              <Select 
-                value={gabinete.fcc.fabricante} 
-                onValueChange={(value: FCCFabricante) => updateFCC({ fabricante: value, fabricanteOutra: value === 'OUTRA' ? gabinete.fcc.fabricanteOutra : '' })}
+            <div className="flex items-center justify-between">
+              <Label>FCCs</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addFCC}
+                disabled={gabinete.fcc.fccs.length >= 4}
+                className="gap-1"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o fabricante" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FCC_FABRICANTES.map((fab) => (
-                    <SelectItem key={fab} value={fab}>
-                      {fab}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Plus className="w-4 h-4" />
+                Adicionar
+              </Button>
             </div>
 
-            {gabinete.fcc.fabricante === 'OUTRA' && (
-              <div className="space-y-2">
-                <Label>Especifique o fabricante</Label>
-                <Input
-                  placeholder="Digite o nome do fabricante"
-                  value={gabinete.fcc.fabricanteOutra || ''}
-                  onChange={(e) => updateFCC({ fabricanteOutra: e.target.value })}
-                />
+            {gabinete.fcc.fccs.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Zap className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Nenhuma FCC cadastrada</p>
+                <p className="text-xs">Clique em "Adicionar" para começar</p>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Tensão DC</Label>
-                <Select 
-                  value={gabinete.fcc.tensaoDC} 
-                  onValueChange={(value: TensaoDC) => updateFCC({ tensaoDC: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TENSAO_OPTIONS.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {gabinete.fcc.fccs.map((fcc, index) => (
+              <div
+                key={index}
+                className="border rounded-lg p-3 space-y-4 bg-muted/30 animate-slide-up"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">FCC {index + 1}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => removeFCC(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Fabricante</Label>
+                  <Select 
+                    value={fcc.fabricante || ''} 
+                    onValueChange={(value: FCCFabricante) => updateFCC(index, { fabricante: value, fabricanteOutra: value === 'OUTRA' ? fcc.fabricanteOutra : '' })}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Selecione o fabricante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FCC_FABRICANTES.map((fab) => (
+                        <SelectItem key={fab} value={fab}>
+                          {fab}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {fcc.fabricante === 'OUTRA' && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Especifique o fabricante</Label>
+                    <Input
+                      placeholder="Digite o nome do fabricante"
+                      value={fcc.fabricanteOutra || ''}
+                      onChange={(e) => updateFCC(index, { fabricanteOutra: e.target.value })}
+                      className="h-9"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Tensão DC</Label>
+                    <Select 
+                      value={fcc.tensaoDC || ''} 
+                      onValueChange={(value: TensaoDC) => updateFCC(index, { tensaoDC: value })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TENSAO_OPTIONS.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs">Consumo DC (W)</Label>
+                    <Input
+                      type="number"
+                      value={fcc.consumoDC || ''}
+                      onChange={(e) => updateFCC(index, { consumoDC: parseInt(e.target.value) || 0 })}
+                      placeholder="0"
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Qtd. URs Suportadas</Label>
+                    <Select 
+                      value={fcc.qtdURSuportadas != null ? String(fcc.qtdURSuportadas) : ''} 
+                      onValueChange={(value) => updateFCC(index, { qtdURSuportadas: parseInt(value) })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UR_OPTIONS.map((ur) => (
+                          <SelectItem key={ur} value={String(ur)}>
+                            {ur}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs">Qtd. URs Instaladas</Label>
+                    <Select 
+                      value={fcc.qtdURInstaladas != null ? String(fcc.qtdURInstaladas) : ''} 
+                      onValueChange={(value) => updateFCC(index, { qtdURInstaladas: parseInt(value) })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UR_OPTIONS.map((ur) => (
+                          <SelectItem key={ur} value={String(ur)}>
+                            {ur}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <ToggleSwitch
+                    label="Gerenciada SG Infra"
+                    value={fcc.gerenciadaSG}
+                    onChange={(value) => updateFCC(index, { gerenciadaSG: value })}
+                  />
+                  <ToggleSwitch
+                    label="Gerenciável"
+                    value={fcc.gerenciavel}
+                    onChange={(value) => updateFCC(index, { gerenciavel: value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <PhotoCapture
+                    label="FCC Panorâmica"
+                    value={fcc.fotoPanoramica}
+                    onChange={(value) => updateFCC(index, { fotoPanoramica: value })}
+                    required
+                    siteCode={data.siglaSite}
+                    category={`gab${currentGabinete + 1}_fcc${index + 1}_panoramica`}
+                  />
+                  <PhotoCapture
+                    label="Painel de Instrumentos"
+                    value={fcc.fotoPainel}
+                    onChange={(value) => updateFCC(index, { fotoPainel: value })}
+                    required
+                    siteCode={data.siglaSite}
+                    category={`gab${currentGabinete + 1}_fcc${index + 1}_painel`}
+                  />
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <Label>Consumo DC (W)</Label>
-                <Input
-                  type="number"
-                  value={gabinete.fcc.consumoDC || ''}
-                  onChange={(e) => updateFCC({ consumoDC: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Qtd. URs Suportadas</Label>
-                <Select 
-                  value={gabinete.fcc.qtdURSuportadas != null ? String(gabinete.fcc.qtdURSuportadas) : ''} 
-                  onValueChange={(value) => updateFCC({ qtdURSuportadas: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UR_OPTIONS.map((ur) => (
-                      <SelectItem key={ur} value={String(ur)}>
-                        {ur}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Qtd. URs Instaladas</Label>
-                <Select 
-                  value={gabinete.fcc.qtdURInstaladas != null ? String(gabinete.fcc.qtdURInstaladas) : ''} 
-                  onValueChange={(value) => updateFCC({ qtdURInstaladas: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UR_OPTIONS.map((ur) => (
-                      <SelectItem key={ur} value={String(ur)}>
-                        {ur}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </FormCard>
-
-        <FormCard title="Gerenciamento" icon={<Settings className="w-4 h-4" />}>
-          <div className="space-y-3">
-            <ToggleSwitch
-              label="Gerenciada SG Infra"
-              value={gabinete.fcc.gerenciadaSG}
-              onChange={(value) => updateFCC({ gerenciadaSG: value })}
-            />
-            <ToggleSwitch
-              label="Gerenciável"
-              value={gabinete.fcc.gerenciavel}
-              onChange={(value) => updateFCC({ gerenciavel: value })}
-            />
-          </div>
-        </FormCard>
-
-        <FormCard title="Fotos FCC" icon={<Camera className="w-4 h-4" />} variant="accent">
-          <div className="grid grid-cols-1 gap-4">
-            <PhotoCapture
-              label="FCC Panorâmica"
-              value={gabinete.fcc.fotoPanoramica}
-              onChange={(value) => updateFCC({ fotoPanoramica: value })}
-              required
-              siteCode={data.siglaSite}
-              category={`gab${currentGabinete + 1}_fcc_panoramica`}
-            />
-            <PhotoCapture
-              label="Painel de Instrumentos"
-              value={gabinete.fcc.fotoPainel}
-              onChange={(value) => updateFCC({ fotoPainel: value })}
-              required
-              siteCode={data.siglaSite}
-              category={`gab${currentGabinete + 1}_fcc_painel`}
-            />
+            ))}
           </div>
         </FormCard>
       </div>

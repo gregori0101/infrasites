@@ -60,16 +60,32 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
         row[`${prefix}_Tec_Transp_${tec}`] = gab.tecnologiasTransporte.includes(tec as any) ? 'SIM' : 'NÃO';
       });
       
-      // GRUPO 5: FCC
-      row[`${prefix}_FCC_Fabricante`] = gab.fcc.fabricante;
-      row[`${prefix}_FCC_TensaoDC`] = gab.fcc.tensaoDC;
-      row[`${prefix}_FCC_Gerenciada_SG`] = gab.fcc.gerenciadaSG ? 'SIM' : 'NÃO';
-      row[`${prefix}_FCC_Gerenciavel`] = gab.fcc.gerenciavel ? 'SIM' : 'NÃO';
-      row[`${prefix}_FCC_Consumo_W`] = gab.fcc.consumoDC;
-      row[`${prefix}_FCC_QtdUR_Suportadas`] = gab.fcc.qtdURSuportadas;
-      row[`${prefix}_FCC_QtdUR_Instaladas`] = gab.fcc.qtdURInstaladas;
-      row[`${prefix}_FCC_Foto_Panoramica`] = getPhotoValue(gab.fcc.fotoPanoramica);
-      row[`${prefix}_FCC_Foto_Painel`] = getPhotoValue(gab.fcc.fotoPainel);
+      // GRUPO 5: FCC (multiple FCCs support)
+      row[`${prefix}_Num_FCCs`] = gab.fcc.numFCCs;
+      for (let f = 0; f < 4; f++) {
+        const fcc = gab.fcc.fccs[f];
+        if (fcc) {
+          row[`${prefix}_FCC${f + 1}_Fabricante`] = fcc.fabricante;
+          row[`${prefix}_FCC${f + 1}_TensaoDC`] = fcc.tensaoDC;
+          row[`${prefix}_FCC${f + 1}_Gerenciada_SG`] = fcc.gerenciadaSG ? 'SIM' : 'NÃO';
+          row[`${prefix}_FCC${f + 1}_Gerenciavel`] = fcc.gerenciavel ? 'SIM' : 'NÃO';
+          row[`${prefix}_FCC${f + 1}_Consumo_W`] = fcc.consumoDC;
+          row[`${prefix}_FCC${f + 1}_QtdUR_Suportadas`] = fcc.qtdURSuportadas;
+          row[`${prefix}_FCC${f + 1}_QtdUR_Instaladas`] = fcc.qtdURInstaladas;
+          row[`${prefix}_FCC${f + 1}_Foto_Panoramica`] = getPhotoValue(fcc.fotoPanoramica);
+          row[`${prefix}_FCC${f + 1}_Foto_Painel`] = getPhotoValue(fcc.fotoPainel);
+        } else {
+          row[`${prefix}_FCC${f + 1}_Fabricante`] = '';
+          row[`${prefix}_FCC${f + 1}_TensaoDC`] = '';
+          row[`${prefix}_FCC${f + 1}_Gerenciada_SG`] = '';
+          row[`${prefix}_FCC${f + 1}_Gerenciavel`] = '';
+          row[`${prefix}_FCC${f + 1}_Consumo_W`] = '';
+          row[`${prefix}_FCC${f + 1}_QtdUR_Suportadas`] = '';
+          row[`${prefix}_FCC${f + 1}_QtdUR_Instaladas`] = '';
+          row[`${prefix}_FCC${f + 1}_Foto_Panoramica`] = '';
+          row[`${prefix}_FCC${f + 1}_Foto_Painel`] = '';
+        }
+      }
       
       // GRUPO 6: BATERIAS
       row[`${prefix}_Num_Bancos`] = gab.baterias.numBancos;

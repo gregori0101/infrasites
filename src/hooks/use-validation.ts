@@ -42,15 +42,20 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
 
       case 2: // Step3FCC
         if (!gabinete) break;
-        if (!gabinete.fcc.fabricante) {
-          errors.push({ field: 'fabricante', message: 'Informe o fabricante da FCC' });
+        if (gabinete.fcc.fccs.length === 0) {
+          errors.push({ field: 'fcc', message: 'Adicione pelo menos uma FCC' });
         }
-        if (!gabinete.fcc.tensaoDC) {
-          errors.push({ field: 'tensaoDC', message: 'Selecione a tensão DC' });
-        }
-        if (!gabinete.fcc.fotoPanoramica) {
-          errors.push({ field: 'fcc.fotoPanoramica', message: 'Foto panorâmica da FCC é obrigatória' });
-        }
+        gabinete.fcc.fccs.forEach((fcc, index) => {
+          if (!fcc.fabricante) {
+            errors.push({ field: `fcc.${index}.fabricante`, message: `FCC ${index + 1}: Informe o fabricante` });
+          }
+          if (!fcc.tensaoDC) {
+            errors.push({ field: `fcc.${index}.tensaoDC`, message: `FCC ${index + 1}: Selecione a tensão DC` });
+          }
+          if (!fcc.fotoPanoramica) {
+            errors.push({ field: `fcc.${index}.fotoPanoramica`, message: `FCC ${index + 1}: Foto panorâmica obrigatória` });
+          }
+        });
         break;
 
       case 3: // Step4Baterias

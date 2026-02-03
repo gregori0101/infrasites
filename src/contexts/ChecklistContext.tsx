@@ -413,15 +413,14 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       progress += gabInfoProgress * WEIGHTS.gabineteInfo * gabWeightFactor;
 
       // Step 3: FCC (12% distribuído)
-      const fccFields = [
-        !!gab.fcc.fabricante,
-        !!gab.fcc.tensaoDC,
-        gab.fcc.consumoDC > 0,
-        gab.fcc.qtdURSuportadas !== null && gab.fcc.qtdURSuportadas !== undefined,
-        !!gab.fcc.fotoPanoramica,
-        !!gab.fcc.fotoPainel,
-      ];
-      const fccProgress = fccFields.filter(Boolean).length / fccFields.length;
+      let fccProgress = 0;
+      if (gab.fcc.numFCCs > 0) {
+        const fccItems = gab.fcc.fccs;
+        const fccFieldsCount = fccItems.reduce((count, fcc) => {
+          return count + (fcc.fabricante ? 1 : 0) + (fcc.tensaoDC ? 1 : 0) + (fcc.fotoPanoramica ? 1 : 0) + (fcc.fotoPainel ? 1 : 0);
+        }, 0);
+        fccProgress = fccFieldsCount / (fccItems.length * 4);
+      }
       progress += fccProgress * WEIGHTS.fcc * gabWeightFactor;
 
       // Step 4: Baterias (12% distribuído)
