@@ -84,6 +84,7 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
     torre: {
       ...data.torre,
       fotoNinhos: null,
+      fotoFibrasProtegidas: null,
     },
   };
 }
@@ -312,12 +313,15 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       informar: report.gmg_existe === 'SIM',
       fabricante: report.gmg_fabricante as any,
       potencia: parseInt(report.gmg_potencia) || undefined,
+      autonomia: parseInt(report.gmg_autonomia) || undefined,
+      status: (report.gmg_status as any) || undefined,
       ultimoTeste: report.gmg_ultimo_teste || undefined,
       fotoGMG: report.gmg_foto_painel || null,
     },
     torre: {
       ninhos: report.torre_ninhos === 'SIM',
       fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
+      fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
       zeladoria: (report.torre_housekeeping || 'OK') as any,
       fotoNinhos: report.torre_foto_ninhos || null,

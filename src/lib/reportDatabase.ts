@@ -51,6 +51,8 @@ function buildDashboardColumns(): string {
     'gmg_existe',
     'gmg_fabricante',
     'gmg_potencia',
+    'gmg_autonomia',
+    'gmg_status',
     'torre_ninhos',
     'torre_protecao_fibra',
     'torre_aterramento',
@@ -100,6 +102,7 @@ function buildDashboardColumns(): string {
         `${prefix}_bat${b}_data_fabricacao`,
         `${prefix}_bat${b}_estado`,
         `${prefix}_bat${b}_colada`,
+        `${prefix}_bat${b}_com_gradil`,
       );
     }
 
@@ -131,10 +134,13 @@ function buildPhotoColumns(): string {
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
     'torre_foto_ninhos',
+    'torre_foto_fibras_protegidas',
     'gmg_foto_painel',
     // Fiber optic photos
     'fibra_abord1_foto',
     'fibra_abord2_foto',
+    'fibra_abord3_foto',
+    'fibra_abord4_foto',
     'fibra_foto_caixas_passagem',
     'fibra_foto_caixas_subterraneas',
     'fibra_foto_subidas_laterais',
@@ -320,11 +326,14 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   row.gmg_existe = data.gmg?.informar === true ? 'SIM' : data.gmg?.informar === false ? 'NÃO' : null;
   row.gmg_fabricante = data.gmg?.fabricante || null;
   row.gmg_potencia = data.gmg?.potencia != null ? data.gmg.potencia : null;
+  row.gmg_autonomia = data.gmg?.autonomia != null ? data.gmg.autonomia : null;
+  row.gmg_status = data.gmg?.status || null;
   row.gmg_combustivel = null; // Not in current data structure
   row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
   row.gmg_foto_painel = data.gmg?.fotoGMG || null;
   row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
   row.torre_protecao_fibra = data.torre?.fibrasProtegidas === true ? 'SIM' : data.torre?.fibrasProtegidas === false ? 'NÃO' : null;
+  row.torre_foto_fibras_protegidas = data.torre?.fotoFibrasProtegidas || null;
   row.torre_aterramento = data.torre?.aterramento || null;
   row.torre_housekeeping = data.torre?.zeladoria || null;
 
