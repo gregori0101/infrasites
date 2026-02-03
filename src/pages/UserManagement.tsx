@@ -104,7 +104,7 @@ export default function UserManagement() {
       const usersWithRoles: UserWithRole[] = (roles || []).map((role) => ({
         id: role.id,
         user_id: role.user_id,
-        email: emailMap[role.user_id] || role.user_id.slice(0, 8) + '...',
+        email: emailMap[role.user_id] || 'Email não disponível',
         role: role.role as 'administrador' | 'gestor' | 'tecnico',
         operadora: (role.operadora as 'VIVO' | 'TEL') || 'VIVO',
         area_atuacao: (role as any).area_atuacao as 'PI' | 'REDE' | null,
@@ -374,11 +374,11 @@ export default function UserManagement() {
                           variant="outline"
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           disabled={actionLoading === u.user_id}
-                          onClick={() => setConfirmDialog({ 
+                        onClick={() => setConfirmDialog({ 
                             open: true, 
                             userId: u.user_id, 
                             action: 'approve',
-                            email: u.user_id 
+                            email: u.email 
                           })}
                         >
                           {actionLoading === u.user_id ? (
