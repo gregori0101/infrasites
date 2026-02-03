@@ -99,18 +99,36 @@ export default function Dashboard() {
     retry: 2,
   });
 
-  // Fetch sites to get site types
+  // Fetch sites to get site types (paginated to overcome 1000 row limit)
   const { data: sitesData = [] } = useQuery({
     queryKey: ["dashboard-sites"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("site_code, tipo");
-      if (error) {
-        console.error("Error fetching sites:", error);
-        return [];
+      const allSites: { site_code: string; tipo: string }[] = [];
+      const pageSize = 1000;
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("sites")
+          .select("site_code, tipo")
+          .range(from, from + pageSize - 1);
+
+        if (error) {
+          console.error("Error fetching sites:", error);
+          break;
+        }
+
+        if (data && data.length > 0) {
+          allSites.push(...data);
+          from += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
       }
-      return data || [];
+
+      return allSites;
     },
     staleTime: 1000 * 60 * 10,
     retry: 2,
