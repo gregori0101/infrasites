@@ -429,7 +429,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
         const batFields = [
           true, // numBancos preenchido
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.fotoBanco),
-          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.tipo && b.tipo !== 'NA'),
+          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.tipo),
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.fabricante),
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.estado),
         ];

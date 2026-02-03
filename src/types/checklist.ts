@@ -23,7 +23,7 @@ export type FCCFabricante =
 
 export type TensaoDC = '24V' | '48V';
 
-export type BateriaTipo = 'LÍTIO' | 'POLÍMERO 100A' | 'POLÍMERO 200A' | 'MONOBLOCO 2V' | 'NA';
+export type BateriaTipo = 'LÍTIO' | 'POLÍMERO' | 'MONOBLOCO';
 
 export type BateriaFabricante = 
   | 'ERICSSON' | 'FREEDOM' | 'FULGURIS' | 'GETPOWER' | 'HUAWEI' | 'MOURA' 

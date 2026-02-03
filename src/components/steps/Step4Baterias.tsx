@@ -12,7 +12,7 @@ import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BateriaCol
 import { ValidationError } from "@/hooks/use-validation";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
-const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO 100A', 'POLÍMERO 200A', 'MONOBLOCO 2V', 'NA'];
+const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO', 'MONOBLOCO'];
 const BATERIA_FABRICANTES: BateriaFabricante[] = [
   'ERICSSON', 'FREEDOM', 'FULGURIS', 'GETPOWER', 'HUAWEI', 'MOURA',
   'NEWMAX', 'NORTHSTAR', 'UNICOBA', 'ZTE', 'SHOTO', 'NA', 'OUTRA'
@@ -22,7 +22,7 @@ const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'VAZANDO', 'TRINCADA', 'NÃO
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
-  tipo: 'NA',
+  tipo: 'LÍTIO',
   fabricante: 'NA',
   fabricanteOutra: '',
   capacidadeAh: null,
