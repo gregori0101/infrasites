@@ -418,18 +418,40 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
     // FCC Section
     addSubSectionTitle('FCC - Fonte de Corrente Contínua');
-    addFieldRow('Fabricante', gab.fcc.fabricante);
-    addFieldRow('Tensão DC', gab.fcc.tensaoDC);
-    addFieldRow('Consumo DC (W)', gab.fcc.consumoDC);
-    addFieldRow('URs Suportadas', gab.fcc.qtdURSuportadas ?? 'N/A');
-    addFieldRow('URs Instaladas', gab.fcc.qtdURInstaladas ?? 'N/A');
-    addFieldRow('Gerenciada SG Infra', gab.fcc.gerenciadaSG, gab.fcc.gerenciadaSG ? 'ok' : 'warning');
-    addFieldRow('Gerenciável', gab.fcc.gerenciavel, gab.fcc.gerenciavel ? 'ok' : 'warning');
+    addFieldRow('Número de FCCs', gab.fcc.numFCCs);
 
-    await addPhotoGrid([
-      { photo: gab.fcc.fotoPanoramica, label: 'FCC Panorâmica' },
-      { photo: gab.fcc.fotoPainel, label: 'Painel de Instrumentos' },
-    ]);
+    for (let f = 0; f < gab.fcc.fccs.length; f++) {
+      const fcc = gab.fcc.fccs[f];
+      checkNewPage(50);
+      
+      y += 2;
+      doc.setFillColor(...GRAY_LIGHT);
+      doc.roundedRect(margin, y, contentWidth, 35, 1, 1, 'F');
+      
+      doc.setTextColor(...VIVO_PURPLE);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`FCC ${f + 1}`, margin + 3, y + 5);
+      
+      doc.setTextColor(...GRAY_DARK);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      
+      doc.text(`Fabricante: ${fcc.fabricante || '-'}`, margin + 3, y + 11);
+      doc.text(`Tensão DC: ${fcc.tensaoDC || '-'}`, margin + contentWidth/2, y + 11);
+      doc.text(`Consumo DC: ${fcc.consumoDC || 0}W`, margin + 3, y + 17);
+      doc.text(`URs Suportadas: ${fcc.qtdURSuportadas ?? 'N/A'}`, margin + contentWidth/2, y + 17);
+      doc.text(`URs Instaladas: ${fcc.qtdURInstaladas ?? 'N/A'}`, margin + 3, y + 23);
+      doc.text(`Gerenciada SG: ${fcc.gerenciadaSG ? 'Sim' : 'Não'}`, margin + contentWidth/2, y + 23);
+      doc.text(`Gerenciável: ${fcc.gerenciavel ? 'Sim' : 'Não'}`, margin + 3, y + 29);
+      
+      y += 38;
+
+      await addPhotoGrid([
+        { photo: fcc.fotoPanoramica, label: `FCC ${f + 1} Panorâmica` },
+        { photo: fcc.fotoPainel, label: `FCC ${f + 1} Painel` },
+      ]);
+    }
 
     // Batteries Section
     checkNewPage(40);
