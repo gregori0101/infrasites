@@ -248,48 +248,68 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
             </span>
             <span className={cn(
               "text-xs font-bold px-2 py-0.5 rounded-full",
-              (data.fotosObservacao?.filter(Boolean).length || 0) > 0 
+              (data.fotosObservacao?.filter(f => f.foto).length || 0) > 0 
                 ? "bg-success/20 text-success" 
                 : "bg-muted text-muted-foreground"
             )}>
-              {data.fotosObservacao?.filter(Boolean).length || 0} foto(s)
+              {data.fotosObservacao?.filter(f => f.foto).length || 0} foto(s)
             </span>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            {(data.fotosObservacao || []).map((foto, index) => (
-              <PhotoCapture
-                key={index}
-                label={`Observação ${index + 1}`}
-                value={foto}
-                onChange={(value) => {
-                  const newFotos = [...(data.fotosObservacao || [])];
-                  if (value) {
-                    newFotos[index] = value;
-                  } else {
-                    // Remove the photo from array
-                    newFotos.splice(index, 1);
-                  }
-                  updateData('fotosObservacao', newFotos);
-                }}
-                siteCode={data.siglaSite}
-                category={`observacao_${index}`}
-              />
+          <div className="space-y-4">
+            {(data.fotosObservacao || []).map((item, index) => (
+              <div key={index} className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">Foto {index + 1}</span>
+                </div>
+                <PhotoCapture
+                  label={`Foto de Observação ${index + 1}`}
+                  value={item.foto}
+                  onChange={(value) => {
+                    const newFotos = [...(data.fotosObservacao || [])];
+                    if (value) {
+                      newFotos[index] = { ...newFotos[index], foto: value };
+                    } else {
+                      // Remove the photo from array
+                      newFotos.splice(index, 1);
+                    }
+                    updateData('fotosObservacao', newFotos);
+                  }}
+                  siteCode={data.siglaSite}
+                  category={`observacao_${index}`}
+                />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Descrição da foto</Label>
+                  <Textarea
+                    value={item.descricao || ''}
+                    onChange={(e) => {
+                      const newFotos = [...(data.fotosObservacao || [])];
+                      newFotos[index] = { ...newFotos[index], descricao: e.target.value };
+                      updateData('fotosObservacao', newFotos);
+                    }}
+                    placeholder="Descreva o que esta foto documenta..."
+                    rows={2}
+                    className="text-sm"
+                  />
+                </div>
+              </div>
             ))}
             
             {/* Add new photo slot */}
-            <PhotoCapture
-              label={`Nova foto ${(data.fotosObservacao?.length || 0) + 1}`}
-              value={null}
-              onChange={(value) => {
-                if (value) {
-                  const newFotos = [...(data.fotosObservacao || []), value];
-                  updateData('fotosObservacao', newFotos);
-                }
-              }}
-              siteCode={data.siglaSite}
-              category={`observacao_${data.fotosObservacao?.length || 0}`}
-            />
+            <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-3">
+              <PhotoCapture
+                label={`Adicionar nova foto`}
+                value={null}
+                onChange={(value) => {
+                  if (value) {
+                    const newFotos = [...(data.fotosObservacao || []), { foto: value, descricao: '' }];
+                    updateData('fotosObservacao', newFotos);
+                  }
+                }}
+                siteCode={data.siglaSite}
+                category={`observacao_${data.fotosObservacao?.length || 0}`}
+              />
+            </div>
           </div>
         </div>
       </FormCard>

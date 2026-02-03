@@ -131,6 +131,30 @@ function parseJsonArray(value: string | null): string[] {
 }
 
 /**
+ * Parse fotosObservacao from JSON - handles both old format (string[]) and new format (FotoObservacao[])
+ */
+function parseFotosObservacao(value: string | null): { foto: string | null; descricao: string }[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    // Check if it's old format (array of strings) or new format (array of objects)
+    return parsed.map((item: any) => {
+      if (typeof item === 'string') {
+        // Old format: just a URL string
+        return { foto: item, descricao: '' };
+      } else if (item && typeof item === 'object') {
+        // New format: object with foto and descricao
+        return { foto: item.foto || null, descricao: item.descricao || '' };
+      }
+      return { foto: null, descricao: '' };
+    }).filter((item: any) => item.foto);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Reconstruct ChecklistData from a database ReportRow
  * This allows regenerating PDF/Excel from saved reports
  */
@@ -290,7 +314,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotoNinhos: report.torre_foto_ninhos || null,
     },
     observacoes: report.observacoes || '',
-    fotosObservacao: report.observacao_foto_url ? parseJsonArray(report.observacao_foto_url) : [],
+    fotosObservacao: parseFotosObservacao(report.observacao_foto_url),
     assinaturaDigital: report.assinatura_digital || null,
     dataHora: report.created_at || new Date().toISOString(),
     tecnico: report.technician_name || '',

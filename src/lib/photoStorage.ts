@@ -121,11 +121,17 @@ export async function uploadAllPhotos(
     'site_panoramica'
   );
 
-  // Upload observation photos (multiple)
-  updatedData.fotosObservacao = await uploadPhotoArray(
-    data.fotosObservacao,
-    'observacao'
-  );
+  // Upload observation photos with descriptions (FotoObservacao[])
+  if (Array.isArray(data.fotosObservacao)) {
+    updatedData.fotosObservacao = await Promise.all(
+      data.fotosObservacao.map(async (item: { foto: string | null; descricao: string }, idx: number) => {
+        const uploadedFoto = item?.foto ? await uploadSinglePhoto(item.foto, `observacao_${idx}`) : null;
+        return { foto: uploadedFoto, descricao: item?.descricao || '' };
+      })
+    );
+  } else {
+    updatedData.fotosObservacao = [];
+  }
 
   // Upload signature
   updatedData.assinaturaDigital = await uploadSinglePhoto(
