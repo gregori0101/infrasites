@@ -73,7 +73,7 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
             />
 
             <ToggleSwitch
-              label="Com Proteção"
+              label={gabinete.comProtecao ? "Com Proteção" : "Sem Proteção"}
               description="Tranca ou cadeado instalado"
               value={gabinete.comProtecao}
               onChange={(value) => updateGabinete(currentGabinete, { comProtecao: value })}
