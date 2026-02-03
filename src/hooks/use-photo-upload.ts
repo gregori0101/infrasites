@@ -15,6 +15,40 @@ interface UsePhotoUploadOptions {
 }
 
 /**
+ * Convert base64 data URL to Blob - iOS Safari compatible
+ */
+function dataURLToBlob(dataURL: string): Blob {
+  try {
+    const arr = dataURL.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    
+    // Use a safer base64 decoding approach for iOS
+    const base64 = arr[1];
+    const byteCharacters = atob(base64);
+    
+    // Process in smaller chunks to avoid memory issues on iOS
+    const sliceSize = 512;
+    const byteArrays: BlobPart[] = [];
+    
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray.buffer);
+    }
+    
+    return new Blob(byteArrays, { type: mime });
+  } catch (error) {
+    console.error('[dataURLToBlob] Error:', error);
+    throw new Error('Falha ao processar imagem. Tente capturar novamente.');
+  }
+}
+
+/**
  * Hook that handles photo upload to Supabase Storage immediately after capture
  * This prevents localStorage quota issues by storing URLs instead of base64 data
  */
@@ -74,30 +108,41 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
       const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${siteCode}/${timestamp}/${category}_${uuidv4().slice(0, 8)}.jpg`;
 
-      // Convert base64 to blob
-      const arr = processedData.split(',');
-      const mimeMatch = arr[0].match(/:(.*?);/);
-      const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      const blob = new Blob([u8arr], { type: mime });
+      // Convert base64 to blob using iOS-safe method
+      const blob = dataURLToBlob(processedData);
 
       setUploadProgress(60);
 
-      // Upload to Supabase Storage
-      const { error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg',
-          upsert: true
-        });
+      // Upload to Supabase Storage with retry for iOS
+      let uploadError = null;
+      let retries = 0;
+      const maxRetries = 2;
+      
+      while (retries <= maxRetries) {
+        const { error } = await supabase.storage
+          .from(BUCKET_NAME)
+          .upload(fileName, blob, {
+            contentType: 'image/jpeg',
+            upsert: true
+          });
+        
+        if (!error) {
+          uploadError = null;
+          break;
+        }
+        
+        uploadError = error;
+        retries++;
+        
+        if (retries <= maxRetries) {
+          console.log(`[PhotoUpload] Retry ${retries}/${maxRetries} for ${category}`);
+          // Small delay before retry
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
 
-      if (error) {
-        throw new Error(`Upload failed: ${error.message}`);
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
       }
 
       setUploadProgress(90);
@@ -117,12 +162,16 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
     } catch (error) {
       console.error('[PhotoUpload] Error:', error);
-      onError?.(error as Error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      onError?.(new Error(errorMessage));
       
       // Fallback: return compressed base64 if upload fails
       try {
         const fallback = await compressWithFallback(base64Data, MAX_SIZE_KB);
         console.log('[PhotoUpload] Using compressed base64 fallback');
+        toast.warning('Foto salva localmente', { 
+          description: 'Será enviada ao finalizar o relatório.' 
+        });
         return fallback;
       } catch {
         return null;
