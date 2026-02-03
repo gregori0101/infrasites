@@ -385,7 +385,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   doc.addPage();
   addHeader();
 
-  addSectionTitle('DADOS DO SITE', '📍');
+  addSectionTitle('DADOS DO SITE');
   
   addInfoCard('Informações Gerais', [
     { label: 'Sigla SCIENCE', value: data.siglaSite },
@@ -413,7 +413,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       doc.addPage();
       addHeader();
 
-      addSectionTitle(`GABINETE ${i + 1}`, '🏢');
+      addSectionTitle(`GABINETE ${i + 1}`);
 
       // Gabinete Info
       addInfoCard(`Gabinete ${i + 1} - Informações`, [
@@ -545,7 +545,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   doc.addPage();
   addHeader();
 
-  addSectionTitle('FIBRA ÓPTICA DO SITE', '🔗');
+  addSectionTitle('FIBRA OPTICA DO SITE');
 
   const fibra = {
     ...INITIAL_FIBRA_OPTICA,
@@ -624,7 +624,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.addPage();
     addHeader();
 
-    addSectionTitle('ENERGIA', '⚡');
+    addSectionTitle('ENERGIA');
 
     addInfoCard('Quadro de Energia', [
       { label: 'Tipo de Quadro', value: data.energia.tipoQuadro },
@@ -646,7 +646,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.addPage();
     addHeader();
 
-    addSectionTitle('GMG - GRUPO MOTOR GERADOR', '🔋');
+    addSectionTitle('GMG - GRUPO MOTOR GERADOR');
     addFieldRow('Possui GMG', data.gmg.informar, data.gmg.informar ? 'ok' : 'warning');
     if (data.gmg.informar) {
       addFieldRow('Fabricante', data.gmg.fabricante);
@@ -661,7 +661,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     }
 
     y += 10;
-    addSectionTitle('TORRE E ZELADORIA', '🗼');
+    addSectionTitle('TORRE E ZELADORIA');
     
     addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'warning' : 'ok');
     if (data.torre.ninhos && data.torre.fotoNinhos) {
@@ -681,7 +681,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   doc.addPage();
   addHeader();
 
-  addSectionTitle('OBSERVAÇÕES GERAIS', '📝');
+  addSectionTitle('OBSERVACOES GERAIS');
 
   if (data.observacoes) {
     doc.setFillColor(...GRAY_LIGHT);
@@ -714,7 +714,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   // ===== SIGNATURE =====
   if (data.assinaturaDigital) {
     checkNewPage(70);
-    addSectionTitle('ASSINATURA DIGITAL', '✍️');
+    addSectionTitle('ASSINATURA DIGITAL');
 
     doc.setFillColor(...WHITE);
     doc.setDrawColor(...VIVO_PURPLE);
