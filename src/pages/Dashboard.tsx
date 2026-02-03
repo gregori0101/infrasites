@@ -211,6 +211,15 @@ export default function Dashboard() {
       ? Math.round((totalRealizadas / totalAtribuidas) * 100) 
       : 0;
 
+    // Total de sites na base
+    const totalSitesBase = sitesData.length;
+    
+    // Sites únicos já vistoriados (usando site_code único)
+    const sitesVistoriados = new Set(filteredReportsBySiteType.map(r => r.site_code)).size;
+    
+    // Sites não vistoriados = total base - sites únicos vistoriados
+    const sitesNaoVistoriados = Math.max(0, totalSitesBase - sitesVistoriados);
+
     // Vistorias por UF from reports
     const vistoriasPorUf = stats.ufDistribution.map(uf => ({
       uf: uf.name,
@@ -233,6 +242,8 @@ export default function Dashboard() {
       totalEmAndamento,
       taxaConclusao,
       mediaPorTecnico: stats.mediaPorTecnico,
+      totalSitesBase,
+      sitesNaoVistoriados,
       technicianRanking: technicianRankingWithEmails,
       vistoriasPorMes: stats.vistoriasPorMes,
       vistoriasPorDia: stats.vistoriasPorDia,
@@ -241,7 +252,7 @@ export default function Dashboard() {
       vistoriasPorUf,
       assignmentsByUf: assignmentStats?.byUf || []
     };
-  }, [stats, assignmentStats, technicianEmails]);
+  }, [stats, assignmentStats, technicianEmails, sitesData, filteredReportsBySiteType]);
 
   // Calculate fiber stats from reports
   const fibraStats = useMemo((): FibraStats => {

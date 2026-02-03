@@ -78,6 +78,8 @@ export interface ProdutividadeStats {
   totalEmAndamento: number;
   taxaConclusao: number;
   mediaPorTecnico: number;
+  totalSitesBase: number; // Total de sites cadastrados na base
+  sitesNaoVistoriados: number; // Sites que ainda não foram vistoriados
   technicianRanking: TechnicianRanking[];
   vistoriasPorMes: { month: string; count: number }[];
   vistoriasPorDia: { day: string; count: number }[];
@@ -239,24 +241,30 @@ export function ProdutividadePanel({ stats, onDrillDown }: Props) {
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          title="Sites na Base"
+          value={stats.totalSitesBase}
+          subtitle="Total cadastrado"
+          icon={Target}
+          iconBg="bg-blue-100"
+        />
         <StatCard
           title="Vistorias Realizadas"
           value={stats.totalRealizadas}
-          subtitle="Concluídas no período"
+          subtitle={`${stats.totalSitesBase > 0 ? Math.round((stats.totalRealizadas / stats.totalSitesBase) * 100) : 0}% da base`}
           icon={ClipboardCheck}
           iconBg="bg-green-100"
           badge={{ text: "Concluídas", variant: "success" }}
           onClick={() => onDrillDown?.("realizadas")}
         />
         <StatCard
-          title="Vistorias Pendentes"
-          value={stats.totalPendentes}
-          subtitle="Aguardando execução"
+          title="Sites Não Vistoriados"
+          value={stats.sitesNaoVistoriados}
+          subtitle={`${stats.totalSitesBase > 0 ? Math.round((stats.sitesNaoVistoriados / stats.totalSitesBase) * 100) : 0}% da base`}
           icon={Clock}
           iconBg="bg-amber-100"
           badge={{ text: "Pendentes", variant: "warning" }}
-          onClick={() => onDrillDown?.("pendentes")}
         />
         <StatCard
           title="Média por Técnico"
