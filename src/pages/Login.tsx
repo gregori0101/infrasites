@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
-import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2, KeyRound, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,8 +14,10 @@ import { Helmet } from 'react-helmet';
 
 type Operadora = 'VIVO' | 'TEL';
 
+type ViewMode = 'login' | 'signup' | 'forgot-password';
+
 export default function Login() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +27,39 @@ export default function Login() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const { signIn, signUp, refreshRole } = useAuth();
+
+  const isLogin = viewMode === 'login';
+  const isForgotPassword = viewMode === 'forgot-password';
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setIsLoading(true);
+
+    if (!email.trim()) {
+      setError('Por favor, informe seu email');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess('Se este email estiver cadastrado, você receberá um link para redefinir sua senha.');
+        setEmail('');
+      }
+    } catch (err) {
+      setError('Erro ao processar sua solicitação');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +136,22 @@ export default function Login() {
     }
   };
 
+  const getTitle = () => {
+    if (isForgotPassword) return 'Recuperar Senha';
+    return isLogin ? 'Entrar no Sistema' : 'Criar Conta';
+  };
+
+  const getDescription = () => {
+    if (isForgotPassword) return 'Informe seu email para receber o link de recuperação';
+    return isLogin
+      ? 'Acesse o sistema de checklist de sites'
+      : 'Cadastre-se para acessar o sistema (requer aprovação)';
+  };
+
   return (
     <>
       <Helmet>
-        <title>{isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
+        <title>{isForgotPassword ? 'Recuperar Senha' : isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -112,113 +159,178 @@ export default function Login() {
             <div className="flex justify-center">
               <VivoLogo className="h-12 w-auto" />
             </div>
-            <CardTitle className="text-xl">
-              {isLogin ? 'Entrar no Sistema' : 'Criar Conta'}
-            </CardTitle>
-            <CardDescription>
-              {isLogin
-                ? 'Acesse o sistema de checklist de sites'
-                : 'Cadastre-se para acessar o sistema (requer aprovação)'}
-            </CardDescription>
+            <CardTitle className="text-xl">{getTitle()}</CardTitle>
+            <CardDescription>{getDescription()}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {!isLogin && (
+            {isForgotPassword ? (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="confirmPassword"
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
+                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>{success}</span>
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <KeyRound className="w-4 h-4 mr-2" />
+                  )}
+                  Enviar Link de Recuperação
+                </Button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline flex items-center justify-center gap-1 mx-auto"
+                    onClick={() => {
+                      setViewMode('login');
+                      setError('');
+                      setSuccess('');
+                    }}
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    Voltar ao login
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
                     type="password"
                     placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
-              )}
-
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    Empresa <span className="text-destructive">*</span>
-                  </Label>
-                  <Select value={operadora} onValueChange={(value: Operadora) => setOperadora(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="VIVO">VIVO</SelectItem>
-                      <SelectItem value="TEL">TEL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {error && (
-                <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {success && (
-                <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
-                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{success}</span>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : isLogin ? (
-                  <LogIn className="w-4 h-4 mr-2" />
-                ) : (
-                  <UserPlus className="w-4 h-4 mr-2" />
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                  </div>
                 )}
-                {isLogin ? 'Entrar' : 'Cadastrar'}
-              </Button>
 
-              <div className="text-center">
-                <button
-                  type="button"
-                  className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError('');
-                    setSuccess('');
-                  }}
-                >
-                  {isLogin
-                    ? 'Não tem conta? Cadastre-se'
-                    : 'Já tem conta? Faça login'}
-                </button>
-              </div>
-            </form>
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4" />
+                      Empresa <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={operadora} onValueChange={(value: Operadora) => setOperadora(value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VIVO">VIVO</SelectItem>
+                        <SelectItem value="TEL">TEL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
+                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>{success}</span>
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : isLogin ? (
+                    <LogIn className="w-4 h-4 mr-2" />
+                  ) : (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  )}
+                  {isLogin ? 'Entrar' : 'Cadastrar'}
+                </Button>
+
+                {isLogin && (
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+                      onClick={() => {
+                        setViewMode('forgot-password');
+                        setError('');
+                        setSuccess('');
+                      }}
+                    >
+                      Esqueceu a senha?
+                    </button>
+                  </div>
+                )}
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+                    onClick={() => {
+                      setViewMode(isLogin ? 'signup' : 'login');
+                      setError('');
+                      setSuccess('');
+                    }}
+                  >
+                    {isLogin
+                      ? 'Não tem conta? Cadastre-se'
+                      : 'Já tem conta? Faça login'}
+                  </button>
+                </div>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>
