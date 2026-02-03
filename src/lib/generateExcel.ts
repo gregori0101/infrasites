@@ -253,6 +253,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   row['Torre_Ninhos'] = data.torre.ninhos ? 'SIM' : 'NÃO';
   row['Torre_Foto_Ninhos'] = getPhotoValue(data.torre.fotoNinhos);
   row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
+  row['Torre_Foto_Fibras_Protegidas'] = getPhotoValue(data.torre.fotoFibrasProtegidas);
   row['Torre_Aterramento'] = data.torre.aterramento;
   row['Torre_Zeladoria'] = data.torre.zeladoria;
   
