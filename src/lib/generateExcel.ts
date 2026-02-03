@@ -67,6 +67,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
       row[`${prefix}_FCC_Gerenciavel`] = gab.fcc.gerenciavel ? 'SIM' : 'NÃO';
       row[`${prefix}_FCC_Consumo_W`] = gab.fcc.consumoDC;
       row[`${prefix}_FCC_QtdUR_Suportadas`] = gab.fcc.qtdURSuportadas;
+      row[`${prefix}_FCC_QtdUR_Instaladas`] = gab.fcc.qtdURInstaladas;
       row[`${prefix}_FCC_Foto_Panoramica`] = getPhotoValue(gab.fcc.fotoPanoramica);
       row[`${prefix}_FCC_Foto_Painel`] = getPhotoValue(gab.fcc.fotoPainel);
       

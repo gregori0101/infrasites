@@ -259,6 +259,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`${prefix}_fcc_gerenciavel`] = gab.fcc.gerenciavel === true ? 'SIM' : gab.fcc.gerenciavel === false ? 'NÃO' : null;
       row[`${prefix}_fcc_consumo`] = gab.fcc.consumoDC != null ? gab.fcc.consumoDC.toString() : null;
       row[`${prefix}_fcc_qtd_ur`] = gab.fcc.qtdURSuportadas != null ? gab.fcc.qtdURSuportadas.toString() : null;
+      row[`${prefix}_fcc_qtd_ur_instaladas`] = gab.fcc.qtdURInstaladas != null ? gab.fcc.qtdURInstaladas.toString() : null;
       row[`${prefix}_fcc_foto_panoramica`] = gab.fcc.fotoPanoramica || null;
       row[`${prefix}_fcc_foto_painel`] = gab.fcc.fotoPainel || null;
       

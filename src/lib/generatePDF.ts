@@ -421,7 +421,8 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     addFieldRow('Fabricante', gab.fcc.fabricante);
     addFieldRow('Tensão DC', gab.fcc.tensaoDC);
     addFieldRow('Consumo DC (W)', gab.fcc.consumoDC);
-    addFieldRow('URs Suportadas', gab.fcc.qtdURSuportadas);
+    addFieldRow('URs Suportadas', gab.fcc.qtdURSuportadas ?? 'N/A');
+    addFieldRow('URs Instaladas', gab.fcc.qtdURInstaladas ?? 'N/A');
     addFieldRow('Gerenciada SG Infra', gab.fcc.gerenciadaSG, gab.fcc.gerenciadaSG ? 'ok' : 'warning');
     addFieldRow('Gerenciável', gab.fcc.gerenciavel, gab.fcc.gerenciavel ? 'ok' : 'warning');
 
