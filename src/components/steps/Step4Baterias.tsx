@@ -18,7 +18,7 @@ const BATERIA_FABRICANTES: BateriaFabricante[] = [
   'NEWMAX', 'NORTHSTAR', 'UNICOBA', 'ZTE', 'SHOTO', 'NA', 'OUTRA'
 ];
 const CAPACIDADES: CapacidadeAh[] = [100, 105, 170, 200, 300, 400, 430, 500, 600, 640, 750, 800, 1000, 1250, 1500, 2000, 2500];
-const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA'];
+const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'ESTOURADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA'];
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
