@@ -106,7 +106,9 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       } catch (uploadError) {
         console.error('Photo upload error:', uploadError);
         toast.error('Erro no upload das fotos', {
-          description: 'Verifique sua conexão e tente novamente.'
+          description: uploadError instanceof Error
+            ? uploadError.message
+            : 'Verifique sua conexão e tente novamente.'
         });
         setIsSending(false);
         setUploadProgress('');
