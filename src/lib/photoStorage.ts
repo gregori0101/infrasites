@@ -96,9 +96,11 @@ export async function uploadAllPhotos(
     if (!photo || photo.startsWith('http')) return photo || null;
     try {
       return await uploadPhoto(photo, siteCode, category);
-    } catch (e) {
+    } catch (e: any) {
+      // CRITICAL: never fall back to returning base64 and accidentally store it in DB.
       console.error(`Failed to upload ${category}:`, e);
-      return photo; // Return original if upload fails
+      const msg = e?.message ? String(e.message) : 'erro desconhecido';
+      throw new Error(`Falha ao enviar foto (${category}): ${msg}`);
     }
   };
 
