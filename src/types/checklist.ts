@@ -26,7 +26,7 @@ export type TensaoDC = '24V' | '48V';
 export type BateriaTipo = 'LÍTIO' | 'POLÍMERO 100A' | 'POLÍMERO 200A' | 'MONOBLOCO 2V' | 'NA';
 
 export type BateriaFabricante = 
-  | 'FREEDOM' | 'FULGURIS' | 'GETPOWER' | 'HUAWEI' | 'MOURA' 
+  | 'ERICSSON' | 'FREEDOM' | 'FULGURIS' | 'GETPOWER' | 'HUAWEI' | 'MOURA' 
   | 'NEWMAX' | 'NORTHSTAR' | 'UNICOBA' | 'ZTE' | 'SHOTO' | 'NA' | 'OUTRA';
 
 export type CapacidadeAh = 100 | 105 | 170 | 200 | 300 | 400 | 430 | 500 | 600 | 640 | 750 | 800 | 1000 | 1250 | 1500 | 2000 | 2500;
@@ -96,6 +96,7 @@ export interface FibraOpticaData {
 export interface BancoBateria {
   tipo: BateriaTipo;
   fabricante: BateriaFabricante;
+  fabricanteOutra?: string;
   capacidadeAh: CapacidadeAh | null;
   dataFabricacao: string;
   estado: BateriaEstado;
