@@ -490,22 +490,20 @@ export default function UserManagement() {
                                   <SelectItem value="administrador">Administrador</SelectItem>
                                 </SelectContent>
                               </Select>
-                              {u.role === 'tecnico' && (
-                                <Select
-                                  value={u.area_atuacao || "_none_"}
-                                  onValueChange={(value) => handleAreaAtuacaoChange(u.user_id, value === "_none_" ? null : value as 'PI' | 'REDE')}
-                                  disabled={actionLoading === u.user_id}
-                                >
-                                  <SelectTrigger className="w-24 h-8">
-                                    <SelectValue placeholder="Área" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="_none_">Área</SelectItem>
-                                    <SelectItem value="PI">PI</SelectItem>
-                                    <SelectItem value="REDE">REDE</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              )}
+                              <Select
+                                value={u.area_atuacao || "_none_"}
+                                onValueChange={(value) => handleAreaAtuacaoChange(u.user_id, value === "_none_" ? null : value as 'PI' | 'REDE')}
+                                disabled={actionLoading === u.user_id}
+                              >
+                                <SelectTrigger className="w-24 h-8">
+                                  <SelectValue placeholder="Área" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="_none_">Área</SelectItem>
+                                  <SelectItem value="PI">PI</SelectItem>
+                                  <SelectItem value="REDE">REDE</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <Button
                                 size="sm"
                                 variant="outline"
