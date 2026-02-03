@@ -60,7 +60,9 @@ export async function uploadPhoto(
     console.log(`[Photo] Original size: ${originalSize}KB - ${category}`);
     
     try {
-      processedData = await compressToMaxSize(base64Data, MAX_IMAGE_SIZE_KB);
+      // More aggressive compression for mobile (300KB target)
+      const targetSize = originalSize > 1000 ? 300 : MAX_IMAGE_SIZE_KB;
+      processedData = await compressToMaxSize(base64Data, targetSize);
       const compressedSize = getBase64SizeKB(processedData);
       const savings = Math.round((1 - compressedSize / originalSize) * 100);
       console.log(`[Photo] Compressed: ${compressedSize}KB (${savings}% reduction) - ${category}`);
@@ -71,22 +73,31 @@ export async function uploadPhoto(
   }
 
   // Generate unique filename (always jpg after compression)
-  const fileName = `${siteCode}/${category}/${uuidv4()}.jpg`;
+  const timestamp = new Date().toISOString().slice(0, 10);
+  const fileName = `${siteCode}/${timestamp}/${category}_${uuidv4().slice(0, 8)}.jpg`;
 
   // Convert base64 to blob
-  const blob = dataURLToBlob(processedData);
+  let blob: Blob;
+  try {
+    blob = dataURLToBlob(processedData);
+  } catch (blobError) {
+    console.error(`[Photo] Blob conversion failed for ${category}:`, blobError);
+    throw new Error(`Falha ao processar imagem (${category})`);
+  }
 
-  // Upload to Supabase Storage
-  const { error } = await supabase.storage
+  // Upload to Supabase Storage with timeout
+  const uploadPromise = supabase.storage
     .from(BUCKET_NAME)
     .upload(fileName, blob, {
       contentType: 'image/jpeg',
       upsert: true
     });
 
+  const { error } = await uploadPromise;
+
   if (error) {
     console.error('Error uploading photo:', error);
-    throw new Error(`Failed to upload photo: ${error.message}`);
+    throw new Error(`Falha no upload: ${error.message}`);
   }
 
   // Get public URL
@@ -94,26 +105,66 @@ export async function uploadPhoto(
     .from(BUCKET_NAME)
     .getPublicUrl(fileName);
 
+  // Clear reference to help GC
+  processedData = '';
+  
   return urlData.publicUrl;
 }
 
 /**
  * Uploads all photos from checklist data and returns updated data with URLs
  */
+/**
+ * Small delay helper for iOS memory management
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Upload with retry logic for iOS Safari stability
+ */
+async function uploadWithRetry(
+  base64Data: string,
+  siteCode: string,
+  category: string,
+  maxRetries = 2
+): Promise<string> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        console.log(`[PhotoUpload] Retry ${attempt}/${maxRetries} for ${category}`);
+        await delay(500 * attempt); // Increasing delay between retries
+      }
+      return await uploadPhoto(base64Data, siteCode, category);
+    } catch (error) {
+      lastError = error as Error;
+      console.warn(`[PhotoUpload] Attempt ${attempt + 1} failed for ${category}:`, error);
+    }
+  }
+  
+  throw lastError || new Error('Upload failed');
+}
+
 export async function uploadAllPhotos(
   data: any,
   siteCode: string
 ): Promise<any> {
   const updatedData = JSON.parse(JSON.stringify(data)); // Deep clone to avoid mutations
 
-  // Helper function to upload a single photo
+  // Helper function to upload a single photo with retry
   const uploadSinglePhoto = async (
     photo: string | null | undefined,
     category: string
   ): Promise<string | null> => {
     if (!photo || photo.startsWith('http')) return photo || null;
     try {
-      return await uploadPhoto(photo, siteCode, category);
+      const result = await uploadWithRetry(photo, siteCode, category);
+      // Small delay after each upload to prevent iOS memory pressure
+      await delay(100);
+      return result;
     } catch (e: any) {
       // CRITICAL: never fall back to returning base64 and accidentally store it in DB.
       console.error(`Failed to upload ${category}:`, e);
@@ -122,17 +173,22 @@ export async function uploadAllPhotos(
     }
   };
 
-  // Helper function to upload array of photos
+  // Helper function to upload array of photos SEQUENTIALLY (not parallel) for iOS stability
   const uploadPhotoArray = async (
     photos: (string | null | undefined)[] | undefined,
     category: string
   ): Promise<(string | null)[]> => {
     if (!Array.isArray(photos)) return [];
-    return Promise.all(
-      photos.map((p, idx) =>
-        p ? uploadSinglePhoto(p, `${category}_${idx}`) : Promise.resolve(null)
-      )
-    );
+    const results: (string | null)[] = [];
+    for (let idx = 0; idx < photos.length; idx++) {
+      const p = photos[idx];
+      if (p) {
+        results.push(await uploadSinglePhoto(p, `${category}_${idx}`));
+      } else {
+        results.push(null);
+      }
+    }
+    return results;
   };
 
   // Upload panoramic photo

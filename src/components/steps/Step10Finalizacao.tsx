@@ -96,19 +96,20 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
       const updatedData = { ...data, dataHora: new Date().toISOString() };
       updateData('dataHora', updatedData.dataHora);
       
-      // 1. Upload das fotos para o Storage
-      setUploadProgress('Fazendo upload das fotos...');
+      // 1. Upload das fotos para o Storage (sequencial para iOS)
+      setUploadProgress('Enviando fotos... (pode demorar alguns minutos)');
       const siteCode = data.siglaSite || `site_${Date.now()}`;
       
       let dataWithUrls;
       try {
         dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
+        setUploadProgress('Fotos enviadas com sucesso!');
       } catch (uploadError) {
         console.error('Photo upload error:', uploadError);
+        const errorMsg = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido';
         toast.error('Erro no upload das fotos', {
-          description: uploadError instanceof Error
-            ? uploadError.message
-            : 'Verifique sua conexão e tente novamente.'
+          description: errorMsg,
+          duration: 8000
         });
         setIsSending(false);
         setUploadProgress('');
