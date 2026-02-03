@@ -280,6 +280,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
           row[`${prefix}_bat${j + 1}_data_fabricacao`] = banco.dataFabricacao || null;
           row[`${prefix}_bat${j + 1}_estado`] = banco.estados?.join(', ') || null;
           row[`${prefix}_bat${j + 1}_colada`] = banco.colada || null;
+          row[`${prefix}_bat${j + 1}_com_gradil`] = banco.comGradil || null;
           row[`${prefix}_bat${j + 1}_foto`] = banco.fotoBanco || null;
         }
       }

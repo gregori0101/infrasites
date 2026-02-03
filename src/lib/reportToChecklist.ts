@@ -224,6 +224,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
           dataFabricacao: report[`${prefix}_bat${j + 1}_data_fabricacao`] || '',
           estados: estados as any,
           colada: (report[`${prefix}_bat${j + 1}_colada`] || 'NA') as any,
+          comGradil: (report[`${prefix}_bat${j + 1}_com_gradil`] || 'NA') as any,
           fotoBanco: report[`${prefix}_bat${j + 1}_foto`] || null,
         });
       }

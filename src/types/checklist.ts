@@ -101,6 +101,7 @@ export interface BancoBateria {
   dataFabricacao: string;
   estados: BateriaEstado[];
   colada: BateriaColada;
+  comGradil: BateriaColada;
   fotoBanco: string | null;
 }
 

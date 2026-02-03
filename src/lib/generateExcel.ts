@@ -101,6 +101,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           row[`${prefix}_Banco${j + 1}_DataFab`] = banco.dataFabricacao || '';
           row[`${prefix}_Banco${j + 1}_Estado`] = banco.estados?.join(', ') || '';
           row[`${prefix}_Banco${j + 1}_Colada`] = banco.colada || 'NA';
+          row[`${prefix}_Banco${j + 1}_ComGradil`] = banco.comGradil || 'NA';
           row[`${prefix}_Banco${j + 1}_Foto`] = getPhotoValue(banco.fotoBanco);
         } else {
           row[`${prefix}_Banco${j + 1}_Tipo`] = '';
@@ -109,6 +110,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           row[`${prefix}_Banco${j + 1}_DataFab`] = '';
           row[`${prefix}_Banco${j + 1}_Estado`] = '';
           row[`${prefix}_Banco${j + 1}_Colada`] = '';
+          row[`${prefix}_Banco${j + 1}_ComGradil`] = '';
           row[`${prefix}_Banco${j + 1}_Foto`] = '';
         }
       }
