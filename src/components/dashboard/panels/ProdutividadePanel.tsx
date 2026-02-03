@@ -34,6 +34,13 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   ClipboardCheck,
   Clock,
   TrendingUp,
@@ -95,11 +102,12 @@ interface Props {
   stats: ProdutividadeStats;
   onDrillDown?: (type: "realizadas" | "pendentes" | "nao-vistoriados" | "base") => void;
   areaAtuacaoFilter?: "all" | "PI" | "REDE";
+  onAreaAtuacaoChange?: (value: "all" | "PI" | "REDE") => void;
 }
 
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
-export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "all" }: Props) {
+export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "all", onAreaAtuacaoChange }: Props) {
   const [metaDiaria, setMetaDiaria] = useState<number>(10);
   const [searchTechnician, setSearchTechnician] = useState("");
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
@@ -483,7 +491,20 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
                 {technicianProductivity.length} técnicos
               </Badge>
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select
+                value={areaAtuacaoFilter}
+                onValueChange={(v) => onAreaAtuacaoChange?.(v as "all" | "PI" | "REDE")}
+              >
+                <SelectTrigger className="w-28 h-8 text-sm">
+                  <SelectValue placeholder="Área" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="PI">PI</SelectItem>
+                  <SelectItem value="REDE">REDE</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 placeholder="Buscar técnico..."
                 value={searchTechnician}
