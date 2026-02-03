@@ -643,9 +643,13 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
   y += 10;
   addSectionTitle('TORRE E ZELADORIA', '🗼');
-  addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
   
-  // Foto das Fibras Protegidas
+  addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'warning' : 'ok');
+  if (data.torre.ninhos && data.torre.fotoNinhos) {
+    await addPhoto(data.torre.fotoNinhos, 'Foto dos Ninhos');
+  }
+  
+  addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
   if (data.torre.fotoFibrasProtegidas) {
     await addPhoto(data.torre.fotoFibrasProtegidas, 'Foto das Fibras Protegidas');
   }
