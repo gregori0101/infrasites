@@ -25,14 +25,18 @@ interface Step9Props {
 
 export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Step9Props) {
   const { data, updateData, updateSecaoNaoAplicavel } = useChecklist();
-  const isSkipped = data.secoesNaoAplicaveis.gmgTorre;
+  const isSkipped = data.secoesNaoAplicaveis?.gmgTorre ?? false;
+
+  // Ensure gmg and torre are always defined
+  const gmg = data.gmg ?? { informar: false };
+  const torre = data.torre ?? { ninhos: false, fibrasProtegidas: true, aterramento: 'OK', zeladoria: 'OK' };
 
   const updateGMG = (updates: Partial<GMGData>) => {
-    updateData('gmg', { ...data.gmg, ...updates });
+    updateData('gmg', { ...gmg, ...updates });
   };
 
   const updateTorre = (updates: Partial<TorreData>) => {
-    updateData('torre', { ...data.torre, ...updates });
+    updateData('torre', { ...torre, ...updates });
   };
 
   return (
@@ -196,7 +200,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                     key={status}
                     onClick={() => updateTorre({ aterramento: status })}
                     className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
-                      data.torre.aterramento === status
+                      torre.aterramento === status
                         ? status === 'OK'
                           ? 'bg-success text-success-foreground border-success'
                           : status === 'NOK'
@@ -219,7 +223,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                     key={status}
                     onClick={() => updateTorre({ zeladoria: status })}
                     className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
-                      data.torre.zeladoria === status
+                      torre.zeladoria === status
                         ? status === 'OK'
                           ? 'bg-success text-success-foreground border-success'
                           : status === 'NOK'

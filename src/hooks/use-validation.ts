@@ -17,6 +17,14 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
   return useMemo(() => {
     const errors: ValidationError[] = [];
 
+    // Check if sections are skipped (não se aplica)
+    const isGabineteSkipped = data.secoesNaoAplicaveis?.gabinete ?? false;
+    const isFCCSkipped = data.secoesNaoAplicaveis?.fcc ?? false;
+    const isBateriasSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
+    const isClimatizacaoSkipped = data.secoesNaoAplicaveis?.climatizacao ?? false;
+    const isEnergiaSkipped = data.secoesNaoAplicaveis?.energia ?? false;
+    const isGmgTorreSkipped = data.secoesNaoAplicaveis?.gmgTorre ?? false;
+
     switch (currentStep) {
       case 0: // Step1DadosSite
         if (!data.siglaSite || data.siglaSite.length !== 5) {
@@ -31,6 +39,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         break;
 
       case 1: // Step2Gabinete
+        if (isGabineteSkipped) break;
         if (!gabinete) break;
         if (!gabinete.tipo) {
           errors.push({ field: 'tipo', message: 'Selecione o tipo do gabinete' });
@@ -41,10 +50,10 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         break;
 
       case 2: // Step3FCC
+        if (isFCCSkipped) break;
         if (!gabinete) break;
-        if (gabinete.fcc.fccs.length === 0) {
-          errors.push({ field: 'fcc', message: 'Adicione pelo menos uma FCC' });
-        }
+        // FCC pode ter 0 itens se não houver neste gabinete específico
+        // Valida apenas se há FCCs cadastradas
         gabinete.fcc.fccs.forEach((fcc, index) => {
           if (!fcc.fabricante) {
             errors.push({ field: `fcc.${index}.fabricante`, message: `FCC ${index + 1}: Informe o fabricante` });
@@ -59,10 +68,10 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         break;
 
       case 3: // Step4Baterias
+        if (isBateriasSkipped) break;
         if (!gabinete) break;
-        if (gabinete.baterias.bancos.length === 0) {
-          errors.push({ field: 'numBancos', message: 'Adicione pelo menos um banco de bateria' });
-        }
+        // Baterias pode ter 0 itens se não houver neste gabinete específico
+        // Valida apenas se há bancos cadastrados
         gabinete.baterias.bancos.forEach((banco, index) => {
           if (!banco.fotoBanco) {
             errors.push({ field: `banco.${index}.fotoBanco`, message: `Banco ${index + 1}: Foto obrigatória` });
@@ -71,13 +80,23 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         break;
 
       case 4: // Step5Climatizacao
+        if (isClimatizacaoSkipped) break;
         if (!gabinete) break;
         if (!gabinete.climatizacao.tipo) {
           errors.push({ field: 'climatizacao.tipo', message: 'Selecione o tipo de climatização' });
         }
         break;
 
-      case 5: // Step7Energia
+      case 5: // Step6FibraOptica
+        // Fibra sempre é aplicável (não tem toggle de skip)
+        // Validação mínima - pelo menos 1 abordagem com tipo definido
+        if (!data.fibraOptica?.abordagens?.length || data.fibraOptica.abordagens.length === 0) {
+          errors.push({ field: 'fibra.abordagens', message: 'Adicione pelo menos uma abordagem de fibra' });
+        }
+        break;
+
+      case 6: // Step7Energia
+        if (isEnergiaSkipped) break;
         if (!data.energia.fotoQuadroGeral) {
           errors.push({ field: 'energia.fotoQuadroGeral', message: 'Foto do quadro geral é obrigatória' });
         }
@@ -86,7 +105,8 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 6: // Step9GMGTorre
+      case 7: // Step9GMGTorre
+        if (isGmgTorreSkipped) break;
         // GMG validation - ultimoTeste is required when GMG exists
         if (data.gmg.informar && !data.gmg.ultimoTeste) {
           errors.push({ field: 'gmg.ultimoTeste', message: 'Data do último teste é obrigatória quando GMG existe' });
@@ -97,7 +117,7 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         }
         break;
 
-      case 7: // Step10Finalizacao
+      case 8: // Step10Finalizacao
         if (!data.tecnico || data.tecnico.trim() === '') {
           errors.push({ field: 'tecnico', message: 'Nome do técnico é obrigatório' });
         }

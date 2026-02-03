@@ -30,8 +30,8 @@ interface Step5Props {
 
 export function Step5Climatizacao({ showErrors = false, validationErrors = [] }: Step5Props) {
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
-  const gabinete = data.gabinetes[currentGabinete];
-  const isSkipped = data.secoesNaoAplicaveis.climatizacao;
+  const gabinete = data.gabinetes?.[currentGabinete];
+  const isSkipped = data.secoesNaoAplicaveis?.climatizacao ?? false;
 
   if (!gabinete) return null;
 

@@ -27,8 +27,8 @@ interface Step2Props {
 
 export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Step2Props) {
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
-  const gabinete = data.gabinetes[currentGabinete];
-  const isSkipped = data.secoesNaoAplicaveis.gabinete;
+  const gabinete = data.gabinetes?.[currentGabinete];
+  const isSkipped = data.secoesNaoAplicaveis?.gabinete ?? false;
 
   if (!gabinete) return null;
 
