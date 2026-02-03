@@ -5,8 +5,9 @@ import { PhotoCapture } from "@/components/ui/photo-capture";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Building2, Image, History, Loader2 } from "lucide-react";
-import { UF } from "@/types/checklist";
+import { Button } from "@/components/ui/button";
+import { MapPin, Building2, Image, History, Loader2, Navigation, CheckCircle2 } from "lucide-react";
+import { UF, GeolocalizacaoData } from "@/types/checklist";
 import { ValidationError, getFieldError } from "@/hooks/use-validation";
 import { usePreviousReport } from "@/hooks/use-previous-report";
 import { PrefillDialog } from "@/components/ui/prefill-dialog";
@@ -32,6 +33,80 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
   
   const [showPrefillDialog, setShowPrefillDialog] = React.useState(false);
   const [hasShownDialogForSite, setHasShownDialogForSite] = React.useState<string | null>(null);
+  const [isCapturingLocation, setIsCapturingLocation] = React.useState(false);
+
+  const captureGeolocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não suportada', {
+        description: 'Seu navegador não suporta geolocalização.',
+      });
+      return;
+    }
+
+    setIsCapturingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Try to get address via reverse geocoding
+        let endereco: string | null = null;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                'Accept-Language': 'pt-BR',
+              },
+            }
+          );
+          const data = await response.json();
+          if (data.display_name) {
+            endereco = data.display_name;
+          }
+        } catch (err) {
+          console.error('Erro ao obter endereço:', err);
+        }
+
+        const geoData: GeolocalizacaoData = {
+          latitude,
+          longitude,
+          endereco,
+          capturadoEm: new Date().toISOString(),
+        };
+
+        updateData('geolocalizacao', geoData);
+        setIsCapturingLocation(false);
+        
+        toast.success('Localização capturada!', {
+          description: endereco 
+            ? `${endereco.slice(0, 60)}...` 
+            : `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
+        });
+      },
+      (error) => {
+        setIsCapturingLocation(false);
+        let message = 'Erro ao capturar localização';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Permissão de localização negada';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Localização indisponível';
+            break;
+          case error.TIMEOUT:
+            message = 'Tempo esgotado ao capturar localização';
+            break;
+        }
+        toast.error(message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handleSiglaChange = (value: string) => {
     const formatted = value.toUpperCase().slice(0, 5);
@@ -142,6 +217,57 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </FormCard>
+
+      <FormCard title="Localização GPS" icon={<Navigation className="w-4 h-4" />}>
+        <div className="space-y-4">
+          <Button
+            type="button"
+            variant={data.geolocalizacao?.latitude ? "outline" : "default"}
+            className="w-full"
+            onClick={captureGeolocation}
+            disabled={isCapturingLocation}
+          >
+            {isCapturingLocation ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Capturando localização...
+              </>
+            ) : data.geolocalizacao?.latitude ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 mr-2 text-success" />
+                Atualizar Localização
+              </>
+            ) : (
+              <>
+                <Navigation className="w-4 h-4 mr-2" />
+                Capturar Localização do Site
+              </>
+            )}
+          </Button>
+
+          {data.geolocalizacao?.latitude && (
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                <span className="font-medium">Coordenadas:</span>
+                <span className="text-muted-foreground">
+                  {data.geolocalizacao.latitude.toFixed(6)}, {data.geolocalizacao.longitude?.toFixed(6)}
+                </span>
+              </div>
+              {data.geolocalizacao.endereco && (
+                <div className="text-muted-foreground text-xs leading-relaxed">
+                  📍 {data.geolocalizacao.endereco}
+                </div>
+              )}
+              {data.geolocalizacao.capturadoEm && (
+                <div className="text-xs text-muted-foreground/70">
+                  Capturado em: {new Date(data.geolocalizacao.capturadoEm).toLocaleString('pt-BR')}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </FormCard>
 

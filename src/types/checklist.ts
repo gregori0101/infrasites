@@ -190,6 +190,20 @@ export const INITIAL_SECOES_NAO_APLICAVEIS: SecoesNaoAplicaveis = {
   gmgTorre: false,
 };
 
+export interface GeolocalizacaoData {
+  latitude: number | null;
+  longitude: number | null;
+  endereco: string | null;
+  capturadoEm: string | null;
+}
+
+export const INITIAL_GEOLOCALIZACAO: GeolocalizacaoData = {
+  latitude: null,
+  longitude: null,
+  endereco: null,
+  capturadoEm: null,
+};
+
 export interface ChecklistData {
   id: string;
   operadora: Operadora;
@@ -197,6 +211,7 @@ export interface ChecklistData {
   uf: UF;
   qtdGabinetes: number;
   fotoPanoramica: string | null;
+  geolocalizacao: GeolocalizacaoData;
   gabinetes: GabineteData[];
   fibraOptica: FibraOpticaData;
   energia: EnergiaData;
@@ -297,6 +312,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   uf: 'PA',
   qtdGabinetes: 1,
   fotoPanoramica: null,
+  geolocalizacao: { ...INITIAL_GEOLOCALIZACAO },
   gabinetes: [{ ...INITIAL_GABINETE }],
   fibraOptica: { ...INITIAL_FIBRA_OPTICA },
   energia: { ...INITIAL_ENERGIA },
