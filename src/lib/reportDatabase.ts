@@ -464,22 +464,6 @@ export async function saveReportToDatabase(
   }
 }
 
-export async function updateReportEmailSent(reportId: string): Promise<boolean> {
-  try {
-    const { error } = await supabase
-      .from('reports')
-      .update({ 
-        email_sent: true, 
-        email_sent_at: new Date().toISOString() 
-      })
-      .eq('id', reportId);
-
-    return !error;
-  } catch {
-    return false;
-  }
-}
-
 // --- Fetch functions (optimized to avoid photo columns) ---
 
 /**
