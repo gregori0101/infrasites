@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { PaginationControls, usePagination } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +90,7 @@ export default function AssignmentManagement() {
   const [selectedSite, setSelectedSite] = React.useState("");
   const [selectedTechnician, setSelectedTechnician] = React.useState("");
   const [deadline, setDeadline] = React.useState("");
+  const [currentPage, setCurrentPage] = React.useState(1);
 
   // Redirect unauthorized users
   React.useEffect(() => {
@@ -214,6 +216,16 @@ export default function AssignmentManagement() {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination
+  const ITEMS_PER_PAGE = 10;
+  const { totalPages, getPageItems, totalItems } = usePagination(filteredAssignments, ITEMS_PER_PAGE);
+  const paginatedAssignments = getPageItems(currentPage);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
+
   const stats = React.useMemo(() => {
     const pending = assignments.filter(a => a.status === 'pendente').length;
     const inProgress = assignments.filter(a => a.status === 'em_andamento').length;
@@ -307,68 +319,78 @@ export default function AssignmentManagement() {
                 : 'Nenhuma atribuição encontrada com os filtros.'}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Site</TableHead>
-                    <TableHead>UF</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Técnico</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Prazo</TableHead>
-                    <TableHead>Tempo</TableHead>
-                    <TableHead className="w-[80px]">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAssignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell className="font-mono font-semibold">
-                        {assignment.site?.site_code}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{assignment.site?.uf}</Badge>
-                      </TableCell>
-                      <TableCell>{assignment.site?.tipo}</TableCell>
-                      <TableCell className="text-sm">
-                        {technicianEmailMap.get(assignment.technician_id) || 
-                          <span className="text-muted-foreground">—</span>}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(assignment.status, assignment.deadline)}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(assignment.deadline).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell className={
-                        new Date(assignment.deadline) < new Date() && assignment.status !== 'concluido'
-                          ? 'text-destructive font-medium'
-                          : 'text-muted-foreground'
-                      }>
-                        {assignment.status === 'concluido' 
-                          ? 'Finalizado' 
-                          : getDaysRemaining(assignment.deadline)}
-                      </TableCell>
-                      <TableCell>
-                        {assignment.status !== 'concluido' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setAssignmentToDelete(assignment);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </TableCell>
+            <>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Site</TableHead>
+                      <TableHead>UF</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Técnico</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Prazo</TableHead>
+                      <TableHead>Tempo</TableHead>
+                      <TableHead className="w-[80px]">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedAssignments.map((assignment) => (
+                      <TableRow key={assignment.id}>
+                        <TableCell className="font-mono font-semibold">
+                          {assignment.site?.site_code}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{assignment.site?.uf}</Badge>
+                        </TableCell>
+                        <TableCell>{assignment.site?.tipo}</TableCell>
+                        <TableCell className="text-sm">
+                          {technicianEmailMap.get(assignment.technician_id) || 
+                            <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(assignment.status, assignment.deadline)}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(assignment.deadline).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell className={
+                          new Date(assignment.deadline) < new Date() && assignment.status !== 'concluido'
+                            ? 'text-destructive font-medium'
+                            : 'text-muted-foreground'
+                        }>
+                          {assignment.status === 'concluido' 
+                            ? 'Finalizado' 
+                            : getDaysRemaining(assignment.deadline)}
+                        </TableCell>
+                        <TableCell>
+                          {assignment.status !== 'concluido' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setAssignmentToDelete(assignment);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                showingLabel="atribuições"
+              />
+            </>
           )}
         </div>
       </main>

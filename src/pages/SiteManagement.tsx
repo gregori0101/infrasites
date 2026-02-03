@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { PaginationControls, usePagination } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,7 @@ export default function SiteManagement() {
   const [isUploading, setIsUploading] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [siteToDelete, setSiteToDelete] = React.useState<Site | null>(null);
+  const [currentPage, setCurrentPage] = React.useState(1);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -153,6 +155,16 @@ export default function SiteManagement() {
     site.uf.toLowerCase().includes(searchTerm.toLowerCase()) ||
     site.tipo.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination
+  const ITEMS_PER_PAGE = 10;
+  const { totalPages, getPageItems, totalItems } = usePagination(filteredSites, ITEMS_PER_PAGE);
+  const paginatedSites = getPageItems(currentPage);
+
+  // Reset to first page when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const sitesByUf = React.useMemo(() => {
     const grouped: Record<string, number> = {};
@@ -284,44 +296,54 @@ export default function SiteManagement() {
                 : 'Nenhum site encontrado com a busca.'}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Site</TableHead>
-                    <TableHead>UF</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Data Cadastro</TableHead>
-                    <TableHead className="w-[80px]">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSites.map((site) => (
-                    <TableRow key={site.id}>
-                      <TableCell className="font-mono font-semibold">
-                        {site.site_code}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{site.uf}</Badge>
-                      </TableCell>
-                      <TableCell>{site.tipo}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {new Date(site.created_at).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(site)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
+            <>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Site</TableHead>
+                      <TableHead>UF</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Data Cadastro</TableHead>
+                      <TableHead className="w-[80px]">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSites.map((site) => (
+                      <TableRow key={site.id}>
+                        <TableCell className="font-mono font-semibold">
+                          {site.site_code}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{site.uf}</Badge>
+                        </TableCell>
+                        <TableCell>{site.tipo}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {new Date(site.created_at).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteClick(site)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                showingLabel="sites"
+              />
+            </>
           )}
         </div>
       </main>
