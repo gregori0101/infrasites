@@ -2,14 +2,14 @@ import * as React from "react";
 import { ChecklistWizard } from "@/components/ChecklistWizard";
 import { TechnicianInbox } from "@/components/technician/TechnicianInbox";
 import { useAuth } from "@/contexts/AuthContext";
-import { useChecklist } from "@/contexts/ChecklistContext";
+import { ChecklistProvider, useChecklist } from "@/contexts/ChecklistContext";
 import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, Inbox } from "lucide-react";
 import { ChecklistData } from "@/types/checklist";
 
-const Index = () => {
+const IndexInner = () => {
   const { isTecnico, isGestor, isAdmin } = useAuth();
   const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport } = useChecklist();
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
@@ -103,4 +103,12 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default function Index() {
+  // Fail-safe: ensures this page always has Checklist context,
+  // even if the app-level provider tree changes.
+  return (
+    <ChecklistProvider>
+      <IndexInner />
+    </ChecklistProvider>
+  );
+}
