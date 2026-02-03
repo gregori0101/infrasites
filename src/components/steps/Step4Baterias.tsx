@@ -224,9 +224,9 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                         className={`px-3 py-1 text-xs rounded-full border transition-all ${
                           banco.colada === option
                             ? option === 'SIM'
-                              ? 'bg-warning text-warning-foreground border-warning'
-                              : option === 'NÃO'
                               ? 'bg-success text-success-foreground border-success'
+                              : option === 'NÃO'
+                              ? 'bg-destructive text-destructive-foreground border-destructive'
                               : 'bg-muted text-muted-foreground border-muted'
                             : 'bg-card border-border hover:border-primary/50'
                         }`}
