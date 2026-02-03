@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VivoLogo } from '@/components/ui/vivo-logo';
+import { PaginationControls, usePagination } from '@/components/ui/pagination-controls';
 import { 
   ArrowLeft, 
   Check, 
@@ -66,6 +67,8 @@ export default function UserManagement() {
     action: 'approve' | 'reject';
     email: string;
   } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -261,6 +264,10 @@ export default function UserManagement() {
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
 
+  // Pagination for approved users
+  const { totalPages, getPageItems, totalItems } = usePagination(approvedUsers, ITEMS_PER_PAGE);
+  const paginatedApprovedUsers = getPageItems(currentPage);
+
   if (!isAdmin) {
     return null;
   }
@@ -379,103 +386,113 @@ export default function UserManagement() {
                   Nenhum usuário aprovado ainda
                 </p>
               ) : (
-                <div className="space-y-3">
-                  {approvedUsers.map((u) => (
-                    <div
-                      key={u.id}
-                      className="p-4 bg-muted/50 rounded-lg space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            {u.role === 'administrador' ? (
-                              <UserCog className="h-5 w-5 text-primary" />
-                            ) : u.role === 'gestor' ? (
-                              <Shield className="h-5 w-5 text-primary" />
-                            ) : (
-                              <Wrench className="h-5 w-5 text-primary" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <p className="font-medium text-sm truncate">{u.email}</p>
-                              <Badge 
-                                variant={u.role === 'administrador' ? 'default' : u.role === 'gestor' ? 'default' : 'secondary'} 
-                                className={`text-xs shrink-0 ${u.role === 'administrador' ? 'bg-primary' : ''}`}
-                              >
-                                {u.role === 'administrador' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : 'Técnico'}
-                              </Badge>
-                              {u.user_id === user?.id && (
-                                <Badge variant="outline" className="text-xs shrink-0">Você</Badge>
-                              )}
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                Cadastro: {new Date(u.created_at).toLocaleDateString('pt-BR')} às {new Date(u.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              {u.approved_at && (
-                                <span className="flex items-center gap-1">
-                                  <Check className="h-3 w-3 text-green-500" />
-                                  Aprovado: {new Date(u.approved_at).toLocaleDateString('pt-BR')} às {new Date(u.approved_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {u.user_id !== user?.id && (
-                          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                            <Select
-                              value={u.operadora}
-                              onValueChange={(value) => handleOperadoraChange(u.user_id, value as 'VIVO' | 'TEL')}
-                              disabled={actionLoading === u.user_id}
-                            >
-                              <SelectTrigger className="w-24 h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="VIVO">VIVO</SelectItem>
-                                <SelectItem value="TEL">TEL</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Select
-                              value={u.role}
-                              onValueChange={(value) => handleRoleChange(u.user_id, value as 'administrador' | 'gestor' | 'tecnico')}
-                              disabled={actionLoading === u.user_id}
-                            >
-                              <SelectTrigger className="w-32 h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="tecnico">Técnico</SelectItem>
-                                <SelectItem value="gestor">Gestor</SelectItem>
-                                <SelectItem value="administrador">Administrador</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              disabled={actionLoading === u.user_id}
-                              onClick={() => setConfirmDialog({ 
-                                open: true, 
-                                userId: u.user_id, 
-                                action: 'reject',
-                                email: u.email 
-                              })}
-                            >
-                              {actionLoading === u.user_id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <div className="space-y-3">
+                    {paginatedApprovedUsers.map((u) => (
+                      <div
+                        key={u.id}
+                        className="p-4 bg-muted/50 rounded-lg space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              {u.role === 'administrador' ? (
+                                <UserCog className="h-5 w-5 text-primary" />
+                              ) : u.role === 'gestor' ? (
+                                <Shield className="h-5 w-5 text-primary" />
                               ) : (
-                                <X className="h-4 w-4" />
+                                <Wrench className="h-5 w-5 text-primary" />
                               )}
-                            </Button>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <p className="font-medium text-sm truncate">{u.email}</p>
+                                <Badge 
+                                  variant={u.role === 'administrador' ? 'default' : u.role === 'gestor' ? 'default' : 'secondary'} 
+                                  className={`text-xs shrink-0 ${u.role === 'administrador' ? 'bg-primary' : ''}`}
+                                >
+                                  {u.role === 'administrador' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : 'Técnico'}
+                                </Badge>
+                                {u.user_id === user?.id && (
+                                  <Badge variant="outline" className="text-xs shrink-0">Você</Badge>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  Cadastro: {new Date(u.created_at).toLocaleDateString('pt-BR')} às {new Date(u.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                {u.approved_at && (
+                                  <span className="flex items-center gap-1">
+                                    <Check className="h-3 w-3 text-green-500" />
+                                    Aprovado: {new Date(u.approved_at).toLocaleDateString('pt-BR')} às {new Date(u.approved_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        )}
+                          {u.user_id !== user?.id && (
+                            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                              <Select
+                                value={u.operadora}
+                                onValueChange={(value) => handleOperadoraChange(u.user_id, value as 'VIVO' | 'TEL')}
+                                disabled={actionLoading === u.user_id}
+                              >
+                                <SelectTrigger className="w-24 h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="VIVO">VIVO</SelectItem>
+                                  <SelectItem value="TEL">TEL</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                value={u.role}
+                                onValueChange={(value) => handleRoleChange(u.user_id, value as 'administrador' | 'gestor' | 'tecnico')}
+                                disabled={actionLoading === u.user_id}
+                              >
+                                <SelectTrigger className="w-32 h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="tecnico">Técnico</SelectItem>
+                                  <SelectItem value="gestor">Gestor</SelectItem>
+                                  <SelectItem value="administrador">Administrador</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                disabled={actionLoading === u.user_id}
+                                onClick={() => setConfirmDialog({ 
+                                  open: true, 
+                                  userId: u.user_id, 
+                                  action: 'reject',
+                                  email: u.email 
+                                })}
+                              >
+                                {actionLoading === u.user_id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <X className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    totalItems={totalItems}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    showingLabel="usuários"
+                  />
+                </>
               )}
             </CardContent>
           </Card>

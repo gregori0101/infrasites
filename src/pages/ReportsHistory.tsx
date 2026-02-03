@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
@@ -9,6 +9,7 @@ import {
   Calendar, User, Building2, Loader2, AlertCircle, Download, Trash2
 } from "lucide-react";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
+import { PaginationControls, usePagination } from "@/components/ui/pagination-controls";
 import { generateExcel, generateConsolidatedExcel, downloadExcel } from "@/lib/generateExcel";
 import { reportToChecklist } from "@/lib/reportToChecklist";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,7 @@ export default function ReportsHistory() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [operadoraFilter, setOperadoraFilter] = useState<"all" | "VIVO" | "TEL">(isVivoUser ? "all" : "TEL");
-  
+  const [currentPage, setCurrentPage] = useState(1);
   // Applied filters (only update when user clicks "Filtrar")
   const [appliedFilters, setAppliedFilters] = useState({
     siteCode: "",
@@ -102,6 +103,16 @@ export default function ReportsHistory() {
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
+
+  // Pagination
+  const ITEMS_PER_PAGE = 10;
+  const { totalPages, getPageItems, totalItems } = usePagination(reports, ITEMS_PER_PAGE);
+  const paginatedReports = getPageItems(currentPage);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilters]);
 
   const handleFilter = () => {
     setAppliedFilters({
@@ -407,7 +418,7 @@ export default function ReportsHistory() {
                 Exportar Todos
               </Button>
             </div>
-            {reports.map((report) => (
+            {paginatedReports.map((report) => (
               <Card 
                 key={report.id} 
                 className="cursor-pointer hover:border-primary/50 transition-colors"
@@ -459,6 +470,14 @@ export default function ReportsHistory() {
                 </CardContent>
               </Card>
             ))}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              showingLabel="relatórios"
+            />
           </div>
         )}
 
