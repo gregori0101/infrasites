@@ -229,7 +229,7 @@ export interface ChecklistData {
 }
 
 export const INITIAL_GABINETE: GabineteData = {
-  tipo: 'CONTAINER',
+  tipo: null as unknown as GabineteType,
   ativo: true,
   comProtecao: false,
   tecnologiasAcesso: [],
