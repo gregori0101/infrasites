@@ -18,7 +18,7 @@ const BATERIA_FABRICANTES: BateriaFabricante[] = [
   'NEWMAX', 'NORTHSTAR', 'UNICOBA', 'ZTE', 'SHOTO', 'NA', 'OUTRA'
 ];
 const CAPACIDADES: CapacidadeAh[] = [100, 105, 170, 200, 300, 400, 430, 500, 600, 640, 750, 800, 1000, 1250, 1500, 2000, 2500];
-const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA', 'NA'];
+const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA'];
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
@@ -27,7 +27,7 @@ const EMPTY_BANCO: BancoBateria = {
   fabricanteOutra: '',
   capacidadeAh: null,
   dataFabricacao: '',
-  estado: 'OK',
+  estados: ['OK'],
   colada: 'NA',
   fotoBanco: null
 };
@@ -204,23 +204,46 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                 <div className="space-y-1.5">
                   <Label className="text-xs">Estado</Label>
                   <div className="flex flex-wrap gap-1.5">
-                    {ESTADOS.map((estado) => (
-                      <button
-                        key={estado}
-                        onClick={() => updateBanco(index, { estado })}
-                        className={`px-2 py-1 text-xs rounded-full border transition-all ${
-                          banco.estado === estado
-                            ? estado === 'OK'
-                              ? 'bg-success text-success-foreground border-success'
-                              : estado === 'NA'
-                              ? 'bg-muted text-muted-foreground border-muted'
-                              : 'bg-destructive text-destructive-foreground border-destructive'
-                            : 'bg-card border-border hover:border-primary/50'
-                        }`}
-                      >
-                        {estado}
-                      </button>
-                    ))}
+                    {ESTADOS.map((estado) => {
+                      const isSelected = banco.estados?.includes(estado) || false;
+                      const isOkSelected = banco.estados?.includes('OK') || false;
+                      
+                      const handleEstadoClick = () => {
+                        if (estado === 'OK') {
+                          // Se clicar em OK, seleciona apenas OK
+                          updateBanco(index, { estados: ['OK'] });
+                        } else {
+                          // Se clicar em outro estado
+                          if (isOkSelected) {
+                            // Se OK estava selecionado, remove OK e adiciona o novo
+                            updateBanco(index, { estados: [estado] });
+                          } else if (isSelected) {
+                            // Se já está selecionado, remove
+                            const newEstados = banco.estados.filter(e => e !== estado);
+                            updateBanco(index, { estados: newEstados.length > 0 ? newEstados : ['OK'] });
+                          } else {
+                            // Adiciona à lista
+                            updateBanco(index, { estados: [...(banco.estados || []), estado] });
+                          }
+                        }
+                      };
+                      
+                      return (
+                        <button
+                          key={estado}
+                          onClick={handleEstadoClick}
+                          className={`px-2 py-1 text-xs rounded-full border transition-all ${
+                            isSelected
+                              ? estado === 'OK'
+                                ? 'bg-success text-success-foreground border-success'
+                                : 'bg-destructive text-destructive-foreground border-destructive'
+                              : 'bg-card border-border hover:border-primary/50'
+                          }`}
+                        >
+                          {estado}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -431,7 +431,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.fotoBanco),
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.tipo),
           gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.fabricante),
-          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => !!b.estado),
+          gab.baterias.bancos.length > 0 && gab.baterias.bancos.every(b => b.estados && b.estados.length > 0),
         ];
         bateriasProgress = batFields.filter(Boolean).length / batFields.length;
       } else {
