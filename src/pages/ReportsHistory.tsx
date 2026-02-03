@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
-  ArrowLeft, Search, Filter, Mail, MailCheck, 
+  ArrowLeft, Search, Filter, 
   FileText, FileSpreadsheet, RefreshCw, X,
   Calendar, User, Building2, Loader2, AlertCircle, Download, Trash2
 } from "lucide-react";
@@ -195,48 +195,6 @@ export default function ReportsHistory() {
       toast.error('Erro ao gerar Excel');
     } finally {
       setIsGeneratingExcel(false);
-    }
-  };
-
-  const handleResendEmail = async () => {
-    if (!selectedReport) return;
-    
-    // Generate and download files first
-    try {
-      const checklistData = reportToChecklist(selectedReport);
-      const pdfBlob = await generatePDF(checklistData);
-      const excelBlob = generateExcel(checklistData);
-      
-      const pdfFilename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.pdf`;
-      const excelFilename = `Checklist_${selectedReport.site_code}_${selectedReport.state_uf}_${selectedReport.created_date?.replace(/\//g, '')}.xlsx`;
-      
-      downloadPDF(pdfBlob, pdfFilename);
-      downloadExcel(excelBlob, excelFilename);
-      
-      const dateStr = selectedReport.created_date + ' ' + selectedReport.created_time;
-      const emailBody = `
-Checklist Sites Telecom
-  
-Site: ${selectedReport.site_code} - ${selectedReport.state_uf}
-Data: ${dateStr}
-Técnico: ${selectedReport.technician_name || 'N/A'}
-Gabinetes: ${selectedReport.total_cabinets}
-  
----
-Os arquivos PDF e Excel foram baixados automaticamente.
-Por favor, anexe-os a este email antes de enviar.
-      `.trim();
-
-      const subject = `Checklist ${selectedReport.site_code} – ${selectedReport.state_uf} – ${dateStr}`;
-      const mailtoLink = `mailto:gregori.jose@telefonica.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-      
-      window.open(mailtoLink, '_blank');
-      toast.success('Arquivos baixados e email preparado!', {
-        description: 'Anexe os arquivos baixados ao email.'
-      });
-    } catch (error) {
-      console.error('Error preparing email:', error);
-      toast.error('Erro ao preparar email');
     }
   };
 
@@ -495,14 +453,6 @@ Por favor, anexe-os a este email antes de enviar.
                           <Download className="w-4 h-4" />
                         )}
                       </Button>
-                      <Badge variant={report.email_sent ? "default" : "secondary"}>
-                        {report.email_sent ? (
-                          <MailCheck className="w-3 h-3 mr-1" />
-                        ) : (
-                          <Mail className="w-3 h-3 mr-1" />
-                        )}
-                        {report.email_sent ? 'Enviado' : 'Pendente'}
-                      </Badge>
                       <Badge variant="outline">{report.total_cabinets} gab</Badge>
                     </div>
                   </div>
@@ -541,12 +491,6 @@ Por favor, anexe-os a este email antes de enviar.
                   <div>
                     <Label className="text-xs text-muted-foreground">Total Gabinetes</Label>
                     <p className="font-medium">{selectedReport.total_cabinets}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Email</Label>
-                    <Badge variant={selectedReport.email_sent ? "default" : "secondary"}>
-                      {selectedReport.email_sent ? 'Enviado' : 'Não enviado'}
-                    </Badge>
                   </div>
                 </div>
 
@@ -636,14 +580,6 @@ Por favor, anexe-os a este email antes de enviar.
                     <Download className="w-4 h-4 mr-2" />
                   )}
                   Baixar Excel
-                </Button>
-                <Button 
-                  onClick={handleResendEmail} 
-                  className="flex-1"
-                  disabled={isGeneratingPDF || isGeneratingExcel}
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  Enviar Email
                 </Button>
 
                 {isAdmin && selectedReport?.id && (
