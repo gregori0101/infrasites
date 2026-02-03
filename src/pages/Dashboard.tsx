@@ -545,7 +545,7 @@ export default function Dashboard() {
             uniqueTechnicians={uniqueTechnicians}
             uniqueSiteTypes={uniqueSiteTypes}
             showOperadoraFilter={isVivoUser}
-            showAreaAtuacaoFilter={activePanel === "produtividade"}
+            showAreaAtuacaoFilter={false}
           />
 
           {/* Loading State */}
@@ -588,6 +588,7 @@ export default function Dashboard() {
                 <ProdutividadePanel
                   stats={produtividadeStats}
                   areaAtuacaoFilter={filters.areaAtuacao}
+                  onAreaAtuacaoChange={(value) => setFilters({ ...filters, areaAtuacao: value })}
                   onDrillDown={(type) => {
                     if (type === "realizadas") openDrillDown("sites", "Vistorias Realizadas", (s) => s);
                     else if (type === "pendentes") openDrillDown("sites", "Sites com Atribuições Pendentes", (s) => s);
