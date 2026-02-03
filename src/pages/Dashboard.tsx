@@ -731,7 +731,7 @@ export default function Dashboard() {
         onClose={() => setModalOpen(false)}
         title={modalTitle}
         type={modalType}
-        sites={modalAllowSiteView || modalType === "sites" ? sites : undefined}
+        sites={modalAllowSiteView || modalType === "sites" ? modalFilterFn(sites) : undefined}
         batteries={modalType === "batteries" ? modalFilterFn(batteries) : undefined}
         acs={modalType === "acs" ? modalFilterFn(acs) : undefined}
         gabinetes={modalType === "gabinetes" ? modalFilterFn(gabinetes) : undefined}
