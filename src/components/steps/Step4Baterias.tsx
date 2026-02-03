@@ -14,7 +14,7 @@ import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
 const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO 100A', 'POLÍMERO 200A', 'MONOBLOCO 2V', 'NA'];
 const BATERIA_FABRICANTES: BateriaFabricante[] = [
-  'FREEDOM', 'FULGURIS', 'GETPOWER', 'HUAWEI', 'MOURA',
+  'ERICSSON', 'FREEDOM', 'FULGURIS', 'GETPOWER', 'HUAWEI', 'MOURA',
   'NEWMAX', 'NORTHSTAR', 'UNICOBA', 'ZTE', 'SHOTO', 'NA', 'OUTRA'
 ];
 const CAPACIDADES: CapacidadeAh[] = [100, 105, 170, 200, 300, 400, 430, 500, 600, 640, 750, 800, 1000, 1250, 1500, 2000, 2500];
@@ -24,6 +24,7 @@ const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 const EMPTY_BANCO: BancoBateria = {
   tipo: 'NA',
   fabricante: 'NA',
+  fabricanteOutra: '',
   capacidadeAh: null,
   dataFabricacao: '',
   estado: 'OK',
@@ -150,7 +151,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     <Label className="text-xs">Fabricante</Label>
                     <Select
                       value={banco.fabricante}
-                      onValueChange={(value: BateriaFabricante) => updateBanco(index, { fabricante: value })}
+                      onValueChange={(value: BateriaFabricante) => updateBanco(index, { fabricante: value, fabricanteOutra: value === 'OUTRA' ? banco.fabricanteOutra : '' })}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue />
@@ -161,6 +162,14 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                         ))}
                       </SelectContent>
                     </Select>
+                    {banco.fabricante === 'OUTRA' && (
+                      <Input
+                        placeholder="Nome do fabricante"
+                        value={banco.fabricanteOutra || ''}
+                        onChange={(e) => updateBanco(index, { fabricanteOutra: e.target.value })}
+                        className="h-9 mt-1.5"
+                      />
+                    )}
                   </div>
 
                   <div className="space-y-1.5">

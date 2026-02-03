@@ -267,7 +267,11 @@ export function buildReportRow(data: ChecklistData): ReportRow {
         const banco = gab.baterias.bancos[j];
         if (banco) {
           row[`${prefix}_bat${j + 1}_tipo`] = banco.tipo || null;
-          row[`${prefix}_bat${j + 1}_fabricante`] = banco.fabricante || null;
+          // Store fabricante - if OUTRA, store the custom name instead
+          const fabricanteValue = banco.fabricante === 'OUTRA' && banco.fabricanteOutra 
+            ? banco.fabricanteOutra 
+            : banco.fabricante;
+          row[`${prefix}_bat${j + 1}_fabricante`] = fabricanteValue || null;
           row[`${prefix}_bat${j + 1}_capacidade`] = banco.capacidadeAh != null ? banco.capacidadeAh.toString() : null;
           row[`${prefix}_bat${j + 1}_data_fabricacao`] = banco.dataFabricacao || null;
           row[`${prefix}_bat${j + 1}_estado`] = banco.estado || null;
