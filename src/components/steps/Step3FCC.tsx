@@ -17,7 +17,7 @@ const FCC_FABRICANTES: FCCFabricante[] = [
 ];
 
 const TENSAO_OPTIONS: TensaoDC[] = ['24V', '48V'];
-const UR_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'Outra'] as const;
+const UR_OPTIONS = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
 
 interface Step3Props {
   showErrors?: boolean;
@@ -113,23 +113,44 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Qtd. URs Suportadas</Label>
-              <Select 
-                value={String(gabinete.fcc.qtdURSuportadas)} 
-                onValueChange={(value) => updateFCC({ qtdURSuportadas: value === 'Outra' ? 'Outra' : parseInt(value) })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {UR_OPTIONS.map((ur) => (
-                    <SelectItem key={ur} value={String(ur)}>
-                      {ur}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Qtd. URs Suportadas</Label>
+                <Select 
+                  value={gabinete.fcc.qtdURSuportadas != null ? String(gabinete.fcc.qtdURSuportadas) : ''} 
+                  onValueChange={(value) => updateFCC({ qtdURSuportadas: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UR_OPTIONS.map((ur) => (
+                      <SelectItem key={ur} value={String(ur)}>
+                        {ur}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Qtd. URs Instaladas</Label>
+                <Select 
+                  value={gabinete.fcc.qtdURInstaladas != null ? String(gabinete.fcc.qtdURInstaladas) : ''} 
+                  onValueChange={(value) => updateFCC({ qtdURInstaladas: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UR_OPTIONS.map((ur) => (
+                      <SelectItem key={ur} value={String(ur)}>
+                        {ur}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </FormCard>

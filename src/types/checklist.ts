@@ -115,7 +115,8 @@ export interface FCCData {
   gerenciadaSG: boolean;
   gerenciavel: boolean;
   consumoDC: number;
-  qtdURSuportadas: number | 'Outra';
+  qtdURSuportadas: number | null;
+  qtdURInstaladas: number | null;
   fotoPanoramica: string | null;
   fotoPainel: string | null;
 }
@@ -252,7 +253,8 @@ export const INITIAL_GABINETE: GabineteData = {
     gerenciadaSG: false,
     gerenciavel: false,
     consumoDC: 0,
-    qtdURSuportadas: null as unknown as number,
+    qtdURSuportadas: null,
+    qtdURInstaladas: null,
     fotoPanoramica: null,
     fotoPainel: null,
   },
