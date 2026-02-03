@@ -481,6 +481,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       const estadoStr = banco.estados?.join(', ') || '-';
       addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
       addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
+      addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
 
       await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
     }

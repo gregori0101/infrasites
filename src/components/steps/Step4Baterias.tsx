@@ -29,6 +29,7 @@ const EMPTY_BANCO: BancoBateria = {
   dataFabricacao: '',
   estados: ['OK'],
   colada: 'NA',
+  comGradil: 'NA',
   fotoBanco: null
 };
 
@@ -256,6 +257,29 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                         onClick={() => updateBanco(index, { colada: option })}
                         className={`px-3 py-1 text-xs rounded-full border transition-all ${
                           banco.colada === option
+                            ? option === 'SIM'
+                              ? 'bg-success text-success-foreground border-success'
+                              : option === 'NÃO'
+                              ? 'bg-destructive text-destructive-foreground border-destructive'
+                              : 'bg-muted text-muted-foreground border-muted'
+                            : 'bg-card border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Bateria com Gradil?</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {COLADA_OPTIONS.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => updateBanco(index, { comGradil: option })}
+                        className={`px-3 py-1 text-xs rounded-full border transition-all ${
+                          banco.comGradil === option
                             ? option === 'SIM'
                               ? 'bg-success text-success-foreground border-success'
                               : option === 'NÃO'
