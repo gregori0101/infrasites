@@ -1,141 +1,163 @@
 
-# Plano: Pré-preenchimento do Formulário com Dados Anteriores
+# Plano: Modal de Detalhes de Bateria com Foto
 
-## Objetivo
-Permitir que, ao iniciar uma vistoria para um site que já foi inspecionado anteriormente, o usuário possa ter o formulário pré-preenchido com as informações da última vistoria. O usuário poderá modificar e acrescentar informações conforme necessário.
-
-## Como Vai Funcionar
-
-### Para o Usuário
-1. Ao selecionar um site para vistoria (seja pela caixa de entrada ou manualmente digitando a sigla)
-2. O sistema verifica se existe uma vistoria anterior para aquele site
-3. Se existir, aparece uma opção perguntando: "Este site foi vistoriado anteriormente. Deseja carregar os dados da última vistoria?"
-4. O usuário pode escolher:
-   - **Sim**: Carrega todos os dados anteriores (exceto fotos e assinatura) no formulário
-   - **Não**: Inicia um formulário em branco
-
-### Comportamento do Pré-preenchimento
-- Carrega: tipo de gabinete, tecnologias, dados FCC, configuração de baterias, climatização, dados de energia, etc.
-- **NÃO carrega**: fotos (precisam ser tiradas novamente), assinatura, data/hora, nome do técnico
-- O usuário pode modificar qualquer campo normalmente
-- É uma nova vistoria - será salva como um novo relatório
+## Resumo
+Implementar um modal popup que exibe todas as informacoes de uma bateria individual quando o usuario clicar em uma linha da tabela de baterias no DrillDownModal do painel de Baterias.
 
 ---
 
-## Detalhes Tecnicos
+## Analise Tecnica
 
-### 1. Nova Funcao para Buscar Ultimo Relatorio do Site
-**Arquivo**: `src/lib/reportDatabase.ts`
+### Estrutura de Dados Atual
+O sistema armazena informacoes de baterias no banco de dados com a seguinte estrutura:
+- Cada gabinete pode ter ate 6 bancos de bateria
+- Campos por bateria: tipo, fabricante, capacidade, data_fabricacao, estado, colada, com_gradil
+- Foto: existe apenas uma foto por gabinete (`gab{n}_bat_foto`), nao por bateria individual
 
-Criar funcao `fetchLatestReportBySiteCode(siteCode: string)`:
-- Busca o relatorio mais recente para um dado site_code
-- Retorna os dados do relatorio ou null se nao existir
-- Filtra por operadora do usuario para garantir que TEL so veja dados de TEL
+### Interface BatteryInfo Atual
+```text
+BatteryInfo {
+  siteCode, uf, gabinete, banco, fabricante, tipo, tipoClassificado,
+  capacidade, dataFabricacao, estado, idade, obsolescencia,
+  obsolescenciaTipo, autonomyRisk, needsReplacement
+}
+```
 
-### 2. Funcao para Converter Relatorio em ChecklistData sem Fotos
-**Arquivo**: `src/lib/reportToChecklist.ts`
-
-Modificar ou criar funcao `reportToChecklistWithoutPhotos()`:
-- Utiliza a funcao existente `reportToChecklist()`
-- Remove todas as fotos e assinatura
-- Gera novo ID para o checklist
-- Atualiza timestamps
-
-### 3. Hook para Verificar Dados Anteriores
-**Arquivo**: `src/hooks/use-previous-report.ts` (novo)
-
-Criar hook `usePreviousReport(siteCode: string)`:
-- Busca ultimo relatorio quando siteCode tem 5 caracteres
-- Retorna estado de loading, dados anteriores se existirem
-- Memoiza resultado para evitar buscas desnecessarias
-
-### 4. Dialogo de Confirmacao
-**Arquivo**: `src/components/ui/prefill-dialog.tsx` (novo)
-
-Criar componente de dialogo:
-- Mostra quando existe relatorio anterior
-- Exibe data da ultima vistoria
-- Botoes "Usar dados anteriores" e "Iniciar novo"
-
-### 5. Integracao no Fluxo de Entrada
-**Arquivo**: `src/components/steps/Step1DadosSite.tsx`
-
-Modificar para:
-- Usar o hook `usePreviousReport`
-- Mostrar indicador visual quando dados anteriores existem
-- Mostrar dialogo quando usuario seleciona site com historico
-
-### 6. Integracao na Caixa de Entrada do Tecnico
-**Arquivo**: `src/components/technician/TechnicianInbox.tsx`
-
-Modificar `handleStartChecklist`:
-- Antes de iniciar, verificar se existe relatorio anterior
-- Mostrar opcao de pre-preencher
-
-### 7. Funcao no Contexto para Carregar Dados
-**Arquivo**: `src/contexts/ChecklistContext.tsx`
-
-Adicionar funcao `loadFromPreviousReport(checklistData: ChecklistData)`:
-- Carrega dados de relatorio anterior no estado
-- Mantem ID novo e timestamps atualizados
-- Limpa fotos e assinatura
+### Fluxo Atual
+1. BateriaPanel exibe cards com metricas de baterias
+2. Ao clicar em um card, abre DrillDownModal com lista de baterias
+3. Lista exibe informacoes basicas em uma tabela
+4. Nao ha acao ao clicar em uma bateria individual
 
 ---
 
-## Arquivos a Serem Modificados/Criados
+## Solucao Proposta
 
-| Arquivo | Acao |
-|---------|------|
-| `src/lib/reportDatabase.ts` | Adicionar funcao de busca |
-| `src/lib/reportToChecklist.ts` | Adicionar versao sem fotos |
-| `src/hooks/use-previous-report.ts` | Criar novo hook |
-| `src/components/ui/prefill-dialog.tsx` | Criar dialogo |
-| `src/components/steps/Step1DadosSite.tsx` | Integrar verificacao |
-| `src/components/technician/TechnicianInbox.tsx` | Integrar opcao |
-| `src/contexts/ChecklistContext.tsx` | Adicionar funcao de carga |
-| `src/pages/Index.tsx` | Coordenar fluxo |
+### 1. Criar Novo Componente BatteryDetailModal
+Criar modal dedicado em `src/components/dashboard/BatteryDetailModal.tsx`
 
----
+**Recursos do modal:**
+- Header com codigo do site e identificacao do gabinete/banco
+- Secoes organizadas para exibir todas as informacoes
+- Foto do banco de baterias (quando disponivel)
+- Badges coloridos para status (estado, obsolescencia, autonomia)
+- Botao para fechar
 
-## Fluxo de Dados
+**Layout proposto:**
+```text
++------------------------------------------+
+| [X] Bateria - SITE123 - G1 Banco 1       |
++------------------------------------------+
+| [FOTO DO BANCO DE BATERIAS]              |
+|                                          |
+| IDENTIFICACAO                            |
+| Site: SITE123    UF: PA                  |
+| Gabinete: G1     Banco: 1                |
+|                                          |
+| ESPECIFICACOES TECNICAS                  |
+| Tipo: Litio     Fabricante: HUAWEI       |
+| Capacidade: 200Ah                        |
+| Data Fabricacao: 01/2024                 |
+| Idade: 2 anos                            |
+|                                          |
+| STATUS                                   |
+| Estado: [OK]                             |
+| Colada: [NAO]   Gradil: [SIM]            |
+| Obsolescencia: [Medio Risco]             |
+| Autonomia: [OK]                          |
+| Requer Troca: [Nao]                      |
++------------------------------------------+
+```
+
+### 2. Atualizar Interface BatteryInfo
+Adicionar campos para suportar informacoes adicionais:
 
 ```text
-Usuario digita sigla do site (5 caracteres)
-           |
-           v
-Hook busca ultimo relatorio no banco
-           |
-           v
-     Existe relatorio?
-      /          \
-    SIM          NAO
-     |            |
-     v            v
-Mostra dialogo   Continua normal
-     |
-     v
-Usuario escolhe
-     |
-  /     \
-Sim      Nao
- |        |
- v        v
-Carrega   Continua
-dados     em branco
++ colada: string
++ comGradil: string
++ fotoUrl: string | null (foto do gabinete)
++ reportId: string (para buscar foto se necessario)
+```
+
+### 3. Atualizar useDashboardStats
+Modificar a funcao para extrair e incluir os novos campos:
+- colada, com_gradil para cada bateria
+- Armazenar referencia ao report.id para buscar foto posteriormente
+
+### 4. Atualizar DrillDownModal
+Adicionar:
+- Estado para controlar abertura do BatteryDetailModal
+- Estado para armazenar bateria selecionada
+- Handler de clique nas linhas da tabela de baterias
+- Estilo de cursor pointer nas linhas
+
+### 5. Buscar Foto da Bateria
+Como a foto e por gabinete (nao por bateria individual):
+- Opcao A: Incluir fotoUrl diretamente no BatteryInfo durante processamento (requer fetch adicional)
+- Opcao B: Buscar foto sob demanda quando modal abrir (melhor performance)
+
+**Recomendacao:** Opcao B - buscar sob demanda usando reportId e gabinete
+
+---
+
+## Arquivos a Modificar/Criar
+
+| Arquivo | Acao | Descricao |
+|---------|------|-----------|
+| `src/components/dashboard/types.ts` | Modificar | Adicionar campos colada, comGradil, reportId ao BatteryInfo |
+| `src/components/dashboard/useDashboardStats.ts` | Modificar | Extrair campos adicionais e incluir reportId |
+| `src/components/dashboard/BatteryDetailModal.tsx` | Criar | Novo componente de modal de detalhes |
+| `src/components/dashboard/DrillDownModal.tsx` | Modificar | Adicionar estado e handler para abrir modal de detalhes |
+| `src/lib/reportDatabase.ts` | Modificar | Adicionar funcao para buscar foto da bateria por reportId e gabinete |
+
+---
+
+## Detalhes de Implementacao
+
+### BatteryDetailModal
+```text
+Props:
+- open: boolean
+- onClose: () => void
+- battery: BatteryInfo | null
+
+Funcionalidades:
+- Fetch da foto ao abrir (usando reportId e gabinete)
+- Loading state para foto
+- Fallback se foto nao disponivel
+- Lightbox ao clicar na foto
+```
+
+### Busca de Foto
+Criar funcao `fetchBatteryPhoto(reportId, gabinete)`:
+- Busca campo `gab{n}_bat_foto` do report
+- Retorna URL da foto ou null
+
+### Integracao no DrillDownModal
+```text
++ const [batteryDetailOpen, setBatteryDetailOpen] = useState(false)
++ const [selectedBattery, setSelectedBattery] = useState<BatteryInfo | null>(null)
+
+Na TableRow de baterias:
++ onClick={() => { setSelectedBattery(b); setBatteryDetailOpen(true); }}
++ className="cursor-pointer hover:bg-muted/50"
 ```
 
 ---
 
-## Consideracoes de Seguranca
+## Estimativa de Esforco
+- Criar BatteryDetailModal: componente principal
+- Atualizar types.ts: 3 campos novos
+- Atualizar useDashboardStats: extrair campos adicionais
+- Atualizar DrillDownModal: estado e handler
+- Funcao de busca de foto: 1 funcao nova
+- Testes e ajustes de UI
 
-- A busca respeita RLS (usuarios TEL so veem dados TEL)
-- Validacao de operadora no backend
-- Fotos nao sao copiadas (devem ser tiradas novamente)
-- Assinatura nao e copiada (nova assinatura necessaria)
+---
 
-## Experiencia do Usuario
-
-- Indicador visual sutil mostrando que o site tem historico
-- Dialogo nao intrusivo com opcao clara
-- Pre-preenchimento instantaneo sem delays perceptiveis
-- Campos pre-preenchidos podem ser editados normalmente
+## Resultado Esperado
+Usuario clica em qualquer linha de bateria na tabela do DrillDownModal e visualiza um popup elegante com:
+- Todas as informacoes da bateria
+- Foto do banco de baterias (se disponivel)
+- Status visuais com badges coloridos
+- Possibilidade de ampliar a foto via lightbox
