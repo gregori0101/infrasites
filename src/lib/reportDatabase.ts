@@ -333,8 +333,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 
   // Observations
   row.observacoes = data.observacoes || null;
-  // Store multiple observation photos as JSON array
-  const validPhotos = (data.fotosObservacao || []).filter(Boolean);
+  // Store multiple observation photos as JSON array (with descriptions)
+  const validPhotos = (data.fotosObservacao || []).filter((item: any) => item?.foto);
   row.observacao_foto_url = validPhotos.length > 0 ? JSON.stringify(validPhotos) : null;
   
   // Assinatura

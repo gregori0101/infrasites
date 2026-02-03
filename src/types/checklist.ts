@@ -208,6 +208,11 @@ export const INITIAL_GEOLOCALIZACAO: GeolocalizacaoData = {
   capturadoEm: null,
 };
 
+export interface FotoObservacao {
+  foto: string | null;
+  descricao: string;
+}
+
 export interface ChecklistData {
   id: string;
   operadora: Operadora;
@@ -222,7 +227,7 @@ export interface ChecklistData {
   gmg: GMGData;
   torre: TorreData;
   observacoes: string;
-  fotosObservacao: (string | null)[];
+  fotosObservacao: FotoObservacao[];
   assinaturaDigital: string | null;
   dataHora: string;
   tecnico: string;

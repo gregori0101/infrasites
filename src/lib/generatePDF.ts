@@ -654,9 +654,10 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
   // Add all observation photos
   for (let i = 0; i < (data.fotosObservacao?.length || 0); i++) {
-    const foto = data.fotosObservacao[i];
-    if (foto) {
-      await addPhoto(foto, `Foto Observação ${i + 1}`);
+    const item = data.fotosObservacao[i];
+    if (item?.foto) {
+      const label = item.descricao ? `Foto Observação ${i + 1}: ${item.descricao}` : `Foto Observação ${i + 1}`;
+      await addPhoto(item.foto, label);
     }
   }
 
