@@ -31,7 +31,7 @@ export type BateriaFabricante =
 
 export type CapacidadeAh = 100 | 105 | 170 | 200 | 300 | 400 | 430 | 500 | 600 | 640 | 750 | 800 | 1000 | 1250 | 1500 | 2000 | 2500;
 
-export type BateriaEstado = 'OK' | 'ESTUFADA' | 'VAZANDO' | 'TRINCADA' | 'NÃO SEGURA CARGA';
+export type BateriaEstado = 'OK' | 'ESTUFADA' | 'ESTOURADA' | 'VAZANDO' | 'TRINCADA' | 'NÃO SEGURA CARGA';
 
 export type BateriaColada = 'SIM' | 'NÃO' | 'NA';
 
