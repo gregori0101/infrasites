@@ -77,6 +77,17 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
             console.log('Restored session from localStorage');
 
             const parsedFibra = parsed.fibraOptica || {};
+            
+            // Ensure gabinetes have all required fields with fallbacks
+            const restoredGabinetes = Array.isArray(parsed.gabinetes) && parsed.gabinetes.length > 0 
+              ? parsed.gabinetes.map((gab: any) => ({
+                  ...INITIAL_GABINETE,
+                  ...gab,
+                  fcc: { ...INITIAL_GABINETE.fcc, ...(gab.fcc || {}) },
+                  baterias: { ...INITIAL_GABINETE.baterias, ...(gab.baterias || {}) },
+                  climatizacao: { ...INITIAL_GABINETE.climatizacao, ...(gab.climatizacao || {}) },
+                }))
+              : [{ ...INITIAL_GABINETE }];
 
             return {
               ...INITIAL_CHECKLIST,
@@ -86,7 +97,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
                 ...INITIAL_GEOLOCALIZACAO,
                 ...(parsed.geolocalizacao || {}),
               },
-              gabinetes: Array.isArray(parsed.gabinetes) && parsed.gabinetes.length > 0 ? parsed.gabinetes : [{ ...INITIAL_GABINETE }],
+              gabinetes: restoredGabinetes,
               fibraOptica: {
                 ...INITIAL_FIBRA_OPTICA,
                 ...parsedFibra,
@@ -106,7 +117,9 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
             } as ChecklistData;
           }
         } catch (e) {
-          console.warn('Failed to parse saved session:', e);
+          console.warn('Failed to parse saved session, clearing localStorage:', e);
+          // Clear corrupted session data
+          localStorage.removeItem(CURRENT_SESSION_KEY);
         }
       }
     }
