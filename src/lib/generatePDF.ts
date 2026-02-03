@@ -162,13 +162,13 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   };
 
   const addFieldRow = (label: string, value: string | number | boolean | null | undefined, status?: 'ok' | 'warning' | 'error') => {
-    checkNewPage(8);
+    checkNewPage(10);
     
     // Alternating row background
-    const rowIndex = Math.floor(y / 6) % 2;
+    const rowIndex = Math.floor(y / 7) % 2;
     if (rowIndex === 0) {
       doc.setFillColor(250, 250, 250);
-      doc.rect(margin, y - 3, contentWidth, 6, 'F');
+      doc.rect(margin, y - 4, contentWidth, 7, 'F');
     }
 
     doc.setFontSize(8);
@@ -191,7 +191,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.setFont('helvetica', 'bold');
     doc.text(displayValue, margin + (status ? 75 : 65), y);
     
-    y += 5;
+    y += 7;
   };
 
   const addStatusBadge = (status: string, x: number, yPos: number) => {
@@ -436,30 +436,30 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
         for (let f = 0; f < gab.fcc.fccs.length; f++) {
           const fcc = gab.fcc.fccs[f];
-          checkNewPage(50);
+          checkNewPage(55);
           
-          y += 2;
+          y += 4;
           doc.setFillColor(...GRAY_LIGHT);
-          doc.roundedRect(margin, y, contentWidth, 35, 1, 1, 'F');
+          doc.roundedRect(margin, y, contentWidth, 40, 1, 1, 'F');
           
           doc.setTextColor(...VIVO_PURPLE);
           doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
-          doc.text(`FCC ${f + 1}`, margin + 3, y + 5);
+          doc.text(`FCC ${f + 1}`, margin + 3, y + 6);
           
           doc.setTextColor(...GRAY_DARK);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(7);
           
-          doc.text(`Fabricante: ${fcc.fabricante || '-'}`, margin + 3, y + 11);
-          doc.text(`Tensão DC: ${fcc.tensaoDC || '-'}`, margin + contentWidth/2, y + 11);
-          doc.text(`Consumo DC: ${fcc.consumoDC || 0}W`, margin + 3, y + 17);
-          doc.text(`URs Suportadas: ${fcc.qtdURSuportadas ?? 'N/A'}`, margin + contentWidth/2, y + 17);
-          doc.text(`URs Instaladas: ${fcc.qtdURInstaladas ?? 'N/A'}`, margin + 3, y + 23);
-          doc.text(`Gerenciada SG: ${fcc.gerenciadaSG ? 'Sim' : 'Não'}`, margin + contentWidth/2, y + 23);
-          doc.text(`Gerenciável: ${fcc.gerenciavel ? 'Sim' : 'Não'}`, margin + 3, y + 29);
+          doc.text(`Fabricante: ${fcc.fabricante || '-'}`, margin + 3, y + 13);
+          doc.text(`Tensão DC: ${fcc.tensaoDC || '-'}`, margin + contentWidth/2, y + 13);
+          doc.text(`Consumo DC: ${fcc.consumoDC || 0}W`, margin + 3, y + 20);
+          doc.text(`URs Suportadas: ${fcc.qtdURSuportadas ?? 'N/A'}`, margin + contentWidth/2, y + 20);
+          doc.text(`URs Instaladas: ${fcc.qtdURInstaladas ?? 'N/A'}`, margin + 3, y + 27);
+          doc.text(`Gerenciada SG: ${fcc.gerenciadaSG ? 'Sim' : 'Não'}`, margin + contentWidth/2, y + 27);
+          doc.text(`Gerenciável: ${fcc.gerenciavel ? 'Sim' : 'Não'}`, margin + 3, y + 34);
           
-          y += 38;
+          y += 46;
 
           await addPhotoGrid([
             { photo: fcc.fotoPanoramica, label: `FCC ${f + 1} Panorâmica` },
@@ -477,18 +477,16 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
         for (let b = 0; b < gab.baterias.bancos.length; b++) {
           const banco = gab.baterias.bancos[b];
-          checkNewPage(35);
+          checkNewPage(70);
           
-          y += 2;
-          doc.setFillColor(...GRAY_LIGHT);
-          doc.roundedRect(margin, y, contentWidth, 28, 1, 1, 'F');
+          y += 4;
           
           doc.setTextColor(...VIVO_PURPLE);
           doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
-          doc.text(`Banco ${b + 1}`, margin + 3, y + 5);
+          doc.text(`Banco ${b + 1}`, margin + 3, y);
           
-          y += 7;
+          y += 6;
           doc.setTextColor(...GRAY_DARK);
           addFieldRow('  Tipo', banco.tipo);
           addFieldRow('  Fabricante', banco.fabricante);
@@ -496,7 +494,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           addFieldRow('  Data Fabricação', banco.dataFabricacao || '-');
           const estadoStr = banco.estados?.join(', ') || '-';
           addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
-          addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'ok' : banco.colada === 'NÃO' ? 'error' : undefined);
+          addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'warning' : banco.colada === 'NÃO' ? 'ok' : undefined);
           addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
 
           await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
