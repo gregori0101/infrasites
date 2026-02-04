@@ -65,6 +65,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                 {TIPOS_QUADRO.map((tipo) => (
                   <button
                     key={tipo}
+                    type="button"
                     onClick={() => updateEnergia({ tipoQuadro: tipo })}
                     className={cn(
                       "py-3 text-sm font-medium rounded-md border transition-all",
@@ -122,6 +123,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                 {TENSOES_ENTRADA.map((tensao) => (
                   <button
                     key={tensao}
+                    type="button"
                     onClick={() => updateEnergia({ tensaoEntrada: tensao })}
                     className={cn(
                       "py-2 text-sm font-medium rounded-md border transition-all",
