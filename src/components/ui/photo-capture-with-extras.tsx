@@ -227,7 +227,7 @@ export function PhotoCaptureWithExtras({
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button size="icon" variant="secondary" className="h-8 w-8">
+                    <Button type="button" size="icon" variant="secondary" className="h-8 w-8">
                       <ZoomIn className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
@@ -235,7 +235,7 @@ export function PhotoCaptureWithExtras({
                     <img src={value} alt={label} className="w-full h-auto" />
                   </DialogContent>
                 </Dialog>
-                <Button size="icon" variant="destructive" className="h-8 w-8" onClick={handleRemoveMain}>
+                <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={handleRemoveMain}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -267,7 +267,7 @@ export function PhotoCaptureWithExtras({
                     <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 rounded-lg">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button size="icon" variant="secondary" className="h-6 w-6">
+                          <Button type="button" size="icon" variant="secondary" className="h-6 w-6">
                             <ZoomIn className="h-3 w-3" />
                           </Button>
                         </DialogTrigger>
@@ -276,6 +276,7 @@ export function PhotoCaptureWithExtras({
                         </DialogContent>
                       </Dialog>
                       <Button 
+                        type="button"
                         size="icon" 
                         variant="destructive" 
                         className="h-6 w-6" 
@@ -320,6 +321,7 @@ export function PhotoCaptureWithExtras({
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => mainInputRef.current?.click()}
           disabled={isLoading}
           className={cn(
