@@ -59,31 +59,12 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
               <div className="space-y-4 pt-2 animate-slide-up">
                 <div className="space-y-2">
                   <Label>Fabricante</Label>
-                  <Select
-                    value={data.gmg.fabricante || ''}
-                    onValueChange={(value: FCCFabricante) => updateGMG({ fabricante: value, fabricanteOutra: value === 'OUTRA' ? data.gmg.fabricanteOutra : '' })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FCC_FABRICANTES.map((f) => (
-                        <SelectItem key={f} value={f}>{f}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    placeholder="Digite o nome do fabricante"
+                    value={data.gmg.fabricanteOutra || ''}
+                    onChange={(e) => updateGMG({ fabricanteOutra: e.target.value })}
+                  />
                 </div>
-
-                {data.gmg.fabricante === 'OUTRA' && (
-                  <div className="space-y-2">
-                    <Label>Especifique o fabricante</Label>
-                    <Input
-                      placeholder="Digite o nome do fabricante"
-                      value={data.gmg.fabricanteOutra || ''}
-                      onChange={(e) => updateGMG({ fabricanteOutra: e.target.value })}
-                    />
-                  </div>
-                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
