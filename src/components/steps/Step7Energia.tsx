@@ -33,6 +33,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
     transformadorOK: null,
     fotoTransformador: null,
     fotoQuadroGeral: null,
+    unidadeConsumidora: null,
+    fotoRelogio: null,
   };
   const isSkipped = data.secoesNaoAplicaveis?.energia ?? false;
 
@@ -172,6 +174,30 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
             siteCode={data.siglaSite}
             category="energia_quadro"
           />
+        </FormCard>
+
+        {/* Unidade Consumidora */}
+        <FormCard title="Unidade Consumidora" icon={<Zap className="w-4 h-4" />}>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Número da UC</Label>
+              <Input
+                placeholder="Digite o número da unidade consumidora"
+                value={energia.unidadeConsumidora || ''}
+                onChange={(e) => updateEnergia({ unidadeConsumidora: e.target.value })}
+              />
+            </div>
+
+            <PhotoCaptureWithExtras
+              label="Foto do Relógio"
+              value={energia.fotoRelogio}
+              onChange={(value) => updateEnergia({ fotoRelogio: value })}
+              extraPhotos={getFotosExtras('energia_relogio')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('energia_relogio', photos)}
+              siteCode={data.siglaSite}
+              category="energia_relogio"
+            />
+          </div>
         </FormCard>
       </div>
     </SectionSkipToggle>

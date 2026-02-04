@@ -63,6 +63,8 @@ export interface EnergiaData {
   transformadorOK: boolean | null;
   fotoTransformador: string | null;
   fotoQuadroGeral: string | null;
+  unidadeConsumidora: string | null;
+  fotoRelogio: string | null;
 }
 
 // New Fibra Óptica structures
@@ -322,6 +324,8 @@ export const INITIAL_ENERGIA: EnergiaData = {
   transformadorOK: null,
   fotoTransformador: null,
   fotoQuadroGeral: null,
+  unidadeConsumidora: null,
+  fotoRelogio: null,
 };
 
 export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'updatedAt'> = {
