@@ -1,58 +1,99 @@
 
 Objetivo
-- Corrigir a falha ao enviar relatório (erro: “Could not find the 'gab1_fcc_qtd_ur_instaladas' column of 'reports' in the schema cache”) adicionando a coluna que o app está tentando gravar e garantindo que leituras (prefill/dashboard) também incluam esse novo campo.
+- Parar o “Ah, não! Algo deu errado ao exibir esta página da Web.” (crash do Chrome) ao capturar/adicionar foto (principal e extras) no Android Chrome.
 
-Causa raiz (confirmada pelo print + código)
-- O app monta a linha para inserir em public.reports com o campo:
-  - gab{N}_fcc_qtd_ur_instaladas
-- Porém a tabela reports atualmente só possui gab{N}_fcc_qtd_ur (qtd suportadas) e não possui gab{N}_fcc_qtd_ur_instaladas.
-- Ao inserir um objeto com uma coluna inexistente, o backend rejeita e o cliente mostra “column … not found in schema cache”.
+Diagnóstico (baseado no que vi no código + sintoma do print)
+- Esse “Ah, não!” é a tela do Chrome quando a aba “quebra” (crash), não é apenas reload por submit.
+- Hoje o fluxo faz: FileReader.readAsDataURL(file) → gera uma string base64 grande → depois comprime via canvas → converte base64 → Blob → upload.
+- Em Android, especialmente com fotos grandes da câmera, a criação/manipulação dessas strings base64 pode estourar memória e derrubar a aba.
+- Já corrigimos “type=button” para evitar submits, mas o erro persistiu: isso aponta mais para “pressão de memória” do que para submit.
 
-Solução (abordagem escolhida)
-- Adicionar no banco (Lovable Cloud) as colunas faltantes gab1..gab7_fcc_qtd_ur_instaladas (TEXT, nullable) para manter compatibilidade com o modelo “horizontal” já usado na tabela reports.
-- Atualizar o “select de colunas” usado em consultas do dashboard/prefill para incluir essas colunas (para que o dado possa ser lido depois de salvo).
+Estratégia de correção (mudança de arquitetura do upload, sem quebrar o resto)
+1) Evitar base64 no caminho principal (usar File/Blob direto)
+- Implementar um caminho “file-first”:
+  - Em vez de FileReader → base64, vamos:
+    - carregar a imagem a partir do File (via createImageBitmap ou Image + objectURL)
+    - desenhar no canvas
+    - exportar direto como Blob (canvas.toBlob)
+    - enviar Blob para o storage
+- Isso reduz picos de memória e evita strings base64 gigantes.
 
-Mudanças planejadas (sequência)
+2) Estender o hook usePhotoUpload para aceitar File
+- No `src/hooks/use-photo-upload.ts`:
+  - Adicionar uma função nova, por exemplo `uploadPhotoFile(file: File): Promise<string | null>`.
+  - Manter a função existente `uploadPhoto(base64Data: string)` para compatibilidade (caso algum lugar ainda use base64).
+  - `uploadPhotoFile` deve:
+    - validar tipo/tamanho (ou assumir que o componente já validou)
+    - comprimir do File para Blob (target ~500KB como hoje; e mais agressivo se necessário)
+    - fazer upload do Blob (sem converter para base64)
+    - limpar referências (ajuda GC): revogar objectURL, soltar canvas, setar variáveis grandes para null
 
-1) Migração de banco de dados: adicionar colunas faltantes
-- Criar uma nova migration SQL que execute:
-  - ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS gab1_fcc_qtd_ur_instaladas TEXT;
-  - …
-  - ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS gab7_fcc_qtd_ur_instaladas TEXT;
-- Justificativa:
-  - Resolve o erro imediatamente sem alterar o fluxo do formulário.
-  - Mantém o padrão atual (colunas por gabinete) e evita refatoração grande.
+3) Criar utilitário de compressão “File -> Blob” com fallback
+- Em `src/lib/imageCompression.ts` (ou um novo utilitário dentro dele, reaproveitando padrão existente):
+  - Adicionar funções:
+    - `compressFileToBlob(file, options/targetKB): Promise<Blob>`
+    - internamente, tentar:
+      - createImageBitmap(file) (melhor performance/memória quando disponível)
+      - fallback para Image() + URL.createObjectURL(file)
+    - iterar tentativas (redução de dimensão/qualidade), semelhante ao `compressWithFallback`, mas produzindo Blob.
+  - Garantir `URL.revokeObjectURL()` no finally.
 
-2) Ajuste de queries no código para incluir as novas colunas (leitura/prefill)
-Arquivo: src/lib/reportDatabase.ts
-- Em buildDashboardColumns(), incluir também:
-  - `${prefix}_fcc_qtd_ur_instaladas`
-- Isso garante que:
-  - fetchLatestReportBySiteCode (prefill sem fotos) traga esse campo.
-  - Qualquer tela que use “dashboard columns” possa enxergar o valor.
+4) Atualizar componentes PhotoCapture e PhotoCaptureWithExtras para usar uploadPhotoFile
+- Em `src/components/ui/photo-capture.tsx`:
+  - Remover FileReader/readAsDataURL do caminho padrão.
+  - No `handleCapture`, usar diretamente:
+    - `const result = await uploadPhotoFile(file)`
+  - Resetar `e.target.value = ''` (ou `inputRef.current.value=''`) após processar para permitir selecionar a mesma foto novamente.
+  - Manter try/catch/finally envolvendo todo o handler (não só dentro do onload), já que agora tudo é await direto.
+- Em `src/components/ui/photo-capture-with-extras.tsx`:
+  - Mesma mudança para `handleMainCapture` e `handleExtraCapture`.
+  - Garantir que `processingExtra/isProcessing` sejam desligados no finally sempre, mesmo em erros.
 
-3) (Opcional, mas recomendado) Robustez no parser de prefill
-Arquivo: src/lib/reportToChecklist.ts
-- Verificar se já está tolerante a undefined (está), mas ajustar para evitar parseInt(undefined) gerar NaN:
-  - Usar um helper safeParseInt (ou fallback) para qtdURInstaladas.
-- Isso não é obrigatório para corrigir o envio, mas melhora a estabilidade do prefill.
+5) Rede de segurança: capturar erros assíncronos globais (para não “morrer” silenciosamente)
+- Em `src/App.tsx`:
+  - Adicionar listeners:
+    - `window.addEventListener('unhandledrejection', ...)`
+    - `window.addEventListener('error', ...)`
+  - Nesses handlers:
+    - logar no console (com prefixo claro)
+    - mostrar toast “Ocorreu um erro ao processar a foto. Tente novamente.”
+    - `event.preventDefault()` quando aplicável (especialmente em unhandledrejection) para evitar que o browser finalize o app por erro não tratado.
+- Observação: isso não impede crash por memória, mas ajuda muito a evitar “quedas” por Promise rejeitada não tratada.
 
-4) Validação e teste ponta a ponta
-- Depois da migração e ajuste de colunas:
-  - Recarregar a aplicação (hard refresh no mobile/Chrome) para limpar cache do schema no cliente.
-  - Testar envio com FCC preenchida (qtd suportadas e instaladas) em pelo menos 1 gabinete.
-  - Confirmar que o relatório salva e que ao abrir o prefill do mesmo site o valor de “UR instaladas” aparece.
+6) Ajustes finos para Android Chrome (memória/performance)
+- Reduzir um pouco dimensões máximas no mobile:
+  - Se detectar mobile (hook `use-mobile` já existe), usar maxWidth/maxHeight menores (ex.: 1280) antes de tentar qualidade alta.
+- Garantir que os Blobs sejam criados como JPEG (não WebP em todos os devices, mas podemos manter WebP como fallback se der certo).
+- Inserir pequenos yields entre etapas pesadas:
+  - `await new Promise(requestAnimationFrame)` ou `await new Promise(r => setTimeout(r, 0))` antes/depois de compressão para evitar travar a UI.
 
-Riscos / observações
-- “Schema cache” no cliente pode persistir até recarregar a aba; por isso o hard refresh é importante após a migração.
-- As políticas de segurança (RLS) já exigem user_id = auth.uid() no INSERT; como o erro atual é de coluna inexistente, o foco é a migração. Se após isso surgir erro de permissão, aí investigaremos RLS/autenticação do usuário que está tentando enviar.
+7) Testes de validação (o que você deve checar no Android)
+- Fluxo principal:
+  - Capturar foto principal em um campo comum (Step 1/2 etc.) e confirmar que não crasha.
+- Extras:
+  - Adicionar 3-5 fotos extras no mesmo campo (sequencialmente) e confirmar estabilidade.
+- Fibra/Finalização:
+  - Onde `PhotoCapture` ainda é usado (Step6/Step10), repetir o teste, porque eles usam “Adicionar foto” com value null (muito importante).
+- Rede ruim:
+  - Testar com conexão mais lenta (4G fraco) para confirmar que o progresso e estados não deixam o componente travado.
 
-Critérios de pronto
-- Envio do relatório não apresenta mais o erro da coluna ausente.
-- O relatório é inserido com sucesso em reports.
-- Prefill e/ou telas de detalhes conseguem ler e mostrar gab{N}_fcc_qtd_ur_instaladas quando existir.
+Riscos e como vamos mitigar
+- Diferenças de compatibilidade do canvas/toBlob/createImageBitmap:
+  - Usar fallback (Image + objectURL) se createImageBitmap falhar.
+- Mudança grande no caminho de upload:
+  - Manter `uploadPhoto(base64)` antigo por compatibilidade; migrar componentes primeiro, e só depois avaliar remover base64 em outras partes.
+- Possível perda de qualidade:
+  - Manter tentativas progressivas e apenas reduzir mais se precisar atingir target KB.
 
-Arquivos envolvidos
-- Banco (migration): adicionar colunas gab1..gab7_fcc_qtd_ur_instaladas
-- src/lib/reportDatabase.ts: incluir colunas no buildDashboardColumns()
-- (Opcional) src/lib/reportToChecklist.ts: parse mais robusto
+Arquivos que serão alterados (previsto)
+- src/hooks/use-photo-upload.ts (adicionar uploadPhotoFile + usar compressão via Blob)
+- src/lib/imageCompression.ts (adicionar compressão File/Blob com fallback)
+- src/components/ui/photo-capture.tsx (trocar FileReader por uploadPhotoFile)
+- src/components/ui/photo-capture-with-extras.tsx (trocar FileReader por uploadPhotoFile)
+- src/App.tsx (handlers globais de erro/unhandled rejection)
+
+Critério de pronto
+- No Android Chrome, ao tocar “Capturar Foto” e confirmar a foto:
+  - não aparece mais “Ah, não!”
+  - a foto aparece no preview do campo
+  - upload completa (ou cai no fallback com mensagem, sem derrubar a página)
