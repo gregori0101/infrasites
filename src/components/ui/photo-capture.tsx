@@ -153,7 +153,7 @@ export function PhotoCapture({
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="icon" variant="secondary" className="h-8 w-8">
+                  <Button type="button" size="icon" variant="secondary" className="h-8 w-8">
                     <ZoomIn className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
@@ -161,7 +161,7 @@ export function PhotoCapture({
                   <img src={value} alt={label} className="w-full h-auto" />
                 </DialogContent>
               </Dialog>
-              <Button size="icon" variant="destructive" className="h-8 w-8" onClick={handleRemove}>
+              <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={handleRemove}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -175,6 +175,7 @@ export function PhotoCapture({
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => inputRef.current?.click()}
           disabled={isLoading}
           className={cn(
