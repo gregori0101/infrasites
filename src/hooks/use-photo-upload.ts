@@ -56,7 +56,13 @@ function dataURLToBlob(dataURL: string): Blob {
 export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePhotoUploadOptions) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const isMobile = useIsMobile();
+  const isMobileFromHook = useIsMobile();
+  
+  // Enhanced mobile detection for iOS Safari and other mobile browsers
+  const isMobile = isMobileFromHook || (typeof navigator !== 'undefined' && (
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document) // iPad with desktop mode
+  ));
 
   /**
    * Upload a File directly (memory-efficient, avoids base64)

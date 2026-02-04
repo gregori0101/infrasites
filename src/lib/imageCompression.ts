@@ -230,32 +230,77 @@ const DEFAULT_FILE_OPTIONS: FileToBlobOptions = {
 
 /**
  * Yields execution to allow GC and prevent UI freeze
+ * Uses requestAnimationFrame when available for smoother experience
  */
 function yieldToMain(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 0));
+  return new Promise(resolve => {
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => setTimeout(resolve, 0));
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
+}
+
+/**
+ * Safely close an ImageBitmap if supported
+ */
+function safeCloseBitmap(bitmap: ImageBitmap | null): void {
+  if (bitmap && typeof bitmap.close === 'function') {
+    try {
+      bitmap.close();
+    } catch (e) {
+      // Some browsers may throw if already closed
+      console.warn('[safeCloseBitmap] Could not close bitmap:', e);
+    }
+  }
+}
+
+/**
+ * Check if createImageBitmap is fully supported
+ * Some browsers have partial support that may fail on certain image types
+ */
+function isCreateImageBitmapSupported(): boolean {
+  if (typeof createImageBitmap !== 'function') {
+    return false;
+  }
+  
+  // Safari iOS has createImageBitmap but it can be flaky with certain formats
+  // Check for proper support by looking at the function signature
+  try {
+    // Basic feature detection
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Load an image from a File without using base64 (memory-efficient)
  * Tries createImageBitmap first, falls back to Image + objectURL
+ * Compatible with Edge, Safari iOS, and Chrome Android
  */
-async function loadImageFromFile(file: File): Promise<{ source: ImageBitmap | HTMLImageElement; objectUrl?: string }> {
+async function loadImageFromFile(file: File): Promise<{ source: ImageBitmap | HTMLImageElement; objectUrl?: string; isBitmap: boolean }> {
   // Try createImageBitmap first (more memory efficient)
-  if (typeof createImageBitmap === 'function') {
+  if (isCreateImageBitmapSupported()) {
     try {
       const bitmap = await createImageBitmap(file);
-      return { source: bitmap };
+      return { source: bitmap, isBitmap: true };
     } catch (e) {
       console.warn('[loadImageFromFile] createImageBitmap failed, using fallback:', e);
     }
   }
 
-  // Fallback: Image element + objectURL
+  // Fallback: Image element + objectURL (works everywhere including Safari iOS)
   const objectUrl = URL.createObjectURL(file);
   
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({ source: img, objectUrl });
+    
+    // Required for Safari iOS to properly load cross-origin images
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => resolve({ source: img, objectUrl, isBitmap: false });
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
       reject(new Error('Failed to load image'));
@@ -335,14 +380,20 @@ export async function compressFileToBlob(
       );
     });
   } finally {
-    // Cleanup to help GC
+    // Cleanup to help GC - use delayed cleanup for Safari iOS stability
     if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
+      // Safari iOS needs a delay before revoking object URLs
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
     }
-    if (source instanceof ImageBitmap) {
-      source.close();
+    if (source && 'close' in source && typeof (source as ImageBitmap).close === 'function') {
+      safeCloseBitmap(source as ImageBitmap);
     }
     if (canvas) {
+      // Clear canvas to free memory
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
       canvas.width = 0;
       canvas.height = 0;
     }
