@@ -23,6 +23,7 @@ import {
   Tooltip,
   Legend,
   ReferenceLine,
+  LabelList,
 } from "recharts";
 import {
   Table,
@@ -468,7 +469,14 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
                     strokeWidth={3}
                     dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
                     name="Vistorias"
-                  />
+                  >
+                    <LabelList
+                      dataKey="count"
+                      position="top"
+                      offset={8}
+                      className="fill-foreground text-xs font-semibold"
+                    />
+                  </Line>
                 </LineChart>
               </ResponsiveContainer>
             </div>
