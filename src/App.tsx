@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ChecklistProvider } from "@/contexts/ChecklistContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { toast } from "sonner";
 
 // Lazy-loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -28,12 +29,58 @@ const PageLoader = () => (
   </div>
 );
 
+// Global error handlers component
+function GlobalErrorHandlers() {
+  useEffect(() => {
+    // Handle unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('[GlobalError] Unhandled Promise Rejection:', event.reason);
+      
+      // Prevent the default behavior (which may crash the app)
+      event.preventDefault();
+      
+      // Show user-friendly toast for common scenarios
+      const message = event.reason?.message || String(event.reason);
+      if (message.includes('image') || message.includes('photo') || message.includes('compress')) {
+        toast.error("Erro ao processar foto", { 
+          description: "Tente novamente ou use outra imagem." 
+        });
+      }
+    };
+
+    // Handle uncaught errors
+    const handleError = (event: ErrorEvent) => {
+      console.error('[GlobalError] Uncaught Error:', event.error);
+      
+      // Don't show toast for every error, only specific ones
+      const message = event.message || '';
+      if (message.includes('memory') || message.includes('allocation')) {
+        toast.error("Memória insuficiente", { 
+          description: "Feche outras abas e tente novamente." 
+        });
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  return null;
+}
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ChecklistProvider>
           <TooltipProvider>
+            <GlobalErrorHandlers />
             <Toaster />
             <Sonner position="top-center" />
             <BrowserRouter>

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Camera, X, ZoomIn, Loader2, Upload, CheckCircle } from "lucide-react";
+import { Camera, X, ZoomIn, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 import { usePhotoUpload } from "@/hooks/use-photo-upload";
@@ -29,7 +29,7 @@ export function PhotoCapture({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
 
-  const { uploadPhoto, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
+  const { uploadPhotoFile, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
     siteCode,
     category,
   });
@@ -39,6 +39,12 @@ export function PhotoCapture({
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    
+    // Reset input immediately to allow re-selecting same file
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+    
     if (!file) return;
 
     // Validate file type
@@ -56,50 +62,25 @@ export function PhotoCapture({
     setIsProcessing(true);
 
     try {
-      const reader = new FileReader();
+      // Use file-first upload (no base64 intermediate)
+      const result = await uploadPhotoFile(file);
       
-      reader.onload = async (event) => {
-        try {
-          const dataURL = event.target?.result as string;
-          if (!dataURL) {
-            throw new Error("Falha ao ler a imagem");
-          }
-          
-          // Upload to storage or compress for local storage
-          const result = await uploadPhoto(dataURL);
-          
-          if (result) {
-            onChange(result);
-            if (result.startsWith('http')) {
-              toast.success("Foto salva na nuvem!");
-            } else {
-              toast.success("Foto adicionada!");
-            }
-          } else {
-            throw new Error("Falha ao processar imagem");
-          }
-        } catch (error) {
-          console.error("Error processing image:", error);
-          toast.error("Erro ao processar imagem", { 
-            description: "Tente novamente ou use outra imagem." 
-          });
-        } finally {
-          setIsProcessing(false);
+      if (result) {
+        onChange(result);
+        if (result.startsWith('http')) {
+          toast.success("Foto salva na nuvem!");
+        } else {
+          toast.success("Foto adicionada!");
         }
-      };
-      
-      reader.onerror = () => {
-        console.error("FileReader error");
-        toast.error("Erro ao carregar imagem", { 
-          description: "Verifique se o arquivo é válido." 
-        });
-        setIsProcessing(false);
-      };
-      
-      reader.readAsDataURL(file);
+      } else {
+        throw new Error("Falha ao processar imagem");
+      }
     } catch (error) {
-      console.error("Error handling file:", error);
-      toast.error("Erro ao processar arquivo");
+      console.error("[PhotoCapture] Error:", error);
+      toast.error("Erro ao processar imagem", { 
+        description: "Tente novamente ou use outra imagem." 
+      });
+    } finally {
       setIsProcessing(false);
     }
   };
