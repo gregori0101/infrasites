@@ -60,7 +60,7 @@ export interface EnergiaData {
   fabricante: FabricanteQuadro | null;
   potenciaKVA: number | null;
   tensaoEntrada: TensaoEntrada | null;
-  transformadorOK: boolean | null;
+  temTransformador: boolean;
   fotoTransformador: string | null;
   fotoQuadroGeral: string | null;
   unidadeConsumidora: string | null;
@@ -321,7 +321,7 @@ export const INITIAL_ENERGIA: EnergiaData = {
   fabricante: null,
   potenciaKVA: null,
   tensaoEntrada: null,
-  transformadorOK: null,
+  temTransformador: false,
   fotoTransformador: null,
   fotoQuadroGeral: null,
   unidadeConsumidora: null,

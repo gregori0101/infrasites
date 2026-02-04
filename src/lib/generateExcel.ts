@@ -197,9 +197,11 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['Energia_Fabricante'] = data.energia.fabricante || '';
     row['Energia_Potencia_kVA'] = data.energia.potenciaKVA ?? '';
     row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada || '';
-    row['Energia_Transformador_OK'] = data.energia.transformadorOK === null ? '' : (data.energia.transformadorOK ? 'SIM' : 'NÃO');
+    row['Energia_Tem_Transformador'] = data.energia.temTransformador ? 'SIM' : 'NÃO';
     row['Energia_Foto_Transformador'] = getPhotoValue(data.energia.fotoTransformador);
     row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
+    row['Energia_Unidade_Consumidora'] = data.energia.unidadeConsumidora || '';
+    row['Energia_Foto_Relogio'] = getPhotoValue(data.energia.fotoRelogio);
   } else {
     row['Energia_Secao'] = 'N/A';
   }

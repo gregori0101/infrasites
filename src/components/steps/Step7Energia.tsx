@@ -30,7 +30,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
     fabricante: null,
     potenciaKVA: null,
     tensaoEntrada: null,
-    transformadorOK: null,
+    temTransformador: false,
     fotoTransformador: null,
     fotoQuadroGeral: null,
     unidadeConsumidora: null,
@@ -142,22 +142,24 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
         <FormCard title="Transformador" icon={<Zap className="w-4 h-4" />}>
           <div className="space-y-4">
             <ToggleSwitch
-              label="Transformador OK?"
-              value={energia.transformadorOK ?? false}
-              onChange={(value) => updateEnergia({ transformadorOK: value })}
+              label="Possui Transformador?"
+              description="Site possui transformador de energia"
+              value={energia.temTransformador ?? false}
+              onChange={(value) => updateEnergia({ temTransformador: value })}
             />
 
-            {energia.transformadorOK === false && (
-              <PhotoCaptureWithExtras
-                label="Foto Transformador (obrigatória)"
-                value={energia.fotoTransformador}
-                onChange={(value) => updateEnergia({ fotoTransformador: value })}
-                extraPhotos={getFotosExtras('energia_transformador')}
-                onExtraPhotosChange={(photos) => updateFotosExtras('energia_transformador', photos)}
-                required
-                siteCode={data.siglaSite}
-                category="energia_transformador"
-              />
+            {energia.temTransformador && (
+              <div className="pt-2 animate-slide-up">
+                <PhotoCaptureWithExtras
+                  label="Foto do Transformador"
+                  value={energia.fotoTransformador}
+                  onChange={(value) => updateEnergia({ fotoTransformador: value })}
+                  extraPhotos={getFotosExtras('energia_transformador')}
+                  onExtraPhotosChange={(photos) => updateFotosExtras('energia_transformador', photos)}
+                  siteCode={data.siglaSite}
+                  category="energia_transformador"
+                />
+              </div>
             )}
           </div>
         </FormCard>

@@ -635,12 +635,14 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       { label: 'Fabricante', value: data.energia.fabricante },
       { label: 'Potência (kVA)', value: data.energia.potenciaKVA },
       { label: 'Tensão de Entrada', value: data.energia.tensaoEntrada },
-      { label: 'Transformador', value: data.energia.transformadorOK ? 'OK' : 'NOK' },
+      { label: 'Possui Transformador', value: data.energia.temTransformador ? 'SIM' : 'NÃO' },
+      { label: 'Unidade Consumidora (UC)', value: data.energia.unidadeConsumidora },
     ]);
 
     await addPhotoGrid([
       { photo: data.energia.fotoQuadroGeral, label: 'Quadro Geral' },
       { photo: data.energia.fotoTransformador, label: 'Transformador' },
+      { photo: data.energia.fotoRelogio, label: 'Relógio' },
     ]);
   }
 
