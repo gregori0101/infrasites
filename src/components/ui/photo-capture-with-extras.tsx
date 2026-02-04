@@ -297,6 +297,7 @@ export function PhotoCaptureWithExtras({
           {/* Add more button */}
           {onExtraPhotosChange && (
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => extraInputRef.current?.click()}
