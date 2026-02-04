@@ -42,7 +42,7 @@ export function PhotoCaptureWithExtras({
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [processingExtra, setProcessingExtra] = React.useState(false);
 
-  const { uploadPhoto, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
+  const { uploadPhotoFile, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
     siteCode,
     category,
   });
@@ -52,6 +52,12 @@ export function PhotoCaptureWithExtras({
 
   const handleMainCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    
+    // Reset input immediately to allow re-selecting same file
+    if (mainInputRef.current) {
+      mainInputRef.current.value = '';
+    }
+    
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -67,44 +73,31 @@ export function PhotoCaptureWithExtras({
     setIsProcessing(true);
 
     try {
-      const reader = new FileReader();
+      // Use file-first upload (no base64 intermediate)
+      const result = await uploadPhotoFile(file);
       
-      reader.onload = async (event) => {
-        try {
-          const dataURL = event.target?.result as string;
-          if (!dataURL) throw new Error("Falha ao ler a imagem");
-          
-          const result = await uploadPhoto(dataURL);
-          
-          if (result) {
-            onChange(result);
-            toast.success(result.startsWith('http') ? "Foto salva na nuvem!" : "Foto adicionada!");
-          } else {
-            throw new Error("Falha ao processar imagem");
-          }
-        } catch (error) {
-          console.error("Error processing image:", error);
-          toast.error("Erro ao processar imagem");
-        } finally {
-          setIsProcessing(false);
-        }
-      };
-      
-      reader.onerror = () => {
-        toast.error("Erro ao carregar imagem");
-        setIsProcessing(false);
-      };
-      
-      reader.readAsDataURL(file);
+      if (result) {
+        onChange(result);
+        toast.success(result.startsWith('http') ? "Foto salva na nuvem!" : "Foto adicionada!");
+      } else {
+        throw new Error("Falha ao processar imagem");
+      }
     } catch (error) {
-      console.error("Error handling file:", error);
-      toast.error("Erro ao processar arquivo");
+      console.error("[PhotoCaptureWithExtras] Main capture error:", error);
+      toast.error("Erro ao processar imagem");
+    } finally {
       setIsProcessing(false);
     }
   };
 
   const handleExtraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    
+    // Reset input immediately to allow re-selecting same file
+    if (extraInputRef.current) {
+      extraInputRef.current.value = '';
+    }
+    
     if (!file || !onExtraPhotosChange) return;
 
     if (!file.type.startsWith('image/')) {
@@ -120,39 +113,19 @@ export function PhotoCaptureWithExtras({
     setProcessingExtra(true);
 
     try {
-      const reader = new FileReader();
+      // Use file-first upload (no base64 intermediate)
+      const result = await uploadPhotoFile(file);
       
-      reader.onload = async (event) => {
-        try {
-          const dataURL = event.target?.result as string;
-          if (!dataURL) throw new Error("Falha ao ler a imagem");
-          
-          const result = await uploadPhoto(dataURL);
-          
-          if (result) {
-            onExtraPhotosChange([...extraPhotos, result]);
-            toast.success("Foto extra adicionada!");
-          } else {
-            throw new Error("Falha ao processar imagem");
-          }
-        } catch (error) {
-          console.error("Error processing extra image:", error);
-          toast.error("Erro ao processar imagem extra");
-        } finally {
-          setProcessingExtra(false);
-          if (extraInputRef.current) extraInputRef.current.value = '';
-        }
-      };
-      
-      reader.onerror = () => {
-        toast.error("Erro ao carregar imagem");
-        setProcessingExtra(false);
-      };
-      
-      reader.readAsDataURL(file);
+      if (result) {
+        onExtraPhotosChange([...extraPhotos, result]);
+        toast.success("Foto extra adicionada!");
+      } else {
+        throw new Error("Falha ao processar imagem");
+      }
     } catch (error) {
-      console.error("Error handling file:", error);
-      toast.error("Erro ao processar arquivo");
+      console.error("[PhotoCaptureWithExtras] Extra capture error:", error);
+      toast.error("Erro ao processar imagem extra");
+    } finally {
       setProcessingExtra(false);
     }
   };

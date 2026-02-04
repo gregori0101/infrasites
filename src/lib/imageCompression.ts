@@ -209,3 +209,218 @@ export function getBase64SizeKB(dataURL: string): number {
 export function isBase64DataURL(str: string): boolean {
   return str.startsWith('data:image/');
 }
+
+// ============================================
+// File-to-Blob compression utilities (memory-efficient)
+// ============================================
+
+interface FileToBlobOptions {
+  maxWidth?: number;
+  maxHeight?: number;
+  quality?: number;
+  mimeType?: 'image/jpeg' | 'image/webp';
+}
+
+const DEFAULT_FILE_OPTIONS: FileToBlobOptions = {
+  maxWidth: 1920,
+  maxHeight: 1920,
+  quality: 0.8,
+  mimeType: 'image/jpeg'
+};
+
+/**
+ * Yields execution to allow GC and prevent UI freeze
+ */
+function yieldToMain(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+/**
+ * Load an image from a File without using base64 (memory-efficient)
+ * Tries createImageBitmap first, falls back to Image + objectURL
+ */
+async function loadImageFromFile(file: File): Promise<{ source: ImageBitmap | HTMLImageElement; objectUrl?: string }> {
+  // Try createImageBitmap first (more memory efficient)
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return { source: bitmap };
+    } catch (e) {
+      console.warn('[loadImageFromFile] createImageBitmap failed, using fallback:', e);
+    }
+  }
+
+  // Fallback: Image element + objectURL
+  const objectUrl = URL.createObjectURL(file);
+  
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ source: img, objectUrl });
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Failed to load image'));
+    };
+    img.src = objectUrl;
+  });
+}
+
+/**
+ * Compress an image file directly to a Blob (no base64 intermediate)
+ * This is much more memory-efficient than the base64 approach
+ */
+export async function compressFileToBlob(
+  file: File,
+  options: FileToBlobOptions = {}
+): Promise<Blob> {
+  const opts = { ...DEFAULT_FILE_OPTIONS, ...options };
+  
+  let objectUrl: string | undefined;
+  let source: ImageBitmap | HTMLImageElement | null = null;
+  let canvas: HTMLCanvasElement | null = null;
+
+  try {
+    // Load image
+    const loaded = await loadImageFromFile(file);
+    source = loaded.source;
+    objectUrl = loaded.objectUrl;
+
+    // Get original dimensions
+    const origWidth = source instanceof ImageBitmap ? source.width : source.naturalWidth;
+    const origHeight = source instanceof ImageBitmap ? source.height : source.naturalHeight;
+
+    // Calculate new dimensions maintaining aspect ratio
+    let width = origWidth;
+    let height = origHeight;
+    const maxW = opts.maxWidth!;
+    const maxH = opts.maxHeight!;
+
+    if (width > maxW || height > maxH) {
+      const ratio = Math.min(maxW / width, maxH / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+    }
+
+    // Yield before heavy canvas work
+    await yieldToMain();
+
+    // Create canvas and draw
+    canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, 0, 0, width, height);
+
+    // Yield after draw
+    await yieldToMain();
+
+    // Convert to Blob
+    return new Promise((resolve, reject) => {
+      canvas!.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create blob from canvas'));
+          }
+        },
+        opts.mimeType,
+        opts.quality
+      );
+    });
+  } finally {
+    // Cleanup to help GC
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    if (source instanceof ImageBitmap) {
+      source.close();
+    }
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+    source = null;
+    canvas = null;
+  }
+}
+
+/**
+ * Compression attempt configuration for file-to-blob
+ */
+interface FileToBlobAttempt {
+  quality: number;
+  maxWidth: number;
+  maxHeight: number;
+  mimeType: 'image/jpeg' | 'image/webp';
+}
+
+/**
+ * Compress a file with multiple fallback strategies until size target is met
+ * Memory-efficient version that never creates base64 strings
+ */
+export async function compressFileToBlobWithFallback(
+  file: File,
+  maxSizeKB: number = 500,
+  isMobile: boolean = false
+): Promise<Blob> {
+  // Mobile gets smaller initial dimensions to reduce memory pressure
+  const baseDimension = isMobile ? 1280 : 1920;
+  
+  const attempts: FileToBlobAttempt[] = [
+    { quality: 0.85, maxWidth: baseDimension, maxHeight: baseDimension, mimeType: 'image/jpeg' },
+    { quality: 0.75, maxWidth: 1280, maxHeight: 1280, mimeType: 'image/jpeg' },
+    { quality: 0.65, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/jpeg' },
+    { quality: 0.55, maxWidth: 800, maxHeight: 800, mimeType: 'image/jpeg' },
+    { quality: 0.45, maxWidth: 640, maxHeight: 640, mimeType: 'image/jpeg' },
+    // WebP fallback for better compression
+    { quality: 0.6, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/webp' },
+    { quality: 0.5, maxWidth: 800, maxHeight: 800, mimeType: 'image/webp' },
+  ];
+
+  let lastResult: Blob | null = null;
+  let lastError: Error | null = null;
+
+  for (const attempt of attempts) {
+    try {
+      // Yield between attempts to prevent UI freeze
+      await yieldToMain();
+      
+      const blob = await compressFileToBlob(file, {
+        quality: attempt.quality,
+        maxWidth: attempt.maxWidth,
+        maxHeight: attempt.maxHeight,
+        mimeType: attempt.mimeType,
+      });
+
+      const sizeKB = Math.round(blob.size / 1024);
+
+      if (sizeKB <= maxSizeKB) {
+        console.log(`[compressFileToBlobWithFallback] Success: ${sizeKB}KB (q:${attempt.quality}, ${attempt.maxWidth}x${attempt.maxHeight}, ${attempt.mimeType})`);
+        return blob;
+      }
+
+      // Keep best result
+      if (!lastResult || blob.size < lastResult.size) {
+        lastResult = blob;
+      }
+    } catch (error) {
+      console.warn(`[compressFileToBlobWithFallback] Attempt failed (q:${attempt.quality}):`, error);
+      lastError = error as Error;
+    }
+  }
+
+  if (lastResult) {
+    const finalSizeKB = Math.round(lastResult.size / 1024);
+    console.warn(`[compressFileToBlobWithFallback] Could not reach ${maxSizeKB}KB, best: ${finalSizeKB}KB`);
+    return lastResult;
+  }
+
+  throw lastError || new Error('All compression attempts failed');
+}

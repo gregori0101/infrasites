@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { compressWithFallback, isBase64DataURL, getBase64SizeKB } from '@/lib/imageCompression';
+import { compressWithFallback, isBase64DataURL, getBase64SizeKB, compressFileToBlobWithFallback } from '@/lib/imageCompression';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BUCKET_NAME = 'report-photos';
 const MAX_SIZE_KB = 400; // Target size for localStorage-safe storage
@@ -55,7 +56,146 @@ function dataURLToBlob(dataURL: string): Blob {
 export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePhotoUploadOptions) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const isMobile = useIsMobile();
 
+  /**
+   * Upload a File directly (memory-efficient, avoids base64)
+   * This is the preferred method for mobile devices
+   */
+  const uploadPhotoFile = useCallback(async (file: File): Promise<string | null> => {
+    // If no siteCode, we need to fall back to base64 for localStorage
+    if (!siteCode) {
+      console.log('[PhotoUpload] No siteCode, using base64 fallback for localStorage');
+      setIsUploading(true);
+      setUploadProgress(10);
+      
+      try {
+        // Compress file to blob first
+        const blob = await compressFileToBlobWithFallback(file, MAX_SIZE_KB, isMobile);
+        setUploadProgress(50);
+        
+        // Convert blob to base64 for localStorage (only when necessary)
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            setUploadProgress(100);
+            onSuccess?.(result);
+            resolve(result);
+          };
+          reader.onerror = () => reject(new Error('Failed to read blob'));
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error('[PhotoUpload] Compression failed:', error);
+        onError?.(error as Error);
+        return null;
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    }
+
+    setIsUploading(true);
+    setUploadProgress(10);
+
+    try {
+      // Compress file directly to blob (no base64)
+      console.log(`[PhotoUpload] Compressing file: ${Math.round(file.size / 1024)}KB - ${category}`);
+      const blob = await compressFileToBlobWithFallback(file, 500, isMobile);
+      console.log(`[PhotoUpload] Compressed to: ${Math.round(blob.size / 1024)}KB - ${category}`);
+      
+      setUploadProgress(50);
+
+      // Generate unique filename
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      const fileName = `${siteCode}/${timestamp}/${category}_${uuidv4().slice(0, 8)}.${ext}`;
+
+      setUploadProgress(60);
+
+      // Upload to Supabase Storage with retry
+      let uploadError = null;
+      let retries = 0;
+      const maxRetries = 2;
+      
+      while (retries <= maxRetries) {
+        const { error } = await supabase.storage
+          .from(BUCKET_NAME)
+          .upload(fileName, blob, {
+            contentType: blob.type,
+            upsert: true
+          });
+        
+        if (!error) {
+          uploadError = null;
+          break;
+        }
+        
+        uploadError = error;
+        retries++;
+        
+        if (retries <= maxRetries) {
+          console.log(`[PhotoUpload] Retry ${retries}/${maxRetries} for ${category}`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      setUploadProgress(90);
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData.publicUrl;
+      
+      setUploadProgress(100);
+      console.log(`[PhotoUpload] Success: ${fileName}`);
+      
+      onSuccess?.(publicUrl);
+      return publicUrl;
+
+    } catch (error) {
+      console.error('[PhotoUpload] Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      onError?.(new Error(errorMessage));
+      
+      // Fallback: try to compress to base64 for localStorage
+      try {
+        console.log('[PhotoUpload] Attempting base64 fallback...');
+        const blob = await compressFileToBlobWithFallback(file, MAX_SIZE_KB, isMobile);
+        
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            console.log('[PhotoUpload] Using compressed base64 fallback');
+            toast.warning('Foto salva localmente', { 
+              description: 'Será enviada ao finalizar o relatório.' 
+            });
+            resolve(result);
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        return null;
+      }
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  }, [siteCode, category, isMobile, onSuccess, onError]);
+
+  /**
+   * Legacy method: Upload from base64 data URL
+   * Kept for backwards compatibility
+   */
   const uploadPhoto = useCallback(async (base64Data: string): Promise<string | null> => {
     // If already a URL, return it directly
     if (base64Data.startsWith('http')) {
@@ -211,6 +351,7 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
   return {
     uploadPhoto,
+    uploadPhotoFile,
     deletePhoto,
     isUploading,
     uploadProgress,
