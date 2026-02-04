@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,7 @@ interface Step4Props {
 }
 
 export function Step4Baterias({ showErrors = false, validationErrors = [] }: Step4Props) {
-  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
 
@@ -294,10 +294,12 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   </div>
                 </div>
 
-                <PhotoCapture
+                <PhotoCaptureWithExtras
                   label="Foto do Banco"
                   value={banco.fotoBanco}
                   onChange={(value) => updateBanco(index, { fotoBanco: value })}
+                  extraPhotos={getFotosExtras(`gab${currentGabinete}_bateria_banco${index}`)}
+                  onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_bateria_banco${index}`, photos)}
                   required
                   siteCode={data.siglaSite}
                   category={`gab${currentGabinete + 1}_bateria_banco${index + 1}`}

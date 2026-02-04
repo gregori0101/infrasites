@@ -21,6 +21,8 @@ interface ChecklistContextType {
   updateData: <K extends keyof ChecklistData>(key: K, value: ChecklistData[K]) => void;
   updateGabinete: (index: number, gabinete: Partial<GabineteData>) => void;
   updateSecaoNaoAplicavel: (secao: keyof SecoesNaoAplicaveis, value: boolean) => void;
+  updateFotosExtras: (fieldKey: string, photos: string[]) => void;
+  getFotosExtras: (fieldKey: string) => string[];
   addGabinete: () => void;
   removeGabinete: (index: number) => void;
   resetChecklist: () => void;
@@ -114,6 +116,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
                 ...INITIAL_SECOES_NAO_APLICAVEIS,
                 ...(parsed.secoesNaoAplicaveis || {}),
               },
+              fotosExtras: parsed.fotosExtras || {},
             } as ChecklistData;
           }
         } catch (e) {
@@ -306,6 +309,21 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       updatedAt: new Date().toISOString(),
     }));
   }, []);
+
+  const updateFotosExtras = useCallback((fieldKey: string, photos: string[]) => {
+    setData(prev => ({
+      ...prev,
+      fotosExtras: {
+        ...prev.fotosExtras,
+        [fieldKey]: photos,
+      },
+      updatedAt: new Date().toISOString(),
+    }));
+  }, []);
+
+  const getFotosExtras = useCallback((fieldKey: string): string[] => {
+    return data.fotosExtras?.[fieldKey] || [];
+  }, [data.fotosExtras]);
 
   const addGabinete = useCallback(() => {
     setData(prev => ({
@@ -560,6 +578,8 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       updateData,
       updateGabinete,
       updateSecaoNaoAplicavel,
+      updateFotosExtras,
+      getFotosExtras,
       addGabinete,
       removeGabinete,
       resetChecklist,

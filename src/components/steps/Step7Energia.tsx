@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ interface Step7Props {
 }
 
 export function Step7Energia({ showErrors = false, validationErrors = [] }: Step7Props) {
-  const { data, updateData, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, updateData, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const energia = data.energia ?? {
     tipoQuadro: null,
     fabricante: null,
@@ -146,10 +146,12 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
             />
 
             {energia.transformadorOK === false && (
-              <PhotoCapture
+              <PhotoCaptureWithExtras
                 label="Foto Transformador (obrigatória)"
                 value={energia.fotoTransformador}
                 onChange={(value) => updateEnergia({ fotoTransformador: value })}
+                extraPhotos={getFotosExtras('energia_transformador')}
+                onExtraPhotosChange={(photos) => updateFotosExtras('energia_transformador', photos)}
                 required
                 siteCode={data.siglaSite}
                 category="energia_transformador"
@@ -160,10 +162,12 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
 
         {/* Foto Quadro Geral */}
         <FormCard title="Foto Quadro Geral" icon={<FileText className="w-4 h-4" />}>
-          <PhotoCapture
+          <PhotoCaptureWithExtras
             label="Foto do Quadro Geral (obrigatória)"
             value={energia.fotoQuadroGeral}
             onChange={(value) => updateEnergia({ fotoQuadroGeral: value })}
+            extraPhotos={getFotosExtras('energia_quadro')}
+            onExtraPhotosChange={(photos) => updateFotosExtras('energia_quadro', photos)}
             required
             siteCode={data.siglaSite}
             category="energia_quadro"

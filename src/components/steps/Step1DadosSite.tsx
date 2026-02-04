@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,7 +22,7 @@ interface Step1Props {
 }
 
 export function Step1DadosSite({ showErrors = false, validationErrors = [] }: Step1Props) {
-  const { data, updateData, loadFromPreviousReport } = useChecklist();
+  const { data, updateData, loadFromPreviousReport, updateFotosExtras, getFotosExtras } = useChecklist();
   const { 
     isLoading: isCheckingPrevious, 
     previousChecklistData, 
@@ -297,10 +297,12 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
       </FormCard>
 
       <FormCard title="Foto Panorâmica" icon={<Image className="w-4 h-4" />} variant="accent">
-        <PhotoCapture
+        <PhotoCaptureWithExtras
           label="Vista geral do site"
           value={data.fotoPanoramica}
           onChange={(value) => updateData('fotoPanoramica', value)}
+          extraPhotos={getFotosExtras('site_panoramica')}
+          onExtraPhotosChange={(photos) => updateFotosExtras('site_panoramica', photos)}
           required
           siteCode={data.siglaSite}
           category="site_panoramica"

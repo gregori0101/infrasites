@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,7 +29,7 @@ interface Step5Props {
 }
 
 export function Step5Climatizacao({ showErrors = false, validationErrors = [] }: Step5Props) {
-  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.climatizacao ?? false;
 
@@ -233,31 +233,39 @@ export function Step5Climatizacao({ showErrors = false, validationErrors = [] }:
 
         <FormCard title="Fotos Climatização" icon={<Camera className="w-4 h-4" />} variant="accent">
           <div className="grid grid-cols-2 gap-3">
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="AR 1"
               value={gabinete.climatizacao.fotoAR1}
               onChange={(value) => updateClimatizacao({ fotoAR1: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_ar1`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_ar1`, photos)}
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_ar1`}
             />
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="AR 2"
               value={gabinete.climatizacao.fotoAR2}
               onChange={(value) => updateClimatizacao({ fotoAR2: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_ar2`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_ar2`, photos)}
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_ar2`}
             />
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="Condensador"
               value={gabinete.climatizacao.fotoCondensador}
               onChange={(value) => updateClimatizacao({ fotoCondensador: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_condensador`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_condensador`, photos)}
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_condensador`}
             />
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="Evaporador"
               value={gabinete.climatizacao.fotoEvaporador}
               onChange={(value) => updateClimatizacao({ fotoEvaporador: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_evaporador`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_evaporador`, photos)}
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_evaporador`}
             />
