@@ -100,9 +100,6 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         if (!data.energia.fotoQuadroGeral) {
           errors.push({ field: 'energia.fotoQuadroGeral', message: 'Foto do quadro geral é obrigatória' });
         }
-        if (data.energia.transformadorOK === false && !data.energia.fotoTransformador) {
-          errors.push({ field: 'energia.fotoTransformador', message: 'Foto do transformador é obrigatória quando NOK' });
-        }
         break;
 
       case 7: // Step9GMGTorre

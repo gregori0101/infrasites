@@ -534,8 +534,8 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       data.energia.potenciaKVA !== null && data.energia.potenciaKVA > 0,
       !!data.energia.tensaoEntrada,
       !!data.energia.fotoQuadroGeral,
-      // Fotos condicionais
-      data.energia.transformadorOK !== false || !!data.energia.fotoTransformador,
+      // Fotos condicionais - se tem transformador, deve ter foto
+      !data.energia.temTransformador || !!data.energia.fotoTransformador,
     ];
     const energiaProgress = energiaFields.filter(Boolean).length / energiaFields.length;
     progress += energiaProgress * WEIGHTS.energia;

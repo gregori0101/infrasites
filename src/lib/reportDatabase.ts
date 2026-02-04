@@ -362,7 +362,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.energia_fabricante = data.energia?.fabricante || null;
     row.energia_potencia_kva = data.energia?.potenciaKVA != null ? data.energia.potenciaKVA : null;
     row.energia_tensao_entrada = data.energia?.tensaoEntrada || null;
-    row.energia_transformador_ok = data.energia?.transformadorOK === true ? 'SIM' : data.energia?.transformadorOK === false ? 'NÃO' : null;
+    row.energia_transformador_ok = data.energia?.temTransformador ? 'SIM' : 'NÃO';
     row.energia_foto_transformador = data.energia?.fotoTransformador || null;
     row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
   }
