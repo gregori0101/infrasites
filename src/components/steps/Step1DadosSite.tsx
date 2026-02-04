@@ -281,6 +281,7 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <button
                   key={num}
+                    type="button"
                   onClick={() => updateData('qtdGabinetes', num)}
                   className={`w-10 h-10 rounded-lg font-semibold transition-all duration-200 ${
                     data.qtdGabinetes === num

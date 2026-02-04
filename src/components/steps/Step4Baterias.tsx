@@ -232,6 +232,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                       return (
                         <button
                           key={estado}
+                          type="button"
                           onClick={handleEstadoClick}
                           className={`px-2 py-1 text-xs rounded-full border transition-all ${
                             isSelected
@@ -254,6 +255,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     {COLADA_OPTIONS.map((option) => (
                       <button
                         key={option}
+                        type="button"
                         onClick={() => updateBanco(index, { colada: option })}
                         className={`px-3 py-1 text-xs rounded-full border transition-all ${
                           banco.colada === option
@@ -277,6 +279,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     {COLADA_OPTIONS.map((option) => (
                       <button
                         key={option}
+                        type="button"
                         onClick={() => updateBanco(index, { comGradil: option })}
                         className={`px-3 py-1 text-xs rounded-full border transition-all ${
                           banco.comGradil === option

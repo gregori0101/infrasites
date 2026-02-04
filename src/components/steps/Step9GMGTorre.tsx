@@ -95,6 +95,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                     {STATUS_OPTIONS.map((status) => (
                       <button
                         key={status}
+                        type="button"
                         onClick={() => updateGMG({ status })}
                         className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
                           data.gmg.status === status
@@ -183,6 +184,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 {STATUS_OPTIONS.map((status) => (
                   <button
                     key={status}
+                    type="button"
                     onClick={() => updateTorre({ aterramento: status })}
                     className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
                       torre.aterramento === status
@@ -206,6 +208,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 {STATUS_OPTIONS.map((status) => (
                   <button
                     key={status}
+                    type="button"
                     onClick={() => updateTorre({ zeladoria: status })}
                     className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
                       torre.zeladoria === status

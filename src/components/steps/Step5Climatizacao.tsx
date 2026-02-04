@@ -167,6 +167,7 @@ export function Step5Climatizacao({ showErrors = false, validationErrors = [] }:
                         {STATUS_OPTIONS.map((status) => (
                           <button
                             key={status}
+                            type="button"
                             onClick={() => updateAC(index, { funcionamento: status })}
                             className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-all ${
                               ac.funcionamento === status
@@ -194,6 +195,7 @@ export function Step5Climatizacao({ showErrors = false, validationErrors = [] }:
                     {STATUS_OPTIONS.map((status) => (
                       <button
                         key={status}
+                        type="button"
                         onClick={() => updateClimatizacao({ plcLeadLag: status })}
                         className={`flex-1 py-2 text-xs font-medium rounded-md border transition-all ${
                           gabinete.climatizacao.plcLeadLag === status

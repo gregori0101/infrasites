@@ -335,6 +335,7 @@ export function ChecklistWizard() {
           {Array.from({ length: maxGabinetes }).map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => setCurrentGabinete(i)}
               className={cn(
                 "w-8 h-8 rounded-full text-xs font-semibold transition-all",
