@@ -222,6 +222,11 @@ export interface FotoObservacao {
   descricao: string;
 }
 
+// Extra photos storage - keyed by field identifier
+export interface FotosExtras {
+  [fieldKey: string]: string[];
+}
+
 export interface ChecklistData {
   id: string;
   operadora: Operadora;
@@ -242,6 +247,7 @@ export interface ChecklistData {
   tecnico: string;
   sincronizado: boolean;
   secoesNaoAplicaveis: SecoesNaoAplicaveis;
+  fotosExtras: FotosExtras;
   createdAt: string;
   updatedAt: string;
 }
@@ -344,4 +350,5 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   tecnico: '',
   sincronizado: false,
   secoesNaoAplicaveis: { ...INITIAL_SECOES_NAO_APLICAVEIS },
+  fotosExtras: {},
 };

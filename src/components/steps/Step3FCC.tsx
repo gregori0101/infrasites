@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ interface Step3Props {
 }
 
 export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Props) {
-  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.fcc ?? false;
 
@@ -248,18 +248,22 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <PhotoCapture
+                  <PhotoCaptureWithExtras
                     label="FCC Panorâmica"
                     value={fcc.fotoPanoramica}
                     onChange={(value) => updateFCC(index, { fotoPanoramica: value })}
+                    extraPhotos={getFotosExtras(`gab${currentGabinete}_fcc${index}_panoramica`)}
+                    onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_fcc${index}_panoramica`, photos)}
                     required
                     siteCode={data.siglaSite}
                     category={`gab${currentGabinete + 1}_fcc${index + 1}_panoramica`}
                   />
-                  <PhotoCapture
+                  <PhotoCaptureWithExtras
                     label="Painel de Instrumentos"
                     value={fcc.fotoPainel}
                     onChange={(value) => updateFCC(index, { fotoPainel: value })}
+                    extraPhotos={getFotosExtras(`gab${currentGabinete}_fcc${index}_painel`)}
+                    onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_fcc${index}_painel`, photos)}
                     required
                     siteCode={data.siglaSite}
                     category={`gab${currentGabinete + 1}_fcc${index + 1}_painel`}

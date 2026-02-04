@@ -3,7 +3,7 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
 import { ChipSelect } from "@/components/ui/chip-select";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +26,7 @@ interface Step2Props {
 }
 
 export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Step2Props) {
-  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.gabinete ?? false;
 
@@ -113,10 +113,12 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
 
         <FormCard title="Fotos do Gabinete" icon={<Camera className="w-4 h-4" />} variant="accent">
           <div className="space-y-4">
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="Vista Panorâmica do Gabinete"
               value={gabinete.fotoPanoramicaGabinete}
               onChange={(value) => updateGabinete(currentGabinete, { fotoPanoramicaGabinete: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_panoramica`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_panoramica`, photos)}
               required
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_panoramica`}
@@ -125,10 +127,12 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
               Capture uma foto panorâmica externa do gabinete
             </p>
             
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="Equipamentos de Transmissão (gabinete aberto)"
               value={gabinete.fotoTransmissao}
               onChange={(value) => updateGabinete(currentGabinete, { fotoTransmissao: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_transmissao`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_transmissao`, photos)}
               required
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_transmissao`}
@@ -137,10 +141,12 @@ export function Step2Gabinete({ showErrors = false, validationErrors = [] }: Ste
               Capture uma foto clara dos equipamentos de transmissão com o gabinete aberto
             </p>
             
-            <PhotoCapture
+            <PhotoCaptureWithExtras
               label="Equipamentos de Acesso (gabinete aberto)"
               value={gabinete.fotoAcesso}
               onChange={(value) => updateGabinete(currentGabinete, { fotoAcesso: value })}
+              extraPhotos={getFotosExtras(`gab${currentGabinete}_acesso`)}
+              onExtraPhotosChange={(photos) => updateFotosExtras(`gab${currentGabinete}_acesso`, photos)}
               required
               siteCode={data.siglaSite}
               category={`gab${currentGabinete + 1}_acesso`}

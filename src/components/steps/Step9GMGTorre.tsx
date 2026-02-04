@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
-import { PhotoCapture } from "@/components/ui/photo-capture";
+import { PhotoCaptureWithExtras } from "@/components/ui/photo-capture-with-extras";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ interface Step9Props {
 }
 
 export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Step9Props) {
-  const { data, updateData, updateSecaoNaoAplicavel } = useChecklist();
+  const { data, updateData, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const isSkipped = data.secoesNaoAplicaveis?.gmgTorre ?? false;
 
   // Ensure gmg and torre are always defined
@@ -155,10 +155,12 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                   )}
                 </div>
 
-                <PhotoCapture
+                <PhotoCaptureWithExtras
                   label="Foto do Painel do GMG"
                   value={data.gmg.fotoGMG || null}
                   onChange={(value) => updateGMG({ fotoGMG: value })}
+                  extraPhotos={getFotosExtras('gmg_painel')}
+                  onExtraPhotosChange={(photos) => updateFotosExtras('gmg_painel', photos)}
                   siteCode={data.siglaSite}
                   category="gmg_painel"
                 />
@@ -178,10 +180,12 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
 
             {data.torre.fibrasProtegidas && (
               <div className="pt-2 animate-slide-up">
-                <PhotoCapture
+                <PhotoCaptureWithExtras
                   label="Foto das Fibras Protegidas"
                   value={data.torre.fotoFibrasProtegidas || null}
                   onChange={(value) => updateTorre({ fotoFibrasProtegidas: value })}
+                  extraPhotos={getFotosExtras('torre_fibras_protegidas')}
+                  onExtraPhotosChange={(photos) => updateFotosExtras('torre_fibras_protegidas', photos)}
                   siteCode={data.siglaSite}
                   category="torre_fibras_protegidas"
                 />
