@@ -61,6 +61,7 @@ export interface EnergiaData {
   potenciaKVA: number | null;
   tensaoEntrada: TensaoEntrada | null;
   temTransformador: boolean;
+  potenciaTransformador: string | null;
   fotoTransformador: string | null;
   fotoQuadroGeral: string | null;
   unidadeConsumidora: string | null;
@@ -322,6 +323,7 @@ export const INITIAL_ENERGIA: EnergiaData = {
   potenciaKVA: null,
   tensaoEntrada: null,
   temTransformador: false,
+  potenciaTransformador: null,
   fotoTransformador: null,
   fotoQuadroGeral: null,
   unidadeConsumidora: null,
