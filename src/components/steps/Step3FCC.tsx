@@ -183,7 +183,7 @@ export function Step3FCC({ showErrors = false, validationErrors = [] }: Step3Pro
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs">Consumo DC (W)</Label>
+                    <Label className="text-xs">Consumo</Label>
                     <Input
                       type="number"
                       value={fcc.consumoDC || ''}
