@@ -188,46 +188,92 @@ export function Step5Climatizacao({ showErrors = false, validationErrors = [] }:
                 </div>
               ))}
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="space-y-3 pt-2">
                 <div className="space-y-2">
                   <Label>PLC Lead-Lag</Label>
-                  <div className="flex gap-1">
-                    {STATUS_OPTIONS.map((status) => (
-                      <button
-                        key={status}
-                        type="button"
-                        onClick={() => updateClimatizacao({ plcLeadLag: status })}
-                        className={`flex-1 py-2 text-xs font-medium rounded-md border transition-all ${
-                          gabinete.climatizacao.plcLeadLag === status
-                            ? status === 'OK'
-                              ? 'bg-success text-success-foreground border-success'
-                              : status === 'NOK'
-                              ? 'bg-destructive text-destructive-foreground border-destructive'
-                              : 'bg-muted text-muted-foreground border-muted'
-                            : 'bg-card border-border hover:border-primary/50'
-                        }`}
-                      >
-                        {status}
-                      </button>
-                    ))}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateClimatizacao({ temPlcLeadLag: true })}
+                      className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                        gabinete.climatizacao.temPlcLeadLag === true
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-card border-border hover:border-primary/50'
+                      }`}
+                    >
+                      SIM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateClimatizacao({ temPlcLeadLag: false, plcLeadLagStatus: null, fotoPlcLeadLag: null })}
+                      className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                        gabinete.climatizacao.temPlcLeadLag === false
+                          ? 'bg-muted text-muted-foreground border-muted'
+                          : 'bg-card border-border hover:border-primary/50'
+                      }`}
+                    >
+                      NÃO
+                    </button>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Alarmística</Label>
-                  <Select
-                    value={gabinete.climatizacao.alarmistica}
-                    onValueChange={(value: 'SGINFRA U2020' | 'Outra') => updateClimatizacao({ alarmistica: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SGINFRA U2020">SGINFRA U2020</SelectItem>
-                      <SelectItem value="Outra">Outra</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {gabinete.climatizacao.temPlcLeadLag && (
+                  <div className="space-y-3 animate-slide-up pl-2 border-l-2 border-primary/30">
+                    <div className="space-y-2">
+                      <Label>Status PLC Lead-Lag</Label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => updateClimatizacao({ plcLeadLagStatus: 'OK' })}
+                          className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                            gabinete.climatizacao.plcLeadLagStatus === 'OK'
+                              ? 'bg-success text-success-foreground border-success'
+                              : 'bg-card border-border hover:border-primary/50'
+                          }`}
+                        >
+                          OK
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateClimatizacao({ plcLeadLagStatus: 'NOK' })}
+                          className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                            gabinete.climatizacao.plcLeadLagStatus === 'NOK'
+                              ? 'bg-destructive text-destructive-foreground border-destructive'
+                              : 'bg-card border-border hover:border-primary/50'
+                          }`}
+                        >
+                          NOK
+                        </button>
+                      </div>
+                    </div>
+
+                    <PhotoCaptureWithExtras
+                      label="Foto PLC Lead-Lag"
+                      value={gabinete.climatizacao.fotoPlcLeadLag}
+                      onChange={(value) => updateClimatizacao({ fotoPlcLeadLag: value })}
+                      extraPhotos={getFotosExtras(`climatizacao_plc_${currentGabinete}`)}
+                      onExtraPhotosChange={(photos) => updateFotosExtras(`climatizacao_plc_${currentGabinete}`, photos)}
+                      siteCode={data.siglaSite}
+                      category={`climatizacao_plc_gab${currentGabinete + 1}`}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <Label>Alarmística</Label>
+                <Select
+                  value={gabinete.climatizacao.alarmistica}
+                  onValueChange={(value: 'SGINFRA U2020' | 'Outra') => updateClimatizacao({ alarmistica: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SGINFRA U2020">SGINFRA U2020</SelectItem>
+                    <SelectItem value="Outra">Outra</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </FormCard>

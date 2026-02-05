@@ -141,7 +141,9 @@ export interface ClimatizacaoData {
   tipo: ClimatizacaoTipo;
   fanOK: boolean;
   acs: ArCondicionado[];
-  plcLeadLag: StatusFuncionamento;
+  temPlcLeadLag: boolean;
+  plcLeadLagStatus: 'OK' | 'NOK' | null;
+  fotoPlcLeadLag: string | null;
   alarmistica: 'SGINFRA U2020' | 'Outra';
   fotoAR1: string | null;
   fotoAR2: string | null;
@@ -275,7 +277,9 @@ export const INITIAL_GABINETE: GabineteData = {
     tipo: 'NA',
     fanOK: true,
     acs: [],
-    plcLeadLag: 'NA',
+    temPlcLeadLag: false,
+    plcLeadLagStatus: null,
+    fotoPlcLeadLag: null,
     alarmistica: 'SGINFRA U2020',
     fotoAR1: null,
     fotoAR2: null,
