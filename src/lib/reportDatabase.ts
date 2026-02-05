@@ -318,7 +318,11 @@ export function buildReportRow(data: ChecklistData): ReportRow {
           }
         }
         
-        row[`${prefix}_plc_status`] = gab.climatizacao.plcLeadLag || null;
+        // PLC Lead-Lag: store combined value (SIM/OK, SIM/NOK, or NÃO)
+        const plcValue = gab.climatizacao.temPlcLeadLag 
+          ? `SIM/${gab.climatizacao.plcLeadLagStatus || 'N/A'}` 
+          : 'NÃO';
+        row[`${prefix}_plc_status`] = plcValue;
         row[`${prefix}_alarme_status`] = gab.climatizacao.alarmistica || null;
         row[`${prefix}_clima_foto_ar1`] = gab.climatizacao.fotoAR1 || null;
         row[`${prefix}_clima_foto_ar2`] = gab.climatizacao.fotoAR2 || null;

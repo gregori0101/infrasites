@@ -141,7 +141,12 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
           }
         }
         
-        row[`${prefix}_PLC_Lead_Lag`] = gab.climatizacao.plcLeadLag;
+        // PLC Lead-Lag: store combined value
+        const plcValue = gab.climatizacao.temPlcLeadLag 
+          ? `SIM/${gab.climatizacao.plcLeadLagStatus || 'N/A'}` 
+          : 'NÃO';
+        row[`${prefix}_PLC_Lead_Lag`] = plcValue;
+        row[`${prefix}_Foto_PLC`] = getPhotoValue(gab.climatizacao.fotoPlcLeadLag);
         row[`${prefix}_Alarmistica`] = gab.climatizacao.alarmistica;
         row[`${prefix}_Foto_AR1`] = getPhotoValue(gab.climatizacao.fotoAR1);
         row[`${prefix}_Foto_AR2`] = getPhotoValue(gab.climatizacao.fotoAR2);

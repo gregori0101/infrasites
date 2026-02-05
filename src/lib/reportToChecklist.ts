@@ -203,7 +203,10 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         tipo: (report[`${prefix}_climatizacao_tipo`] || 'NA') as any,
         fanOK: report[`${prefix}_ventiladores_status`] === 'OK',
         acs: [],
-        plcLeadLag: (report[`${prefix}_plc_status`] || 'NA') as any,
+        temPlcLeadLag: report[`${prefix}_plc_status`]?.startsWith('SIM') || false,
+        plcLeadLagStatus: report[`${prefix}_plc_status`]?.includes('/OK') ? 'OK' : 
+                          report[`${prefix}_plc_status`]?.includes('/NOK') ? 'NOK' : null,
+        fotoPlcLeadLag: null, // Photo field - would need DB column to restore
         alarmistica: (report[`${prefix}_alarme_status`] || 'SGINFRA U2020') as any,
         fotoAR1: report[`${prefix}_clima_foto_ar1`] || null,
         fotoAR2: report[`${prefix}_clima_foto_ar2`] || null,

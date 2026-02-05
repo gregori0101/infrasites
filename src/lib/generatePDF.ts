@@ -507,7 +507,12 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
         addSubSectionTitle('CLIMATIZAÇÃO');
         addFieldRow('Tipo', gab.climatizacao.tipo);
         addFieldRow('Fan OK', gab.climatizacao.fanOK, gab.climatizacao.fanOK ? 'ok' : 'error');
-        addFieldRow('PLC Lead-Lag', gab.climatizacao.plcLeadLag, gab.climatizacao.plcLeadLag === 'OK' ? 'ok' : 'warning');
+        const plcValue = gab.climatizacao.temPlcLeadLag 
+          ? `SIM / ${gab.climatizacao.plcLeadLagStatus || 'N/A'}` 
+          : 'NÃO';
+        const plcStatus = gab.climatizacao.temPlcLeadLag && gab.climatizacao.plcLeadLagStatus === 'OK' ? 'ok' : 
+                         gab.climatizacao.temPlcLeadLag && gab.climatizacao.plcLeadLagStatus === 'NOK' ? 'error' : 'warning';
+        addFieldRow('PLC Lead-Lag', plcValue, plcStatus);
         addFieldRow('Alarmística', gab.climatizacao.alarmistica);
 
         if (gab.climatizacao.acs.length > 0) {

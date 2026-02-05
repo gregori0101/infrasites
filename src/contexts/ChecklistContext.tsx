@@ -518,7 +518,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
           true, // tipo selecionado
           gab.climatizacao.acs.length > 0 && gab.climatizacao.acs.some(ac => ac.modelo !== 'NA'),
           !!gab.climatizacao.fotoAR1,
-          gab.climatizacao.plcLeadLag !== null,
+          gab.climatizacao.temPlcLeadLag !== undefined,
         ];
         climaProgress = climaFields.filter(Boolean).length / climaFields.length;
       } else if (gab.climatizacao.tipo === 'FAN') {
