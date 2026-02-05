@@ -634,6 +634,10 @@ export type Database = {
           gab7_tecnologias_transporte: string | null
           gab7_tipo: string | null
           gab7_ventiladores_status: string | null
+          geo_capturado_em: string | null
+          geo_endereco: string | null
+          geo_latitude: number | null
+          geo_longitude: number | null
           gmg_autonomia: number | null
           gmg_combustivel: string | null
           gmg_existe: string | null
@@ -1279,6 +1283,10 @@ export type Database = {
           gab7_tecnologias_transporte?: string | null
           gab7_tipo?: string | null
           gab7_ventiladores_status?: string | null
+          geo_capturado_em?: string | null
+          geo_endereco?: string | null
+          geo_latitude?: number | null
+          geo_longitude?: number | null
           gmg_autonomia?: number | null
           gmg_combustivel?: string | null
           gmg_existe?: string | null
@@ -1924,6 +1932,10 @@ export type Database = {
           gab7_tecnologias_transporte?: string | null
           gab7_tipo?: string | null
           gab7_ventiladores_status?: string | null
+          geo_capturado_em?: string | null
+          geo_endereco?: string | null
+          geo_latitude?: number | null
+          geo_longitude?: number | null
           gmg_autonomia?: number | null
           gmg_combustivel?: string | null
           gmg_existe?: string | null
@@ -2698,6 +2710,10 @@ export type Database = {
           gab7_tecnologias_transporte: string | null
           gab7_tipo: string | null
           gab7_ventiladores_status: string | null
+          geo_capturado_em: string | null
+          geo_endereco: string | null
+          geo_latitude: number | null
+          geo_longitude: number | null
           gmg_autonomia: number | null
           gmg_combustivel: string | null
           gmg_existe: string | null
