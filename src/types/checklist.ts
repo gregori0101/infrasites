@@ -15,7 +15,7 @@ export type GabineteType =
   | 'OUTROS';
 
 export type TecnologiaAcesso = '2G' | '3G' | '4G' | '5G';
-export type TecnologiaTransporte = 'DWDM' | 'GPON' | 'HL3/HL2' | 'HL4' | 'HL5D' | 'HL5G' | 'PDH' | 'SDH' | 'GWS' | 'GWD' | 'SWA';
+export type TecnologiaTransporte = 'DWDM' | 'GPON' | 'HL3' | 'HL4' | 'HL5D' | 'HL5G' | 'PDH' | 'SDH' | 'GWS' | 'GWD' | 'SWA';
 
 export type FCCFabricante = 
   | 'ALCATEL' | 'ALFA' | 'ASCOM' | 'DELTA' | 'ELTEK' | 'EFACEC' 
