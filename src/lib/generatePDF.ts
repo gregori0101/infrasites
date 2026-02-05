@@ -662,7 +662,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     if (data.gmg.informar) {
       addFieldRow('Fabricante', data.gmg.fabricante);
       addFieldRow('Potência (kVA)', data.gmg.potencia);
-      addFieldRow('Autonomia (h)', data.gmg.autonomia);
+      addFieldRow('Capacidade Tanque (L)', data.gmg.capacidadeTanque);
       addFieldRow('Status', data.gmg.status, data.gmg.status === 'OK' ? 'ok' : 'error');
       addFieldRow('Último Teste', data.gmg.ultimoTeste);
       

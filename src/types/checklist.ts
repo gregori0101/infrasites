@@ -174,7 +174,7 @@ export interface GMGData {
   fabricante?: FCCFabricante;
   fabricanteOutra?: string;
   potencia?: number;
-  autonomia?: number;
+  capacidadeTanque?: number;
   status?: StatusFuncionamento;
   ultimoTeste?: string;
   fotoGMG?: string | null;
