@@ -18,7 +18,7 @@ const GABINETE_TYPES: GabineteType[] = [
 ];
 
 const TECNOLOGIAS_ACESSO: TecnologiaAcesso[] = ['2G', '3G', '4G', '5G'];
-const TECNOLOGIAS_TRANSPORTE: TecnologiaTransporte[] = ['DWDM', 'GPON', 'HL3/HL2', 'HL4', 'HL5D', 'HL5G', 'PDH', 'SDH', 'GWS', 'GWD', 'SWA'];
+const TECNOLOGIAS_TRANSPORTE: TecnologiaTransporte[] = ['DWDM', 'GPON', 'HL3', 'HL4', 'HL5D', 'HL5G', 'PDH', 'SDH', 'GWS', 'GWD', 'SWA'];
 
 interface Step2Props {
   showErrors?: boolean;
