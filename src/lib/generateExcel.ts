@@ -217,7 +217,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
     row['GMG_Fabricante'] = data.gmg.informar ? (data.gmg.fabricante || '') : '';
     row['GMG_Potencia_kVA'] = data.gmg.informar ? (data.gmg.potencia || '') : '';
-    row['GMG_Autonomia_h'] = data.gmg.informar ? (data.gmg.autonomia || '') : '';
+    row['GMG_Capacidade_Tanque_L'] = data.gmg.informar ? (data.gmg.capacidadeTanque || '') : '';
     row['GMG_Status'] = data.gmg.informar ? (data.gmg.status || '') : '';
     row['GMG_Ultimo_Teste'] = data.gmg.informar ? (data.gmg.ultimoTeste || '') : '';
     row['GMG_Foto_Painel'] = data.gmg.informar ? getPhotoValue(data.gmg.fotoGMG) : '';

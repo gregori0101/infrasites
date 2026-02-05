@@ -346,7 +346,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_existe = data.gmg?.informar === true ? 'SIM' : data.gmg?.informar === false ? 'NÃO' : null;
     row.gmg_fabricante = data.gmg?.fabricante || null;
     row.gmg_potencia = data.gmg?.potencia != null ? data.gmg.potencia : null;
-    row.gmg_autonomia = data.gmg?.autonomia != null ? data.gmg.autonomia : null;
+    row.gmg_autonomia = data.gmg?.capacidadeTanque != null ? data.gmg.capacidadeTanque : null;
     row.gmg_status = data.gmg?.status || null;
     row.gmg_combustivel = null;
     row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;

@@ -325,7 +325,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       informar: report.gmg_existe === 'SIM',
       fabricante: report.gmg_fabricante as any,
       potencia: parseInt(report.gmg_potencia) || undefined,
-      autonomia: parseInt(report.gmg_autonomia) || undefined,
+      capacidadeTanque: parseInt(report.gmg_autonomia) || undefined,
       status: (report.gmg_status as any) || undefined,
       ultimoTeste: report.gmg_ultimo_teste || undefined,
       fotoGMG: report.gmg_foto_painel || null,

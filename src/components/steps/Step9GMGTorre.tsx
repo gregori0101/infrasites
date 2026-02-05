@@ -78,11 +78,11 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Autonomia (h)</Label>
+                    <Label>Capacidade do Tanque (L)</Label>
                     <input
                       type="number"
-                      value={data.gmg.autonomia || ''}
-                      onChange={(e) => updateGMG({ autonomia: parseInt(e.target.value) || undefined })}
+                      value={data.gmg.capacidadeTanque || ''}
+                      onChange={(e) => updateGMG({ capacidadeTanque: parseInt(e.target.value) || undefined })}
                       className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                       placeholder="0"
                     />
