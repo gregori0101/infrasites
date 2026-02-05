@@ -99,12 +99,21 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
       setUploadProgress(10);
 
       try {
+        // Small delay to allow UI to update and prevent race conditions
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        
         // Compress file directly to blob (no base64)
         console.log(`[PhotoUpload] Compressing file: ${Math.round(file.size / 1024)}KB - ${category}`);
-        const blob = await compressFileToBlobWithFallback(file, 500, isMobile);
+        
+        // Use smaller target for mobile to prevent memory issues
+        const targetSizeKB = isMobile ? 350 : 500;
+        const blob = await compressFileToBlobWithFallback(file, targetSizeKB, isMobile);
         console.log(`[PhotoUpload] Compressed to: ${Math.round(blob.size / 1024)}KB - ${category}`);
 
         setUploadProgress(50);
+        
+        // Allow GC between heavy operations
+        await new Promise((resolve) => setTimeout(resolve, 30));
 
         // Generate unique filename
         const timestamp = new Date().toISOString().slice(0, 10);
@@ -134,7 +143,7 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
           if (retries <= maxRetries) {
             console.log(`[PhotoUpload] Retry ${retries}/${maxRetries} for ${category}`);
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 800 * retries));
           }
         }
 
@@ -159,27 +168,11 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
         onError?.(new Error(errorMessage));
 
-        // LAST resort fallback: store compressed base64 locally (should be rare)
-        try {
-          console.log('[PhotoUpload] Attempting base64 fallback...');
-          const blob = await compressFileToBlobWithFallback(file, MAX_SIZE_KB, isMobile);
-
-          return await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              console.log('[PhotoUpload] Using compressed base64 fallback');
-              toast.warning('Foto salva localmente', {
-                description: 'Será enviada ao finalizar o relatório.',
-              });
-              resolve(result);
-            };
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        } catch {
-          return null;
-        }
+        // Return null on failure - no fallback to base64 to avoid memory issues
+        toast.error('Falha no upload da foto', {
+          description: 'Tente novamente ou verifique sua conexão.',
+        });
+        return null;
       } finally {
         setIsUploading(false);
         setUploadProgress(0);
