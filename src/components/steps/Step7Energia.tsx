@@ -31,6 +31,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
     potenciaKVA: null,
     tensaoEntrada: null,
     temTransformador: false,
+    potenciaTransformador: null,
     fotoTransformador: null,
     fotoQuadroGeral: null,
     unidadeConsumidora: null,
@@ -151,7 +152,15 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
             />
 
             {energia.temTransformador && (
-              <div className="pt-2 animate-slide-up">
+              <div className="pt-2 animate-slide-up space-y-4">
+                <div className="space-y-2">
+                  <Label>Potência do Transformador (opcional)</Label>
+                  <Input
+                    placeholder="Ex: 75 kVA"
+                    value={energia.potenciaTransformador || ''}
+                    onChange={(e) => updateEnergia({ potenciaTransformador: e.target.value })}
+                  />
+                </div>
                 <PhotoCaptureWithExtras
                   label="Foto do Transformador"
                   value={energia.fotoTransformador}
