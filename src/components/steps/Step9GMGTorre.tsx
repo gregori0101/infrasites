@@ -134,8 +134,20 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 <ToggleSwitch
                   label="Possui alarme ativo?"
                   value={data.gmg.alarmeAtivo ?? false}
-                  onChange={(value) => updateGMG({ alarmeAtivo: value })}
+                  onChange={(value) => updateGMG({ alarmeAtivo: value, fotoAlarme: value ? data.gmg.fotoAlarme : null })}
                 />
+
+                {data.gmg.alarmeAtivo && (
+                  <PhotoCaptureWithExtras
+                    label="Foto do Alarme"
+                    value={data.gmg.fotoAlarme}
+                    onChange={(value) => updateGMG({ fotoAlarme: value })}
+                    extraPhotos={getFotosExtras('gmg_alarme')}
+                    onExtraPhotosChange={(photos) => updateFotosExtras('gmg_alarme', photos)}
+                    siteCode={data.siglaSite}
+                    category="gmg_alarme"
+                  />
+                )}
 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1">
