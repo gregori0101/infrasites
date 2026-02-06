@@ -326,6 +326,12 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     uf: (report.state_uf || 'PA') as any,
     qtdGabinetes: report.total_cabinets || 1,
     fotoPanoramica: report.panoramic_photo_url || null,
+    geolocalizacao: {
+      latitude: (report as any).geo_latitude ?? null,
+      longitude: (report as any).geo_longitude ?? null,
+      endereco: (report as any).geo_endereco ?? null,
+      capturadoEm: (report as any).geo_capturado_em ?? null,
+    },
     gabinetes,
     fibraOptica: {
       ...INITIAL_FIBRA_OPTICA,
@@ -372,7 +378,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotoGMG: report.gmg_foto_painel || null,
     },
     torre: {
-      ninhos: false,
+      ninhos: (report as any).torre_ninhos === 'SIM',
+      fotoNinhos: (report as any).torre_foto_ninhos ?? null,
       fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
       fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
