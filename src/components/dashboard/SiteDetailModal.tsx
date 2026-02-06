@@ -262,10 +262,6 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.energia_foto_transformador) {
     allPhotos.push({ url: report.energia_foto_transformador, label: "Transformador", category: "Energia" });
   }
-  // Torre photos
-  if (report?.torre_foto_ninhos) {
-    allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
-  }
   // GMG photo
   if (report?.gmg_foto_painel) {
     allPhotos.push({ url: report.gmg_foto_painel, label: "Painel do GMG", category: "GMG" });
@@ -942,23 +938,12 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
                         <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Ninhos:</span>
-                          <StatusBadge status={report.torre_ninhos} />
-                        </div>
-                        <div className="flex items-center gap-2 py-1">
                           <span className="text-sm text-muted-foreground">Fibra Protegida:</span>
                           <StatusBadge status={report.torre_protecao_fibra} />
                         </div>
                         <InfoRow label="Aterramento" value={report.torre_aterramento} />
                         <InfoRow label="Zeladoria" value={report.torre_housekeeping} />
                       </div>
-                      
-                      {/* Foto de ninhos */}
-                      {report.torre_ninhos === "SIM" && report.torre_foto_ninhos && (
-                        <div className="mt-4">
-                          <PhotoViewer url={report.torre_foto_ninhos} label="Foto dos Ninhos" />
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>

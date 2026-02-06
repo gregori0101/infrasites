@@ -82,10 +82,9 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       fotoAlarme: null,
     },
     
-    // Clear torre photo
+    // Clear torre photos
     torre: {
       ...data.torre,
-      fotoNinhos: null,
       fotoFibrasProtegidas: null,
       fotoAterramento: null,
       fotoZeladoria: null,
@@ -340,6 +339,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     gmg: {
       informar: report.gmg_existe === 'SIM',
       fabricante: report.gmg_fabricante as any,
+      fabricanteOutra: report.gmg_fabricante || '',
       potencia: parseInt(report.gmg_potencia) || undefined,
       capacidadeTanque: parseInt(report.gmg_autonomia) || undefined,
       combustivelPorcentagem: report.gmg_combustivel ? parseInt(report.gmg_combustivel) : undefined,
@@ -350,14 +350,13 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotoGMG: report.gmg_foto_painel || null,
     },
     torre: {
-      ninhos: report.torre_ninhos === 'SIM',
+      ninhos: false,
       fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
       fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
-      fotoAterramento: null, // Not stored in legacy DB columns
+      fotoAterramento: null,
       zeladoria: (report.torre_housekeeping || 'OK') as any,
-      fotoZeladoria: null, // Not stored in legacy DB columns
-      fotoNinhos: report.torre_foto_ninhos || null,
+      fotoZeladoria: null,
     },
     observacoes: report.observacoes || '',
     fotosObservacao: parseFotosObservacao(report.observacao_foto_url),

@@ -668,7 +668,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     addSectionTitle('GMG - GRUPO MOTOR GERADOR');
     addFieldRow('Possui GMG', data.gmg.informar, data.gmg.informar ? 'ok' : 'warning');
     if (data.gmg.informar) {
-      addFieldRow('Fabricante', data.gmg.fabricante);
+      addFieldRow('Fabricante', data.gmg.fabricanteOutra || data.gmg.fabricante);
       addFieldRow('Potência', data.gmg.potencia);
       addFieldRow('Capacidade Tanque (L)', data.gmg.capacidadeTanque);
       addFieldRow('Combustível (%)', data.gmg.combustivelPorcentagem != null ? `${data.gmg.combustivelPorcentagem}%` : undefined);
@@ -686,11 +686,6 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
     y += 10;
     addSectionTitle('TORRE E ZELADORIA');
-    
-    addFieldRow('Ninhos na Torre', data.torre.ninhos, data.torre.ninhos ? 'warning' : 'ok');
-    if (data.torre.ninhos && data.torre.fotoNinhos) {
-      await addPhoto(data.torre.fotoNinhos, 'Foto dos Ninhos');
-    }
     
     addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
     if (data.torre.fotoFibrasProtegidas) {
