@@ -8,6 +8,7 @@ import { ChecklistProvider } from "@/contexts/ChecklistContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { toast } from "sonner";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 // Lazy-loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -18,6 +19,7 @@ const PendingApproval = lazy(() => import("./pages/PendingApproval"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const SiteManagement = lazy(() => import("./pages/SiteManagement"));
 const AssignmentManagement = lazy(() => import("./pages/AssignmentManagement"));
+const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -84,6 +86,7 @@ const App = () => {
             <Toaster />
             <Sonner position="top-center" />
             <BrowserRouter>
+              <PWAInstallPrompt />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public routes */}
@@ -121,6 +124,7 @@ const App = () => {
                       <AssignmentManagement />
                     </ProtectedRoute>
                   } />
+                  <Route path="/instalar" element={<Install />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
