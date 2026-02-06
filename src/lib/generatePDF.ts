@@ -474,8 +474,16 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     addInfoCard('Localização GPS', geoItems);
   }
 
-  if (data.fotoPanoramica) {
-    await addPhoto(data.fotoPanoramica, 'FOTO PANORÂMICA DO SITE', 80, 55);
+  // Site panoramic photo + extras
+  const sitePanoramicPhotos: { photo: string | null; label: string }[] = [
+    { photo: data.fotoPanoramica, label: 'Panorâmica do Site' },
+  ];
+  const sitePanoramicExtras = getExtrasForField('site_panoramica');
+  sitePanoramicPhotos.push(...sitePanoramicExtras);
+
+  const validSitePhotos = sitePanoramicPhotos.filter(p => p.photo);
+  if (validSitePhotos.length > 0) {
+    await addPhotoGrid(validSitePhotos as { photo: string; label: string }[]);
   }
 
   // ===== GABINETES =====
