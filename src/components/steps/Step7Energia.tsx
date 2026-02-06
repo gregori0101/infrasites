@@ -31,6 +31,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
     fabricanteOutra: '',
     potenciaKVA: null,
     tensaoEntrada: null,
+    capacidadeDisjuntorEntrada: null,
+    capacidadeDisjuntorQDCA: null,
     protegidoGradil: false,
     protegidoCadeado: false,
     temTransformador: false,
@@ -147,6 +149,35 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                     {tensao}
                   </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Disjuntor de Entrada (A)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={energia.capacidadeDisjuntorEntrada ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateEnergia({ capacidadeDisjuntorEntrada: val === "" ? null : parseInt(val) || 0 });
+                    }}
+                    placeholder="Ex: 100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Disjuntor do QDCA (A)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={energia.capacidadeDisjuntorQDCA ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateEnergia({ capacidadeDisjuntorQDCA: val === "" ? null : parseInt(val) || 0 });
+                    }}
+                    placeholder="Ex: 63"
+                  />
                 </div>
               </div>
 
