@@ -39,14 +39,24 @@ function GlobalErrorHandlers() {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.error('[GlobalError] Unhandled Promise Rejection:', event.reason);
       
-      // Prevent the default behavior (which may crash the app)
+      // CRITICAL: Prevent the default behavior (which crashes/reloads the app)
       event.preventDefault();
       
       // Show user-friendly toast for common scenarios
       const message = event.reason?.message || String(event.reason);
-      if (message.includes('image') || message.includes('photo') || message.includes('compress')) {
+      
+      if (message.includes('image') || message.includes('photo') || message.includes('compress') || message.includes('upload')) {
         toast.error("Erro ao processar foto", { 
           description: "Tente novamente ou use outra imagem." 
+        });
+      } else if (message.includes('memory') || message.includes('allocation')) {
+        toast.error("Memória insuficiente", { 
+          description: "Feche outras abas e tente novamente." 
+        });
+      } else {
+        // Generic error for other cases
+        toast.error("Ocorreu um erro", { 
+          description: "Por favor, tente novamente." 
         });
       }
     };

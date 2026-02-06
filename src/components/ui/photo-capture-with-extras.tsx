@@ -60,31 +60,41 @@ export function PhotoCaptureWithExtras({
     
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
-      return;
-    }
-
-    setIsProcessing(true);
-
+    // CRITICAL: Wrap everything in try-catch to prevent unhandled rejections
     try {
-      // Use file-first upload (no base64 intermediate)
-      const result = await uploadPhotoFile(file);
-      
-      if (result) {
-        onChange(result);
-        toast.success(result.startsWith('http') ? "Foto salva na nuvem!" : "Foto adicionada!");
-      } else {
-        throw new Error("Falha ao processar imagem");
+      if (!file.type.startsWith('image/')) {
+        toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
+        return;
+      }
+
+      setIsProcessing(true);
+
+      try {
+        // Use file-first upload (no base64 intermediate)
+        const result = await uploadPhotoFile(file);
+        
+        if (result) {
+          onChange(result);
+          toast.success(result.startsWith('http') ? "Foto salva na nuvem!" : "Foto adicionada!");
+        } else {
+          throw new Error("Falha ao processar imagem");
+        }
+      } catch (uploadError) {
+        console.error("[PhotoCaptureWithExtras] Upload error:", uploadError);
+        toast.error("Erro ao enviar foto", { 
+          description: "Verifique sua conexão e tente novamente." 
+        });
       }
     } catch (error) {
       console.error("[PhotoCaptureWithExtras] Main capture error:", error);
-      toast.error("Erro ao processar imagem");
+      toast.error("Erro ao processar imagem", {
+        description: "Tente capturar novamente."
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -100,31 +110,41 @@ export function PhotoCaptureWithExtras({
     
     if (!file || !onExtraPhotosChange) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
-      return;
-    }
-
-    setProcessingExtra(true);
-
+    // CRITICAL: Wrap everything in try-catch to prevent unhandled rejections
     try {
-      // Use file-first upload (no base64 intermediate)
-      const result = await uploadPhotoFile(file);
-      
-      if (result) {
-        onExtraPhotosChange([...extraPhotos, result]);
-        toast.success("Foto extra adicionada!");
-      } else {
-        throw new Error("Falha ao processar imagem");
+      if (!file.type.startsWith('image/')) {
+        toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
+        return;
+      }
+
+      setProcessingExtra(true);
+
+      try {
+        // Use file-first upload (no base64 intermediate)
+        const result = await uploadPhotoFile(file);
+        
+        if (result) {
+          onExtraPhotosChange([...extraPhotos, result]);
+          toast.success("Foto extra adicionada!");
+        } else {
+          throw new Error("Falha ao processar imagem");
+        }
+      } catch (uploadError) {
+        console.error("[PhotoCaptureWithExtras] Upload error:", uploadError);
+        toast.error("Erro ao enviar foto extra", { 
+          description: "Verifique sua conexão e tente novamente." 
+        });
       }
     } catch (error) {
       console.error("[PhotoCaptureWithExtras] Extra capture error:", error);
-      toast.error("Erro ao processar imagem extra");
+      toast.error("Erro ao processar imagem extra", {
+        description: "Tente capturar novamente."
+      });
     } finally {
       setProcessingExtra(false);
     }
