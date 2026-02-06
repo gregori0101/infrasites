@@ -128,6 +128,7 @@ function buildDashboardColumns(): string {
       `${prefix}_fcc_qtd_ur`,
       `${prefix}_fcc_qtd_ur_instaladas`,
       `${prefix}_bancos_interligados`,
+      `${prefix}_bat_foto`,
       `${prefix}_climatizacao_tipo`,
       `${prefix}_ventiladores_status`,
       `${prefix}_plc_status`,
