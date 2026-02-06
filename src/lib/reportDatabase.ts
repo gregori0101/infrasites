@@ -57,6 +57,7 @@ function buildDashboardColumns(): string {
     'torre_protecao_fibra',
     'torre_aterramento',
     'torre_housekeeping',
+    'energia_unidade_consumidora',
     'observacoes',
     // Fibra Óptica columns
     'fibra_qtd_abordagens',
@@ -134,7 +135,10 @@ function buildPhotoColumns(): string {
     'assinatura_digital',
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
+    'energia_foto_relogio',
     'torre_foto_fibras_protegidas',
+    'torre_foto_aterramento',
+    'torre_foto_zeladoria',
     'gmg_foto_painel',
     // Fiber optic photos
     'fibra_abord1_foto',
@@ -359,7 +363,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
     row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
     row.torre_aterramento = data.torre?.aterramento || null;
+    row.torre_foto_aterramento = data.torre?.fotoAterramento || null;
     row.torre_housekeeping = data.torre?.zeladoria || null;
+    row.torre_foto_zeladoria = data.torre?.fotoZeladoria || null;
   }
 
   // Energia data - skip if energia section marked NA
@@ -377,6 +383,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.energia_transformador_ok = data.energia?.temTransformador ? 'SIM' : 'NÃO';
     row.energia_foto_transformador = data.energia?.fotoTransformador || null;
     row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
+    row.energia_unidade_consumidora = data.energia?.unidadeConsumidora || null;
+    row.energia_foto_relogio = data.energia?.fotoRelogio || null;
   }
 
   // Observations (always include)
