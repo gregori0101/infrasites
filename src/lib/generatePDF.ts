@@ -401,6 +401,27 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     { label: 'Data/Hora', value: data.dataHora ? format(new Date(data.dataHora), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : '-' },
   ]);
 
+  // GPS Location Section
+  if (data.geolocalizacao?.latitude && data.geolocalizacao?.longitude) {
+    const geoItems: { label: string; value: string | number | boolean | null | undefined }[] = [
+      { label: 'Latitude', value: data.geolocalizacao.latitude.toFixed(6) },
+      { label: 'Longitude', value: data.geolocalizacao.longitude.toFixed(6) },
+    ];
+    
+    if (data.geolocalizacao.endereco) {
+      geoItems.push({ label: 'Endereço', value: data.geolocalizacao.endereco });
+    }
+    
+    if (data.geolocalizacao.capturadoEm) {
+      geoItems.push({ 
+        label: 'Capturado em', 
+        value: format(new Date(data.geolocalizacao.capturadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+      });
+    }
+    
+    addInfoCard('Localização GPS', geoItems);
+  }
+
   if (data.fotoPanoramica) {
     await addPhoto(data.fotoPanoramica, 'FOTO PANORÂMICA DO SITE', 80, 55);
   }
