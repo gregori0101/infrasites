@@ -61,6 +61,8 @@ export interface EnergiaData {
   fabricanteOutra?: string;
   potenciaKVA: number | null;
   tensaoEntrada: TensaoEntrada | null;
+  protegidoGradil: boolean;
+  protegidoCadeado: boolean;
   temTransformador: boolean;
   potenciaTransformador: string | null;
   fotoTransformador: string | null;
@@ -331,6 +333,8 @@ export const INITIAL_ENERGIA: EnergiaData = {
   fabricanteOutra: '',
   potenciaKVA: null,
   tensaoEntrada: null,
+  protegidoGradil: false,
+  protegidoCadeado: false,
   temTransformador: false,
   potenciaTransformador: null,
   fotoTransformador: null,

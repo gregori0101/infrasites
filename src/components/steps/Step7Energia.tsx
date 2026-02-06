@@ -31,6 +31,8 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
     fabricanteOutra: '',
     potenciaKVA: null,
     tensaoEntrada: null,
+    protegidoGradil: false,
+    protegidoCadeado: false,
     temTransformador: false,
     potenciaTransformador: null,
     fotoTransformador: null,
@@ -144,11 +146,24 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                   >
                     {tensao}
                   </button>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <ToggleSwitch
+                  label="Protegido com Gradil?"
+                  value={energia.protegidoGradil ?? false}
+                  onChange={(value) => updateEnergia({ protegidoGradil: value })}
+                />
+                <ToggleSwitch
+                  label="Protegido com Cadeado?"
+                  value={energia.protegidoCadeado ?? false}
+                  onChange={(value) => updateEnergia({ protegidoCadeado: value })}
+                />
               </div>
             </div>
-          </div>
-        </FormCard>
+          </FormCard>
 
         {/* Transformador */}
         <FormCard title="Transformador" icon={<Zap className="w-4 h-4" />}>
