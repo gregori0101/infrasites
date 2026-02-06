@@ -327,6 +327,58 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     }
   };
 
+  // Helper to get extra photos for a specific field key pattern
+  const getExtrasForField = (keyPattern: string): { photo: string; label: string }[] => {
+    if (!data.fotosExtras || typeof data.fotosExtras !== 'object') return [];
+    
+    const extras: { photo: string; label: string }[] = [];
+    const keys = Object.keys(data.fotosExtras).filter(k => k.toLowerCase().includes(keyPattern.toLowerCase()));
+    
+    const labelMap: Record<string, string> = {
+      'gab': 'Gabinete',
+      'ar': 'AR',
+      'condensador': 'Condensador',
+      'evaporador': 'Evaporador',
+      'controlador': 'Controlador',
+      'fcc': 'FCC',
+      'bateria': 'Bateria',
+      'energia': 'Energia',
+      'transformador': 'Transformador',
+      'quadro': 'Quadro',
+      'torre': 'Torre',
+      'fibra': 'Fibra',
+      'gmg': 'GMG',
+      'plc': 'PLC',
+      'clima': 'Climatização',
+    };
+
+    const getLabel = (key: string): string => {
+      let label = key.replace(/_/g, ' ').replace(/\d+/g, (match) => ` ${match}`);
+      for (const [pattern, replacement] of Object.entries(labelMap)) {
+        if (key.toLowerCase().includes(pattern)) {
+          label = label.replace(new RegExp(pattern, 'gi'), replacement);
+        }
+      }
+      return label.trim().replace(/\s+/g, ' ');
+    };
+
+    for (const key of keys) {
+      const photos = data.fotosExtras[key];
+      if (Array.isArray(photos)) {
+        photos.forEach((photo, i) => {
+          if (photo) {
+            extras.push({
+              photo,
+              label: `Extra: ${getLabel(key)}${photos.length > 1 ? ` (${i + 1})` : ''}`
+            });
+          }
+        });
+      }
+    }
+    
+    return extras;
+  };
+
   // ===== COVER PAGE =====
   // Full page cover
   doc.setFillColor(...VIVO_PURPLE);
@@ -482,10 +534,16 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           
           y += 46;
 
-          await addPhotoGrid([
+          // FCC photos with extras
+          const fccPhotos: { photo: string | null; label: string }[] = [
             { photo: fcc.fotoPanoramica, label: `FCC ${f + 1} Panorâmica` },
             { photo: fcc.fotoPainel, label: `FCC ${f + 1} Painel` },
-          ]);
+          ];
+          // Add extras for this FCC
+          const fccExtras = getExtrasForField(`gab${i + 1}_fcc${f + 1}`);
+          fccPhotos.push(...fccExtras);
+          
+          await addPhotoGrid(fccPhotos);
         }
       }
 
@@ -518,7 +576,18 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'warning' : banco.colada === 'NÃO' ? 'ok' : undefined);
           addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
 
-          await addPhoto(banco.fotoBanco, `Foto Banco ${b + 1}`);
+          // Battery photos grid: main photo + extras
+          const batteryPhotos: { photo: string | null; label: string }[] = [];
+          if (banco.fotoBanco) {
+            batteryPhotos.push({ photo: banco.fotoBanco, label: `Foto Banco ${b + 1}` });
+          }
+          // Add extras for this battery
+          const batExtras = getExtrasForField(`gab${i + 1}_bat${b + 1}`);
+          batteryPhotos.push(...batExtras);
+          
+          if (batteryPhotos.length > 0) {
+            await addPhotoGrid(batteryPhotos);
+          }
         }
       }
 
@@ -550,7 +619,8 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           });
         }
 
-        await addPhotoGrid([
+        // Climate photos with extras
+        const climaPhotos: { photo: string | null; label: string }[] = [
           { photo: gab.climatizacao.fotoAR1, label: 'AR 1' },
           { photo: gab.climatizacao.fotoAR2, label: 'AR 2' },
           { photo: gab.climatizacao.fotoAR3, label: 'AR 3' },
@@ -558,16 +628,29 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           { photo: gab.climatizacao.fotoCondensador, label: 'Condensador' },
           { photo: gab.climatizacao.fotoEvaporador, label: 'Evaporador' },
           { photo: gab.climatizacao.fotoControlador, label: 'Controlador' },
-        ]);
+        ];
+        // Add extras for this cabinet's climate
+        const climaExtras = getExtrasForField(`gab${i + 1}_clima`);
+        climaPhotos.push(...climaExtras);
+        
+        await addPhotoGrid(climaPhotos);
       }
 
       // Equipment Section (always include if gabinete active)
       checkNewPage(60);
       addSubSectionTitle('EQUIPAMENTOS');
-      await addPhotoGrid([
+      
+      // Equipment photos with extras
+      const equipPhotos: { photo: string | null; label: string }[] = [
         { photo: gab.fotoTransmissao, label: 'Equipamentos de Transmissão' },
         { photo: gab.fotoAcesso, label: 'Equipamentos de Acesso' },
-      ]);
+      ];
+      // Add extras for this cabinet's equipment
+      const equipExtras = getExtrasForField(`gab${i + 1}_transmissao`);
+      equipExtras.push(...getExtrasForField(`gab${i + 1}_acesso`));
+      equipPhotos.push(...equipExtras);
+      
+      await addPhotoGrid(equipPhotos);
     }
   }
 
@@ -642,6 +725,10 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     if (dgo.fotoDGO) fibraPhotos.push({ photo: dgo.fotoDGO, label: `DGO ${i + 1}` });
     if (dgo.fotoCordesDetalhada) fibraPhotos.push({ photo: dgo.fotoCordesDetalhada, label: `DGO ${i + 1} - Cordões` });
   });
+  
+  // Add extras for fibra section
+  const fibraExtras = getExtrasForField('fibra');
+  fibraPhotos.push(...fibraExtras);
 
   if (fibraPhotos.length > 0) {
     checkNewPage(60);
@@ -676,11 +763,17 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       { label: 'Unidade Consumidora (UC)', value: data.energia.unidadeConsumidora },
     ]);
 
-    await addPhotoGrid([
+    // Energy photos with extras
+    const energyPhotos: { photo: string | null; label: string }[] = [
       { photo: data.energia.fotoQuadroGeral, label: 'Quadro Geral' },
       { photo: data.energia.fotoTransformador, label: 'Transformador' },
       { photo: data.energia.fotoRelogio, label: 'Relógio' },
-    ]);
+    ];
+    // Add extras for energy section
+    const energyExtras = getExtrasForField('energia');
+    energyPhotos.push(...energyExtras);
+    
+    await addPhotoGrid(energyPhotos);
   }
 
   // ===== GMG & TOWER ===== - skip if marked NA
@@ -700,30 +793,49 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       addFieldRow('Alarme Ativo', data.gmg.alarmeAtivo ? 'SIM' : 'NÃO', data.gmg.alarmeAtivo ? 'ok' : 'warning');
       addFieldRow('Último Teste', data.gmg.ultimoTeste);
       
+      // GMG photos with extras
+      const gmgPhotos: { photo: string | null; label: string }[] = [];
       if (data.gmg.fotoGMG) {
-        await addPhoto(data.gmg.fotoGMG, 'Foto do Painel do GMG');
+        gmgPhotos.push({ photo: data.gmg.fotoGMG, label: 'Foto do Painel do GMG' });
       }
       if (data.gmg.alarmeAtivo && data.gmg.fotoAlarme) {
-        await addPhoto(data.gmg.fotoAlarme, 'Foto do Alarme');
+        gmgPhotos.push({ photo: data.gmg.fotoAlarme, label: 'Foto do Alarme' });
+      }
+      // Add extras for GMG section
+      const gmgExtras = getExtrasForField('gmg');
+      gmgPhotos.push(...gmgExtras);
+      
+      if (gmgPhotos.length > 0) {
+        await addPhotoGrid(gmgPhotos);
       }
     }
 
     y += 10;
     addSectionTitle('TORRE E ZELADORIA');
     
+    // Torre photos with extras
+    const torrePhotos: { photo: string | null; label: string }[] = [];
     addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
     if (data.torre.fotoFibrasProtegidas) {
-      await addPhoto(data.torre.fotoFibrasProtegidas, 'Foto das Fibras Protegidas');
+      torrePhotos.push({ photo: data.torre.fotoFibrasProtegidas, label: 'Foto das Fibras Protegidas' });
     }
     
     addFieldRow('Aterramento', data.torre.aterramento, data.torre.aterramento === 'OK' ? 'ok' : 'error');
     if (data.torre.fotoAterramento) {
-      await addPhoto(data.torre.fotoAterramento, 'Foto do Aterramento');
+      torrePhotos.push({ photo: data.torre.fotoAterramento, label: 'Foto do Aterramento' });
     }
     
     addFieldRow('Zeladoria', data.torre.zeladoria, data.torre.zeladoria === 'OK' ? 'ok' : 'error');
     if (data.torre.fotoZeladoria) {
-      await addPhoto(data.torre.fotoZeladoria, 'Foto da Zeladoria');
+      torrePhotos.push({ photo: data.torre.fotoZeladoria, label: 'Foto da Zeladoria' });
+    }
+    
+    // Add extras for torre section
+    const torreExtras = getExtrasForField('torre');
+    torrePhotos.push(...torreExtras);
+    
+    if (torrePhotos.length > 0) {
+      await addPhotoGrid(torrePhotos);
     }
   }
 
@@ -761,68 +873,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     }
   }
 
-  // ===== EXTRA PHOTOS =====
-  // Add extra photos from fotosExtras map
-  if (data.fotosExtras && typeof data.fotosExtras === 'object') {
-    const extraKeys = Object.keys(data.fotosExtras);
-    const validExtras = extraKeys.filter(key => {
-      const photos = data.fotosExtras[key];
-      return Array.isArray(photos) && photos.some(p => p);
-    });
-
-    if (validExtras.length > 0) {
-      checkNewPage(40);
-      addSectionTitle('FOTOS EXTRAS');
-
-      // Map field keys to friendly labels
-      const labelMap: Record<string, string> = {
-        'gab': 'Gabinete',
-        'ar': 'Ar Condicionado',
-        'condensador': 'Condensador',
-        'evaporador': 'Evaporador',
-        'controlador': 'Controlador',
-        'fcc': 'FCC',
-        'bateria': 'Bateria',
-        'energia': 'Energia',
-        'transformador': 'Transformador',
-        'quadro': 'Quadro',
-        'torre': 'Torre',
-        'fibra': 'Fibra',
-        'gmg': 'GMG',
-        'plc': 'PLC',
-        'clima': 'Climatização',
-      };
-
-      const getLabel = (key: string): string => {
-        // Try to create a friendly label from the key
-        let label = key.replace(/_/g, ' ').replace(/\d+/g, (match) => ` ${match}`);
-        
-        // Replace known parts with friendly names
-        for (const [pattern, replacement] of Object.entries(labelMap)) {
-          if (key.toLowerCase().includes(pattern)) {
-            label = label.replace(new RegExp(pattern, 'gi'), replacement);
-          }
-        }
-        
-        return label.trim().replace(/\s+/g, ' ');
-      };
-
-      for (const key of validExtras) {
-        const photos = data.fotosExtras[key];
-        const friendlyLabel = getLabel(key);
-        
-        for (let i = 0; i < photos.length; i++) {
-          const photo = photos[i];
-          if (photo) {
-            const photoLabel = photos.length > 1 
-              ? `Extra: ${friendlyLabel} (${i + 1}/${photos.length})`
-              : `Extra: ${friendlyLabel}`;
-            await addPhoto(photo, photoLabel);
-          }
-        }
-      }
-    }
-  }
+  // Note: Extra photos are now included inline with their respective sections
 
   // ===== SIGNATURE =====
   if (data.assinaturaDigital) {
