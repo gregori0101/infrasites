@@ -349,6 +349,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_autonomia = data.gmg?.capacidadeTanque != null ? data.gmg.capacidadeTanque : null;
     row.gmg_status = data.gmg?.status || null;
     row.gmg_combustivel = data.gmg?.combustivelPorcentagem != null ? String(data.gmg.combustivelPorcentagem) : null;
+    row.gmg_alarme_ativo = data.gmg?.alarmeAtivo ? 'SIM' : 'NÃO';
+    row.gmg_foto_alarme = data.gmg?.fotoAlarme || null;
     row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
     row.gmg_foto_painel = data.gmg?.fotoGMG || null;
     row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
@@ -364,8 +366,13 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   if (!skipEnergia) {
     row.energia_tipo_quadro = data.energia?.tipoQuadro || null;
     row.energia_fabricante = data.energia?.fabricante || null;
+    row.energia_fabricante_outra = data.energia?.fabricanteOutra || null;
     row.energia_potencia_kva = data.energia?.potenciaKVA != null ? data.energia.potenciaKVA : null;
     row.energia_tensao_entrada = data.energia?.tensaoEntrada || null;
+    row.energia_disjuntor_entrada = data.energia?.capacidadeDisjuntorEntrada != null ? data.energia.capacidadeDisjuntorEntrada : null;
+    row.energia_disjuntor_qdca = data.energia?.capacidadeDisjuntorQDCA != null ? data.energia.capacidadeDisjuntorQDCA : null;
+    row.energia_protegido_gradil = data.energia?.protegidoGradil ? 'SIM' : 'NÃO';
+    row.energia_protegido_cadeado = data.energia?.protegidoCadeado ? 'SIM' : 'NÃO';
     row.energia_transformador_ok = data.energia?.temTransformador ? 'SIM' : 'NÃO';
     row.energia_foto_transformador = data.energia?.fotoTransformador || null;
     row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;

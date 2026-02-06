@@ -200,8 +200,13 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   if (!skipEnergia) {
     row['Energia_Tipo_Quadro'] = data.energia.tipoQuadro || '';
     row['Energia_Fabricante'] = data.energia.fabricante || '';
+    row['Energia_Fabricante_Outra'] = data.energia.fabricanteOutra || '';
     row['Energia_Potencia_kVA'] = data.energia.potenciaKVA ?? '';
     row['Energia_Tensao_Entrada'] = data.energia.tensaoEntrada || '';
+    row['Energia_Disjuntor_Entrada_A'] = data.energia.capacidadeDisjuntorEntrada ?? '';
+    row['Energia_Disjuntor_QDCA_A'] = data.energia.capacidadeDisjuntorQDCA ?? '';
+    row['Energia_Protegido_Gradil'] = data.energia.protegidoGradil ? 'SIM' : 'NÃO';
+    row['Energia_Protegido_Cadeado'] = data.energia.protegidoCadeado ? 'SIM' : 'NÃO';
     row['Energia_Tem_Transformador'] = data.energia.temTransformador ? 'SIM' : 'NÃO';
     row['Energia_Foto_Transformador'] = getPhotoValue(data.energia.fotoTransformador);
     row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
@@ -220,6 +225,8 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['GMG_Capacidade_Tanque_L'] = data.gmg.informar ? (data.gmg.capacidadeTanque || '') : '';
     row['GMG_Combustivel_Pct'] = data.gmg.informar ? (data.gmg.combustivelPorcentagem != null ? data.gmg.combustivelPorcentagem : '') : '';
     row['GMG_Status'] = data.gmg.informar ? (data.gmg.status || '') : '';
+    row['GMG_Alarme_Ativo'] = data.gmg.informar ? (data.gmg.alarmeAtivo ? 'SIM' : 'NÃO') : '';
+    row['GMG_Foto_Alarme'] = data.gmg.informar ? getPhotoValue(data.gmg.fotoAlarme) : '';
     row['GMG_Ultimo_Teste'] = data.gmg.informar ? (data.gmg.ultimoTeste || '') : '';
     row['GMG_Foto_Painel'] = data.gmg.informar ? getPhotoValue(data.gmg.fotoGMG) : '';
     

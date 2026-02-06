@@ -635,11 +635,19 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
     addSectionTitle('ENERGIA');
 
+    const fabricanteEnergia = data.energia.fabricante === 'OUTRA' && data.energia.fabricanteOutra 
+      ? `OUTRA - ${data.energia.fabricanteOutra}` 
+      : data.energia.fabricante;
+
     addInfoCard('Quadro de Energia', [
       { label: 'Tipo de Quadro', value: data.energia.tipoQuadro },
-      { label: 'Fabricante', value: data.energia.fabricante },
-      { label: 'Potência (kVA)', value: data.energia.potenciaKVA },
+      { label: 'Fabricante', value: fabricanteEnergia },
+      { label: 'Potência', value: data.energia.potenciaKVA },
       { label: 'Tensão de Entrada', value: data.energia.tensaoEntrada },
+      { label: 'Disjuntor de Entrada (A)', value: data.energia.capacidadeDisjuntorEntrada },
+      { label: 'Disjuntor QDCA (A)', value: data.energia.capacidadeDisjuntorQDCA },
+      { label: 'Protegido com Gradil', value: data.energia.protegidoGradil ? 'SIM' : 'NÃO' },
+      { label: 'Protegido com Cadeado', value: data.energia.protegidoCadeado ? 'SIM' : 'NÃO' },
       { label: 'Possui Transformador', value: data.energia.temTransformador ? 'SIM' : 'NÃO' },
       { label: 'Unidade Consumidora (UC)', value: data.energia.unidadeConsumidora },
     ]);
@@ -661,14 +669,18 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     addFieldRow('Possui GMG', data.gmg.informar, data.gmg.informar ? 'ok' : 'warning');
     if (data.gmg.informar) {
       addFieldRow('Fabricante', data.gmg.fabricante);
-      addFieldRow('Potência (kVA)', data.gmg.potencia);
+      addFieldRow('Potência', data.gmg.potencia);
       addFieldRow('Capacidade Tanque (L)', data.gmg.capacidadeTanque);
       addFieldRow('Combustível (%)', data.gmg.combustivelPorcentagem != null ? `${data.gmg.combustivelPorcentagem}%` : undefined);
       addFieldRow('Status', data.gmg.status, data.gmg.status === 'OK' ? 'ok' : 'error');
+      addFieldRow('Alarme Ativo', data.gmg.alarmeAtivo ? 'SIM' : 'NÃO', data.gmg.alarmeAtivo ? 'ok' : 'warning');
       addFieldRow('Último Teste', data.gmg.ultimoTeste);
       
       if (data.gmg.fotoGMG) {
         await addPhoto(data.gmg.fotoGMG, 'Foto do Painel do GMG');
+      }
+      if (data.gmg.alarmeAtivo && data.gmg.fotoAlarme) {
+        await addPhoto(data.gmg.fotoAlarme, 'Foto do Alarme');
       }
     }
 
