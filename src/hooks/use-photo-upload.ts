@@ -138,6 +138,19 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
             break;
           }
 
+          // Check for RLS/permission errors - don't retry these
+          if (error.message?.includes('row-level security') || 
+              error.message?.includes('policy') ||
+              error.message?.includes('403') ||
+              error.message?.includes('Unauthorized')) {
+            console.error(`[PhotoUpload] Permission denied for ${category}:`, error);
+            toast.error('Sem permissão para enviar foto', {
+              description: 'Verifique se você está logado e seu usuário está aprovado.',
+              duration: 8000,
+            });
+            return null;
+          }
+
           uploadError = error;
           retries++;
 
@@ -170,7 +183,8 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
         // Return null on failure - no fallback to base64 to avoid memory issues
         toast.error('Falha no upload da foto', {
-          description: 'Tente novamente ou verifique sua conexão.',
+          description: errorMessage.includes('permissão') ? errorMessage : 'Tente novamente ou verifique sua conexão.',
+          duration: 6000,
         });
         return null;
       } finally {

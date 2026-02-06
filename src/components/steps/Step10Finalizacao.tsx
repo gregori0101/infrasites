@@ -98,7 +98,17 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         const updatedData = { ...data, dataHora: new Date().toISOString() };
         updateData('dataHora', updatedData.dataHora);
         
-        // 1. Upload das fotos para o Storage (sequencial para iOS)
+        // 1. Verificar autenticação antes de começar
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast.error('Sessão expirada', {
+            description: 'Faça login novamente para enviar o relatório.',
+            duration: 8000
+          });
+          return;
+        }
+        
+        // 2. Upload das fotos para o Storage (sequencial para iOS)
         setUploadProgress('Enviando fotos... (pode demorar alguns minutos)');
         const siteCode = data.siglaSite || `site_${Date.now()}`;
         
@@ -109,10 +119,19 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         } catch (uploadError) {
           console.error('[Step10] Photo upload error:', uploadError);
           const errorMsg = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido';
-          toast.error('Erro no upload das fotos', {
-            description: errorMsg,
-            duration: 8000
-          });
+          
+          // Check for permission-related errors
+          if (errorMsg.includes('permissão') || errorMsg.includes('policy') || errorMsg.includes('403')) {
+            toast.error('Sem permissão para enviar fotos', {
+              description: 'Seu usuário pode não estar aprovado. Entre em contato com o administrador.',
+              duration: 10000
+            });
+          } else {
+            toast.error('Erro no upload das fotos', {
+              description: errorMsg,
+              duration: 8000
+            });
+          }
           return; // Early return, finally will clean up
         }
         
