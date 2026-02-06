@@ -1,61 +1,76 @@
 
-# Correção: Página Recarregando ao Adicionar Foto Panorâmica
+# Plano: Aplicar Tratamento Robusto de Erros em Todos os Componentes de Foto
 
-## Problema Identificado
+## Diagnóstico
 
-Após a implementação do PWA, a configuração `registerType: "autoUpdate"` no `vite-plugin-pwa` pode estar causando recarregamentos automáticos da página. Quando o Service Worker detecta uma atualização, ele pode automaticamente recarregar a página sem aviso, interrompendo operações como captura de fotos.
+A página continua recarregando ao adicionar fotos porque o componente **`PhotoCapture`** (usado nas seções de Fibra Óptica e Finalização) **não possui** o mesmo tratamento robusto de erros que foi implementado no `PhotoCaptureWithExtras`.
 
-## Solução
+O problema específico é que erros assíncronos não capturados (como falhas de memória durante compressão) causam "Unhandled Promise Rejections" que podem fazer o navegador recarregar a página.
 
-Mudar a estratégia de atualização do PWA para dar controle ao usuário, em vez de recarregar automaticamente.
+## Componentes Afetados
 
----
+| Componente | Uso | Status |
+|------------|-----|--------|
+| `PhotoCaptureWithExtras` | Step1-5, Step7, Step9 | ✅ Já possui double try-catch |
+| `PhotoCapture` | Step6, Step10 | ❌ **Precisa de ajuste** |
 
 ## Mudanças a Implementar
 
-### 1. Alterar Configuração do PWA (`vite.config.ts`)
+### 1. Atualizar `PhotoCapture` (`src/components/ui/photo-capture.tsx`)
 
-Mudar de `registerType: "autoUpdate"` para `registerType: "prompt"`. Isso evita recarregamentos automáticos e permite que o usuário escolha quando atualizar.
+Adicionar o mesmo padrão de double try-catch usado em `PhotoCaptureWithExtras`:
 
-### 2. Adicionar Componente de Atualização do PWA
-
-Criar um componente `PWAUpdatePrompt` que:
-- Detecta quando há uma nova versão disponível
-- Mostra um toast/botão perguntando ao usuário se deseja atualizar
-- Só recarrega a página quando o usuário confirma
-
-### 3. Registrar o Service Worker Manualmente
-
-Usar o hook `useRegisterSW` do `vite-plugin-pwa/react` para controlar o registro e atualizações do Service Worker.
-
----
-
-## Detalhes Técnicos
-
-### Arquivo: `vite.config.ts`
 ```typescript
-VitePWA({
-  registerType: "prompt",  // Mudança: era "autoUpdate"
-  // ... resto da configuração mantida
-})
+const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  
+  if (inputRef.current) {
+    inputRef.current.value = '';
+  }
+  
+  if (!file) return;
+
+  // CRÍTICO: Envolver TUDO em try-catch para evitar rejeições não tratadas
+  try {
+    // Validações...
+    
+    setIsProcessing(true);
+
+    try {
+      // Upload interno com seu próprio try-catch
+      const result = await uploadPhotoFile(file);
+      // ...
+    } catch (uploadError) {
+      // Erro específico de upload
+      console.error("[PhotoCapture] Upload error:", uploadError);
+      toast.error("Erro ao enviar foto", { 
+        description: "Verifique sua conexão e tente novamente." 
+      });
+    }
+  } catch (error) {
+    // Erro externo genérico (previne crash)
+    console.error("[PhotoCapture] Capture error:", error);
+    toast.error("Erro ao processar imagem", {
+      description: "Tente capturar novamente."
+    });
+  } finally {
+    setIsProcessing(false);
+  }
+};
 ```
 
-### Novo Arquivo: `src/components/PWAUpdatePrompt.tsx`
+### 2. Melhorar Mensagens de Erro
 
-Componente que:
-- Usa `useRegisterSW` para detectar atualizações
-- Mostra toast quando nova versão disponível
-- Permite ao usuário controlar quando recarregar
+As mensagens de erro serão padronizadas para serem mais claras e informativas para o usuário.
 
-### Arquivo: `src/App.tsx`
+## Arquivos a Modificar
 
-Adicionar o novo componente `PWAUpdatePrompt` junto com o `PWAInstallPrompt`.
-
----
+| Arquivo | Ação |
+|---------|------|
+| `src/components/ui/photo-capture.tsx` | Adicionar double try-catch no `handleCapture` |
 
 ## Resultado Esperado
 
-- A página **não** recarrega automaticamente durante operações
-- Quando há nova versão, aparece um botão discreto para atualizar
-- O usuário tem controle total sobre quando recarregar
-- Capturas de foto funcionam sem interrupção
+- O componente `PhotoCapture` terá a mesma proteção contra crashes que o `PhotoCaptureWithExtras`
+- Erros durante captura/upload mostrarão toasts informativos em vez de recarregar a página
+- Todas as seções do formulário (Fibra Óptica, Finalização, etc.) ficarão estáveis
