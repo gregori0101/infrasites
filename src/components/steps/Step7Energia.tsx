@@ -110,7 +110,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
             </div>
 
             <div className="space-y-2">
-              <Label>Potência (kVA)</Label>
+              <Label>Potência</Label>
               <Input
                 type="number"
                 min={5}
