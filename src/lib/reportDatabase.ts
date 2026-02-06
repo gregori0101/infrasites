@@ -59,6 +59,8 @@ function buildDashboardColumns(): string {
     'torre_housekeeping',
     'energia_unidade_consumidora',
     'observacoes',
+    // JSONB (leve) - necessário para exibir/gerar PDF com fotos extras
+    'fotos_extras',
     // Fibra Óptica columns
     'fibra_qtd_abordagens',
     'fibra_abord1_tipo',
@@ -110,10 +112,7 @@ function buildDashboardColumns(): string {
 
     // ACs (4 per gabinete)
     for (let a = 1; a <= 4; a++) {
-      cols.push(
-        `${prefix}_ac${a}_modelo`,
-        `${prefix}_ac${a}_status`,
-      );
+      cols.push(`${prefix}_ac${a}_modelo`, `${prefix}_ac${a}_status`);
     }
   }
 

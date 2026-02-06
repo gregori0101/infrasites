@@ -14,17 +14,20 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     sincronizado: false,
-    
+
     // Clear site-level photos
     fotoPanoramica: null,
     fotosObservacao: [],
     assinaturaDigital: null,
-    
+
+    // Extra photos should NOT be carried to a new inspection
+    fotosExtras: {},
+
     // Clear technician name (new inspection, new technician)
     tecnico: '',
-    
+
     // Clear gabinete photos
-    gabinetes: data.gabinetes.map(gab => ({
+    gabinetes: data.gabinetes.map((gab) => ({
       ...gab,
       fotoPanoramicaGabinete: null,
       fotoTransmissao: null,
@@ -49,24 +52,24 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
         fotoControlador: null,
       },
     })),
-    
+
     // Clear fiber optic photos
     fibraOptica: {
       ...data.fibraOptica,
-      abordagens: data.fibraOptica.abordagens.map(ab => ({
+      abordagens: data.fibraOptica.abordagens.map((ab) => ({
         ...ab,
         fotos: [],
       })),
       fotosCaixasPassagem: [],
       fotosCaixasSubterraneas: [],
       fotosSubidasLaterais: [],
-      dgos: data.fibraOptica.dgos.map(dgo => ({
+      dgos: data.fibraOptica.dgos.map((dgo) => ({
         ...dgo,
         fotoDGO: null,
         fotoCordesDetalhada: null,
       })),
     },
-    
+
     // Clear energia photos
     energia: {
       ...data.energia,
@@ -74,14 +77,14 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       fotoQuadroGeral: null,
       fotoRelogio: null,
     },
-    
+
     // Clear GMG photo
     gmg: {
       ...data.gmg,
       fotoGMG: null,
       fotoAlarme: null,
     },
-    
+
     // Clear torre photos
     torre: {
       ...data.torre,
@@ -134,6 +137,22 @@ function parseJsonArray(value: string | null): string[] {
   }
 }
 
+function parseFotosExtras(value: unknown): Record<string, string[]> {
+  if (!value) return {};
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === 'object') return parsed as Record<string, string[]>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof value === 'object') {
+    return value as Record<string, string[]>;
+  }
+  return {};
+}
+
 /**
  * Parse fotosObservacao from JSON - handles both old format (string[]) and new format (FotoObservacao[])
  */
@@ -143,16 +162,18 @@ function parseFotosObservacao(value: string | null): { foto: string | null; desc
     const parsed = JSON.parse(value);
     if (!Array.isArray(parsed)) return [];
     // Check if it's old format (array of strings) or new format (array of objects)
-    return parsed.map((item: any) => {
-      if (typeof item === 'string') {
-        // Old format: just a URL string
-        return { foto: item, descricao: '' };
-      } else if (item && typeof item === 'object') {
-        // New format: object with foto and descricao
-        return { foto: item.foto || null, descricao: item.descricao || '' };
-      }
-      return { foto: null, descricao: '' };
-    }).filter((item: any) => item.foto);
+    return parsed
+      .map((item: any) => {
+        if (typeof item === 'string') {
+          // Old format: just a URL string
+          return { foto: item, descricao: '' };
+        } else if (item && typeof item === 'object') {
+          // New format: object with foto and descricao
+          return { foto: item.foto || null, descricao: item.descricao || '' };
+        }
+        return { foto: null, descricao: '' };
+      })
+      .filter((item: any) => item.foto);
   } catch {
     return [];
   }
@@ -306,7 +327,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     qtdGabinetes: report.total_cabinets || 1,
     fotoPanoramica: report.panoramic_photo_url || null,
     gabinetes,
-    fibraOptica: { 
+    fibraOptica: {
       ...INITIAL_FIBRA_OPTICA,
       qtdAbordagens: report.fibra_qtd_abordagens || 1,
       abordagens: abordagens.length > 0 ? abordagens : INITIAL_FIBRA_OPTICA.abordagens,
@@ -319,22 +340,23 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotosCaixasSubterraneas: parseJsonArray(report.fibra_foto_caixas_subterraneas),
       fotosSubidasLaterais: parseJsonArray(report.fibra_foto_subidas_laterais),
     },
-    energia: { 
+    energia: {
       ...INITIAL_ENERGIA,
-      tipoQuadro: report.energia_tipo_quadro as any || null,
-      fabricante: report.energia_fabricante as any || null,
+      tipoQuadro: (report.energia_tipo_quadro as any) || null,
+      fabricante: (report.energia_fabricante as any) || null,
       fabricanteOutra: report.energia_fabricante_outra || '',
       potenciaKVA: report.energia_potencia_kva != null ? Number(report.energia_potencia_kva) : null,
-      tensaoEntrada: report.energia_tensao_entrada as any || null,
+      tensaoEntrada: (report.energia_tensao_entrada as any) || null,
       capacidadeDisjuntorEntrada: report.energia_disjuntor_entrada != null ? Number(report.energia_disjuntor_entrada) : null,
       capacidadeDisjuntorQDCA: report.energia_disjuntor_qdca != null ? Number(report.energia_disjuntor_qdca) : null,
       protegidoGradil: report.energia_protegido_gradil === 'SIM',
       protegidoCadeado: report.energia_protegido_cadeado === 'SIM',
       temTransformador: report.energia_transformador_ok === 'SIM',
+      potenciaTransformador: (report as any).energia_potencia_transformador ?? null,
       fotoTransformador: report.energia_foto_transformador || null,
       fotoQuadroGeral: report.energia_foto_quadro_geral || null,
-      unidadeConsumidora: null, // Not stored in DB
-      fotoRelogio: null, // Not stored in DB
+      unidadeConsumidora: (report as any).energia_unidade_consumidora ?? null,
+      fotoRelogio: (report as any).energia_foto_relogio ?? null,
     },
     gmg: {
       informar: report.gmg_existe === 'SIM',
@@ -354,12 +376,13 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
       fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
-      fotoAterramento: null,
+      fotoAterramento: (report as any).torre_foto_aterramento ?? null,
       zeladoria: (report.torre_housekeeping || 'OK') as any,
-      fotoZeladoria: null,
+      fotoZeladoria: (report as any).torre_foto_zeladoria ?? null,
     },
     observacoes: report.observacoes || '',
     fotosObservacao: parseFotosObservacao(report.observacao_foto_url),
+    fotosExtras: parseFotosExtras((report as any).fotos_extras),
     assinaturaDigital: report.assinatura_digital || null,
     dataHora: report.created_at || new Date().toISOString(),
     tecnico: report.technician_name || '',
