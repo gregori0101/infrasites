@@ -1,76 +1,44 @@
 
-# Plano: Aplicar Tratamento Robusto de Erros em Todos os Componentes de Foto
+# Plano: Compatibilidade Total do Formulário em Todos os Navegadores
 
-## Diagnóstico
+## Status: ✅ CONCLUÍDO
 
-A página continua recarregando ao adicionar fotos porque o componente **`PhotoCapture`** (usado nas seções de Fibra Óptica e Finalização) **não possui** o mesmo tratamento robusto de erros que foi implementado no `PhotoCaptureWithExtras`.
+## Mudanças Implementadas
 
-O problema específico é que erros assíncronos não capturados (como falhas de memória durante compressão) causam "Unhandled Promise Rejections" que podem fazer o navegador recarregar a página.
+### 1. Tratamento Robusto de Erros (Step10Finalizacao.tsx)
+- ✅ Double try-catch no `handleConfirmSend` para evitar crashes
+- ✅ Tratamento individual de erros para cada etapa (upload, PDF, Excel, banco)
+- ✅ Delays entre operações pesadas para estabilidade no iOS
 
-## Componentes Afetados
+### 2. Compatibilidade iOS Safari (photoStorage.ts)
+- ✅ Detecção de iOS Safari com `isIOSSafari()`
+- ✅ Delays maiores entre uploads no iOS (200ms vs 100ms)
+- ✅ Retries com delays exponenciais (800ms * attempt no iOS)
+- ✅ Upload da foto de alarme do GMG (`fotoAlarme`)
+- ✅ Upload da foto de ninhos da torre (`fotoNinhos`)
+- ✅ Upload da foto do relógio de energia (`fotoRelogio`)
+- ✅ Upload de todas as fotos extras (`fotosExtras`)
 
-| Componente | Uso | Status |
-|------------|-----|--------|
-| `PhotoCaptureWithExtras` | Step1-5, Step7, Step9 | ✅ Já possui double try-catch |
-| `PhotoCapture` | Step6, Step10 | ❌ **Precisa de ajuste** |
+### 3. Componentes de Foto (photo-capture.tsx)
+- ✅ Double try-catch no `handleCapture`
+- ✅ Mensagens de erro claras e informativas
 
-## Mudanças a Implementar
+### 4. Banco de Dados (reportDatabase.ts)
+- ✅ Adicionado `torre_ninhos` e `torre_foto_ninhos`
 
-### 1. Atualizar `PhotoCapture` (`src/components/ui/photo-capture.tsx`)
+## Arquivos Modificados
 
-Adicionar o mesmo padrão de double try-catch usado em `PhotoCaptureWithExtras`:
-
-```typescript
-const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  
-  if (inputRef.current) {
-    inputRef.current.value = '';
-  }
-  
-  if (!file) return;
-
-  // CRÍTICO: Envolver TUDO em try-catch para evitar rejeições não tratadas
-  try {
-    // Validações...
-    
-    setIsProcessing(true);
-
-    try {
-      // Upload interno com seu próprio try-catch
-      const result = await uploadPhotoFile(file);
-      // ...
-    } catch (uploadError) {
-      // Erro específico de upload
-      console.error("[PhotoCapture] Upload error:", uploadError);
-      toast.error("Erro ao enviar foto", { 
-        description: "Verifique sua conexão e tente novamente." 
-      });
-    }
-  } catch (error) {
-    // Erro externo genérico (previne crash)
-    console.error("[PhotoCapture] Capture error:", error);
-    toast.error("Erro ao processar imagem", {
-      description: "Tente capturar novamente."
-    });
-  } finally {
-    setIsProcessing(false);
-  }
-};
-```
-
-### 2. Melhorar Mensagens de Erro
-
-As mensagens de erro serão padronizadas para serem mais claras e informativas para o usuário.
-
-## Arquivos a Modificar
-
-| Arquivo | Ação |
-|---------|------|
-| `src/components/ui/photo-capture.tsx` | Adicionar double try-catch no `handleCapture` |
+| Arquivo | Mudança |
+|---------|---------|
+| `src/components/steps/Step10Finalizacao.tsx` | Double try-catch, delays para iOS |
+| `src/components/ui/photo-capture.tsx` | Double try-catch no handleCapture |
+| `src/lib/photoStorage.ts` | iOS detection, delays, upload de fotos extras |
+| `src/lib/reportDatabase.ts` | Campos de foto de ninhos da torre |
 
 ## Resultado Esperado
 
-- O componente `PhotoCapture` terá a mesma proteção contra crashes que o `PhotoCaptureWithExtras`
-- Erros durante captura/upload mostrarão toasts informativos em vez de recarregar a página
-- Todas as seções do formulário (Fibra Óptica, Finalização, etc.) ficarão estáveis
+- ✅ Formulário funciona corretamente em Chrome Android
+- ✅ Formulário funciona corretamente em Safari iOS
+- ✅ Formulário funciona corretamente em qualquer navegador desktop
+- ✅ Erros mostram mensagens claras em vez de recarregar a página
+- ✅ Todas as fotos (incluindo extras) são enviadas para o servidor

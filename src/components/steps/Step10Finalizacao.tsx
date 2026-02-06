@@ -91,103 +91,130 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
 
     setIsSending(true);
     
+    // CRITICAL: Wrap EVERYTHING in outer try-catch to prevent unhandled rejections
     try {
-      // Atualizar data/hora
-      const updatedData = { ...data, dataHora: new Date().toISOString() };
-      updateData('dataHora', updatedData.dataHora);
-      
-      // 1. Upload das fotos para o Storage (sequencial para iOS)
-      setUploadProgress('Enviando fotos... (pode demorar alguns minutos)');
-      const siteCode = data.siglaSite || `site_${Date.now()}`;
-      
-      let dataWithUrls;
       try {
-        dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
-        setUploadProgress('Fotos enviadas com sucesso!');
-      } catch (uploadError) {
-        console.error('Photo upload error:', uploadError);
-        const errorMsg = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido';
-        toast.error('Erro no upload das fotos', {
-          description: errorMsg,
-          duration: 8000
-        });
-        setIsSending(false);
-        setUploadProgress('');
-        return;
-      }
-      
-      // 2. Gerar PDF (apenas se o usuário quiser baixar)
-      let pdfBlob = null;
-      if (shouldDownloadPdf) {
-        setUploadProgress('Gerando PDF...');
+        // Atualizar data/hora
+        const updatedData = { ...data, dataHora: new Date().toISOString() };
+        updateData('dataHora', updatedData.dataHora);
+        
+        // 1. Upload das fotos para o Storage (sequencial para iOS)
+        setUploadProgress('Enviando fotos... (pode demorar alguns minutos)');
+        const siteCode = data.siglaSite || `site_${Date.now()}`;
+        
+        let dataWithUrls;
         try {
-          pdfBlob = await generatePDF(dataWithUrls, userOperadora);
-        } catch (pdfError) {
-          console.error('PDF generation error:', pdfError);
-          toast.error('Erro ao gerar PDF', {
-            description: 'Continuando sem download do PDF.'
+          dataWithUrls = await uploadAllPhotos(updatedData, siteCode);
+          setUploadProgress('Fotos enviadas com sucesso!');
+        } catch (uploadError) {
+          console.error('[Step10] Photo upload error:', uploadError);
+          const errorMsg = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido';
+          toast.error('Erro no upload das fotos', {
+            description: errorMsg,
+            duration: 8000
           });
-          pdfBlob = null;
+          return; // Early return, finally will clean up
         }
-      }
-      
-      // 3. Gerar Excel (sempre para salvar no banco)
-      setUploadProgress('Gerando Excel...');
-      let excelBlob;
-      try {
-        excelBlob = generateExcel(dataWithUrls, userOperadora);
-      } catch (excelError) {
-        console.error('Excel generation error:', excelError);
-        excelBlob = null;
-      }
+        
+        // Small delay for iOS stability
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // 2. Gerar PDF (apenas se o usuário quiser baixar)
+        let pdfBlob = null;
+        if (shouldDownloadPdf) {
+          setUploadProgress('Gerando PDF...');
+          try {
+            pdfBlob = await generatePDF(dataWithUrls, userOperadora);
+          } catch (pdfError) {
+            console.error('[Step10] PDF generation error:', pdfError);
+            toast.error('Erro ao gerar PDF', {
+              description: 'Continuando sem download do PDF.'
+            });
+            pdfBlob = null;
+          }
+        }
+        
+        // Small delay for iOS stability
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // 3. Gerar Excel (sempre para salvar no banco)
+        setUploadProgress('Gerando Excel...');
+        let excelBlob;
+        try {
+          excelBlob = generateExcel(dataWithUrls, userOperadora);
+        } catch (excelError) {
+          console.error('[Step10] Excel generation error:', excelError);
+          excelBlob = null;
+        }
 
-      // 4. Salvar no banco de dados
-      setUploadProgress('Salvando no banco de dados...');
-      const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
-      const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
-      
-      const result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
-      
-      if (result.success) {
-        // 5. Download dos arquivos (apenas se solicitado)
-        if (shouldDownloadPdf && pdfBlob) {
-          setUploadProgress('Baixando PDF...');
-          try {
-            downloadPDF(pdfBlob, pdfFilename);
-          } catch (downloadError) {
-            console.error('PDF download error:', downloadError);
-            toast.warning('Não foi possível baixar o PDF automaticamente');
-          }
+        // 4. Salvar no banco de dados
+        setUploadProgress('Salvando no banco de dados...');
+        const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+        const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
+        
+        let result;
+        try {
+          result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
+        } catch (dbError) {
+          console.error('[Step10] Database save error:', dbError);
+          toast.error('Erro ao salvar no banco', {
+            description: dbError instanceof Error ? dbError.message : 'Tente novamente.'
+          });
+          return;
         }
         
-        // 6. Vincular à atribuição se houver
-        const assignmentId = sessionStorage.getItem('currentAssignmentId');
-        if (assignmentId && result.id) {
-          try {
-            setUploadProgress('Finalizando atribuição...');
-            await updateAssignmentStatus(assignmentId, 'concluido', result.id);
-            sessionStorage.removeItem('currentAssignmentId');
-          } catch (assignmentError) {
-            console.error('Error updating assignment:', assignmentError);
-            // Don't fail the whole operation, just log the error
+        if (result.success) {
+          // 5. Download dos arquivos (apenas se solicitado)
+          if (shouldDownloadPdf && pdfBlob) {
+            setUploadProgress('Baixando PDF...');
+            try {
+              // iOS Safari needs a small delay before download
+              await new Promise(resolve => setTimeout(resolve, 300));
+              downloadPDF(pdfBlob, pdfFilename);
+            } catch (downloadError) {
+              console.error('[Step10] PDF download error:', downloadError);
+              toast.warning('Não foi possível baixar o PDF automaticamente', {
+                description: 'O relatório foi salvo no servidor.'
+              });
+            }
           }
+          
+          // 6. Vincular à atribuição se houver
+          const assignmentId = sessionStorage.getItem('currentAssignmentId');
+          if (assignmentId && result.id) {
+            try {
+              setUploadProgress('Finalizando atribuição...');
+              await updateAssignmentStatus(assignmentId, 'concluido', result.id);
+              sessionStorage.removeItem('currentAssignmentId');
+            } catch (assignmentError) {
+              console.error('[Step10] Assignment update error:', assignmentError);
+              // Don't fail the whole operation, just log the error
+            }
+          }
+          
+          toast.success('Relatório enviado com sucesso!', {
+            description: 'Os dados foram salvos no servidor.'
+          });
+          
+          // Reset do formulário após envio bem-sucedido
+          setTimeout(() => {
+            resetChecklist();
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Erro ao salvar no banco');
         }
-        
-        toast.success('Relatório enviado com sucesso!', {
-          description: 'Os dados foram salvos no servidor.'
+      } catch (innerError) {
+        // Inner catch for specific operation errors
+        console.error('[Step10] Inner error:', innerError);
+        toast.error('Erro ao enviar relatório', {
+          description: innerError instanceof Error ? innerError.message : 'Tente novamente.'
         });
-        
-        // Reset do formulário após envio bem-sucedido
-        setTimeout(() => {
-          resetChecklist();
-        }, 2000);
-      } else {
-        throw new Error(result.error || 'Erro ao salvar no banco');
       }
-    } catch (error) {
-      console.error('Error sending report:', error);
-      toast.error('Erro ao enviar relatório', {
-        description: error instanceof Error ? error.message : 'Tente novamente.'
+    } catch (outerError) {
+      // Outer catch for any unhandled errors - prevents page crash
+      console.error('[Step10] Outer error (prevented crash):', outerError);
+      toast.error('Erro inesperado', {
+        description: 'Por favor, tente novamente.'
       });
     } finally {
       setIsSending(false);
