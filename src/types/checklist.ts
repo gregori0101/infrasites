@@ -58,6 +58,7 @@ export type TensaoEntrada = '127V' | '220V' | '380V' | '440V';
 export interface EnergiaData {
   tipoQuadro: TipoQuadro | null;
   fabricante: FabricanteQuadro | null;
+  fabricanteOutra?: string;
   potenciaKVA: number | null;
   tensaoEntrada: TensaoEntrada | null;
   temTransformador: boolean;
@@ -327,6 +328,7 @@ export const INITIAL_FIBRA_OPTICA: FibraOpticaData = {
 export const INITIAL_ENERGIA: EnergiaData = {
   tipoQuadro: null,
   fabricante: null,
+  fabricanteOutra: '',
   potenciaKVA: null,
   tensaoEntrada: null,
   temTransformador: false,
