@@ -1,99 +1,109 @@
 
-Objetivo
-- Parar o “Ah, não! Algo deu errado ao exibir esta página da Web.” (crash do Chrome) ao capturar/adicionar foto (principal e extras) no Android Chrome.
+# Plano: Adicionar Funcionalidade PWA (Progressive Web App)
 
-Diagnóstico (baseado no que vi no código + sintoma do print)
-- Esse “Ah, não!” é a tela do Chrome quando a aba “quebra” (crash), não é apenas reload por submit.
-- Hoje o fluxo faz: FileReader.readAsDataURL(file) → gera uma string base64 grande → depois comprime via canvas → converte base64 → Blob → upload.
-- Em Android, especialmente com fotos grandes da câmera, a criação/manipulação dessas strings base64 pode estourar memória e derrubar a aba.
-- Já corrigimos “type=button” para evitar submits, mas o erro persistiu: isso aponta mais para “pressão de memória” do que para submit.
+## Objetivo
+Transformar a aplicação InfraSite em um Progressive Web App instalável, permitindo que os técnicos instalem o app diretamente no celular e usem offline.
 
-Estratégia de correção (mudança de arquitetura do upload, sem quebrar o resto)
-1) Evitar base64 no caminho principal (usar File/Blob direto)
-- Implementar um caminho “file-first”:
-  - Em vez de FileReader → base64, vamos:
-    - carregar a imagem a partir do File (via createImageBitmap ou Image + objectURL)
-    - desenhar no canvas
-    - exportar direto como Blob (canvas.toBlob)
-    - enviar Blob para o storage
-- Isso reduz picos de memória e evita strings base64 gigantes.
+## Benefícios para os Usuários
+- **Instalação fácil**: Instalar direto do navegador na tela inicial do celular
+- **Acesso rápido**: Abre como um app nativo, sem barra do navegador
+- **Funciona offline**: Carrega mesmo sem internet (dados precisam de conexão)
+- **Carregamento rápido**: Recursos ficam em cache no dispositivo
 
-2) Estender o hook usePhotoUpload para aceitar File
-- No `src/hooks/use-photo-upload.ts`:
-  - Adicionar uma função nova, por exemplo `uploadPhotoFile(file: File): Promise<string | null>`.
-  - Manter a função existente `uploadPhoto(base64Data: string)` para compatibilidade (caso algum lugar ainda use base64).
-  - `uploadPhotoFile` deve:
-    - validar tipo/tamanho (ou assumir que o componente já validou)
-    - comprimir do File para Blob (target ~500KB como hoje; e mais agressivo se necessário)
-    - fazer upload do Blob (sem converter para base64)
-    - limpar referências (ajuda GC): revogar objectURL, soltar canvas, setar variáveis grandes para null
+---
 
-3) Criar utilitário de compressão “File -> Blob” com fallback
-- Em `src/lib/imageCompression.ts` (ou um novo utilitário dentro dele, reaproveitando padrão existente):
-  - Adicionar funções:
-    - `compressFileToBlob(file, options/targetKB): Promise<Blob>`
-    - internamente, tentar:
-      - createImageBitmap(file) (melhor performance/memória quando disponível)
-      - fallback para Image() + URL.createObjectURL(file)
-    - iterar tentativas (redução de dimensão/qualidade), semelhante ao `compressWithFallback`, mas produzindo Blob.
-  - Garantir `URL.revokeObjectURL()` no finally.
+## Etapas de Implementação
 
-4) Atualizar componentes PhotoCapture e PhotoCaptureWithExtras para usar uploadPhotoFile
-- Em `src/components/ui/photo-capture.tsx`:
-  - Remover FileReader/readAsDataURL do caminho padrão.
-  - No `handleCapture`, usar diretamente:
-    - `const result = await uploadPhotoFile(file)`
-  - Resetar `e.target.value = ''` (ou `inputRef.current.value=''`) após processar para permitir selecionar a mesma foto novamente.
-  - Manter try/catch/finally envolvendo todo o handler (não só dentro do onload), já que agora tudo é await direto.
-- Em `src/components/ui/photo-capture-with-extras.tsx`:
-  - Mesma mudança para `handleMainCapture` e `handleExtraCapture`.
-  - Garantir que `processingExtra/isProcessing` sejam desligados no finally sempre, mesmo em erros.
+### 1. Instalar Plugin PWA para Vite
+Adicionar a dependência `vite-plugin-pwa` que automatiza a geração do Service Worker e manifest.
 
-5) Rede de segurança: capturar erros assíncronos globais (para não “morrer” silenciosamente)
-- Em `src/App.tsx`:
-  - Adicionar listeners:
-    - `window.addEventListener('unhandledrejection', ...)`
-    - `window.addEventListener('error', ...)`
-  - Nesses handlers:
-    - logar no console (com prefixo claro)
-    - mostrar toast “Ocorreu um erro ao processar a foto. Tente novamente.”
-    - `event.preventDefault()` quando aplicável (especialmente em unhandledrejection) para evitar que o browser finalize o app por erro não tratado.
-- Observação: isso não impede crash por memória, mas ajuda muito a evitar “quedas” por Promise rejeitada não tratada.
+### 2. Configurar o Plugin no Vite
+Atualizar `vite.config.ts` com as configurações do PWA:
+- Nome do app: "InfraSite"
+- Descrição: "Checklist de Infraestrutura de Sites"
+- Cores da marca Vivo (roxo #660099)
+- Ícones em múltiplos tamanhos
+- Estratégia de cache para assets
 
-6) Ajustes finos para Android Chrome (memória/performance)
-- Reduzir um pouco dimensões máximas no mobile:
-  - Se detectar mobile (hook `use-mobile` já existe), usar maxWidth/maxHeight menores (ex.: 1280) antes de tentar qualidade alta.
-- Garantir que os Blobs sejam criados como JPEG (não WebP em todos os devices, mas podemos manter WebP como fallback se der certo).
-- Inserir pequenos yields entre etapas pesadas:
-  - `await new Promise(requestAnimationFrame)` ou `await new Promise(r => setTimeout(r, 0))` antes/depois de compressão para evitar travar a UI.
+### 3. Criar Ícones do PWA
+Adicionar ícones na pasta `public/` nos tamanhos necessários:
+- `pwa-192x192.png` (ícone padrão)
+- `pwa-512x512.png` (ícone de alta resolução)
+- `apple-touch-icon.png` (180x180 para iOS)
 
-7) Testes de validação (o que você deve checar no Android)
-- Fluxo principal:
-  - Capturar foto principal em um campo comum (Step 1/2 etc.) e confirmar que não crasha.
-- Extras:
-  - Adicionar 3-5 fotos extras no mesmo campo (sequencialmente) e confirmar estabilidade.
-- Fibra/Finalização:
-  - Onde `PhotoCapture` ainda é usado (Step6/Step10), repetir o teste, porque eles usam “Adicionar foto” com value null (muito importante).
-- Rede ruim:
-  - Testar com conexão mais lenta (4G fraco) para confirmar que o progresso e estados não deixam o componente travado.
+### 4. Atualizar index.html
+Adicionar meta tags otimizadas para mobile:
+- Título: "InfraSite"
+- Descrição atualizada
+- Cor do tema (theme-color)
+- Apple-specific meta tags para iOS
+- Link para apple-touch-icon
 
-Riscos e como vamos mitigar
-- Diferenças de compatibilidade do canvas/toBlob/createImageBitmap:
-  - Usar fallback (Image + objectURL) se createImageBitmap falhar.
-- Mudança grande no caminho de upload:
-  - Manter `uploadPhoto(base64)` antigo por compatibilidade; migrar componentes primeiro, e só depois avaliar remover base64 em outras partes.
-- Possível perda de qualidade:
-  - Manter tentativas progressivas e apenas reduzir mais se precisar atingir target KB.
+### 5. Criar Página de Instalação (Opcional)
+Página `/instalar` com instruções visuais de como instalar o app em diferentes dispositivos.
 
-Arquivos que serão alterados (previsto)
-- src/hooks/use-photo-upload.ts (adicionar uploadPhotoFile + usar compressão via Blob)
-- src/lib/imageCompression.ts (adicionar compressão File/Blob com fallback)
-- src/components/ui/photo-capture.tsx (trocar FileReader por uploadPhotoFile)
-- src/components/ui/photo-capture-with-extras.tsx (trocar FileReader por uploadPhotoFile)
-- src/App.tsx (handlers globais de erro/unhandled rejection)
+### 6. Adicionar Prompt de Instalação
+Componente que detecta quando o app pode ser instalado e mostra um botão/banner convidando o usuário a instalar.
 
-Critério de pronto
-- No Android Chrome, ao tocar “Capturar Foto” e confirmar a foto:
-  - não aparece mais “Ah, não!”
-  - a foto aparece no preview do campo
-  - upload completa (ou cai no fallback com mensagem, sem derrubar a página)
+---
+
+## Detalhes Técnicos
+
+### Arquivos a Criar
+```text
+public/pwa-192x192.png      (ícone 192x192)
+public/pwa-512x512.png      (ícone 512x512)
+public/apple-touch-icon.png (ícone 180x180 para iOS)
+src/pages/Install.tsx       (página de instruções)
+src/hooks/use-pwa-install.ts (hook para gerenciar instalação)
+src/components/PWAInstallPrompt.tsx (componente de prompt)
+```
+
+### Arquivos a Modificar
+```text
+package.json       - adicionar vite-plugin-pwa
+vite.config.ts     - configurar plugin PWA
+index.html         - meta tags mobile e título
+src/App.tsx        - rota /instalar e prompt
+```
+
+### Configuração do Manifest (via plugin)
+```typescript
+{
+  name: 'InfraSite',
+  short_name: 'InfraSite',
+  description: 'Checklist de Infraestrutura de Sites de Telecomunicações',
+  theme_color: '#660099',
+  background_color: '#ffffff',
+  display: 'standalone',
+  start_url: '/',
+  icons: [
+    { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+    { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
+  ]
+}
+```
+
+### Estratégia de Cache
+- Assets estáticos (JS, CSS, imagens): Cache primeiro
+- Requisições API: Rede primeiro com fallback
+
+---
+
+## Como Instalar (Instruções para Usuários)
+
+**Android (Chrome):**
+1. Acesse o site no Chrome
+2. Toque no menu (3 pontos) > "Instalar app"
+3. Confirme a instalação
+
+**iPhone (Safari):**
+1. Acesse o site no Safari
+2. Toque no botão Compartilhar
+3. Selecione "Adicionar à Tela de Início"
+4. Confirme
+
+---
+
+## Resultado Esperado
+Após a implementação, a aplicação poderá ser instalada como um app nativo em qualquer smartphone, aparecendo na tela inicial com o ícone da Vivo/InfraSite.
