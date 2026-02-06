@@ -28,6 +28,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
   const energia = data.energia ?? {
     tipoQuadro: null,
     fabricante: null,
+    fabricanteOutra: '',
     potenciaKVA: null,
     tensaoEntrada: null,
     temTransformador: false,
@@ -85,7 +86,7 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
               <Label>Fabricante</Label>
               <Select
                 value={energia.fabricante || ""}
-                onValueChange={(value: FabricanteQuadro) => updateEnergia({ fabricante: value })}
+                onValueChange={(value: FabricanteQuadro) => updateEnergia({ fabricante: value, fabricanteOutra: value !== 'OUTRA' ? '' : energia.fabricanteOutra })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
@@ -96,6 +97,14 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                   ))}
                 </SelectContent>
               </Select>
+              {energia.fabricante === 'OUTRA' && (
+                <Input
+                  placeholder="Digite o nome do fabricante"
+                  value={energia.fabricanteOutra || ''}
+                  onChange={(e) => updateEnergia({ fabricanteOutra: e.target.value })}
+                  className="mt-2"
+                />
+              )}
             </div>
 
             <div className="space-y-2">
