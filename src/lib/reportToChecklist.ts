@@ -326,6 +326,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fabricante: report.gmg_fabricante as any,
       potencia: parseInt(report.gmg_potencia) || undefined,
       capacidadeTanque: parseInt(report.gmg_autonomia) || undefined,
+      combustivelPorcentagem: report.gmg_combustivel ? parseInt(report.gmg_combustivel) : undefined,
       status: (report.gmg_status as any) || undefined,
       ultimoTeste: report.gmg_ultimo_teste || undefined,
       fotoGMG: report.gmg_foto_painel || null,
