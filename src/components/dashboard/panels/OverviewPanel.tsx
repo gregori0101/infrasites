@@ -74,7 +74,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           onClick={() => onDrillDown("batteries")}
         />
         <StatCard
-          title="ACs Total"
+          title="Ar Condicionado"
           value={overview.totalACs}
           subtitle={`${overview.acsNok} com defeito`}
           icon={Thermometer}

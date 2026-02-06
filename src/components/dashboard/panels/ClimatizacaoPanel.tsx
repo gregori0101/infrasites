@@ -14,8 +14,8 @@ interface Props {
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
   const statusBarData = [
-    { name: "ACs OK", value: stats.acsOkCount, fill: "#22c55e" },
-    { name: "ACs NOK", value: stats.acsNokCount, fill: "#ef4444" },
+    { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
+    { name: "Ar Cond. NOK", value: stats.acsNokCount, fill: "#ef4444" },
     { name: "Fan OK", value: stats.fanOkCount, fill: "#3b82f6" },
     { name: "Fan NOK", value: stats.fanNokCount, fill: "#f97316" },
     { name: "PLC OK", value: stats.plcOkCount, fill: "#8b5cf6" },
@@ -42,7 +42,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
         <StatCard
           title="Ar Condicionado"
           value={stats.acTotal}
-          subtitle={`${stats.totalACs} ACs instalados`}
+          subtitle={`${stats.totalACs} unidades instaladas`}
           icon={Wind}
           iconBg="bg-blue-500/10 text-blue-500"
           onClick={() => onDrillDown("ac")}
@@ -68,7 +68,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
       {/* AC Status */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          title="ACs OK"
+          title="Ar Cond. OK"
           value={stats.acsOkCount}
           subtitle="Funcionando"
           icon={CheckCircle2}
@@ -77,7 +77,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           onClick={() => onDrillDown("ac-ok")}
         />
         <StatCard
-          title="ACs NOK"
+          title="Ar Cond. NOK"
           value={stats.acsNokCount}
           subtitle="Com defeito"
           icon={XCircle}
