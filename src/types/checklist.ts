@@ -3,6 +3,7 @@ export type Operadora = 'VIVO' | 'TEL';
 export type UF = 'PA' | 'AM' | 'MA' | 'RR' | 'AP';
 
 export type GabineteType =
+  | 'ABRIGO'
   | 'CONTAINER'
   | 'SHARING'
   | 'HUAWEI 3012'
