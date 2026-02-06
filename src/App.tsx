@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { toast } from "sonner";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 
 // Lazy-loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -87,6 +88,7 @@ const App = () => {
             <Sonner position="top-center" />
             <BrowserRouter>
               <PWAInstallPrompt />
+              <PWAUpdatePrompt />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public routes */}
