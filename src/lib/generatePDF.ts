@@ -686,7 +686,14 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     }
     
     addFieldRow('Aterramento', data.torre.aterramento, data.torre.aterramento === 'OK' ? 'ok' : 'error');
+    if (data.torre.fotoAterramento) {
+      await addPhoto(data.torre.fotoAterramento, 'Foto do Aterramento');
+    }
+    
     addFieldRow('Zeladoria', data.torre.zeladoria, data.torre.zeladoria === 'OK' ? 'ok' : 'error');
+    if (data.torre.fotoZeladoria) {
+      await addPhoto(data.torre.fotoZeladoria, 'Foto da Zeladoria');
+    }
   }
 
   // ===== OBSERVATIONS =====

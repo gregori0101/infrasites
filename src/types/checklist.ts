@@ -187,7 +187,9 @@ export interface TorreData {
   fibrasProtegidas: boolean;
   fotoFibrasProtegidas?: string | null;
   aterramento: StatusFuncionamento;
+  fotoAterramento?: string | null;
   zeladoria: StatusFuncionamento;
+  fotoZeladoria?: string | null;
 }
 
 // Sections that can be marked as "Não se Aplica"

@@ -336,7 +336,9 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
       fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
+      fotoAterramento: null, // Not stored in legacy DB columns
       zeladoria: (report.torre_housekeeping || 'OK') as any,
+      fotoZeladoria: null, // Not stored in legacy DB columns
       fotoNinhos: report.torre_foto_ninhos || null,
     },
     observacoes: report.observacoes || '',
