@@ -32,6 +32,7 @@ export type Database = {
           energia_foto_relogio: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
+          energia_potencia_transformador: string | null
           energia_protegido_cadeado: string | null
           energia_protegido_gradil: string | null
           energia_tensao_entrada: string | null
@@ -693,6 +694,7 @@ export type Database = {
           energia_foto_relogio?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
+          energia_potencia_transformador?: string | null
           energia_protegido_cadeado?: string | null
           energia_protegido_gradil?: string | null
           energia_tensao_entrada?: string | null
@@ -1354,6 +1356,7 @@ export type Database = {
           energia_foto_relogio?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
+          energia_potencia_transformador?: string | null
           energia_protegido_cadeado?: string | null
           energia_protegido_gradil?: string | null
           energia_tensao_entrada?: string | null
@@ -2144,6 +2147,7 @@ export type Database = {
           energia_foto_relogio: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
+          energia_potencia_transformador: string | null
           energia_protegido_cadeado: string | null
           energia_protegido_gradil: string | null
           energia_tensao_entrada: string | null

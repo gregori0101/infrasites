@@ -36,6 +36,12 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   row['Sigla_Site'] = data.siglaSite;
   row['UF'] = data.uf;
   
+  // GPS Location
+  row['GPS_Latitude'] = data.geolocalizacao?.latitude != null ? data.geolocalizacao.latitude : '';
+  row['GPS_Longitude'] = data.geolocalizacao?.longitude != null ? data.geolocalizacao.longitude : '';
+  row['GPS_Endereco'] = data.geolocalizacao?.endereco || '';
+  row['GPS_Capturado_Em'] = data.geolocalizacao?.capturadoEm ? format(new Date(data.geolocalizacao.capturadoEm), 'dd/MM/yyyy HH:mm') : '';
+  
   // GRUPO 2: SITE GERAL
   row['Qtd_Gabinetes_Total'] = data.qtdGabinetes;
   row['Foto_Panoramica'] = getPhotoValue(data.fotoPanoramica);
@@ -208,6 +214,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['Energia_Protegido_Gradil'] = data.energia.protegidoGradil ? 'SIM' : 'NÃO';
     row['Energia_Protegido_Cadeado'] = data.energia.protegidoCadeado ? 'SIM' : 'NÃO';
     row['Energia_Tem_Transformador'] = data.energia.temTransformador ? 'SIM' : 'NÃO';
+    row['Energia_Potencia_Transformador'] = data.energia.potenciaTransformador || '';
     row['Energia_Foto_Transformador'] = getPhotoValue(data.energia.fotoTransformador);
     row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
     row['Energia_Unidade_Consumidora'] = data.energia.unidadeConsumidora || '';

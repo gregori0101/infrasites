@@ -670,6 +670,9 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
       { label: 'Protegido com Gradil', value: data.energia.protegidoGradil ? 'SIM' : 'NÃO' },
       { label: 'Protegido com Cadeado', value: data.energia.protegidoCadeado ? 'SIM' : 'NÃO' },
       { label: 'Possui Transformador', value: data.energia.temTransformador ? 'SIM' : 'NÃO' },
+      ...(data.energia.temTransformador && data.energia.potenciaTransformador 
+        ? [{ label: 'Potência Transformador', value: data.energia.potenciaTransformador }] 
+        : []),
       { label: 'Unidade Consumidora (UC)', value: data.energia.unidadeConsumidora },
     ]);
 

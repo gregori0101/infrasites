@@ -251,6 +251,11 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     total_cabinets: data.qtdGabinetes,
     panoramic_photo_url: data.fotoPanoramica || null,
     operadora: data.operadora || 'VIVO',
+    // Geolocation data
+    geo_latitude: data.geolocalizacao?.latitude || null,
+    geo_longitude: data.geolocalizacao?.longitude || null,
+    geo_endereco: data.geolocalizacao?.endereco || null,
+    geo_capturado_em: data.geolocalizacao?.capturadoEm || null,
   };
 
   // Skip gabinete-related sections if marked NA
@@ -381,6 +386,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.energia_protegido_gradil = data.energia?.protegidoGradil ? 'SIM' : 'NÃO';
     row.energia_protegido_cadeado = data.energia?.protegidoCadeado ? 'SIM' : 'NÃO';
     row.energia_transformador_ok = data.energia?.temTransformador ? 'SIM' : 'NÃO';
+    row.energia_potencia_transformador = data.energia?.potenciaTransformador || null;
     row.energia_foto_transformador = data.energia?.fotoTransformador || null;
     row.energia_foto_quadro_geral = data.energia?.fotoQuadroGeral || null;
     row.energia_unidade_consumidora = data.energia?.unidadeConsumidora || null;
