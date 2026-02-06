@@ -173,6 +173,7 @@ function buildPhotoColumns(): string {
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
     'energia_foto_relogio',
+    'torre_foto_ninhos',
     'torre_foto_fibras_protegidas',
     'torre_foto_aterramento',
     'torre_foto_zeladoria',
