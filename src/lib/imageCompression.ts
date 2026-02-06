@@ -324,10 +324,12 @@ export async function compressFileToBlob(
   let canvas: HTMLCanvasElement | null = null;
 
   try {
-    // Load image
-    const loaded = await loadImageFromFile(file);
-    source = loaded.source;
-    objectUrl = loaded.objectUrl;
+    // CRITICAL: Add try-catch around entire process to prevent crashes
+    try {
+      // Load image
+      const loaded = await loadImageFromFile(file);
+      source = loaded.source;
+      objectUrl = loaded.objectUrl;
 
     // Get original dimensions
     const origWidth = source instanceof ImageBitmap ? source.width : source.naturalWidth;
@@ -367,18 +369,26 @@ export async function compressFileToBlob(
 
     // Convert to Blob
     return new Promise((resolve, reject) => {
-      canvas!.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to create blob from canvas'));
-          }
-        },
-        opts.mimeType,
-        opts.quality
-      );
+      try {
+        canvas!.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Failed to create blob from canvas'));
+            }
+          },
+          opts.mimeType,
+          opts.quality
+        );
+      } catch (blobError) {
+        reject(new Error('toBlob failed: ' + (blobError as Error).message));
+      }
     });
+    } catch (processError) {
+      // Catch any error during image loading/processing
+      throw new Error('Image processing failed: ' + (processError as Error).message);
+    }
   } finally {
     // Cleanup to help GC - use delayed cleanup for Safari iOS stability
     if (objectUrl) {
