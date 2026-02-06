@@ -40,6 +40,24 @@ function dataURLToBlob(dataURL: string): Blob {
 }
 
 /**
+ * Check if user is authenticated and can upload
+ */
+async function checkUploadPermission(): Promise<{ allowed: boolean; error?: string }> {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error || !session) {
+      return { allowed: false, error: 'Usuário não autenticado. Faça login novamente.' };
+    }
+    
+    return { allowed: true };
+  } catch (e) {
+    console.error('[checkUploadPermission] Error:', e);
+    return { allowed: false, error: 'Erro ao verificar autenticação.' };
+  }
+}
+
+/**
  * Uploads a photo to Supabase Storage and returns the public URL
  * Automatically compresses images before upload
  */
@@ -85,30 +103,60 @@ export async function uploadPhoto(
     throw new Error(`Falha ao processar imagem (${category})`);
   }
 
-  // Upload to Supabase Storage with timeout
-  const uploadPromise = supabase.storage
-    .from(BUCKET_NAME)
-    .upload(fileName, blob, {
-      contentType: 'image/jpeg',
-      upsert: true
-    });
+  // Upload to Supabase Storage with retry on auth errors
+  let retries = 0;
+  const maxRetries = 2;
+  let lastError: any = null;
 
-  const { error } = await uploadPromise;
+  while (retries <= maxRetries) {
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(fileName, blob, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
 
-  if (error) {
-    console.error('Error uploading photo:', error);
-    throw new Error(`Falha no upload: ${error.message}`);
+    if (!error) {
+      // Success - get public URL
+      const { data: urlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(fileName);
+
+      // Clear reference to help GC
+      processedData = '';
+      
+      console.log(`[Photo] Uploaded successfully: ${category} -> ${fileName}`);
+      return urlData.publicUrl;
+    }
+
+    lastError = error;
+    console.error(`[Photo] Upload attempt ${retries + 1} failed for ${category}:`, error);
+
+    // Check for specific error types
+    if (error.message?.includes('row-level security') || 
+        error.message?.includes('policy') ||
+        error.message?.includes('403') ||
+        error.message?.includes('Unauthorized')) {
+      // Permission error - check auth status
+      const permCheck = await checkUploadPermission();
+      if (!permCheck.allowed) {
+        throw new Error(permCheck.error || 'Sem permissão para upload. Faça login novamente.');
+      }
+      // If authenticated but still failing, it's a server-side policy issue
+      throw new Error(`Sem permissão para enviar fotos (${category}). Verifique se seu usuário está aprovado.`);
+    }
+
+    retries++;
+    if (retries <= maxRetries) {
+      // Wait before retry with exponential backoff
+      await delay(500 * retries);
+    }
   }
 
-  // Get public URL
-  const { data: urlData } = supabase.storage
-    .from(BUCKET_NAME)
-    .getPublicUrl(fileName);
-
-  // Clear reference to help GC
-  processedData = '';
-  
-  return urlData.publicUrl;
+  // All retries failed
+  const errorMsg = lastError?.message || 'Erro desconhecido';
+  console.error(`[Photo] All upload attempts failed for ${category}:`, errorMsg);
+  throw new Error(`Falha no upload (${category}): ${errorMsg}`);
 }
 
 /**
