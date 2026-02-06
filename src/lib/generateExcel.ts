@@ -228,7 +228,9 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
     row['Torre_Foto_Fibras_Protegidas'] = getPhotoValue(data.torre.fotoFibrasProtegidas);
     row['Torre_Aterramento'] = data.torre.aterramento;
+    row['Torre_Foto_Aterramento'] = getPhotoValue(data.torre.fotoAterramento);
     row['Torre_Zeladoria'] = data.torre.zeladoria;
+    row['Torre_Foto_Zeladoria'] = getPhotoValue(data.torre.fotoZeladoria);
   } else {
     row['GMG_Torre_Secao'] = 'N/A';
   }

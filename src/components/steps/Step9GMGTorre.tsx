@@ -14,6 +14,7 @@ import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
 const STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK', 'NA'];
 const GMG_STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK'];
+const INFRA_STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK'];
 const FCC_FABRICANTES: FCCFabricante[] = [
   'ALCATEL', 'ALFA', 'ASCOM', 'DELTA', 'ELTEK', 'EFACEC',
   'EMERSON', 'HUAWEI', 'INTERGY', 'VERTIV', 'ZTE', 'OUTRA'
@@ -198,7 +199,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
             <div className="space-y-2">
               <Label>Aterramento</Label>
               <div className="flex gap-2">
-                {STATUS_OPTIONS.map((status) => (
+                {INFRA_STATUS_OPTIONS.map((status) => (
                   <button
                     key={status}
                     type="button"
@@ -207,9 +208,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                       torre.aterramento === status
                         ? status === 'OK'
                           ? 'bg-success text-success-foreground border-success'
-                          : status === 'NOK'
-                          ? 'bg-destructive text-destructive-foreground border-destructive'
-                          : 'bg-muted text-muted-foreground border-muted'
+                          : 'bg-destructive text-destructive-foreground border-destructive'
                         : 'bg-card border-border hover:border-primary/50'
                     }`}
                   >
@@ -219,10 +218,20 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
               </div>
             </div>
 
+            <PhotoCaptureWithExtras
+              label="Foto do Aterramento"
+              value={data.torre.fotoAterramento || null}
+              onChange={(value) => updateTorre({ fotoAterramento: value })}
+              extraPhotos={getFotosExtras('torre_aterramento')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('torre_aterramento', photos)}
+              siteCode={data.siglaSite}
+              category="torre_aterramento"
+            />
+
             <div className="space-y-2">
               <Label>Zeladoria</Label>
               <div className="flex gap-2">
-                {STATUS_OPTIONS.map((status) => (
+                {INFRA_STATUS_OPTIONS.map((status) => (
                   <button
                     key={status}
                     type="button"
@@ -231,9 +240,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                       torre.zeladoria === status
                         ? status === 'OK'
                           ? 'bg-success text-success-foreground border-success'
-                          : status === 'NOK'
-                          ? 'bg-destructive text-destructive-foreground border-destructive'
-                          : 'bg-muted text-muted-foreground border-muted'
+                          : 'bg-destructive text-destructive-foreground border-destructive'
                         : 'bg-card border-border hover:border-primary/50'
                     }`}
                   >
@@ -242,6 +249,16 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 ))}
               </div>
             </div>
+
+            <PhotoCaptureWithExtras
+              label="Foto da Zeladoria"
+              value={data.torre.fotoZeladoria || null}
+              onChange={(value) => updateTorre({ fotoZeladoria: value })}
+              extraPhotos={getFotosExtras('torre_zeladoria')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('torre_zeladoria', photos)}
+              siteCode={data.siglaSite}
+              category="torre_zeladoria"
+            />
           </div>
         </FormCard>
       </div>
