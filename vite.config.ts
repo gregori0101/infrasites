@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
-        name: "InfraSite",
-        short_name: "InfraSite",
+        name: "Vivo Infra",
+        short_name: "Vivo Infra",
         description: "Checklist de Infraestrutura de Sites de Telecomunicações",
         theme_color: "#660099",
         background_color: "#ffffff",
