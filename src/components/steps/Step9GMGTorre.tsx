@@ -90,6 +90,22 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Combustível no Tanque (%)</Label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={data.gmg.combustivelPorcentagem || ''}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      updateGMG({ combustivelPorcentagem: isNaN(value) ? undefined : Math.min(100, Math.max(0, value)) });
+                    }}
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label>Status</Label>
                   <div className="flex gap-2">
                     {STATUS_OPTIONS.map((status) => (

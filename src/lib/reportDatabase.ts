@@ -348,7 +348,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_potencia = data.gmg?.potencia != null ? data.gmg.potencia : null;
     row.gmg_autonomia = data.gmg?.capacidadeTanque != null ? data.gmg.capacidadeTanque : null;
     row.gmg_status = data.gmg?.status || null;
-    row.gmg_combustivel = null;
+    row.gmg_combustivel = data.gmg?.combustivelPorcentagem != null ? String(data.gmg.combustivelPorcentagem) : null;
     row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
     row.gmg_foto_painel = data.gmg?.fotoGMG || null;
     row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;

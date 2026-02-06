@@ -175,6 +175,7 @@ export interface GMGData {
   fabricanteOutra?: string;
   potencia?: number;
   capacidadeTanque?: number;
+  combustivelPorcentagem?: number;
   status?: StatusFuncionamento;
   ultimoTeste?: string;
   fotoGMG?: string | null;
