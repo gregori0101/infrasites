@@ -887,8 +887,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       .sort((a, b) => b.value - a.value);
 
     stats.climatizacaoStatus = [
-      { name: "ACs OK", value: stats.acsOkCount, color: "#22c55e" },
-      { name: "ACs NOK", value: stats.acsNokCount, color: "#ef4444" },
+      { name: "Ar Cond. OK", value: stats.acsOkCount, color: "#22c55e" },
+      { name: "Ar Cond. NOK", value: stats.acsNokCount, color: "#ef4444" },
       { name: "Fan OK", value: stats.fanOkCount, color: "#3b82f6" },
       { name: "Fan NOK", value: stats.fanNokCount, color: "#f97316" },
     ].filter(item => item.value > 0);

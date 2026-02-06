@@ -119,7 +119,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
             onClick={() => onDrillDown("cadeado-ok")}
           />
           <StatCard
-            title="Total de ACs"
+            title="Total Ar Condicionado"
             value={stats.totalACs}
             subtitle={`${stats.acsNok} com defeito`}
             icon={Wind}
@@ -506,7 +506,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
         </div>
       </div>
 
-      {/* ===== SEÇÃO ACs ===== */}
+      {/* ===== SEÇÃO AR CONDICIONADO ===== */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1 h-6 bg-primary rounded-full" />
@@ -515,7 +515,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           <StatCard
-            title="ACs Funcionando"
+            title="Ar Cond. Funcionando"
             value={stats.acsOk}
             subtitle={`${acPercentOk}% operacional`}
             icon={CheckCircle2}
@@ -524,7 +524,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
             onClick={() => onDrillDown("ac-ok")}
           />
           <StatCard
-            title="ACs com Defeito"
+            title="Ar Cond. com Defeito"
             value={stats.acsNok}
             subtitle="Requerem manutenção"
             icon={Thermometer}
@@ -533,7 +533,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
             onClick={() => onDrillDown("ac-nok")}
           />
           <StatCard
-            title="Total de ACs"
+            title="Total Ar Condicionado"
             value={stats.totalACs}
             subtitle="Unidades instaladas"
             icon={Wind}

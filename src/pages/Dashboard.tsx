@@ -576,8 +576,8 @@ export default function Dashboard() {
                     else if (type === "nok") openDrillDown("sites", "Sites com Problemas", (s) => s.filter((site: any) => site.hasProblems));
                     else if (type === "batteries") openDrillDown("batteries", "Todas as Baterias", (b) => b);
                     else if (type === "batteries-critical") openDrillDown("batteries", "Baterias Críticas (+8 anos)", (b) => b.filter((bat: any) => bat.obsolescencia === "critical"));
-                    else if (type === "acs") openDrillDown("acs", "Todos os ACs", (a) => a);
-                    else if (type === "acs-nok") openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "acs") openDrillDown("acs", "Todos os Ar Condicionados", (a) => a);
+                    else if (type === "acs-nok") openDrillDown("acs", "Ar Condicionados com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
                     else if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
                     else if (type === "zeladoria-ok") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
                   }}
@@ -629,9 +629,9 @@ export default function Dashboard() {
                       const report = reports.find(r => r.id === site.id);
                       return report && report.gmg_alarme_ativo === "SIM";
                     }));
-                    else if (type === "ac-all") openDrillDown("acs", "Todos os ACs", (a) => a);
-                    else if (type === "ac-ok") openDrillDown("acs", "ACs Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
-                    else if (type === "ac-nok") openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "ac-all") openDrillDown("acs", "Todos os Ar Condicionados", (a) => a);
+                    else if (type === "ac-ok") openDrillDown("acs", "Ar Condicionados Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
+                    else if (type === "ac-nok") openDrillDown("acs", "Ar Condicionados com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
                     else if (type === "transformador-ok") openDrillDown("sites", "Transformador OK", (s) => s.filter((site: any) => {
                       const report = reports.find(r => r.id === site.id);
                       return report && report.energia_transformador_ok === "SIM";
@@ -669,8 +669,8 @@ export default function Dashboard() {
                     if (type === "all") openDrillDown("sites", "Todos Gabinetes", (s) => s);
                     else if (type === "ac") openDrillDown("sites", "Sites com Ar Condicionado", (s) => s);
                     else if (type === "fan") openDrillDown("sites", "Sites com Ventilação/Fan", (s) => s);
-                    else if (type === "ac-ok") openDrillDown("acs", "ACs OK", (a) => a.filter((ac: any) => ac.status === "OK"));
-                    else if (type === "ac-nok") openDrillDown("acs", "ACs NOK", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "ac-ok") openDrillDown("acs", "Ar Condicionados OK", (a) => a.filter((ac: any) => ac.status === "OK"));
+                    else if (type === "ac-nok") openDrillDown("acs", "Ar Condicionados NOK", (a) => a.filter((ac: any) => ac.status === "NOK"));
                     else if (type === "plc-ok") openDrillDown("sites", "Sites com PLC OK", (s) => s);
                     else if (type === "plc-nok") openDrillDown("sites", "Sites com PLC NOK", (s) => s);
                     else if (type === "na") openDrillDown("sites", "Sites sem Climatização", (s) => s);
