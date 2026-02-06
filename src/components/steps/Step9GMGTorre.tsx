@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
 
 const STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK', 'NA'];
+const GMG_STATUS_OPTIONS: StatusFuncionamento[] = ['OK', 'NOK'];
 const FCC_FABRICANTES: FCCFabricante[] = [
   'ALCATEL', 'ALFA', 'ASCOM', 'DELTA', 'ELTEK', 'EFACEC',
   'EMERSON', 'HUAWEI', 'INTERGY', 'VERTIV', 'ZTE', 'OUTRA'
@@ -108,7 +109,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <div className="flex gap-2">
-                    {STATUS_OPTIONS.map((status) => (
+                    {GMG_STATUS_OPTIONS.map((status) => (
                       <button
                         key={status}
                         type="button"
