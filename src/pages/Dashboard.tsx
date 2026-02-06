@@ -617,9 +617,45 @@ export default function Dashboard() {
                   onDrillDown={(type) => {
                     if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
                     else if (type === "gmg-no") openDrillDown("sites", "Sites sem GMG", (s) => s.filter((site: any) => !site.gmgExists));
+                    else if (type === "gmg-ok") openDrillDown("sites", "GMG Operacional (OK)", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_existe === "SIM" && report.gmg_status === "OK";
+                    }));
+                    else if (type === "gmg-nok") openDrillDown("sites", "GMG Inoperante (NOK)", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_existe === "SIM" && report.gmg_status === "NOK";
+                    }));
+                    else if (type === "gmg-alarme") openDrillDown("sites", "GMG com Alarme Ativo", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_alarme_ativo === "SIM";
+                    }));
                     else if (type === "ac-all") openDrillDown("acs", "Todos os ACs", (a) => a);
                     else if (type === "ac-ok") openDrillDown("acs", "ACs Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
                     else if (type === "ac-nok") openDrillDown("acs", "ACs com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "transformador-ok") openDrillDown("sites", "Transformador OK", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.energia_transformador_ok === "SIM";
+                    }));
+                    else if (type === "transformador-nok") openDrillDown("sites", "Transformador NOK", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && (report.energia_transformador_ok === "NÃO" || report.energia_transformador_ok === "NAO");
+                    }));
+                    else if (type === "gradil-ok") openDrillDown("sites", "Sites com Gradil", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.energia_protegido_gradil === "SIM";
+                    }));
+                    else if (type === "gradil-nok") openDrillDown("sites", "Sites sem Gradil", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && (report.energia_protegido_gradil === "NÃO" || report.energia_protegido_gradil === "NAO");
+                    }));
+                    else if (type === "cadeado-ok") openDrillDown("sites", "Sites com Cadeado", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.energia_protegido_cadeado === "SIM";
+                    }));
+                    else if (type === "cadeado-nok") openDrillDown("sites", "Sites sem Cadeado", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && (report.energia_protegido_cadeado === "NÃO" || report.energia_protegido_cadeado === "NAO");
+                    }));
                   }}
                 />
               )}

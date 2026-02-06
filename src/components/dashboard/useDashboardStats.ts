@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ReportRow } from "@/lib/reportDatabase";
-import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo, ClimatizacaoInfo, OverviewStats, GabineteInfo } from "./types";
+import { DashboardFilters, PanelStats, SiteInfo, BatteryInfo, ACInfo, ClimatizacaoInfo, OverviewStats, GabineteInfo, GMGInfo } from "./types";
 import { format, isValid, differenceInYears, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -226,7 +226,24 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         sitesMedioRisco: 0,
         sitesAltoRisco: 0,
         sitesSemBanco: 0,
-      }
+      },
+      // Energia Panel (expanded)
+      energiaTransformadorOk: 0,
+      energiaTransformadorNok: 0,
+      energiaProtecaoGradilOk: 0,
+      energiaProtecaoGradilNok: 0,
+      energiaProtecaoCadeadoOk: 0,
+      energiaProtecaoCadeadoNok: 0,
+      energiaTensaoDistribution: [],
+      energiaFabricanteDistribution: [],
+      energiaTipoQuadroDistribution: [],
+      // GMG Panel (expanded)
+      gmgStatusOk: 0,
+      gmgStatusNok: 0,
+      gmgAlarmeAtivo: 0,
+      gmgCombustivelDistribution: [],
+      gmgFabricanteDistribution: [],
+      gmgPotenciaDistribution: [],
     };
 
     const siteInfoList: SiteInfo[] = [];
@@ -234,6 +251,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     const acInfoList: ACInfo[] = [];
     const climatizacaoList: ClimatizacaoInfo[] = [];
     const gabineteInfoList: GabineteInfo[] = [];
+    const gmgInfoList: GMGInfo[] = [];
+    
+    // Energia tracking
+    const tensaoMap: Record<string, number> = {};
+    const fabricanteQuadroMap: Record<string, number> = {};
+    const tipoQuadroMap: Record<string, number> = {};
+    // GMG tracking
+    const gmgCombustivelMap: Record<string, number> = {};
+    const gmgFabricanteMap: Record<string, number> = {};
+    const gmgPotenciaMap: Record<string, number> = {};
     
     const ufMap: Record<string, { count: number; ok: number; nok: number }> = {};
     const monthMap: Record<string, number> = {};
@@ -314,8 +341,70 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       const hasGMG = report.gmg_existe === "SIM";
       if (hasGMG) {
         stats.sitesWithGMG++;
+        
+        // GMG detailed stats
+        const gmgStatus = report.gmg_status as string;
+        if (gmgStatus === "OK") stats.gmgStatusOk++;
+        else if (gmgStatus === "NOK") stats.gmgStatusNok++;
+        
+        if (report.gmg_alarme_ativo === "SIM") stats.gmgAlarmeAtivo++;
+        
+        const gmgCombustivel = report.gmg_combustivel as string;
+        if (gmgCombustivel) {
+          gmgCombustivelMap[gmgCombustivel] = (gmgCombustivelMap[gmgCombustivel] || 0) + 1;
+        }
+        
+        const gmgFabricante = report.gmg_fabricante as string;
+        if (gmgFabricante) {
+          gmgFabricanteMap[gmgFabricante] = (gmgFabricanteMap[gmgFabricante] || 0) + 1;
+        }
+        
+        const gmgPotencia = report.gmg_potencia as string;
+        if (gmgPotencia) {
+          gmgPotenciaMap[gmgPotencia] = (gmgPotenciaMap[gmgPotencia] || 0) + 1;
+        }
+        
+        gmgInfoList.push({
+          siteCode: report.site_code,
+          uf,
+          status: gmgStatus || "N/A",
+          fabricante: gmgFabricante || "N/A",
+          potencia: gmgPotencia || "N/A",
+          combustivel: gmgCombustivel || "N/A",
+          alarmeAtivo: report.gmg_alarme_ativo === "SIM",
+          ultimoTeste: (report.gmg_ultimo_teste as string) || "N/A",
+        });
       } else {
         stats.sitesWithoutGMG++;
+      }
+      
+      // Energia detailed stats
+      const transformadorOk = report.energia_transformador_ok as string;
+      if (transformadorOk === "SIM") stats.energiaTransformadorOk++;
+      else if (transformadorOk === "NÃO" || transformadorOk === "NAO") stats.energiaTransformadorNok++;
+      
+      const gradil = report.energia_protegido_gradil as string;
+      if (gradil === "SIM") stats.energiaProtecaoGradilOk++;
+      else if (gradil === "NÃO" || gradil === "NAO") stats.energiaProtecaoGradilNok++;
+      
+      const cadeado = report.energia_protegido_cadeado as string;
+      if (cadeado === "SIM") stats.energiaProtecaoCadeadoOk++;
+      else if (cadeado === "NÃO" || cadeado === "NAO") stats.energiaProtecaoCadeadoNok++;
+      
+      const tensao = report.energia_tensao_entrada as string;
+      if (tensao) {
+        tensaoMap[tensao] = (tensaoMap[tensao] || 0) + 1;
+      }
+      
+      const fabQuadro = report.energia_fabricante as string;
+      if (fabQuadro) {
+        const fabKey = fabQuadro === "OUTRA" ? (report.energia_fabricante_outra as string || "Outra") : fabQuadro;
+        fabricanteQuadroMap[fabKey] = (fabricanteQuadroMap[fabKey] || 0) + 1;
+      }
+      
+      const tipoQuadro = report.energia_tipo_quadro as string;
+      if (tipoQuadro) {
+        tipoQuadroMap[tipoQuadro] = (tipoQuadroMap[tipoQuadro] || 0) + 1;
       }
       
       // Zeladoria
@@ -767,6 +856,35 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       { name: "Com GMG", value: stats.sitesWithGMG, color: "#22c55e" },
       { name: "Sem GMG", value: stats.sitesWithoutGMG, color: "#f59e0b" },
     ].filter(item => item.value > 0);
+
+    // Build energia distribution charts
+    const tensaoColors = ["#3b82f6", "#8b5cf6", "#06b6d4", "#f59e0b", "#ec4899"];
+    stats.energiaTensaoDistribution = Object.entries(tensaoMap)
+      .map(([name, value], i) => ({ name, value, color: tensaoColors[i % tensaoColors.length] }))
+      .sort((a, b) => b.value - a.value);
+
+    const fabColors = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899"];
+    stats.energiaFabricanteDistribution = Object.entries(fabricanteQuadroMap)
+      .map(([name, value], i) => ({ name, value, color: fabColors[i % fabColors.length] }))
+      .sort((a, b) => b.value - a.value);
+
+    stats.energiaTipoQuadroDistribution = Object.entries(tipoQuadroMap)
+      .map(([name, value], i) => ({ name, value, color: fabColors[i % fabColors.length] }))
+      .sort((a, b) => b.value - a.value);
+
+    // Build GMG distribution charts
+    const gmgColors = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
+    stats.gmgCombustivelDistribution = Object.entries(gmgCombustivelMap)
+      .map(([name, value], i) => ({ name, value, color: gmgColors[i % gmgColors.length] }))
+      .sort((a, b) => b.value - a.value);
+
+    stats.gmgFabricanteDistribution = Object.entries(gmgFabricanteMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    stats.gmgPotenciaDistribution = Object.entries(gmgPotenciaMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
 
     stats.climatizacaoStatus = [
       { name: "ACs OK", value: stats.acsOkCount, color: "#22c55e" },

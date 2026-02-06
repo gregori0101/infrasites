@@ -209,6 +209,36 @@ export interface PanelStats {
     total: number;
     byUf: { uf: string; count: number }[];
   };
+
+  // Energia Panel (expanded)
+  energiaTransformadorOk: number;
+  energiaTransformadorNok: number;
+  energiaProtecaoGradilOk: number;
+  energiaProtecaoGradilNok: number;
+  energiaProtecaoCadeadoOk: number;
+  energiaProtecaoCadeadoNok: number;
+  energiaTensaoDistribution: { name: string; value: number; color: string }[];
+  energiaFabricanteDistribution: { name: string; value: number; color: string }[];
+  energiaTipoQuadroDistribution: { name: string; value: number; color: string }[];
+
+  // GMG Panel (expanded)
+  gmgStatusOk: number;
+  gmgStatusNok: number;
+  gmgAlarmeAtivo: number;
+  gmgCombustivelDistribution: { name: string; value: number; color: string }[];
+  gmgFabricanteDistribution: { name: string; value: number }[];
+  gmgPotenciaDistribution: { name: string; value: number }[];
+}
+
+export interface GMGInfo {
+  siteCode: string;
+  uf: string;
+  status: string;
+  fabricante: string;
+  potencia: string;
+  combustivel: string;
+  alarmeAtivo: boolean;
+  ultimoTeste: string;
 }
 
 export interface DrillDownData {
