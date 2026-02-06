@@ -1,109 +1,61 @@
 
-# Plano: Adicionar Funcionalidade PWA (Progressive Web App)
+# Correção: Página Recarregando ao Adicionar Foto Panorâmica
 
-## Objetivo
-Transformar a aplicação InfraSite em um Progressive Web App instalável, permitindo que os técnicos instalem o app diretamente no celular e usem offline.
+## Problema Identificado
 
-## Benefícios para os Usuários
-- **Instalação fácil**: Instalar direto do navegador na tela inicial do celular
-- **Acesso rápido**: Abre como um app nativo, sem barra do navegador
-- **Funciona offline**: Carrega mesmo sem internet (dados precisam de conexão)
-- **Carregamento rápido**: Recursos ficam em cache no dispositivo
+Após a implementação do PWA, a configuração `registerType: "autoUpdate"` no `vite-plugin-pwa` pode estar causando recarregamentos automáticos da página. Quando o Service Worker detecta uma atualização, ele pode automaticamente recarregar a página sem aviso, interrompendo operações como captura de fotos.
+
+## Solução
+
+Mudar a estratégia de atualização do PWA para dar controle ao usuário, em vez de recarregar automaticamente.
 
 ---
 
-## Etapas de Implementação
+## Mudanças a Implementar
 
-### 1. Instalar Plugin PWA para Vite
-Adicionar a dependência `vite-plugin-pwa` que automatiza a geração do Service Worker e manifest.
+### 1. Alterar Configuração do PWA (`vite.config.ts`)
 
-### 2. Configurar o Plugin no Vite
-Atualizar `vite.config.ts` com as configurações do PWA:
-- Nome do app: "InfraSite"
-- Descrição: "Checklist de Infraestrutura de Sites"
-- Cores da marca Vivo (roxo #660099)
-- Ícones em múltiplos tamanhos
-- Estratégia de cache para assets
+Mudar de `registerType: "autoUpdate"` para `registerType: "prompt"`. Isso evita recarregamentos automáticos e permite que o usuário escolha quando atualizar.
 
-### 3. Criar Ícones do PWA
-Adicionar ícones na pasta `public/` nos tamanhos necessários:
-- `pwa-192x192.png` (ícone padrão)
-- `pwa-512x512.png` (ícone de alta resolução)
-- `apple-touch-icon.png` (180x180 para iOS)
+### 2. Adicionar Componente de Atualização do PWA
 
-### 4. Atualizar index.html
-Adicionar meta tags otimizadas para mobile:
-- Título: "InfraSite"
-- Descrição atualizada
-- Cor do tema (theme-color)
-- Apple-specific meta tags para iOS
-- Link para apple-touch-icon
+Criar um componente `PWAUpdatePrompt` que:
+- Detecta quando há uma nova versão disponível
+- Mostra um toast/botão perguntando ao usuário se deseja atualizar
+- Só recarrega a página quando o usuário confirma
 
-### 5. Criar Página de Instalação (Opcional)
-Página `/instalar` com instruções visuais de como instalar o app em diferentes dispositivos.
+### 3. Registrar o Service Worker Manualmente
 
-### 6. Adicionar Prompt de Instalação
-Componente que detecta quando o app pode ser instalado e mostra um botão/banner convidando o usuário a instalar.
+Usar o hook `useRegisterSW` do `vite-plugin-pwa/react` para controlar o registro e atualizações do Service Worker.
 
 ---
 
 ## Detalhes Técnicos
 
-### Arquivos a Criar
-```text
-public/pwa-192x192.png      (ícone 192x192)
-public/pwa-512x512.png      (ícone 512x512)
-public/apple-touch-icon.png (ícone 180x180 para iOS)
-src/pages/Install.tsx       (página de instruções)
-src/hooks/use-pwa-install.ts (hook para gerenciar instalação)
-src/components/PWAInstallPrompt.tsx (componente de prompt)
-```
-
-### Arquivos a Modificar
-```text
-package.json       - adicionar vite-plugin-pwa
-vite.config.ts     - configurar plugin PWA
-index.html         - meta tags mobile e título
-src/App.tsx        - rota /instalar e prompt
-```
-
-### Configuração do Manifest (via plugin)
+### Arquivo: `vite.config.ts`
 ```typescript
-{
-  name: 'InfraSite',
-  short_name: 'InfraSite',
-  description: 'Checklist de Infraestrutura de Sites de Telecomunicações',
-  theme_color: '#660099',
-  background_color: '#ffffff',
-  display: 'standalone',
-  start_url: '/',
-  icons: [
-    { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-    { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
-  ]
-}
+VitePWA({
+  registerType: "prompt",  // Mudança: era "autoUpdate"
+  // ... resto da configuração mantida
+})
 ```
 
-### Estratégia de Cache
-- Assets estáticos (JS, CSS, imagens): Cache primeiro
-- Requisições API: Rede primeiro com fallback
+### Novo Arquivo: `src/components/PWAUpdatePrompt.tsx`
 
----
+Componente que:
+- Usa `useRegisterSW` para detectar atualizações
+- Mostra toast quando nova versão disponível
+- Permite ao usuário controlar quando recarregar
 
-## Como Instalar (Instruções para Usuários)
+### Arquivo: `src/App.tsx`
 
-**Android (Chrome):**
-1. Acesse o site no Chrome
-2. Toque no menu (3 pontos) > "Instalar app"
-3. Confirme a instalação
-
-**iPhone (Safari):**
-1. Acesse o site no Safari
-2. Toque no botão Compartilhar
-3. Selecione "Adicionar à Tela de Início"
-4. Confirme
+Adicionar o novo componente `PWAUpdatePrompt` junto com o `PWAInstallPrompt`.
 
 ---
 
 ## Resultado Esperado
-Após a implementação, a aplicação poderá ser instalada como um app nativo em qualquer smartphone, aparecendo na tela inicial com o ícone da Vivo/InfraSite.
+
+- A página **não** recarrega automaticamente durante operações
+- Quando há nova versão, aparece um botão discreto para atualizar
+- O usuário tem controle total sobre quando recarregar
+- Capturas de foto funcionam sem interrupção
