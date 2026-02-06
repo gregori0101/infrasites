@@ -180,6 +180,7 @@ export interface GMGData {
   capacidadeTanque?: number;
   combustivelPorcentagem?: number;
   status?: StatusFuncionamento;
+  alarmeAtivo?: boolean;
   ultimoTeste?: string;
   fotoGMG?: string | null;
 }
