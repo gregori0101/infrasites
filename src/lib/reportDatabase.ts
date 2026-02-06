@@ -15,6 +15,7 @@ export interface ReportRow {
   state_uf: string | null;
   total_cabinets: number;
   panoramic_photo_url: string | null;
+  fotos_extras?: Record<string, string[]> | null;
   [key: string]: any;
 }
 
@@ -428,6 +429,23 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row[`fibra_dgo${i + 1}_cordoes`] = dgo.estadoCordoes || null;
       row[`fibra_dgo${i + 1}_foto`] = dgo.fotoDGO || null;
       row[`fibra_dgo${i + 1}_cordoes_foto`] = dgo.fotoCordesDetalhada || null;
+    }
+  }
+
+  // Fotos extras - store as JSON
+  if (data.fotosExtras && typeof data.fotosExtras === 'object') {
+    // Filter out empty arrays and only keep non-empty photo arrays
+    const validExtras: Record<string, string[]> = {};
+    for (const [key, photos] of Object.entries(data.fotosExtras)) {
+      if (Array.isArray(photos)) {
+        const validPhotos = photos.filter((p): p is string => typeof p === 'string' && p.length > 0);
+        if (validPhotos.length > 0) {
+          validExtras[key] = validPhotos;
+        }
+      }
+    }
+    if (Object.keys(validExtras).length > 0) {
+      row.fotos_extras = validExtras;
     }
   }
 

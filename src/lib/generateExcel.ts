@@ -248,6 +248,39 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   row['Data_Hora_Checklist'] = data.dataHora ? format(new Date(data.dataHora), 'dd/MM/yyyy HH:mm:ss') : '';
   row['Timestamp_Envio'] = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
   
+  // GRUPO FOTOS EXTRAS (always include if exists)
+  if (data.fotosExtras && typeof data.fotosExtras === 'object') {
+    const extraKeys = Object.keys(data.fotosExtras);
+    const validExtras = extraKeys.filter(key => {
+      const photos = data.fotosExtras[key];
+      return Array.isArray(photos) && photos.some(p => p);
+    });
+    
+    row['Fotos_Extras_Qtd_Campos'] = validExtras.length;
+    
+    // Count total extra photos
+    let totalExtraPhotos = 0;
+    validExtras.forEach(key => {
+      const photos = data.fotosExtras[key];
+      if (Array.isArray(photos)) {
+        totalExtraPhotos += photos.filter(p => p).length;
+      }
+    });
+    row['Fotos_Extras_Qtd_Total'] = totalExtraPhotos;
+    
+    // Add each extra photo set as a column
+    validExtras.forEach(key => {
+      const photos = data.fotosExtras[key];
+      if (Array.isArray(photos)) {
+        const validPhotos = photos.filter(p => p);
+        row[`Fotos_Extras_${key}`] = validPhotos.map((p, i) => getPhotoValue(p)).join(' | ');
+      }
+    });
+  } else {
+    row['Fotos_Extras_Qtd_Campos'] = 0;
+    row['Fotos_Extras_Qtd_Total'] = 0;
+  }
+  
   return row;
 }
 

@@ -79,6 +79,7 @@ export type Database = {
           fibra_foto_subidas_laterais: string | null
           fibra_qtd_abordagens: number | null
           fibra_subidas_laterais_qtd: number | null
+          fotos_extras: Json | null
           gab1_ac1_modelo: string | null
           gab1_ac1_status: string | null
           gab1_ac2_modelo: string | null
@@ -735,6 +736,7 @@ export type Database = {
           fibra_foto_subidas_laterais?: string | null
           fibra_qtd_abordagens?: number | null
           fibra_subidas_laterais_qtd?: number | null
+          fotos_extras?: Json | null
           gab1_ac1_modelo?: string | null
           gab1_ac1_status?: string | null
           gab1_ac2_modelo?: string | null
@@ -1391,6 +1393,7 @@ export type Database = {
           fibra_foto_subidas_laterais?: string | null
           fibra_qtd_abordagens?: number | null
           fibra_subidas_laterais_qtd?: number | null
+          fotos_extras?: Json | null
           gab1_ac1_modelo?: string | null
           gab1_ac1_status?: string | null
           gab1_ac2_modelo?: string | null
@@ -2176,6 +2179,7 @@ export type Database = {
           fibra_foto_subidas_laterais: string | null
           fibra_qtd_abordagens: number | null
           fibra_subidas_laterais_qtd: number | null
+          fotos_extras: Json | null
           gab1_ac1_modelo: string | null
           gab1_ac1_status: string | null
           gab1_ac2_modelo: string | null

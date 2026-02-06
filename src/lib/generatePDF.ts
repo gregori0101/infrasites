@@ -758,6 +758,69 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     }
   }
 
+  // ===== EXTRA PHOTOS =====
+  // Add extra photos from fotosExtras map
+  if (data.fotosExtras && typeof data.fotosExtras === 'object') {
+    const extraKeys = Object.keys(data.fotosExtras);
+    const validExtras = extraKeys.filter(key => {
+      const photos = data.fotosExtras[key];
+      return Array.isArray(photos) && photos.some(p => p);
+    });
+
+    if (validExtras.length > 0) {
+      checkNewPage(40);
+      addSectionTitle('FOTOS EXTRAS');
+
+      // Map field keys to friendly labels
+      const labelMap: Record<string, string> = {
+        'gab': 'Gabinete',
+        'ar': 'Ar Condicionado',
+        'condensador': 'Condensador',
+        'evaporador': 'Evaporador',
+        'controlador': 'Controlador',
+        'fcc': 'FCC',
+        'bateria': 'Bateria',
+        'energia': 'Energia',
+        'transformador': 'Transformador',
+        'quadro': 'Quadro',
+        'torre': 'Torre',
+        'fibra': 'Fibra',
+        'gmg': 'GMG',
+        'plc': 'PLC',
+        'clima': 'Climatização',
+      };
+
+      const getLabel = (key: string): string => {
+        // Try to create a friendly label from the key
+        let label = key.replace(/_/g, ' ').replace(/\d+/g, (match) => ` ${match}`);
+        
+        // Replace known parts with friendly names
+        for (const [pattern, replacement] of Object.entries(labelMap)) {
+          if (key.toLowerCase().includes(pattern)) {
+            label = label.replace(new RegExp(pattern, 'gi'), replacement);
+          }
+        }
+        
+        return label.trim().replace(/\s+/g, ' ');
+      };
+
+      for (const key of validExtras) {
+        const photos = data.fotosExtras[key];
+        const friendlyLabel = getLabel(key);
+        
+        for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i];
+          if (photo) {
+            const photoLabel = photos.length > 1 
+              ? `Extra: ${friendlyLabel} (${i + 1}/${photos.length})`
+              : `Extra: ${friendlyLabel}`;
+            await addPhoto(photo, photoLabel);
+          }
+        }
+      }
+    }
+  }
+
   // ===== SIGNATURE =====
   if (data.assinaturaDigital) {
     checkNewPage(70);
