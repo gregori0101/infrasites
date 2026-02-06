@@ -47,38 +47,48 @@ export function PhotoCapture({
     
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
-      return;
-    }
-
-    // Validate file size (max 20MB before compression)
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
-      return;
-    }
-
-    setIsProcessing(true);
-
+    // CRÍTICO: Envolver TUDO em try-catch para evitar rejeições não tratadas
     try {
-      // Use file-first upload (no base64 intermediate)
-      const result = await uploadPhotoFile(file);
-      
-      if (result) {
-        onChange(result);
-        if (result.startsWith('http')) {
-          toast.success("Foto salva na nuvem!");
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Arquivo inválido", { description: "Por favor, selecione uma imagem." });
+        return;
+      }
+
+      // Validate file size (max 20MB before compression)
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Imagem muito grande", { description: "O tamanho máximo é 20MB." });
+        return;
+      }
+
+      setIsProcessing(true);
+
+      try {
+        // Use file-first upload (no base64 intermediate)
+        const result = await uploadPhotoFile(file);
+        
+        if (result) {
+          onChange(result);
+          if (result.startsWith('http')) {
+            toast.success("Foto salva na nuvem!");
+          } else {
+            toast.success("Foto adicionada!");
+          }
         } else {
-          toast.success("Foto adicionada!");
+          throw new Error("Falha ao processar imagem");
         }
-      } else {
-        throw new Error("Falha ao processar imagem");
+      } catch (uploadError) {
+        // Erro específico de upload - capturado internamente
+        console.error("[PhotoCapture] Upload error:", uploadError);
+        toast.error("Erro ao enviar foto", { 
+          description: "Verifique sua conexão e tente novamente." 
+        });
       }
     } catch (error) {
-      console.error("[PhotoCapture] Error:", error);
-      toast.error("Erro ao processar imagem", { 
-        description: "Tente novamente ou use outra imagem." 
+      // Erro externo genérico - previne crash/reload da página
+      console.error("[PhotoCapture] Capture error:", error);
+      toast.error("Erro ao processar imagem", {
+        description: "Tente capturar novamente."
       });
     } finally {
       setIsProcessing(false);
