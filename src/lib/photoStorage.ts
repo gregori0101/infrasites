@@ -122,6 +122,18 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
+ * Detect if running on iOS Safari
+ */
+function isIOSSafari(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS/.test(ua);
+  return isIOS || isSafari;
+}
+
+/**
  * Upload with retry logic for iOS Safari stability
  */
 async function uploadWithRetry(
@@ -131,17 +143,24 @@ async function uploadWithRetry(
   maxRetries = 2
 ): Promise<string> {
   let lastError: Error | null = null;
+  const isIOS = isIOSSafari();
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       if (attempt > 0) {
         console.log(`[PhotoUpload] Retry ${attempt}/${maxRetries} for ${category}`);
-        await delay(500 * attempt); // Increasing delay between retries
+        // Longer delay on iOS for memory recovery
+        await delay(isIOS ? 800 * attempt : 500 * attempt);
       }
       return await uploadPhoto(base64Data, siteCode, category);
     } catch (error) {
       lastError = error as Error;
       console.warn(`[PhotoUpload] Attempt ${attempt + 1} failed for ${category}:`, error);
+      
+      // On iOS, give extra time for GC before retry
+      if (isIOS) {
+        await delay(300);
+      }
     }
   }
   
@@ -162,12 +181,13 @@ export async function uploadAllPhotos(
     if (!photo || photo.startsWith('http')) return photo || null;
     try {
       const result = await uploadWithRetry(photo, siteCode, category);
-      // Small delay after each upload to prevent iOS memory pressure
-      await delay(100);
+      // Longer delay on iOS after each upload to prevent memory pressure
+      const delayMs = isIOSSafari() ? 200 : 100;
+      await delay(delayMs);
       return result;
     } catch (e: any) {
       // CRITICAL: never fall back to returning base64 and accidentally store it in DB.
-      console.error(`Failed to upload ${category}:`, e);
+      console.error(`[uploadAllPhotos] Failed to upload ${category}:`, e);
       const msg = e?.message ? String(e.message) : 'erro desconhecido';
       throw new Error(`Falha ao enviar foto (${category}): ${msg}`);
     }
@@ -399,14 +419,25 @@ export async function uploadAllPhotos(
     if (!updatedData.energia) {
       updatedData.energia = {};
     }
-    updatedData.energia.fotoTransformador = await uploadSinglePhoto(
-      data.energia.fotoTransformador,
-      'energia_transformador'
-    );
-    updatedData.energia.fotoQuadroGeral = await uploadSinglePhoto(
-      data.energia.fotoQuadroGeral,
-      'energia_quadro'
-    );
+    if (data.energia.fotoTransformador) {
+      updatedData.energia.fotoTransformador = await uploadSinglePhoto(
+        data.energia.fotoTransformador,
+        'energia_transformador'
+      );
+    }
+    if (data.energia.fotoQuadroGeral) {
+      updatedData.energia.fotoQuadroGeral = await uploadSinglePhoto(
+        data.energia.fotoQuadroGeral,
+        'energia_quadro'
+      );
+    }
+    // Upload relógio photo if exists
+    if (data.energia.fotoRelogio) {
+      updatedData.energia.fotoRelogio = await uploadSinglePhoto(
+        data.energia.fotoRelogio,
+        'energia_relogio'
+      );
+    }
   }
 
   // Upload tower photos
@@ -420,17 +451,45 @@ export async function uploadAllPhotos(
         'torre_fibras_protegidas'
       );
     }
+    // Upload torre ninhos photo if exists
+    if (data.torre.fotoNinhos) {
+      updatedData.torre.fotoNinhos = await uploadSinglePhoto(
+        data.torre.fotoNinhos,
+        'torre_ninhos'
+      );
+    }
   }
 
   // Upload GMG photos
-  if (data.gmg?.fotoGMG) {
+  if (data.gmg) {
     if (!updatedData.gmg) {
       updatedData.gmg = { ...data.gmg };
     }
-    updatedData.gmg.fotoGMG = await uploadSinglePhoto(
-      data.gmg.fotoGMG,
-      'gmg_painel'
-    );
+    if (data.gmg.fotoGMG) {
+      updatedData.gmg.fotoGMG = await uploadSinglePhoto(
+        data.gmg.fotoGMG,
+        'gmg_painel'
+      );
+    }
+    // Upload GMG alarm photo
+    if (data.gmg.fotoAlarme) {
+      updatedData.gmg.fotoAlarme = await uploadSinglePhoto(
+        data.gmg.fotoAlarme,
+        'gmg_alarme'
+      );
+    }
+  }
+
+  // Upload extra photos (fotosExtras map)
+  if (data.fotosExtras && typeof data.fotosExtras === 'object') {
+    updatedData.fotosExtras = {};
+    const keys = Object.keys(data.fotosExtras);
+    for (const key of keys) {
+      const photos = data.fotosExtras[key];
+      if (Array.isArray(photos) && photos.length > 0) {
+        updatedData.fotosExtras[key] = await uploadPhotoArray(photos, `extra_${key}`);
+      }
+    }
   }
 
   return updatedData;

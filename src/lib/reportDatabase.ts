@@ -355,6 +355,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_foto_painel = data.gmg?.fotoGMG || null;
     row.torre_protecao_fibra = data.torre?.fibrasProtegidas === true ? 'SIM' : data.torre?.fibrasProtegidas === false ? 'NÃO' : null;
     row.torre_foto_fibras_protegidas = data.torre?.fotoFibrasProtegidas || null;
+    row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
+    row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
     row.torre_aterramento = data.torre?.aterramento || null;
     row.torre_housekeeping = data.torre?.zeladoria || null;
   }
