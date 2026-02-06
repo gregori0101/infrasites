@@ -53,7 +53,6 @@ function buildDashboardColumns(): string {
     'gmg_potencia',
     'gmg_autonomia',
     'gmg_status',
-    'torre_ninhos',
     'torre_protecao_fibra',
     'torre_aterramento',
     'torre_housekeeping',
@@ -134,7 +133,6 @@ function buildPhotoColumns(): string {
     'assinatura_digital',
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
-    'torre_foto_ninhos',
     'torre_foto_fibras_protegidas',
     'gmg_foto_painel',
     // Fiber optic photos
@@ -173,6 +171,8 @@ function buildPhotoColumns(): string {
       `${prefix}_foto_acesso`,
     );
   }
+  // Add gmg_foto_alarme to photo columns
+  cols.push('gmg_foto_alarme');
 
   return cols.join(',');
 }
@@ -353,12 +353,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_foto_alarme = data.gmg?.fotoAlarme || null;
     row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
     row.gmg_foto_painel = data.gmg?.fotoGMG || null;
-    row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
     row.torre_protecao_fibra = data.torre?.fibrasProtegidas === true ? 'SIM' : data.torre?.fibrasProtegidas === false ? 'NÃO' : null;
     row.torre_foto_fibras_protegidas = data.torre?.fotoFibrasProtegidas || null;
     row.torre_aterramento = data.torre?.aterramento || null;
     row.torre_housekeeping = data.torre?.zeladoria || null;
-    row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
   }
 
   // Energia data - skip if energia section marked NA

@@ -414,12 +414,6 @@ export async function uploadAllPhotos(
     if (!updatedData.torre) {
       updatedData.torre = { ...data.torre };
     }
-    if (data.torre.fotoNinhos) {
-      updatedData.torre.fotoNinhos = await uploadSinglePhoto(
-        data.torre.fotoNinhos,
-        'torre_ninhos'
-      );
-    }
     if (data.torre.fotoFibrasProtegidas) {
       updatedData.torre.fotoFibrasProtegidas = await uploadSinglePhoto(
         data.torre.fotoFibrasProtegidas,

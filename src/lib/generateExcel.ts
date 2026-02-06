@@ -220,7 +220,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   const skipGmgTorre = skipped.gmgTorre;
   if (!skipGmgTorre) {
     row['GMG_Informado'] = data.gmg.informar ? 'SIM' : 'NÃO';
-    row['GMG_Fabricante'] = data.gmg.informar ? (data.gmg.fabricante || '') : '';
+    row['GMG_Fabricante'] = data.gmg.informar ? (data.gmg.fabricanteOutra || data.gmg.fabricante || '') : '';
     row['GMG_Potencia_kVA'] = data.gmg.informar ? (data.gmg.potencia || '') : '';
     row['GMG_Capacidade_Tanque_L'] = data.gmg.informar ? (data.gmg.capacidadeTanque || '') : '';
     row['GMG_Combustivel_Pct'] = data.gmg.informar ? (data.gmg.combustivelPorcentagem != null ? data.gmg.combustivelPorcentagem : '') : '';
@@ -230,8 +230,6 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['GMG_Ultimo_Teste'] = data.gmg.informar ? (data.gmg.ultimoTeste || '') : '';
     row['GMG_Foto_Painel'] = data.gmg.informar ? getPhotoValue(data.gmg.fotoGMG) : '';
     
-    row['Torre_Ninhos'] = data.torre.ninhos ? 'SIM' : 'NÃO';
-    row['Torre_Foto_Ninhos'] = getPhotoValue(data.torre.fotoNinhos);
     row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
     row['Torre_Foto_Fibras_Protegidas'] = getPhotoValue(data.torre.fotoFibrasProtegidas);
     row['Torre_Aterramento'] = data.torre.aterramento;

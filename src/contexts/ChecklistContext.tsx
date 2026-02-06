@@ -200,7 +200,6 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
             },
             torre: { 
               ...data.torre, 
-              fotoNinhos: keepOnlyUrls(data.torre?.fotoNinhos),
               fotoFibrasProtegidas: keepOnlyUrls(data.torre?.fotoFibrasProtegidas),
             },
             gmg: {
@@ -548,8 +547,6 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       !!data.torre.aterramento,
       !!data.torre.zeladoria,
       data.torre.fibrasProtegidas !== undefined,
-      // Foto ninhos só obrigatória se houver ninhos
-      !data.torre.ninhos || !!data.torre.fotoNinhos,
     ];
     const gmgTorreProgress = gmgTorreFields.filter(Boolean).length / gmgTorreFields.length;
     progress += gmgTorreProgress * WEIGHTS.gmgTorre;
