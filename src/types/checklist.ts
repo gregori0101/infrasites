@@ -181,6 +181,7 @@ export interface GMGData {
   combustivelPorcentagem?: number;
   status?: StatusFuncionamento;
   alarmeAtivo?: boolean;
+  fotoAlarme?: string | null;
   ultimoTeste?: string;
   fotoGMG?: string | null;
 }
