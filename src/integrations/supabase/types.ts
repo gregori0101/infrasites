@@ -29,6 +29,7 @@ export type Database = {
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
+          energia_foto_relogio: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
           energia_protegido_cadeado: string | null
@@ -36,6 +37,7 @@ export type Database = {
           energia_tensao_entrada: string | null
           energia_tipo_quadro: string | null
           energia_transformador_ok: string | null
+          energia_unidade_consumidora: string | null
           excel_file_path: string | null
           fibra_abord1_descricao: string | null
           fibra_abord1_foto: string | null
@@ -664,8 +666,10 @@ export type Database = {
           state_uf: string | null
           technician_name: string | null
           torre_aterramento: string | null
+          torre_foto_aterramento: string | null
           torre_foto_fibras_protegidas: string | null
           torre_foto_ninhos: string | null
+          torre_foto_zeladoria: string | null
           torre_housekeeping: string | null
           torre_ninhos: string | null
           torre_protecao_fibra: string | null
@@ -686,6 +690,7 @@ export type Database = {
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
+          energia_foto_relogio?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
           energia_protegido_cadeado?: string | null
@@ -693,6 +698,7 @@ export type Database = {
           energia_tensao_entrada?: string | null
           energia_tipo_quadro?: string | null
           energia_transformador_ok?: string | null
+          energia_unidade_consumidora?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
           fibra_abord1_foto?: string | null
@@ -1321,8 +1327,10 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_foto_aterramento?: string | null
           torre_foto_fibras_protegidas?: string | null
           torre_foto_ninhos?: string | null
+          torre_foto_zeladoria?: string | null
           torre_housekeeping?: string | null
           torre_ninhos?: string | null
           torre_protecao_fibra?: string | null
@@ -1343,6 +1351,7 @@ export type Database = {
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
+          energia_foto_relogio?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
           energia_protegido_cadeado?: string | null
@@ -1350,6 +1359,7 @@ export type Database = {
           energia_tensao_entrada?: string | null
           energia_tipo_quadro?: string | null
           energia_transformador_ok?: string | null
+          energia_unidade_consumidora?: string | null
           excel_file_path?: string | null
           fibra_abord1_descricao?: string | null
           fibra_abord1_foto?: string | null
@@ -1978,8 +1988,10 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_foto_aterramento?: string | null
           torre_foto_fibras_protegidas?: string | null
           torre_foto_ninhos?: string | null
+          torre_foto_zeladoria?: string | null
           torre_housekeeping?: string | null
           torre_ninhos?: string | null
           torre_protecao_fibra?: string | null
@@ -2129,6 +2141,7 @@ export type Database = {
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
+          energia_foto_relogio: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
           energia_protegido_cadeado: string | null
@@ -2136,6 +2149,7 @@ export type Database = {
           energia_tensao_entrada: string | null
           energia_tipo_quadro: string | null
           energia_transformador_ok: string | null
+          energia_unidade_consumidora: string | null
           excel_file_path: string | null
           fibra_abord1_descricao: string | null
           fibra_abord1_foto: string | null
@@ -2764,8 +2778,10 @@ export type Database = {
           state_uf: string | null
           technician_name: string | null
           torre_aterramento: string | null
+          torre_foto_aterramento: string | null
           torre_foto_fibras_protegidas: string | null
           torre_foto_ninhos: string | null
+          torre_foto_zeladoria: string | null
           torre_housekeeping: string | null
           torre_ninhos: string | null
           torre_protecao_fibra: string | null
