@@ -193,6 +193,17 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
                   onChange={(value) => updateEnergia({ protegidoCadeado: value })}
                 />
               </div>
+
+              <PhotoCaptureWithExtras
+                label="Foto do Quadro Geral (obrigatória)"
+                value={energia.fotoQuadroGeral}
+                onChange={(value) => updateEnergia({ fotoQuadroGeral: value })}
+                extraPhotos={getFotosExtras('energia_quadro')}
+                onExtraPhotosChange={(photos) => updateFotosExtras('energia_quadro', photos)}
+                required
+                siteCode={data.siglaSite}
+                category="energia_quadro"
+              />
             </div>
           </FormCard>
 
@@ -228,20 +239,6 @@ export function Step7Energia({ showErrors = false, validationErrors = [] }: Step
               </div>
             )}
           </div>
-        </FormCard>
-
-        {/* Foto Quadro Geral */}
-        <FormCard title="Foto Quadro Geral" icon={<FileText className="w-4 h-4" />}>
-          <PhotoCaptureWithExtras
-            label="Foto do Quadro Geral (obrigatória)"
-            value={energia.fotoQuadroGeral}
-            onChange={(value) => updateEnergia({ fotoQuadroGeral: value })}
-            extraPhotos={getFotosExtras('energia_quadro')}
-            onExtraPhotosChange={(photos) => updateFotosExtras('energia_quadro', photos)}
-            required
-            siteCode={data.siglaSite}
-            category="energia_quadro"
-          />
         </FormCard>
 
         {/* Unidade Consumidora */}
