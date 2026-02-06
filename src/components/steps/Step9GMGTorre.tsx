@@ -70,7 +70,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Potência (kVA)</Label>
+                    <Label>Potência</Label>
                     <input
                       type="number"
                       value={data.gmg.potencia || ''}
