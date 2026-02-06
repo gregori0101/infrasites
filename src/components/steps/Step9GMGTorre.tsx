@@ -131,6 +131,12 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
                   </div>
                 </div>
 
+                <ToggleSwitch
+                  label="Possui alarme ativo?"
+                  value={data.gmg.alarmeAtivo ?? false}
+                  onChange={(value) => updateGMG({ alarmeAtivo: value })}
+                />
+
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1">
                     Data do Último Teste
