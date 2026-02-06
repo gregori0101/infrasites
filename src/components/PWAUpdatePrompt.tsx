@@ -7,7 +7,7 @@ export function PWAUpdatePrompt() {
   const [dismissed, setDismissed] = useState(false);
   
   const {
-    needRefresh: [needRefresh],
+    needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
@@ -15,6 +15,9 @@ export function PWAUpdatePrompt() {
     },
     onRegisterError(error) {
       console.error('[PWA] Erro ao registrar Service Worker:', error);
+    },
+    onNeedRefresh() {
+      console.log('[PWA] Nova versão disponível');
     },
   });
 

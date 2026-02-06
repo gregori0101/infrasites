@@ -99,21 +99,21 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
       setUploadProgress(10);
 
       try {
-        // Small delay to allow UI to update and prevent race conditions
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        // CRITICAL: Larger delay for mobile to allow UI to stabilize
+        await new Promise((resolve) => setTimeout(resolve, isMobile ? 200 : 50));
         
         // Compress file directly to blob (no base64)
         console.log(`[PhotoUpload] Compressing file: ${Math.round(file.size / 1024)}KB - ${category}`);
         
-        // Use smaller target for mobile to prevent memory issues
-        const targetSizeKB = isMobile ? 350 : 500;
+        // CRITICAL: Much smaller target for mobile to prevent OOM crashes
+        const targetSizeKB = isMobile ? 250 : 500;
         const blob = await compressFileToBlobWithFallback(file, targetSizeKB, isMobile);
         console.log(`[PhotoUpload] Compressed to: ${Math.round(blob.size / 1024)}KB - ${category}`);
 
         setUploadProgress(50);
         
-        // Allow GC between heavy operations
-        await new Promise((resolve) => setTimeout(resolve, 30));
+        // CRITICAL: Longer GC pause on mobile to prevent crash
+        await new Promise((resolve) => setTimeout(resolve, isMobile ? 100 : 30));
 
         // Generate unique filename
         const timestamp = new Date().toISOString().slice(0, 10);

@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "prompt",
+      devOptions: {
+        enabled: false, // Disable SW in dev to prevent reload during photo capture
+      },
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "InfraSite",

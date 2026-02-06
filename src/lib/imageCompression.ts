@@ -421,19 +421,28 @@ export async function compressFileToBlobWithFallback(
   maxSizeKB: number = 500,
   isMobile: boolean = false
 ): Promise<Blob> {
-  // Mobile gets smaller initial dimensions to reduce memory pressure
-  const baseDimension = isMobile ? 1280 : 1920;
+  // CRITICAL: Mobile gets much more aggressive compression to prevent OOM crashes
+  const baseDimension = isMobile ? 1024 : 1920;
+  const baseQuality = isMobile ? 0.7 : 0.85;
   
-  const attempts: FileToBlobAttempt[] = [
-    { quality: 0.85, maxWidth: baseDimension, maxHeight: baseDimension, mimeType: 'image/jpeg' },
-    { quality: 0.75, maxWidth: 1280, maxHeight: 1280, mimeType: 'image/jpeg' },
-    { quality: 0.65, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/jpeg' },
-    { quality: 0.55, maxWidth: 800, maxHeight: 800, mimeType: 'image/jpeg' },
-    { quality: 0.45, maxWidth: 640, maxHeight: 640, mimeType: 'image/jpeg' },
-    // WebP fallback for better compression
-    { quality: 0.6, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/webp' },
-    { quality: 0.5, maxWidth: 800, maxHeight: 800, mimeType: 'image/webp' },
-  ];
+  const attempts: FileToBlobAttempt[] = isMobile
+    ? [
+        // Mobile: Start smaller and more aggressive
+        { quality: 0.7, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/jpeg' },
+        { quality: 0.6, maxWidth: 800, maxHeight: 800, mimeType: 'image/jpeg' },
+        { quality: 0.5, maxWidth: 640, maxHeight: 640, mimeType: 'image/jpeg' },
+        { quality: 0.4, maxWidth: 480, maxHeight: 480, mimeType: 'image/jpeg' },
+        // WebP last resort
+        { quality: 0.55, maxWidth: 800, maxHeight: 800, mimeType: 'image/webp' },
+      ]
+    : [
+        // Desktop: Can handle larger sizes
+        { quality: 0.85, maxWidth: baseDimension, maxHeight: baseDimension, mimeType: 'image/jpeg' },
+        { quality: 0.75, maxWidth: 1280, maxHeight: 1280, mimeType: 'image/jpeg' },
+        { quality: 0.65, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/jpeg' },
+        { quality: 0.55, maxWidth: 800, maxHeight: 800, mimeType: 'image/jpeg' },
+        { quality: 0.6, maxWidth: 1024, maxHeight: 1024, mimeType: 'image/webp' },
+      ];
 
   let lastResult: Blob | null = null;
   let lastError: Error | null = null;
