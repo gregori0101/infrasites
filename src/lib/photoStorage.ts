@@ -266,13 +266,14 @@ export async function uploadAllPhotos(
   );
 
   // Upload observation photos with descriptions (FotoObservacao[])
+  // CRITICAL: Sequential upload for iOS stability (avoid parallel Promise.all)
   if (Array.isArray(data.fotosObservacao)) {
-    updatedData.fotosObservacao = await Promise.all(
-      data.fotosObservacao.map(async (item: { foto: string | null; descricao: string }, idx: number) => {
-        const uploadedFoto = item?.foto ? await uploadSinglePhoto(item.foto, `observacao_${idx}`) : null;
-        return { foto: uploadedFoto, descricao: item?.descricao || '' };
-      })
-    );
+    updatedData.fotosObservacao = [];
+    for (let idx = 0; idx < data.fotosObservacao.length; idx++) {
+      const item = data.fotosObservacao[idx];
+      const uploadedFoto = item?.foto ? await uploadSinglePhoto(item.foto, `observacao_${idx}`) : null;
+      updatedData.fotosObservacao.push({ foto: uploadedFoto, descricao: item?.descricao || '' });
+    }
   } else {
     updatedData.fotosObservacao = [];
   }
@@ -499,11 +500,22 @@ export async function uploadAllPhotos(
         'torre_fibras_protegidas'
       );
     }
-    // Upload torre ninhos photo if exists
     if (data.torre.fotoNinhos) {
       updatedData.torre.fotoNinhos = await uploadSinglePhoto(
         data.torre.fotoNinhos,
         'torre_ninhos'
+      );
+    }
+    if (data.torre.fotoAterramento) {
+      updatedData.torre.fotoAterramento = await uploadSinglePhoto(
+        data.torre.fotoAterramento,
+        'torre_aterramento'
+      );
+    }
+    if (data.torre.fotoZeladoria) {
+      updatedData.torre.fotoZeladoria = await uploadSinglePhoto(
+        data.torre.fotoZeladoria,
+        'torre_zeladoria'
       );
     }
   }
