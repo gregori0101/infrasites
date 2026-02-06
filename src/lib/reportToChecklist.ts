@@ -246,6 +246,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     };
     
     // Parse batteries
+    // Note: Database only has one photo per gabinete (gabX_bat_foto), not per battery bank
+    const gabBatFoto = report[`${prefix}_bat_foto`] || null;
     const bancos = [];
     for (let j = 0; j < 6; j++) {
       const tipo = report[`${prefix}_bat${j + 1}_tipo`];
@@ -262,7 +264,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
           estados: estados as any,
           colada: (report[`${prefix}_bat${j + 1}_colada`] || 'NA') as any,
           comGradil: (report[`${prefix}_bat${j + 1}_com_gradil`] || 'NA') as any,
-          fotoBanco: report[`${prefix}_bat${j + 1}_foto`] || null,
+          // Only first battery gets the photo (DB limitation)
+          fotoBanco: j === 0 ? gabBatFoto : null,
         });
       }
     }
