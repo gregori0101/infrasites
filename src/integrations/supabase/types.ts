@@ -22,12 +22,17 @@ export type Database = {
           created_time: string
           email_sent: boolean | null
           email_sent_at: string | null
+          energia_disjuntor_entrada: number | null
+          energia_disjuntor_qdca: number | null
           energia_fabricante: string | null
+          energia_fabricante_outra: string | null
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
+          energia_protegido_cadeado: string | null
+          energia_protegido_gradil: string | null
           energia_tensao_entrada: string | null
           energia_tipo_quadro: string | null
           energia_transformador_ok: string | null
@@ -638,10 +643,12 @@ export type Database = {
           geo_endereco: string | null
           geo_latitude: number | null
           geo_longitude: number | null
+          gmg_alarme_ativo: string | null
           gmg_autonomia: number | null
           gmg_combustivel: string | null
           gmg_existe: string | null
           gmg_fabricante: string | null
+          gmg_foto_alarme: string | null
           gmg_foto_painel: string | null
           gmg_potencia: string | null
           gmg_status: string | null
@@ -671,12 +678,17 @@ export type Database = {
           created_time: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_disjuntor_entrada?: number | null
+          energia_disjuntor_qdca?: number | null
           energia_fabricante?: string | null
+          energia_fabricante_outra?: string | null
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
+          energia_protegido_cadeado?: string | null
+          energia_protegido_gradil?: string | null
           energia_tensao_entrada?: string | null
           energia_tipo_quadro?: string | null
           energia_transformador_ok?: string | null
@@ -1287,10 +1299,12 @@ export type Database = {
           geo_endereco?: string | null
           geo_latitude?: number | null
           geo_longitude?: number | null
+          gmg_alarme_ativo?: string | null
           gmg_autonomia?: number | null
           gmg_combustivel?: string | null
           gmg_existe?: string | null
           gmg_fabricante?: string | null
+          gmg_foto_alarme?: string | null
           gmg_foto_painel?: string | null
           gmg_potencia?: string | null
           gmg_status?: string | null
@@ -1320,12 +1334,17 @@ export type Database = {
           created_time?: string
           email_sent?: boolean | null
           email_sent_at?: string | null
+          energia_disjuntor_entrada?: number | null
+          energia_disjuntor_qdca?: number | null
           energia_fabricante?: string | null
+          energia_fabricante_outra?: string | null
           energia_foto_cabos?: string | null
           energia_foto_placa?: string | null
           energia_foto_quadro_geral?: string | null
           energia_foto_transformador?: string | null
           energia_potencia_kva?: number | null
+          energia_protegido_cadeado?: string | null
+          energia_protegido_gradil?: string | null
           energia_tensao_entrada?: string | null
           energia_tipo_quadro?: string | null
           energia_transformador_ok?: string | null
@@ -1936,10 +1955,12 @@ export type Database = {
           geo_endereco?: string | null
           geo_latitude?: number | null
           geo_longitude?: number | null
+          gmg_alarme_ativo?: string | null
           gmg_autonomia?: number | null
           gmg_combustivel?: string | null
           gmg_existe?: string | null
           gmg_fabricante?: string | null
+          gmg_foto_alarme?: string | null
           gmg_foto_painel?: string | null
           gmg_potencia?: string | null
           gmg_status?: string | null
@@ -2098,12 +2119,17 @@ export type Database = {
           created_time: string
           email_sent: boolean | null
           email_sent_at: string | null
+          energia_disjuntor_entrada: number | null
+          energia_disjuntor_qdca: number | null
           energia_fabricante: string | null
+          energia_fabricante_outra: string | null
           energia_foto_cabos: string | null
           energia_foto_placa: string | null
           energia_foto_quadro_geral: string | null
           energia_foto_transformador: string | null
           energia_potencia_kva: number | null
+          energia_protegido_cadeado: string | null
+          energia_protegido_gradil: string | null
           energia_tensao_entrada: string | null
           energia_tipo_quadro: string | null
           energia_transformador_ok: string | null
@@ -2714,10 +2740,12 @@ export type Database = {
           geo_endereco: string | null
           geo_latitude: number | null
           geo_longitude: number | null
+          gmg_alarme_ativo: string | null
           gmg_autonomia: number | null
           gmg_combustivel: string | null
           gmg_existe: string | null
           gmg_fabricante: string | null
+          gmg_foto_alarme: string | null
           gmg_foto_painel: string | null
           gmg_potencia: string | null
           gmg_status: string | null

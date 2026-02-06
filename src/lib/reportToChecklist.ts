@@ -72,12 +72,14 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       ...data.energia,
       fotoTransformador: null,
       fotoQuadroGeral: null,
+      fotoRelogio: null,
     },
     
     // Clear GMG photo
     gmg: {
       ...data.gmg,
       fotoGMG: null,
+      fotoAlarme: null,
     },
     
     // Clear torre photo
@@ -85,6 +87,8 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       ...data.torre,
       fotoNinhos: null,
       fotoFibrasProtegidas: null,
+      fotoAterramento: null,
+      fotoZeladoria: null,
     },
   };
 }
@@ -318,8 +322,20 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     },
     energia: { 
       ...INITIAL_ENERGIA,
+      tipoQuadro: report.energia_tipo_quadro as any || null,
+      fabricante: report.energia_fabricante as any || null,
+      fabricanteOutra: report.energia_fabricante_outra || '',
+      potenciaKVA: report.energia_potencia_kva != null ? Number(report.energia_potencia_kva) : null,
+      tensaoEntrada: report.energia_tensao_entrada as any || null,
+      capacidadeDisjuntorEntrada: report.energia_disjuntor_entrada != null ? Number(report.energia_disjuntor_entrada) : null,
+      capacidadeDisjuntorQDCA: report.energia_disjuntor_qdca != null ? Number(report.energia_disjuntor_qdca) : null,
+      protegidoGradil: report.energia_protegido_gradil === 'SIM',
+      protegidoCadeado: report.energia_protegido_cadeado === 'SIM',
+      temTransformador: report.energia_transformador_ok === 'SIM',
       fotoTransformador: report.energia_foto_transformador || null,
       fotoQuadroGeral: report.energia_foto_quadro_geral || null,
+      unidadeConsumidora: null, // Not stored in DB
+      fotoRelogio: null, // Not stored in DB
     },
     gmg: {
       informar: report.gmg_existe === 'SIM',
@@ -328,6 +344,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       capacidadeTanque: parseInt(report.gmg_autonomia) || undefined,
       combustivelPorcentagem: report.gmg_combustivel ? parseInt(report.gmg_combustivel) : undefined,
       status: (report.gmg_status as any) || undefined,
+      alarmeAtivo: report.gmg_alarme_ativo === 'SIM',
+      fotoAlarme: report.gmg_foto_alarme || null,
       ultimoTeste: report.gmg_ultimo_teste || undefined,
       fotoGMG: report.gmg_foto_painel || null,
     },
