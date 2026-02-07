@@ -513,9 +513,13 @@ export async function updateReportInDatabase(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const row = buildReportRow(data);
-    // Remove fields that shouldn't be updated
+    // Remove fields that shouldn't be updated during editing
     delete row.id;
     delete row.created_at;
+    delete row.created_date;   // preserve original creation date
+    delete row.created_time;   // preserve original creation time
+    delete row.operadora;      // preserve original company (TEL/VIVO)
+    delete row.user_id;        // preserve original author
 
     const { error } = await supabase
       .from('reports')
