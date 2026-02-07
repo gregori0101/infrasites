@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, Shield } from "lucide-react";
+import { Trash2, Shield, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "../StatCard";
 import { PanelStats, SiteInfo } from "../types";
@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 interface Props {
   stats: PanelStats;
   sites: SiteInfo[];
-  onDrillDown: (type: "zeladoria" | "aterramento") => void;
+  onDrillDown: (type: "zeladoria" | "aterramento" | "zeladoria_nok" | "aterramento_nok") => void;
 }
 
 export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
@@ -20,6 +20,15 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
     ? Math.round((stats.aterramentoOk / stats.zeladoriaTotal) * 100) 
     : 0;
 
+  const zeladoriaNok = stats.zeladoriaTotal - stats.zeladoriaOk;
+  const aterramentoNok = stats.zeladoriaTotal - stats.aterramentoOk;
+  const zeladoriaNoKPercent = stats.zeladoriaTotal > 0
+    ? Math.round((zeladoriaNok / stats.zeladoriaTotal) * 100)
+    : 0;
+  const aterramentoNokPercent = stats.zeladoriaTotal > 0
+    ? Math.round((aterramentoNok / stats.zeladoriaTotal) * 100)
+    : 0;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
@@ -28,7 +37,7 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="Zeladoria OK"
           value={stats.zeladoriaOk}
@@ -39,6 +48,15 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
           onClick={() => onDrillDown("zeladoria")}
         />
         <StatCard
+          title="Zeladoria NOK"
+          value={zeladoriaNok}
+          subtitle={`${zeladoriaNoKPercent}% dos sites`}
+          icon={AlertTriangle}
+          iconBg="bg-destructive/10 text-destructive"
+          badge={{ text: `${zeladoriaNoKPercent}%`, variant: zeladoriaNoKPercent > 0 ? "destructive" : "success" }}
+          onClick={() => onDrillDown("zeladoria_nok")}
+        />
+        <StatCard
           title="Aterramento OK"
           value={stats.aterramentoOk}
           subtitle={`${aterramentoPercent}% dos sites`}
@@ -46,6 +64,15 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
           iconBg="bg-accent/10 text-accent"
           badge={{ text: `${aterramentoPercent}%`, variant: aterramentoPercent >= 80 ? "success" : "warning" }}
           onClick={() => onDrillDown("aterramento")}
+        />
+        <StatCard
+          title="Aterramento NOK"
+          value={aterramentoNok}
+          subtitle={`${aterramentoNokPercent}% dos sites`}
+          icon={AlertTriangle}
+          iconBg="bg-destructive/10 text-destructive"
+          badge={{ text: `${aterramentoNokPercent}%`, variant: aterramentoNokPercent > 0 ? "destructive" : "success" }}
+          onClick={() => onDrillDown("aterramento_nok")}
         />
       </div>
 
