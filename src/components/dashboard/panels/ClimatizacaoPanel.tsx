@@ -96,7 +96,14 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
         </div>
 
         {/* Site-level Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <StatCard
+            title="Total Sites"
+            value={stats.totalSites}
+            subtitle="Sites vistoriados"
+            icon={Building2}
+            iconBg="bg-primary/10 text-primary"
+          />
           <StatCard
             title="Total Gabinetes"
             value={stats.climatizacaoTotal}
