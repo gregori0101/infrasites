@@ -16,6 +16,7 @@ import {
   Home,
   Cable,
   Users,
+  Fuel,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
@@ -36,12 +37,13 @@ import { ZeladoriaPanel } from "@/components/dashboard/panels/ZeladoriaPanel";
 import { BateriaPanel } from "@/components/dashboard/panels/BateriaPanel";
 import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPanel";
 import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/FibraOpticaPanel";
+import { GMGPanel } from "@/components/dashboard/panels/GMGPanel";
 import { ProdutividadePanel, ProdutividadeStats } from "@/components/dashboard/panels/ProdutividadePanel";
 import { fetchAssignmentStatsForDashboard } from "@/lib/assignmentDatabase";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade";
+type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade" | "gmg";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -268,6 +270,7 @@ export default function Dashboard() {
     { id: "fibra" as const, label: "Fibra Óptica", icon: Cable },
     { id: "zeladoria" as const, label: "Zeladoria", icon: Trash2 },
     { id: "energia" as const, label: "Energia", icon: Zap },
+    { id: "gmg" as const, label: "GMG", icon: Fuel },
   ];
 
   // Calculate productivity stats
@@ -615,21 +618,7 @@ export default function Dashboard() {
                   stats={stats}
                   acs={acs}
                   onDrillDown={(type) => {
-                    if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
-                    else if (type === "gmg-no") openDrillDown("sites", "Sites sem GMG", (s) => s.filter((site: any) => !site.gmgExists));
-                    else if (type === "gmg-ok") openDrillDown("sites", "GMG Operacional (OK)", (s) => s.filter((site: any) => {
-                      const report = reports.find(r => r.id === site.id);
-                      return report && report.gmg_existe === "SIM" && report.gmg_status === "OK";
-                    }));
-                    else if (type === "gmg-nok") openDrillDown("sites", "GMG Inoperante (NOK)", (s) => s.filter((site: any) => {
-                      const report = reports.find(r => r.id === site.id);
-                      return report && report.gmg_existe === "SIM" && report.gmg_status === "NOK";
-                    }));
-                    else if (type === "gmg-alarme") openDrillDown("sites", "GMG com Alarme Ativo", (s) => s.filter((site: any) => {
-                      const report = reports.find(r => r.id === site.id);
-                      return report && report.gmg_alarme_ativo === "SIM";
-                    }));
-                    else if (type === "ac-all") openDrillDown("acs", "Todos os Ar Condicionados", (a) => a);
+                    if (type === "ac-all") openDrillDown("acs", "Todos os Ar Condicionados", (a) => a);
                     else if (type === "ac-ok") openDrillDown("acs", "Ar Condicionados Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
                     else if (type === "ac-nok") openDrillDown("acs", "Ar Condicionados com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
                     else if (type === "transformador-ok") openDrillDown("sites", "Transformador OK", (s) => s.filter((site: any) => {
@@ -655,6 +644,28 @@ export default function Dashboard() {
                     else if (type === "cadeado-nok") openDrillDown("sites", "Sites sem Cadeado", (s) => s.filter((site: any) => {
                       const report = reports.find(r => r.id === site.id);
                       return report && (report.energia_protegido_cadeado === "NÃO" || report.energia_protegido_cadeado === "NAO");
+                    }));
+                  }}
+                />
+              )}
+
+              {activePanel === "gmg" && (
+                <GMGPanel
+                  stats={stats}
+                  onDrillDown={(type) => {
+                    if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
+                    else if (type === "gmg-no") openDrillDown("sites", "Sites sem GMG", (s) => s.filter((site: any) => !site.gmgExists));
+                    else if (type === "gmg-ok") openDrillDown("sites", "GMG Operacional (OK)", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_existe === "SIM" && report.gmg_status === "OK";
+                    }));
+                    else if (type === "gmg-nok") openDrillDown("sites", "GMG Inoperante (NOK)", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_existe === "SIM" && report.gmg_status === "NOK";
+                    }));
+                    else if (type === "gmg-alarme") openDrillDown("sites", "GMG com Alarme Ativo", (s) => s.filter((site: any) => {
+                      const report = reports.find(r => r.id === site.id);
+                      return report && report.gmg_alarme_ativo === "SIM";
                     }));
                   }}
                 />
