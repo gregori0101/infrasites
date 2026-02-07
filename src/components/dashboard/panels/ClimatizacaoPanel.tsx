@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "../StatCard";
 import { PanelStats, ClimatizacaoInfo, ACInfo } from "../types";
-import { Thermometer, Fan, CheckCircle2, XCircle, Gauge, Wind, Building2, Wrench } from "lucide-react";
+import { Thermometer, Fan, CheckCircle2, XCircle, Gauge, Wind, Building2, Wrench, Boxes, Info } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Props {
   stats: PanelStats;
@@ -13,7 +14,7 @@ interface Props {
 }
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
-  // Equipment status bar data
+  const [viewMode, setViewMode] = useState<"site" | "equipamento">("site");
   const equipmentBarData = [
     { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
     { name: "Ar Cond. NOK", value: stats.acsNokCount, fill: "#ef4444" },
@@ -57,7 +58,35 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
         <h2 className="font-semibold text-lg">Painel Climatização</h2>
       </div>
 
+      {/* Toggle Visão Site / Equipamento */}
+      <Card className="bg-muted/30">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Visualização:</span>
+            </div>
+            <ToggleGroup 
+              type="single" 
+              value={viewMode} 
+              onValueChange={(value) => value && setViewMode(value as "site" | "equipamento")}
+              className="bg-background border rounded-lg"
+            >
+              <ToggleGroupItem value="site" aria-label="Por Site" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Site</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="equipamento" aria-label="Por Equipamento" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Wrench className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Equipamento</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ==================== SEÇÃO 1: POR SITE ==================== */}
+      {viewMode === "site" && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-cyan-600" />
@@ -227,8 +256,10 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           )}
         </div>
       </div>
+      )}
 
       {/* ==================== SEÇÃO 2: POR EQUIPAMENTO ==================== */}
+      {viewMode === "equipamento" && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Wrench className="w-5 h-5 text-blue-500" />
@@ -399,6 +430,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           </Card>
         )}
       </div>
+      )}
     </div>
   );
 }
