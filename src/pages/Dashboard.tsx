@@ -684,7 +684,9 @@ export default function Dashboard() {
                   sites={sites}
                   onDrillDown={(type) => {
                     if (type === "zeladoria") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
-                    else openDrillDown("sites", "Aterramento OK", (s) => s);
+                    else if (type === "zeladoria_nok") openDrillDown("sites", "Zeladoria NOK", (s) => s.filter((site: any) => !site.zeladoriaOk));
+                    else if (type === "aterramento") openDrillDown("sites", "Aterramento OK", (s) => s);
+                    else if (type === "aterramento_nok") openDrillDown("sites", "Aterramento NOK", (s) => s);
                   }}
                 />
               )}
