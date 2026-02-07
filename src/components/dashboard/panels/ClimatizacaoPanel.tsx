@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
-  const [viewMode, setViewMode] = useState<"site" | "equipamento">("site");
+  const [viewMode, setViewMode] = useState<"site" | "gabinete">("site");
   const equipmentBarData = [
     { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
     { name: "Ar Cond. NOK", value: stats.acsNokCount, fill: "#ef4444" },
@@ -69,16 +69,16 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             <ToggleGroup 
               type="single" 
               value={viewMode} 
-              onValueChange={(value) => value && setViewMode(value as "site" | "equipamento")}
+              onValueChange={(value) => value && setViewMode(value as "site" | "gabinete")}
               className="bg-background border rounded-lg"
             >
               <ToggleGroupItem value="site" aria-label="Por Site" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                 <Building2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Por Site</span>
               </ToggleGroupItem>
-              <ToggleGroupItem value="equipamento" aria-label="Por Equipamento" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-                <Wrench className="w-4 h-4" />
-                <span className="hidden sm:inline">Por Equipamento</span>
+              <ToggleGroupItem value="gabinete" aria-label="Por Gabinete" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Boxes className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Gabinete</span>
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -258,12 +258,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
       </div>
       )}
 
-      {/* ==================== SEÇÃO 2: POR EQUIPAMENTO ==================== */}
-      {viewMode === "equipamento" && (
+      {/* ==================== SEÇÃO 2: POR GABINETE ==================== */}
+      {viewMode === "gabinete" && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Wrench className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-base text-foreground">Visão por Equipamento</h3>
+          <Boxes className="w-5 h-5 text-blue-500" />
+          <h3 className="font-semibold text-base text-foreground">Visão por Gabinete</h3>
           <div className="flex-1 h-px bg-border ml-2" />
         </div>
 
