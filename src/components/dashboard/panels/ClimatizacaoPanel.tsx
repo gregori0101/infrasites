@@ -150,7 +150,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             badge={stats.fanNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
           />
           <StatCard
-            title="PLC OK"
+            title="Com PLC"
             value={stats.plcOkCount}
             subtitle="Lead-Lag funcional"
             icon={Gauge}
@@ -158,9 +158,9 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             onClick={() => onDrillDown("plc-ok")}
           />
           <StatCard
-            title="PLC NOK"
+            title="Sem PLC"
             value={stats.plcNokCount}
-            subtitle="Com problema"
+            subtitle="Sem Lead-Lag"
             icon={Gauge}
             iconBg="bg-pink-500/10 text-pink-500"
             badge={stats.plcNokCount > 0 ? { text: "Verificar", variant: "warning" } : undefined}
@@ -220,8 +220,8 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={[
-                        { name: "PLC OK", value: stats.plcOkCount, fill: "#8b5cf6" },
-                        { name: "PLC NOK", value: stats.plcNokCount, fill: "#ec4899" },
+                        { name: "Com PLC", value: stats.plcOkCount, fill: "#8b5cf6" },
+                        { name: "Sem PLC", value: stats.plcNokCount, fill: "#ec4899" },
                         { name: "Fan OK", value: stats.fanOkCount, fill: "#3b82f6" },
                         { name: "Fan NOK", value: stats.fanNokCount, fill: "#f97316" },
                       ].filter(d => d.value > 0)}
