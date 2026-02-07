@@ -54,7 +54,7 @@ const ESTADOS_BR = [
 export default function ReportsHistory() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAdmin, userOperadora } = useAuth();
+  const { isAdmin, isGestor, userOperadora } = useAuth();
   const { loadReportForEditing } = useChecklist();
   const isVivoUser = userOperadora === 'VIVO';
 
@@ -603,7 +603,8 @@ export default function ReportsHistory() {
                   Excel
                 </Button>
 
-                {isAdmin && selectedReport?.id && (
+                {/* Admins can edit any report; gestors can edit reports from their operadora */}
+                {selectedReport?.id && (isAdmin || (isGestor && selectedReport.operadora === userOperadora)) && (
                   <Button
                     variant="secondary"
                     className="flex-1 min-w-[120px]"
