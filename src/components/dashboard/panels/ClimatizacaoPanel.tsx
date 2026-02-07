@@ -15,6 +15,7 @@ interface Props {
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"site" | "gabinete">("site");
+  const [equipMode, setEquipMode] = useState<"ac" | "fan">("ac");
   const equipmentBarData = [
     { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
     { name: "Ar Cond. NOK", value: stats.acsNokCount, fill: "#ef4444" },
@@ -267,167 +268,286 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
           <div className="flex-1 h-px bg-border ml-2" />
         </div>
 
-        {/* Equipment-level Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Ar Condicionado"
-            value={stats.totalACs}
-            subtitle={`${stats.acTotal} gabinetes`}
-            icon={Wind}
-            iconBg="bg-blue-500/10 text-blue-500"
-            onClick={() => onDrillDown("ac")}
-          />
-          <StatCard
-            title="Ar Cond. OK"
-            value={stats.acsOkCount}
-            subtitle="Funcionando"
-            icon={CheckCircle2}
-            iconBg="bg-success/10 text-success"
-            badge={{ text: `${stats.totalACs > 0 ? Math.round((stats.acsOkCount / stats.totalACs) * 100) : 0}%`, variant: "success" }}
-            onClick={() => onDrillDown("ac-ok")}
-          />
-          <StatCard
-            title="Ar Cond. NOK"
-            value={stats.acsNokCount}
-            subtitle="Com defeito"
-            icon={XCircle}
-            iconBg="bg-destructive/10 text-destructive"
-            badge={stats.acsNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
-            onClick={() => onDrillDown("ac-nok")}
-          />
-          <StatCard
-            title="Taxa Operacional"
-            value={`${stats.totalACs > 0 ? Math.round((stats.acsOkCount / stats.totalACs) * 100) : 0}%`}
-            subtitle="Ar condicionados OK"
-            icon={CheckCircle2}
-            iconBg="bg-cyan-600/10 text-cyan-600"
-          />
+        {/* Sub-toggle: Ar Condicionado / Fan */}
+        <div className="flex items-center gap-3">
+          <ToggleGroup 
+            type="single" 
+            value={equipMode} 
+            onValueChange={(value) => value && setEquipMode(value as "ac" | "fan")}
+            className="bg-background border rounded-lg"
+          >
+            <ToggleGroupItem value="ac" aria-label="Ar Condicionado" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              <Wind className="w-4 h-4" />
+              <span className="hidden sm:inline">Ar Condicionado</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="fan" aria-label="Fan" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              <Fan className="w-4 h-4" />
+              <span className="hidden sm:inline">Fan</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
-        {/* Equipment Charts */}
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* Equipment Status Bar */}
-          {equipmentBarData.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-600" />
-                  Status dos Equipamentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={equipmentBarData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" tick={{ fontSize: 12 }} />
-                      <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {equipmentBarData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        {/* ---- Ar Condicionado ---- */}
+        {equipMode === "ac" && (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                title="Total Ar Condicionado"
+                value={stats.totalACs}
+                subtitle={`${stats.acTotal} gabinetes`}
+                icon={Wind}
+                iconBg="bg-blue-500/10 text-blue-500"
+                onClick={() => onDrillDown("ac")}
+              />
+              <StatCard
+                title="Ar Cond. OK"
+                value={stats.acsOkCount}
+                subtitle="Funcionando"
+                icon={CheckCircle2}
+                iconBg="bg-success/10 text-success"
+                badge={{ text: `${stats.totalACs > 0 ? Math.round((stats.acsOkCount / stats.totalACs) * 100) : 0}%`, variant: "success" }}
+                onClick={() => onDrillDown("ac-ok")}
+              />
+              <StatCard
+                title="Ar Cond. NOK"
+                value={stats.acsNokCount}
+                subtitle="Com defeito"
+                icon={XCircle}
+                iconBg="bg-destructive/10 text-destructive"
+                badge={stats.acsNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
+                onClick={() => onDrillDown("ac-nok")}
+              />
+              <StatCard
+                title="Taxa Operacional"
+                value={`${stats.totalACs > 0 ? Math.round((stats.acsOkCount / stats.totalACs) * 100) : 0}%`}
+                subtitle="Ar condicionados OK"
+                icon={CheckCircle2}
+                iconBg="bg-cyan-600/10 text-cyan-600"
+              />
+            </div>
 
-          {/* AC Model Distribution */}
-          {modelDistribution.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Wind className="w-4 h-4 text-blue-500" />
-                  Modelos de Ar Condicionado
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={modelDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={40}
-                        outerRadius={65}
-                        paddingAngle={3}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {modelDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend wrapperStyle={{ fontSize: 11 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            {/* AC Charts */}
+            <div className="grid lg:grid-cols-2 gap-4">
+              {/* Equipment Status Bar */}
+              {(stats.acsOkCount + stats.acsNokCount) > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-600" />
+                      Status Ar Condicionado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart 
+                          data={[
+                            { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
+                            { name: "Ar Cond. NOK", value: stats.acsNokCount, fill: "#ef4444" },
+                          ].filter(d => d.value > 0)} 
+                          layout="vertical"
+                        >
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis type="number" tick={{ fontSize: 12 }} />
+                          <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "hsl(var(--card))",
+                              border: "1px solid hsl(var(--border))",
+                              borderRadius: "8px",
+                            }}
+                          />
+                          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                            {[
+                              { fill: "#22c55e" },
+                              { fill: "#ef4444" },
+                            ]
+                              .filter((_, i) => [stats.acsOkCount, stats.acsNokCount][i] > 0)
+                              .map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-        {/* AC Model Table */}
-        {modelDistribution.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-blue-500" />
-                Detalhamento por Modelo
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Modelo</th>
-                      <th className="text-center py-2 px-3 font-medium text-muted-foreground">Quantidade</th>
-                      <th className="text-center py-2 px-3 font-medium text-muted-foreground">OK</th>
-                      <th className="text-center py-2 px-3 font-medium text-muted-foreground">NOK</th>
-                      <th className="text-center py-2 px-3 font-medium text-muted-foreground">Taxa OK</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modelDistribution.map((model) => {
-                      const modelAcs = acs.filter(a => a.modelo === model.name);
-                      const ok = modelAcs.filter(a => a.status === "OK").length;
-                      const nok = modelAcs.filter(a => a.status === "NOK").length;
-                      const taxa = modelAcs.length > 0 ? Math.round((ok / modelAcs.length) * 100) : 0;
-                      return (
-                        <tr key={model.name} className="border-b border-border/50 hover:bg-muted/30">
-                          <td className="py-2 px-3 font-medium">{model.name}</td>
-                          <td className="py-2 px-3 text-center">{model.value}</td>
-                          <td className="py-2 px-3 text-center text-success font-medium">{ok}</td>
-                          <td className="py-2 px-3 text-center text-destructive font-medium">{nok}</td>
-                          <td className="py-2 px-3 text-center">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              taxa >= 80 ? "bg-success/10 text-success" :
-                              taxa >= 50 ? "bg-warning/10 text-warning" :
-                              "bg-destructive/10 text-destructive"
-                            }`}>
-                              {taxa}%
-                            </span>
-                          </td>
+              {/* AC Model Distribution */}
+              {modelDistribution.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Wind className="w-4 h-4 text-blue-500" />
+                      Modelos de Ar Condicionado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={modelDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={65}
+                            paddingAngle={3}
+                            dataKey="value"
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {modelDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend wrapperStyle={{ fontSize: 11 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* AC Model Table */}
+            {modelDistribution.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Wrench className="w-4 h-4 text-blue-500" />
+                    Detalhamento por Modelo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-2 px-3 font-medium text-muted-foreground">Modelo</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">Quantidade</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">OK</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">NOK</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">Taxa OK</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+                      </thead>
+                      <tbody>
+                        {modelDistribution.map((model) => {
+                          const modelAcs = acs.filter(a => a.modelo === model.name);
+                          const ok = modelAcs.filter(a => a.status === "OK").length;
+                          const nok = modelAcs.filter(a => a.status === "NOK").length;
+                          const taxa = modelAcs.length > 0 ? Math.round((ok / modelAcs.length) * 100) : 0;
+                          return (
+                            <tr key={model.name} className="border-b border-border/50 hover:bg-muted/30">
+                              <td className="py-2 px-3 font-medium">{model.name}</td>
+                              <td className="py-2 px-3 text-center">{model.value}</td>
+                              <td className="py-2 px-3 text-center text-success font-medium">{ok}</td>
+                              <td className="py-2 px-3 text-center text-destructive font-medium">{nok}</td>
+                              <td className="py-2 px-3 text-center">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  taxa >= 80 ? "bg-success/10 text-success" :
+                                  taxa >= 50 ? "bg-warning/10 text-warning" :
+                                  "bg-destructive/10 text-destructive"
+                                }`}>
+                                  {taxa}%
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+
+        {/* ---- Fan / Ventilação ---- */}
+        {equipMode === "fan" && (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                title="Total Fan"
+                value={stats.fanTotal}
+                subtitle="Gabinetes com fan"
+                icon={Fan}
+                iconBg="bg-emerald-500/10 text-emerald-500"
+                onClick={() => onDrillDown("fan")}
+              />
+              <StatCard
+                title="Fan OK"
+                value={stats.fanOkCount}
+                subtitle="Funcionando"
+                icon={Fan}
+                iconBg="bg-success/10 text-success"
+                badge={stats.fanTotal > 0 ? { text: `${Math.round((stats.fanOkCount / Math.max(stats.fanOkCount + stats.fanNokCount, 1)) * 100)}%`, variant: "success" } : undefined}
+              />
+              <StatCard
+                title="Fan NOK"
+                value={stats.fanNokCount}
+                subtitle="Com defeito"
+                icon={Fan}
+                iconBg="bg-destructive/10 text-destructive"
+                badge={stats.fanNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
+              />
+              <StatCard
+                title="Taxa Operacional"
+                value={`${(stats.fanOkCount + stats.fanNokCount) > 0 ? Math.round((stats.fanOkCount / (stats.fanOkCount + stats.fanNokCount)) * 100) : 0}%`}
+                subtitle="Fan OK"
+                icon={CheckCircle2}
+                iconBg="bg-emerald-500/10 text-emerald-500"
+              />
+            </div>
+
+            {/* Fan Status Bar */}
+            {(stats.fanOkCount + stats.fanNokCount) > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Fan className="w-4 h-4 text-emerald-500" />
+                    Status Fan / Ventilação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart 
+                        data={[
+                          { name: "Fan OK", value: stats.fanOkCount, fill: "#3b82f6" },
+                          { name: "Fan NOK", value: stats.fanNokCount, fill: "#f97316" },
+                        ].filter(d => d.value > 0)} 
+                        layout="vertical"
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis type="number" tick={{ fontSize: 12 }} />
+                        <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                          {[
+                            { fill: "#3b82f6" },
+                            { fill: "#f97316" },
+                          ]
+                            .filter((_, i) => [stats.fanOkCount, stats.fanNokCount][i] > 0)
+                            .map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
       )}
