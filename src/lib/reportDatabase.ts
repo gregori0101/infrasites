@@ -516,13 +516,18 @@ export async function saveReportToDatabase(
     // Fetch user's operadora from user_roles
     let userOperadora = 'VIVO';
     if (user?.id) {
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('operadora')
         .eq('user_id', user.id)
         .single();
+      if (roleError) {
+        console.error('Error fetching user operadora for report:', roleError);
+      }
       if (roleData?.operadora) {
         userOperadora = roleData.operadora;
+      } else {
+        console.warn('User operadora not found, defaulting to VIVO for user:', user.id);
       }
     }
     
