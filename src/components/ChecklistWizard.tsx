@@ -18,7 +18,7 @@ import {
   MapPin, Server, Zap, Battery, Fan, Plug, Cable,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
   Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus, LogOut, Users,
-  Building2, ClipboardList
+  Building2, ClipboardList, Pencil
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,9 @@ export function ChecklistWizard() {
     getAllLocal,
     loadFromLocal,
     deleteLocal,
-    resetChecklist
+    resetChecklist,
+    editingReportId,
+    clearEditingMode,
   } = useChecklist();
 
   const { signOut, isGestor, isAdmin, user } = useAuth();
@@ -191,7 +193,11 @@ export function ChecklistWizard() {
               size="icon"
               className="h-8 w-8"
               onClick={() => {
-                if (window.confirm('Iniciar novo checklist? Os dados atuais serão perdidos.')) {
+                const msg = editingReportId
+                  ? 'Cancelar edição e iniciar novo checklist? As alterações não salvas serão perdidas.'
+                  : 'Iniciar novo checklist? Os dados atuais serão perdidos.';
+                if (window.confirm(msg)) {
+                  if (editingReportId) clearEditingMode();
                   resetChecklist();
                   toast.success('Novo checklist iniciado');
                 }
@@ -328,6 +334,29 @@ export function ChecklistWizard() {
           />
         </div>
       </header>
+
+      {/* Editing Mode Banner */}
+      {editingReportId && (
+        <div className="bg-accent/10 border-b border-accent/30 px-4 py-2 flex items-center gap-2">
+          <Pencil className="w-4 h-4 text-accent-foreground shrink-0" />
+          <span className="text-sm font-medium text-accent-foreground truncate">
+            Editando relatório: {data.siglaSite || '—'}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto h-7 text-xs"
+            onClick={() => {
+              if (window.confirm('Cancelar edição? As alterações não salvas serão perdidas.')) {
+                clearEditingMode();
+                resetChecklist();
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+        </div>
+      )}
 
       {/* Gabinete Navigator */}
       {isGabineteStep && maxGabinetes > 1 && (

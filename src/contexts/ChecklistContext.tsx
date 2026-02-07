@@ -27,6 +27,9 @@ interface ChecklistContextType {
   removeGabinete: (index: number) => void;
   resetChecklist: () => void;
   loadFromPreviousReport: (checklistData: ChecklistData) => void;
+  loadReportForEditing: (checklistData: ChecklistData, reportId: string) => void;
+  clearEditingMode: () => void;
+  editingReportId: string | null;
   saveToLocal: () => void;
   loadFromLocal: (id: string) => boolean;
   getAllLocal: () => ChecklistData[];
@@ -348,6 +351,8 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentGabinete, data.gabinetes.length]);
 
+  const [editingReportId, setEditingReportId] = React.useState<string | null>(null);
+
   const resetChecklist = useCallback(() => {
     const now = new Date().toISOString();
     const newData = {
@@ -359,6 +364,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     setData(newData);
     setCurrentStep(0);
     setCurrentGabinete(0);
+    setEditingReportId(null);
     
     // Clear session storage
     if (typeof window !== 'undefined') {
@@ -384,6 +390,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     setData(newData);
     setCurrentStep(0);
     setCurrentGabinete(0);
+    setEditingReportId(null);
     
     // Update localStorage with pre-filled session
     if (typeof window !== 'undefined') {
@@ -393,6 +400,33 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     }
     
     console.log('[ChecklistContext] Loaded data from previous report for site:', checklistData.siglaSite);
+  }, []);
+
+  // Load data for editing an existing report (admin feature)
+  const loadReportForEditing = useCallback((checklistData: ChecklistData, reportId: string) => {
+    const now = new Date().toISOString();
+    const newData = {
+      ...checklistData,
+      updatedAt: now,
+    };
+    
+    setData(newData);
+    setCurrentStep(0);
+    setCurrentGabinete(0);
+    setEditingReportId(reportId);
+    
+    // Update localStorage with editing session
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_step`);
+      sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_gabinete`);
+      localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newData));
+    }
+    
+    console.log('[ChecklistContext] Loaded report for editing, ID:', reportId, 'site:', checklistData.siglaSite);
+  }, []);
+
+  const clearEditingMode = useCallback(() => {
+    setEditingReportId(null);
   }, []);
 
   const saveToLocal = useCallback(() => {
@@ -581,6 +615,9 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
       removeGabinete,
       resetChecklist,
       loadFromPreviousReport,
+      loadReportForEditing,
+      clearEditingMode,
+      editingReportId,
       saveToLocal,
       loadFromLocal,
       getAllLocal,

@@ -504,6 +504,36 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   return row;
 }
 
+/**
+ * Update an existing report in the database (for admin editing)
+ */
+export async function updateReportInDatabase(
+  reportId: string,
+  data: ChecklistData,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const row = buildReportRow(data);
+    // Remove fields that shouldn't be updated
+    delete row.id;
+    delete row.created_at;
+
+    const { error } = await supabase
+      .from('reports')
+      .update(row)
+      .eq('id', reportId);
+
+    if (error) {
+      console.error('Error updating report:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception updating report:', err);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function saveReportToDatabase(
   data: ChecklistData,
   pdfPath?: string,

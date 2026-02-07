@@ -6,7 +6,7 @@ import { ptBR } from "date-fns/locale";
 import { 
   ArrowLeft, Search, Filter, 
   FileText, FileSpreadsheet, RefreshCw, X,
-  Calendar, User, Building2, Loader2, AlertCircle, Download, Trash2
+  Calendar, User, Building2, Loader2, AlertCircle, Download, Trash2, Pencil
 } from "lucide-react";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { PaginationControls, usePagination } from "@/components/ui/pagination-controls";
@@ -43,6 +43,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useChecklist } from "@/contexts/ChecklistContext";
 
 const ESTADOS_BR = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -54,6 +55,7 @@ export default function ReportsHistory() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAdmin, userOperadora } = useAuth();
+  const { loadReportForEditing } = useChecklist();
   const isVivoUser = userOperadora === 'VIVO';
 
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
@@ -573,10 +575,10 @@ export default function ReportsHistory() {
               </div>
               
               {/* Actions */}
-              <div className="border-t p-4 flex gap-2">
+              <div className="border-t p-4 flex gap-2 flex-wrap">
                 <Button 
                   variant="outline" 
-                  className="flex-1" 
+                  className="flex-1 min-w-[120px]" 
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF || isGeneratingExcel}
                 >
@@ -585,11 +587,11 @@ export default function ReportsHistory() {
                   ) : (
                     <Download className="w-4 h-4 mr-2" />
                   )}
-                  Baixar PDF
+                  PDF
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1" 
+                  className="flex-1 min-w-[120px]" 
                   onClick={handleDownloadExcel}
                   disabled={isGeneratingPDF || isGeneratingExcel}
                 >
@@ -598,8 +600,26 @@ export default function ReportsHistory() {
                   ) : (
                     <Download className="w-4 h-4 mr-2" />
                   )}
-                  Baixar Excel
+                  Excel
                 </Button>
+
+                {isAdmin && selectedReport?.id && (
+                  <Button
+                    variant="secondary"
+                    className="flex-1 min-w-[120px]"
+                    onClick={() => {
+                      if (!selectedReport) return;
+                      const checklistData = reportToChecklist(selectedReport);
+                      loadReportForEditing(checklistData, selectedReport.id!);
+                      setSelectedReport(null);
+                      navigate('/');
+                    }}
+                    disabled={isGeneratingPDF || isGeneratingExcel || isDeleting}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                )}
 
                 {isAdmin && selectedReport?.id && (
                   <AlertDialog>

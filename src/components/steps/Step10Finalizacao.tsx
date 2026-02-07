@@ -9,12 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, Send, 
-  CheckCircle, Loader2, AlertCircle, Upload, FileDown
+  CheckCircle, Loader2, AlertCircle, Upload, FileDown, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { generateExcel, downloadExcel } from "@/lib/generateExcel";
-import { saveReportToDatabase } from "@/lib/reportDatabase";
+import { saveReportToDatabase, updateReportInDatabase } from "@/lib/reportDatabase";
 import { updateAssignmentStatus } from "@/lib/assignmentDatabase";
 import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
@@ -39,7 +39,7 @@ interface Step10Props {
 
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
-  const { data, updateData, calculateProgress, resetChecklist } = useChecklist();
+  const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode } = useChecklist();
   const { user } = useAuth();
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
@@ -167,13 +167,22 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         }
 
         // 4. Salvar no banco de dados
-        setUploadProgress('Salvando no banco de dados...');
+        setUploadProgress(editingReportId ? 'Atualizando relatório...' : 'Salvando no banco de dados...');
         const pdfFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.pdf`;
         const excelFilename = `Checklist_${data.siglaSite || 'NOVO'}_${data.uf}_${format(new Date(), 'ddMMyyyy')}.xlsx`;
         
-        let result;
+        let result: { success: boolean; id?: string; error?: string };
         try {
-          result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
+          if (editingReportId) {
+            // Update existing report
+            result = await updateReportInDatabase(editingReportId, dataWithUrls);
+            if (result.success) {
+              result.id = editingReportId;
+            }
+          } else {
+            // Create new report
+            result = await saveReportToDatabase(dataWithUrls, pdfFilename, excelFilename);
+          }
         } catch (dbError) {
           console.error('[Step10] Database save error:', dbError);
           toast.error('Erro ao salvar no banco', {
@@ -198,25 +207,29 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
             }
           }
           
-          // 6. Vincular à atribuição se houver
-          const assignmentId = sessionStorage.getItem('currentAssignmentId');
-          if (assignmentId && result.id) {
-            try {
-              setUploadProgress('Finalizando atribuição...');
-              await updateAssignmentStatus(assignmentId, 'concluido', result.id);
-              sessionStorage.removeItem('currentAssignmentId');
-            } catch (assignmentError) {
-              console.error('[Step10] Assignment update error:', assignmentError);
-              // Don't fail the whole operation, just log the error
+          // 6. Vincular à atribuição se houver (apenas para novos relatórios)
+          if (!editingReportId) {
+            const assignmentId = sessionStorage.getItem('currentAssignmentId');
+            if (assignmentId && result.id) {
+              try {
+                setUploadProgress('Finalizando atribuição...');
+                await updateAssignmentStatus(assignmentId, 'concluido', result.id);
+                sessionStorage.removeItem('currentAssignmentId');
+              } catch (assignmentError) {
+                console.error('[Step10] Assignment update error:', assignmentError);
+              }
             }
           }
           
-          toast.success('Relatório enviado com sucesso!', {
-            description: 'Os dados foram salvos no servidor.'
+          toast.success(editingReportId ? 'Relatório atualizado com sucesso!' : 'Relatório enviado com sucesso!', {
+            description: editingReportId ? 'As alterações foram salvas.' : 'Os dados foram salvos no servidor.'
           });
           
           // Reset do formulário após envio bem-sucedido
           setTimeout(() => {
+            if (editingReportId) {
+              clearEditingMode();
+            }
             resetChecklist();
           }, 2000);
         } else {
@@ -243,6 +256,18 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
 
   return (
     <div className="space-y-4 animate-slide-up">
+      {editingReportId && (
+        <div className="rounded-lg p-3 bg-accent/10 border border-accent/30 flex items-center gap-3">
+          <Pencil className="w-5 h-5 text-accent-foreground" />
+          <div>
+            <p className="font-semibold text-sm">Modo de Edição</p>
+            <p className="text-xs text-muted-foreground">
+              Editando relatório do site {data.siglaSite || '—'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className={`rounded-lg p-4 flex items-center gap-3 ${
         progress >= 80 ? 'bg-success/10 border border-success/30' : 
         progress >= 50 ? 'bg-warning/10 border border-warning/30' :
@@ -385,12 +410,12 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         {isSending ? (
           <>
             <Loader2 className="w-6 h-6 animate-spin" />
-            {uploadProgress || 'Enviando...'}
+            {uploadProgress || (editingReportId ? 'Salvando...' : 'Enviando...')}
           </>
         ) : (
           <>
             <Send className="w-6 h-6" />
-            Enviar Relatório
+            {editingReportId ? 'Salvar Alterações' : 'Enviar Relatório'}
           </>
         )}
       </Button>
