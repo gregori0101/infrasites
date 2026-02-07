@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
-  const [viewMode, setViewMode] = useState<"site" | "gabinete">("site");
+  const [viewMode, setViewMode] = useState<"gabinete" | "equipamento">("gabinete");
   const [equipMode, setEquipMode] = useState<"ac" | "fan">("ac");
   const equipmentBarData = [
     { name: "Ar Cond. OK", value: stats.acsOkCount, fill: "#22c55e" },
@@ -59,7 +59,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
         <h2 className="font-semibold text-lg">Painel Climatização</h2>
       </div>
 
-      {/* Toggle Visão Site / Equipamento */}
+      {/* Toggle Visão Gabinete / Equipamento */}
       <Card className="bg-muted/30">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -70,28 +70,28 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             <ToggleGroup 
               type="single" 
               value={viewMode} 
-              onValueChange={(value) => value && setViewMode(value as "site" | "gabinete")}
+              onValueChange={(value) => value && setViewMode(value as "gabinete" | "equipamento")}
               className="bg-background border rounded-lg"
             >
-              <ToggleGroupItem value="site" aria-label="Por Site" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-                <Building2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Por Site</span>
-              </ToggleGroupItem>
               <ToggleGroupItem value="gabinete" aria-label="Por Gabinete" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                 <Boxes className="w-4 h-4" />
                 <span className="hidden sm:inline">Por Gabinete</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="equipamento" aria-label="Por Equipamento" className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                <Wrench className="w-4 h-4" />
+                <span className="hidden sm:inline">Por Equipamento</span>
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
         </CardContent>
       </Card>
 
-      {/* ==================== SEÇÃO 1: POR SITE ==================== */}
-      {viewMode === "site" && (
+      {/* ==================== SEÇÃO 1: POR GABINETE ==================== */}
+      {viewMode === "gabinete" && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-cyan-600" />
-          <h3 className="font-semibold text-base text-foreground">Visão por Site</h3>
+          <Boxes className="w-5 h-5 text-cyan-600" />
+          <h3 className="font-semibold text-base text-foreground">Visão por Gabinete</h3>
           <div className="flex-1 h-px bg-border ml-2" />
         </div>
 
@@ -259,12 +259,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
       </div>
       )}
 
-      {/* ==================== SEÇÃO 2: POR GABINETE ==================== */}
-      {viewMode === "gabinete" && (
+      {/* ==================== SEÇÃO 2: POR EQUIPAMENTO ==================== */}
+      {viewMode === "equipamento" && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Boxes className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-base text-foreground">Visão por Gabinete</h3>
+          <Wrench className="w-5 h-5 text-blue-500" />
+          <h3 className="font-semibold text-base text-foreground">Visão por Equipamento</h3>
           <div className="flex-1 h-px bg-border ml-2" />
         </div>
 
