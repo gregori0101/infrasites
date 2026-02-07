@@ -515,117 +515,117 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         // Temporary storage for batteries in this gabinete (to update autonomyRisk later)
         const gabBatteries: BatteryInfo[] = [];
         
-        // Batteries (6 per gabinete)
-        for (let b = 1; b <= 6; b++) {
-          const tipo = report[`${prefix}_bat${b}_tipo`] as string;
-          const fabricante = report[`${prefix}_bat${b}_fabricante`] as string;
-          const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
-          const dataFab = report[`${prefix}_bat${b}_data_fabricacao`] as string;
-          const estado = report[`${prefix}_bat${b}_estado`] as string;
-          const colada = report[`${prefix}_bat${b}_colada`] as string;
-          const comGradil = report[`${prefix}_bat${b}_com_gradil`] as string;
-          
-          if (tipo && tipo !== "NA" && fabricante) {
-            stats.totalBatteries++;
-            const idade = calculateBatteryAge(dataFab);
-            const obsolescencia = getObsolescenceStatus(idade);
+        // Batteries (6 per gabinete) - only count for valid gabinetes (same rule as climatização)
+        if (isValidGabinete) {
+          for (let b = 1; b <= 6; b++) {
+            const tipo = report[`${prefix}_bat${b}_tipo`] as string;
+            const fabricante = report[`${prefix}_bat${b}_fabricante`] as string;
+            const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
+            const dataFab = report[`${prefix}_bat${b}_data_fabricacao`] as string;
+            const estado = report[`${prefix}_bat${b}_estado`] as string;
+            const colada = report[`${prefix}_bat${b}_colada`] as string;
+            const comGradil = report[`${prefix}_bat${b}_com_gradil`] as string;
             
-            if (obsolescencia === "warning") stats.batteriesOver5Years++;
-            if (obsolescencia === "critical") stats.batteriesOver8Years++;
-            batteryAges[obsolescencia]++;
-            
-            // Determine obsolescence status by battery type for replacement check
-            const tipoUpper = tipo.toUpperCase();
-            const isLitio = tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO");
-            const isChumbo = tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO");
-            
-            // Classify battery type
-            const tipoClassificado: "chumbo" | "litio" | "outro" = isLitio ? "litio" : (isChumbo ? "chumbo" : "outro");
-            
-            // Calculate obsolescence based on type
-            let obsolescenciaTipo: "ok" | "medio" | "alto" = "ok";
-            if (isLitio) {
-              obsolescenciaTipo = getObsolescenciaLitio(idade);
-            } else if (isChumbo) {
-              obsolescenciaTipo = getObsolescenciaChumbo(idade);
-            }
-            
-            const obsolescenciaAlta = obsolescenciaTipo === "alto";
-            
-            // Check battery state
-            const estadoLower = (estado || "").toLowerCase();
-            const needsReplacement = 
-              estadoLower.includes("estufada") ||
-              estadoLower.includes("vazando") ||
-              estadoLower.includes("carga") || // "Não segura carga"
-              obsolescenciaAlta;
-            
-            // Track batteries for replacement (only Norte region)
-            if (needsReplacement && UFS_NORTE.includes(uf)) {
-              bateriasParaTrocaTotal++;
-              bateriasParaTrocaByUf[uf] = (bateriasParaTrocaByUf[uf] || 0) + 1;
-            }
-            
-            if (estado === "BOA" || !estado) {
-              stats.batteriesOk++;
-              batteryStates.ok++;
-            } else {
-              stats.batteriesNok++;
-              batteryIssues++;
-              hasProblems = true;
+            if (tipo && tipo !== "NA" && fabricante) {
+              stats.totalBatteries++;
+              const idade = calculateBatteryAge(dataFab);
+              const obsolescencia = getObsolescenceStatus(idade);
               
-              if (estadoLower.includes("estufada")) batteryStates.estufada++;
-              if (estadoLower.includes("vazando")) batteryStates.vazando++;
-              if (estadoLower.includes("trincada")) batteryStates.trincada++;
-              if (estadoLower.includes("carga")) batteryStates.semCarga++;
-            }
-            
-            // Store battery with placeholder autonomyRisk (will be updated after gabinete processing)
-            const batteryInfo: BatteryInfo = {
-              siteCode: report.site_code,
-              uf,
-              gabinete: g,
-              banco: b,
-              fabricante,
-              tipo,
-              tipoClassificado,
-              capacidade: capacidade || "N/A",
-              dataFabricacao: dataFab || "N/A",
-              estado: estado || "BOA",
-              idade,
-              obsolescencia,
-              obsolescenciaTipo,
-              autonomyRisk: "ok", // Placeholder, will be updated
-              needsReplacement,
-              colada: colada || "N/A",
-              comGradil: comGradil || "N/A",
-              reportId: report.id || "",
-            };
-            
-            gabBatteries.push(batteryInfo);
+              if (obsolescencia === "warning") stats.batteriesOver5Years++;
+              if (obsolescencia === "critical") stats.batteriesOver8Years++;
+              batteryAges[obsolescencia]++;
+              
+              // Determine obsolescence status by battery type for replacement check
+              const tipoUpper = tipo.toUpperCase();
+              const isLitio = tipoUpper.includes("LÍTIO") || tipoUpper.includes("LITIO");
+              const isChumbo = tipoUpper.includes("POLÍMERO") || tipoUpper.includes("POLIMERO") || tipoUpper.includes("MONOBLOCO");
+              
+              // Classify battery type
+              const tipoClassificado: "chumbo" | "litio" | "outro" = isLitio ? "litio" : (isChumbo ? "chumbo" : "outro");
+              
+              // Calculate obsolescence based on type
+              let obsolescenciaTipo: "ok" | "medio" | "alto" = "ok";
+              if (isLitio) {
+                obsolescenciaTipo = getObsolescenciaLitio(idade);
+              } else if (isChumbo) {
+                obsolescenciaTipo = getObsolescenciaChumbo(idade);
+              }
+              
+              const obsolescenciaAlta = obsolescenciaTipo === "alto";
+              
+              // Check battery state
+              const estadoLower = (estado || "").toLowerCase();
+              const needsReplacement = 
+                estadoLower.includes("estufada") ||
+                estadoLower.includes("vazando") ||
+                estadoLower.includes("carga") || // "Não segura carga"
+                obsolescenciaAlta;
+              
+              // Track batteries for replacement (only Norte region)
+              if (needsReplacement && UFS_NORTE.includes(uf)) {
+                bateriasParaTrocaTotal++;
+                bateriasParaTrocaByUf[uf] = (bateriasParaTrocaByUf[uf] || 0) + 1;
+              }
+              
+              if (estado === "BOA" || !estado) {
+                stats.batteriesOk++;
+                batteryStates.ok++;
+              } else {
+                stats.batteriesNok++;
+                batteryIssues++;
+                hasProblems = true;
+                
+                if (estadoLower.includes("estufada")) batteryStates.estufada++;
+                if (estadoLower.includes("vazando")) batteryStates.vazando++;
+                if (estadoLower.includes("trincada")) batteryStates.trincada++;
+                if (estadoLower.includes("carga")) batteryStates.semCarga++;
+              }
+              
+              // Store battery with placeholder autonomyRisk (will be updated after gabinete processing)
+              const batteryInfo: BatteryInfo = {
+                siteCode: report.site_code,
+                uf,
+                gabinete: g,
+                banco: b,
+                fabricante,
+                tipo,
+                tipoClassificado,
+                capacidade: capacidade || "N/A",
+                dataFabricacao: dataFab || "N/A",
+                estado: estado || "BOA",
+                idade,
+                obsolescencia,
+                obsolescenciaTipo,
+                autonomyRisk: "ok", // Placeholder, will be updated
+                needsReplacement,
+                colada: colada || "N/A",
+                comGradil: comGradil || "N/A",
+                reportId: report.id || "",
+              };
+              
+              gabBatteries.push(batteryInfo);
 
-            // Classify battery by type (Chumbo vs Lítio) - reuse isLitio/isChumbo from above
-            if (isLitio) {
-              bateriasLitioTotal++;
-              litioByUf[uf] = (litioByUf[uf] || 0) + 1;
-              gabHasLitio = true;
-              siteHasLitio = true;
-              if (idade > gabLitioMaxAge) gabLitioMaxAge = idade;
-              if (idade > siteLitioMaxAge) siteLitioMaxAge = idade;
-            } else if (isChumbo) {
-              bateriasChumboTotal++;
-              chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
-              gabHasChumbo = true;
-              siteHasChumbo = true;
-              if (idade > gabChumboMaxAge) gabChumboMaxAge = idade;
-              if (idade > siteChumboMaxAge) siteChumboMaxAge = idade;
-            }
-            
-            // Track capacity for site-level autonomy
-            if (capacidade) {
-              const match = capacidade.match(/(\d+)/);
-              if (match) {
-                siteTotalCapacityAh += parseInt(match[1], 10);
+              // Classify battery by type (Chumbo vs Lítio) - reuse isLitio/isChumbo from above
+              if (isLitio) {
+                bateriasLitioTotal++;
+                litioByUf[uf] = (litioByUf[uf] || 0) + 1;
+                gabHasLitio = true;
+                siteHasLitio = true;
+                if (idade > gabLitioMaxAge) gabLitioMaxAge = idade;
+                if (idade > siteLitioMaxAge) siteLitioMaxAge = idade;
+              } else if (isChumbo) {
+                bateriasChumboTotal++;
+                chumboByUf[uf] = (chumboByUf[uf] || 0) + 1;
+                gabHasChumbo = true;
+                siteHasChumbo = true;
+                if (idade > gabChumboMaxAge) gabChumboMaxAge = idade;
+                if (idade > siteChumboMaxAge) siteChumboMaxAge = idade;
+              }
+              if (capacidade) {
+                const match = capacidade.match(/(\d+)/);
+                if (match) {
+                  siteTotalCapacityAh += parseInt(match[1], 10);
+                }
               }
             }
           }
