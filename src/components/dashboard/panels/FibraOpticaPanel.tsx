@@ -1,5 +1,5 @@
 import React from "react";
-import { Cable, CheckCircle2, XCircle, Box, ArrowUpCircle, Layers } from "lucide-react";
+import { Cable, CheckCircle2, XCircle, Box, ArrowUpCircle, Layers, Building2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "../StatCard";
 import { Badge } from "@/components/ui/badge";
@@ -53,7 +53,14 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard
+          title="Total Sites"
+          value={stats.totalSites}
+          subtitle="Sites vistoriados"
+          icon={Building2}
+          iconBg="bg-primary/10 text-primary"
+        />
         <StatCard
           title="Sites Protegidos"
           value={stats.sitesProtegidos}
