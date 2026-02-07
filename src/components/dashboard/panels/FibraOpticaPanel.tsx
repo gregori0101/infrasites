@@ -8,12 +8,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
   Tooltip,
-  Legend,
 } from "recharts";
 
 export interface FibraStats {
@@ -236,50 +231,6 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Infrastructure Bar Chart */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Box className="w-4 h-4 text-amber-500" />
-            Infraestrutura de Fibra por Tipo
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {stats.infraestruturaChart.length > 0 && stats.infraestruturaChart.some(d => d.value > 0) ? (
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.infraestruturaChart} layout="vertical">
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={120}
-                    tick={{ fontSize: 11 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar
-                    dataKey="value"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                    name="Quantidade"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-48 flex items-center justify-center text-muted-foreground">
-              Nenhuma infraestrutura registrada
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Summary Card */}
       <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5">
