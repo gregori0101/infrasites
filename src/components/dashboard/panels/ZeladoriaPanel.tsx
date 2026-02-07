@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, Shield, AlertTriangle } from "lucide-react";
+import { Trash2, Shield, AlertTriangle, Building2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "../StatCard";
 import { PanelStats, SiteInfo } from "../types";
@@ -37,7 +37,14 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <StatCard
+          title="Total Sites"
+          value={stats.zeladoriaTotal}
+          subtitle="Sites vistoriados"
+          icon={Building2}
+          iconBg="bg-primary/10 text-primary"
+        />
         <StatCard
           title="Zeladoria OK"
           value={stats.zeladoriaOk}
