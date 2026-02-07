@@ -1,8 +1,8 @@
 import React from "react";
-import { Zap, Thermometer, Wind, CheckCircle2, ShieldCheck, Lock, Factory, Gauge } from "lucide-react";
+import { Zap, ShieldCheck, Lock, Factory, Gauge } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "../StatCard";
-import { PanelStats, ACInfo } from "../types";
+import { PanelStats } from "../types";
 import {
   ResponsiveContainer,
   PieChart,
@@ -20,8 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface Props {
   stats: PanelStats;
-  acs: ACInfo[];
-  onDrillDown: (type: "ac-all" | "ac-ok" | "ac-nok" | "transformador-ok" | "transformador-nok" | "gradil-ok" | "gradil-nok" | "cadeado-ok" | "cadeado-nok") => void;
+  onDrillDown: (type: "transformador-ok" | "transformador-nok" | "gradil-ok" | "gradil-nok" | "cadeado-ok" | "cadeado-nok") => void;
 }
 
 const CHART_STYLE = {
@@ -30,11 +29,7 @@ const CHART_STYLE = {
   borderRadius: "8px",
 };
 
-export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
-  const acPercentOk = stats.totalACs > 0 
-    ? Math.round((stats.acsOk / stats.totalACs) * 100) 
-    : 0;
-
+export function EnergiaPanel({ stats, onDrillDown }: Props) {
   const totalTransformadores = stats.energiaTransformadorOk + stats.energiaTransformadorNok;
   const transformadorPercentOk = totalTransformadores > 0
     ? Math.round((stats.energiaTransformadorOk / totalTransformadores) * 100)
@@ -72,7 +67,7 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
         </div>
 
         {/* Energy KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <StatCard
             title="Transformador OK"
             value={stats.energiaTransformadorOk}
@@ -108,14 +103,6 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
             iconBg="bg-primary/10 text-primary"
             badge={{ text: `${cadeadoPercentOk}%`, variant: cadeadoPercentOk >= 80 ? "success" : cadeadoPercentOk >= 50 ? "warning" : "destructive" }}
             onClick={() => onDrillDown("cadeado-ok")}
-          />
-          <StatCard
-            title="Total Ar Condicionado"
-            value={stats.totalACs}
-            subtitle={`${stats.acsNok} com defeito`}
-            icon={Wind}
-            iconBg={stats.acsNok > 0 ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}
-            onClick={() => onDrillDown("ac-all")}
           />
         </div>
 
@@ -286,75 +273,6 @@ export function EnergiaPanel({ stats, acs, onDrillDown }: Props) {
             </CardContent>
           </Card>
         </div>
-      </div>
-
-      {/* ===== SEÇÃO AR CONDICIONADO ===== */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="font-semibold text-lg">Ar Condicionado</h2>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-          <StatCard
-            title="Ar Cond. Funcionando"
-            value={stats.acsOk}
-            subtitle={`${acPercentOk}% operacional`}
-            icon={CheckCircle2}
-            iconBg="bg-success/10 text-success"
-            badge={{ text: `${acPercentOk}%`, variant: "success" }}
-            onClick={() => onDrillDown("ac-ok")}
-          />
-          <StatCard
-            title="Ar Cond. com Defeito"
-            value={stats.acsNok}
-            subtitle="Requerem manutenção"
-            icon={Thermometer}
-            iconBg="bg-destructive/10 text-destructive"
-            badge={stats.acsNok > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
-            onClick={() => onDrillDown("ac-nok")}
-          />
-          <StatCard
-            title="Total Ar Condicionado"
-            value={stats.totalACs}
-            subtitle="Unidades instaladas"
-            icon={Wind}
-            iconBg="bg-primary/10 text-primary"
-            onClick={() => onDrillDown("ac-all")}
-          />
-        </div>
-
-        {/* Climatization Types Chart */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Wind className="w-4 h-4 text-primary" />
-              Tipos de Climatização
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.climatizacaoStatus.length > 0 ? (
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={stats.climatizacaoStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}>
-                      {stats.climatizacaoStatus.map((entry, i) => (
-                        <Cell key={`clima-${i}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-48 flex items-center justify-center text-muted-foreground">
-                <p>Nenhum dado disponível</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -616,12 +616,8 @@ export default function Dashboard() {
               {activePanel === "energia" && (
                 <EnergiaPanel
                   stats={stats}
-                  acs={acs}
                   onDrillDown={(type) => {
-                    if (type === "ac-all") openDrillDown("acs", "Todos os Ar Condicionados", (a) => a);
-                    else if (type === "ac-ok") openDrillDown("acs", "Ar Condicionados Funcionando", (a) => a.filter((ac: any) => ac.status === "OK"));
-                    else if (type === "ac-nok") openDrillDown("acs", "Ar Condicionados com Defeito", (a) => a.filter((ac: any) => ac.status === "NOK"));
-                    else if (type === "transformador-ok") openDrillDown("sites", "Transformador OK", (s) => s.filter((site: any) => {
+                    if (type === "transformador-ok") openDrillDown("sites", "Transformador OK", (s) => s.filter((site: any) => {
                       const report = reports.find(r => r.id === site.id);
                       return report && report.energia_transformador_ok === "SIM";
                     }));
