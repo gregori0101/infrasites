@@ -427,10 +427,10 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         const plcStatus = report[`${prefix}_plc_status`] as string;
         const alarmeStatus = report[`${prefix}_alarme_status`] as string;
         
-        // Check if this gabinete exists (has any data)
-        const gabineteExists = climaTipo || report[`${prefix}_tipo`];
+        // Only count climatização for valid gabinetes (same rule as batteries)
+        const isValidGabinete = g <= (report.total_cabinets || 1);
         
-        if (climaTipo) {
+        if (climaTipo && isValidGabinete) {
           stats.climatizacaoTotal++;
           
           if (climaTipo.includes("AR CONDICIONADO")) {
@@ -458,40 +458,42 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           }
         }
         
-        // ACs (4 per gabinete)
+        // ACs (4 per gabinete) - only count for valid gabinetes
         const gabAcs: ACInfo[] = [];
-        for (let a = 1; a <= 4; a++) {
-          const modelo = report[`${prefix}_ac${a}_modelo`] as string;
-          const status = report[`${prefix}_ac${a}_status`] as string;
-          
-          if (modelo && modelo !== "NA") {
-            stats.totalACs++;
-            const acInfo: ACInfo = {
-              siteCode: report.site_code,
-              uf,
-              gabinete: g,
-              acNum: a,
-              modelo,
-              status: status || "N/A",
-            };
+        if (isValidGabinete) {
+          for (let a = 1; a <= 4; a++) {
+            const modelo = report[`${prefix}_ac${a}_modelo`] as string;
+            const status = report[`${prefix}_ac${a}_status`] as string;
             
-            if (status === "OK") {
-              stats.acsOk++;
-              stats.acsOkCount++;
-            } else if (status === "NOK") {
-              stats.acsNok++;
-              stats.acsNokCount++;
-              acIssues++;
-              hasProblems = true;
+            if (modelo && modelo !== "NA") {
+              stats.totalACs++;
+              const acInfo: ACInfo = {
+                siteCode: report.site_code,
+                uf,
+                gabinete: g,
+                acNum: a,
+                modelo,
+                status: status || "N/A",
+              };
+              
+              if (status === "OK") {
+                stats.acsOk++;
+                stats.acsOkCount++;
+              } else if (status === "NOK") {
+                stats.acsNok++;
+                stats.acsNokCount++;
+                acIssues++;
+                hasProblems = true;
+              }
+              
+              acInfoList.push(acInfo);
+              gabAcs.push(acInfo);
             }
-            
-            acInfoList.push(acInfo);
-            gabAcs.push(acInfo);
           }
         }
         
         // Add climatizacao info
-        if (climaTipo) {
+        if (climaTipo && isValidGabinete) {
           climatizacaoList.push({
             siteCode: report.site_code,
             uf,
