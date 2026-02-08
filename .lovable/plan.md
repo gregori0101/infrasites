@@ -1,45 +1,33 @@
 
+# Permitir Administradores Acessarem o Checklist
 
-# Plano: Preservar Operadora ao Editar Relatório
-
-## Problema
-
-Quando um administrador VIVO edita um relatório criado por um técnico TEL (como o AMAXA), o campo `operadora` é sobrescrito para "VIVO". Isso acontece porque:
-
-1. A funcao `buildReportRow()` define `operadora: data.operadora || 'VIVO'` (linha 291)
-2. A funcao `updateReportInDatabase()` envia esse valor no UPDATE, sobrescrevendo o valor original no banco
-
-O trigger no banco foi corrigido para nao alterar a operadora em UPDATEs, mas o problema esta no codigo do frontend que envia o valor explicitamente.
+## Problema Atual
+Quando um administrador ou gestor clica no botao "Checklist" no dashboard, ele e redirecionado para `/`, mas a pagina `Index.tsx` possui um `useEffect` que redireciona automaticamente administradores e gestores de volta para `/dashboard`. Isso cria um loop de redirecionamento que impede o acesso ao checklist.
 
 ## Solucao
+Usar um parametro de URL (`?checklist=true`) para indicar que o usuario deseja acessar o checklist intencionalmente, e pular o redirecionamento automatico nesse caso.
 
-Remover os campos `operadora` e `user_id` do payload de UPDATE em `updateReportInDatabase()`, para que esses valores originais sejam preservados no banco de dados.
+## Alteracoes
 
-Tambem remover `created_date` e `created_time` para manter a data/hora original do relatorio.
+### 1. `src/pages/Index.tsx`
+- Ler o parametro `checklist` da URL usando `useSearchParams` do React Router
+- Modificar o `useEffect` de redirecionamento para **nao** redirecionar quando `?checklist=true` estiver presente
+- Quando o admin/gestor acessar com esse parametro, exibir o `ChecklistWizard` normalmente
 
-## Alteracao
+### 2. `src/pages/Dashboard.tsx`
+- Atualizar os botoes "Checklist" (sidebar e mobile) para navegar para `/?checklist=true` em vez de apenas `/`
+- Isso vale tanto para o botao na barra lateral (desktop) quanto para o chip de acao (mobile)
 
-**Arquivo:** `src/lib/reportDatabase.ts`
-
-Na funcao `updateReportInDatabase` (linhas 515-518), adicionar a remocao dos campos que nao devem ser alterados durante edicao:
+## Detalhes Tecnicos
 
 ```text
-const row = buildReportRow(data);
-// Remove fields that shouldn't be updated
-delete row.id;
-delete row.created_at;
-delete row.created_date;   // preservar data original
-delete row.created_time;   // preservar hora original
-delete row.operadora;      // preservar empresa original (TEL/VIVO)
-delete row.user_id;        // preservar autor original
+Fluxo atual:
+  Dashboard [Checklist] --> navigate("/") --> Index.tsx useEffect --> navigate("/dashboard") --> loop
+
+Fluxo corrigido:
+  Dashboard [Checklist] --> navigate("/?checklist=true") --> Index.tsx detecta param --> exibe ChecklistWizard
 ```
 
-## Correcao do Relatorio AMAXA
-
-Apos aplicar a correcao no codigo, sera necessario corrigir manualmente o registro AMAXA que ja foi alterado incorretamente. Executaremos um UPDATE no banco para restaurar a operadora correta para "TEL".
-
-## Impacto
-
-- Apenas 1 arquivo modificado
-- Nenhuma alteracao no banco de dados (schema)
-- Correcao de dados para o relatorio AMAXA afetado
+Arquivos modificados:
+- `src/pages/Index.tsx` (2 alteracoes: import useSearchParams + condicao no useEffect)
+- `src/pages/Dashboard.tsx` (2 alteracoes: sidebar button + mobile button URL)
