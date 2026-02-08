@@ -32,11 +32,13 @@ interface Props {
   uniqueUFs: string[];
   uniqueTechnicians: string[];
   uniqueSiteTypes: string[];
+  uniqueSiteCodes: string[];
+  uniqueMunicipios: string[];
   showOperadoraFilter?: boolean; // Only show for VIVO users
   showAreaAtuacaoFilter?: boolean; // Show PI/REDE filter in productivity
 }
 
-export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, showOperadoraFilter = false, showAreaAtuacaoFilter = false }: Props) {
+export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, uniqueSiteCodes, uniqueMunicipios, showOperadoraFilter = false, showAreaAtuacaoFilter = false }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   const hasActiveFilters = 
@@ -46,6 +48,8 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.siteType !== "all" ||
     filters.operadora !== "all" ||
     filters.areaAtuacao !== "all" ||
+    filters.siteCode !== "" ||
+    filters.municipio !== "all" ||
     filters.dateRange.from ||
     filters.dateRange.to;
 
@@ -56,6 +60,8 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
     filters.siteType !== "all" ? filters.siteType : null,
     filters.operadora !== "all" ? filters.operadora : null,
     filters.areaAtuacao !== "all" ? filters.areaAtuacao : null,
+    filters.siteCode || null,
+    filters.municipio !== "all" ? filters.municipio : null,
     filters.dateRange.from,
   ].filter(Boolean).length;
 
@@ -68,6 +74,8 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
       siteType: "all",
       operadora: "all",
       areaAtuacao: "all",
+      siteCode: "",
+      municipio: "all",
     });
   };
 
@@ -113,7 +121,7 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
         {/* Collapsible Content */}
         <CollapsibleContent>
           <div className="px-4 pb-4">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${showOperadoraFilter ? '6' : '5'} gap-4`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Date Range */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Período</Label>
@@ -203,6 +211,50 @@ export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqu
                     ))}
                   </SelectContent>
               </Select>
+              </div>
+
+              {/* Site Code */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Site</Label>
+                <Select
+                  value={filters.siteCode || "_all_"}
+                  onValueChange={(v) =>
+                    onFiltersChange({ ...filters, siteCode: v === "_all_" ? "" : v })
+                  }
+                >
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_all_">Todos</SelectItem>
+                    {uniqueSiteCodes.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Município */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Município</Label>
+                <Select
+                  value={filters.municipio}
+                  onValueChange={(v) => onFiltersChange({ ...filters, municipio: v })}
+                >
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {uniqueMunicipios.map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Site Type */}
