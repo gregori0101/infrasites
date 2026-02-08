@@ -7,11 +7,20 @@ import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, Inbox } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { ChecklistData } from "@/types/checklist";
 
 const IndexInner = () => {
   const { isTecnico, isGestor, isAdmin } = useAuth();
   const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport } = useChecklist();
+  const navigate = useNavigate();
+
+  // Redirect admins and gestors to dashboard as their landing page
+  React.useEffect(() => {
+    if ((isAdmin || isGestor) && !isTecnico) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAdmin, isGestor, isTecnico, navigate]);
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
   const [selectedAssignment, setSelectedAssignment] = React.useState<SiteAssignment | null>(null);
 
