@@ -17,6 +17,10 @@ import {
   Cable,
   Users,
   Fuel,
+  ClipboardList,
+  Building2,
+  UserCog,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
@@ -47,7 +51,7 @@ type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { userOperadora } = useAuth();
+  const { userOperadora, isAdmin, isGestor } = useAuth();
   const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
   // TEL users can only see TEL reports; VIVO users can see all by default
   const isVivoUser = userOperadora === 'VIVO';
@@ -480,14 +484,45 @@ export default function Dashboard() {
             ))}
           </ul>
 
-          <p className="text-xs text-muted-foreground mb-2 px-2 mt-6">Ações</p>
+          <p className="text-xs text-muted-foreground mb-2 px-2 mt-6">Gestão</p>
           <ul className="space-y-1">
+            <li>
+              <button
+                onClick={() => navigate("/atribuicoes")}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ClipboardList className="w-4 h-4" />
+                Atribuir Vistorias
+              </button>
+            </li>
+            {isAdmin && (
+              <>
+                <li>
+                  <button
+                    onClick={() => navigate("/sites")}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Building2 className="w-4 h-4" />
+                    Gestão de Sites
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/usuarios")}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <UserCog className="w-4 h-4" />
+                    Gerenciar Usuários
+                  </button>
+                </li>
+              </>
+            )}
             <li>
               <button
                 onClick={() => navigate("/historico")}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                <MapPin className="w-4 h-4" />
+                <FileText className="w-4 h-4" />
                 Relatórios
               </button>
             </li>
@@ -496,8 +531,8 @@ export default function Dashboard() {
                 onClick={() => navigate("/")}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Voltar
+                <MapPin className="w-4 h-4" />
+                Checklist
               </button>
             </li>
           </ul>
@@ -518,9 +553,6 @@ export default function Dashboard() {
         {/* Header Mobile */}
         <header className="lg:hidden sticky top-0 z-50 bg-[#003366] text-white shadow-sm">
           <div className="px-4 py-3 flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="text-white hover:bg-white/10">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
             <VivoLogo className="h-6" />
             <div className="flex-1">
               <h1 className="font-bold">Dashboard</h1>
@@ -534,6 +566,49 @@ export default function Dashboard() {
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
+          </div>
+
+          {/* Mobile Action Buttons */}
+          <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+            <button
+              onClick={() => navigate("/atribuicoes")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
+            >
+              <ClipboardList className="w-3 h-3" />
+              Vistorias
+            </button>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => navigate("/sites")}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
+                >
+                  <Building2 className="w-3 h-3" />
+                  Sites
+                </button>
+                <button
+                  onClick={() => navigate("/usuarios")}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
+                >
+                  <UserCog className="w-3 h-3" />
+                  Usuários
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => navigate("/historico")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
+            >
+              <FileText className="w-3 h-3" />
+              Relatórios
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
+            >
+              <MapPin className="w-3 h-3" />
+              Checklist
+            </button>
           </div>
 
           {/* Mobile Panel Tabs */}
@@ -556,18 +631,43 @@ export default function Dashboard() {
         </header>
 
         {/* Desktop Header */}
-        <header className="hidden lg:flex items-center justify-between px-6 py-4 border-b border-border bg-card">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
-            <p className="text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
+        <header className="hidden lg:block border-b border-border bg-card">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
+              <p className="text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate("/")}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+          {/* Action buttons bar */}
+          <div className="flex items-center gap-2 px-6 pb-3 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => navigate("/atribuicoes")}>
+              <ClipboardList className="w-4 h-4 mr-1.5" />
+              Atribuir Vistorias
             </Button>
-            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            {isAdmin && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate("/sites")}>
+                  <Building2 className="w-4 h-4 mr-1.5" />
+                  Gestão de Sites
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/usuarios")}>
+                  <UserCog className="w-4 h-4 mr-1.5" />
+                  Gerenciar Usuários
+                </Button>
+              </>
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate("/historico")}>
+              <FileText className="w-4 h-4 mr-1.5" />
+              Relatórios
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+              <MapPin className="w-4 h-4 mr-1.5" />
+              Checklist
             </Button>
           </div>
         </header>
