@@ -70,8 +70,13 @@ export async function insertSites(sites: SiteInsert[]): Promise<{ inserted: numb
   let inserted = 0;
   let duplicates = 0;
 
-  // Prepare all sites with user ID
-  const preparedSites = sites.map(site => ({
+  // Prepare all sites with user ID and deduplicate by site_code (keep last occurrence)
+  const sitesMap = new Map<string, typeof sites[0]>();
+  sites.forEach(site => {
+    sitesMap.set(site.site_code.toUpperCase().trim(), site);
+  });
+
+  const preparedSites = Array.from(sitesMap.values()).map(site => ({
     site_code: site.site_code.toUpperCase().trim(),
     uf: site.uf.toUpperCase().trim(),
     tipo: site.tipo.trim(),
