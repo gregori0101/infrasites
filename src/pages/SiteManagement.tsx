@@ -33,6 +33,7 @@ import { SiteEditDialog } from "@/components/sites/SiteEditDialog";
 import { toast } from "sonner";
 import { fetchSites, insertSites, deleteSite, Site } from "@/lib/siteDatabase";
 import { parseSpreadsheet, generateTemplateSpreadsheet } from "@/lib/parseSpreadsheet";
+import * as XLSX from "xlsx";
 import vivoLogo from "@/assets/vivo-logo.png";
 
 export default function SiteManagement() {
@@ -142,6 +143,41 @@ export default function SiteManagement() {
     toast.success('Modelo baixado');
   };
 
+  const handleDownloadBase = () => {
+    if (sites.length === 0) {
+      toast.error('Nenhum site cadastrado para exportar');
+      return;
+    }
+
+    const rows = sites.map(site => ({
+      'Código do Site': site.site_code,
+      'UF': site.uf,
+      'Município': site.municipio || '',
+      'Tipo': site.tipo,
+      'Data Cadastro': new Date(site.created_at).toLocaleDateString('pt-BR'),
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const cols = Object.keys(rows[0]).map(key => ({ wch: Math.max(key.length, 18) }));
+    worksheet['!cols'] = cols;
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sites');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `base_sites_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`${sites.length} sites exportados`);
+  };
+
   const handleDeleteClick = (site: Site) => {
     setSiteToDelete(site);
     setDeleteDialogOpen(true);
@@ -232,6 +268,11 @@ export default function SiteManagement() {
             <Button variant="outline" onClick={handleDownloadTemplate}>
               <Download className="h-4 w-4 mr-2" />
               Baixar Modelo
+            </Button>
+
+            <Button variant="outline" onClick={handleDownloadBase}>
+              <Download className="h-4 w-4 mr-2" />
+              Baixar Base Atual
             </Button>
 
             <div className="flex-1 min-w-[200px]">
