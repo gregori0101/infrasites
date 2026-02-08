@@ -85,12 +85,12 @@ export async function insertSites(sites: SiteInsert[]): Promise<{ inserted: numb
   for (let i = 0; i < preparedSites.length; i += batchSize) {
     const batch = preparedSites.slice(i, i + batchSize);
     
-    // Use upsert with ignoreDuplicates to handle conflicts gracefully
+    // Use upsert to update existing sites and insert new ones
     const { data, error } = await supabase
       .from('sites')
       .upsert(batch, { 
         onConflict: 'site_code',
-        ignoreDuplicates: true 
+        ignoreDuplicates: false 
       })
       .select();
 
