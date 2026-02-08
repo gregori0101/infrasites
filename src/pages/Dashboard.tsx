@@ -528,7 +528,7 @@ export default function Dashboard() {
             </li>
             <li>
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/?checklist=true")}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <MapPin className="w-4 h-4" />
@@ -603,7 +603,7 @@ export default function Dashboard() {
               Relatórios
             </button>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/?checklist=true")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
             >
               <MapPin className="w-3 h-3" />
@@ -665,7 +665,7 @@ export default function Dashboard() {
               <FileText className="w-4 h-4 mr-1.5" />
               Relatórios
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/?checklist=true")}>
               <MapPin className="w-4 h-4 mr-1.5" />
               Checklist
             </Button>
