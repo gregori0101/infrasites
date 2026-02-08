@@ -8,6 +8,8 @@ export interface DashboardFilters {
   siteType: string; // e.g., "DWDM", "HL3", "HL4", "all"
   operadora: "all" | "VIVO" | "TEL"; // Operator filter
   areaAtuacao: "all" | "PI" | "REDE"; // Technician work area filter
+  siteCode: string; // Filter by specific site code, "" means all
+  municipio: string; // Filter by municipality, "all" means all
 }
 
 export interface BatteryInfo {

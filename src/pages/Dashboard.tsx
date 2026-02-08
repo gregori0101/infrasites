@@ -59,6 +59,8 @@ export default function Dashboard() {
     siteType: "all",
     operadora: isVivoUser ? "all" : "TEL", // TEL users default to TEL only
     areaAtuacao: "all",
+    siteCode: "",
+    municipio: "all",
   });
 
   // Drill-down modal state
@@ -102,11 +104,11 @@ export default function Dashboard() {
     retry: 2,
   });
 
-  // Fetch sites to get site types (paginated to overcome 1000 row limit)
+  // Fetch sites to get site types and municipalities (paginated to overcome 1000 row limit)
   const { data: sitesData = [] } = useQuery({
     queryKey: ["dashboard-sites"],
     queryFn: async () => {
-      const allSites: { site_code: string; tipo: string }[] = [];
+      const allSites: { site_code: string; tipo: string; municipio: string | null }[] = [];
       const pageSize = 1000;
       let from = 0;
       let hasMore = true;
@@ -114,7 +116,7 @@ export default function Dashboard() {
       while (hasMore) {
         const { data, error } = await supabase
           .from("sites")
-          .select("site_code, tipo")
+          .select("site_code, tipo, municipio")
           .range(from, from + pageSize - 1);
 
         if (error) {
@@ -156,7 +158,7 @@ export default function Dashboard() {
     retry: 1,
   });
 
-  // Build site type map for filtering
+  // Build site type map and municipio map for filtering
   const siteTypeMap = useMemo(() => {
     const map = new Map<string, string>();
     sitesData.forEach((site: { site_code: string; tipo: string }) => {
@@ -165,11 +167,28 @@ export default function Dashboard() {
     return map;
   }, [sitesData]);
 
-  // Filter reports by site type before processing
+  const siteMunicipioMap = useMemo(() => {
+    const map = new Map<string, string>();
+    sitesData.forEach((site: { site_code: string; municipio: string | null }) => {
+      if (site.municipio) map.set(site.site_code, site.municipio);
+    });
+    return map;
+  }, [sitesData]);
+
+  // Filter reports by site type, site code, and municipio before processing
   const filteredReportsBySiteType = useMemo(() => {
-    if (filters.siteType === "all") return reports;
-    return reports.filter(r => siteTypeMap.get(r.site_code) === filters.siteType);
-  }, [reports, filters.siteType, siteTypeMap]);
+    let result = reports;
+    if (filters.siteType !== "all") {
+      result = result.filter(r => siteTypeMap.get(r.site_code) === filters.siteType);
+    }
+    if (filters.siteCode) {
+      result = result.filter(r => r.site_code === filters.siteCode);
+    }
+    if (filters.municipio !== "all") {
+      result = result.filter(r => siteMunicipioMap.get(r.site_code) === filters.municipio);
+    }
+    return result;
+  }, [reports, filters.siteType, filters.siteCode, filters.municipio, siteTypeMap, siteMunicipioMap]);
 
   // Build reverse map: email -> user_ids for technician filtering
   const emailToUserIdMap = useMemo(() => {
@@ -239,6 +258,20 @@ export default function Dashboard() {
   const uniqueSiteTypes = useMemo(() => {
     const types = new Set(sitesData.map((s: { tipo: string }) => s.tipo).filter(Boolean));
     return Array.from(types).sort() as string[];
+  }, [sitesData]);
+
+  // Extract unique site codes from filtered reports
+  const uniqueSiteCodes = useMemo(() => {
+    const codes = new Set(reports.map(r => r.site_code).filter(Boolean));
+    return Array.from(codes).sort() as string[];
+  }, [reports]);
+
+  // Extract unique municipalities from sites data
+  const uniqueMunicipios = useMemo(() => {
+    const municipios = new Set(
+      sitesData.map((s: { municipio: string | null }) => s.municipio).filter(Boolean) as string[]
+    );
+    return Array.from(municipios).sort();
   }, [sitesData]);
 
   // Drill-down handlers
@@ -547,6 +580,8 @@ export default function Dashboard() {
             uniqueUFs={uniqueUFs}
             uniqueTechnicians={uniqueTechnicians}
             uniqueSiteTypes={uniqueSiteTypes}
+            uniqueSiteCodes={uniqueSiteCodes}
+            uniqueMunicipios={uniqueMunicipios}
             showOperadoraFilter={isVivoUser}
             showAreaAtuacaoFilter={false}
           />
