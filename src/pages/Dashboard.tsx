@@ -568,48 +568,6 @@ export default function Dashboard() {
             </Button>
           </div>
 
-          {/* Mobile Action Buttons */}
-          <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
-            <button
-              onClick={() => navigate("/atribuicoes")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
-            >
-              <ClipboardList className="w-3 h-3" />
-              Vistorias
-            </button>
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => navigate("/sites")}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
-                >
-                  <Building2 className="w-3 h-3" />
-                  Sites
-                </button>
-                <button
-                  onClick={() => navigate("/usuarios")}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
-                >
-                  <UserCog className="w-3 h-3" />
-                  Usuários
-                </button>
-              </>
-            )}
-            <button
-              onClick={() => navigate("/historico")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
-            >
-              <FileText className="w-3 h-3" />
-              Relatórios
-            </button>
-            <button
-              onClick={() => navigate("/?checklist=true")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/20 text-white/90 hover:bg-white/30 transition-colors"
-            >
-              <MapPin className="w-3 h-3" />
-              Checklist
-            </button>
-          </div>
 
           {/* Mobile Panel Tabs */}
           <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
@@ -642,33 +600,6 @@ export default function Dashboard() {
                 <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
               </Button>
             </div>
-          </div>
-          {/* Action buttons bar */}
-          <div className="flex items-center gap-2 px-6 pb-3 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => navigate("/atribuicoes")}>
-              <ClipboardList className="w-4 h-4 mr-1.5" />
-              Atribuir Vistorias
-            </Button>
-            {isAdmin && (
-              <>
-                <Button variant="outline" size="sm" onClick={() => navigate("/sites")}>
-                  <Building2 className="w-4 h-4 mr-1.5" />
-                  Gestão de Sites
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/usuarios")}>
-                  <UserCog className="w-4 h-4 mr-1.5" />
-                  Gerenciar Usuários
-                </Button>
-              </>
-            )}
-            <Button variant="outline" size="sm" onClick={() => navigate("/historico")}>
-              <FileText className="w-4 h-4 mr-1.5" />
-              Relatórios
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/?checklist=true")}>
-              <MapPin className="w-4 h-4 mr-1.5" />
-              Checklist
-            </Button>
           </div>
         </header>
 
