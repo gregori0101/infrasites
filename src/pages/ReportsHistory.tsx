@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { VivoLogo } from "@/components/ui/vivo-logo";
-import { fetchReportsSummary, fetchReportByIdWithPhotos, ReportRow, deleteReportById } from "@/lib/reportDatabase";
+import { fetchReportsSummary, fetchReportByIdWithPhotos, fetchReportsForExcel, ReportRow, deleteReportById } from "@/lib/reportDatabase";
 import { clearReportLinkFromAssignments } from "@/lib/assignmentDatabase";
 import { deletePhotosByPublicUrls } from "@/lib/photoStorage";
 import { Switch } from "@/components/ui/switch";
@@ -219,15 +219,26 @@ export default function ReportsHistory() {
     
     setIsExportingAll(true);
     try {
+      // Fetch full data (dashboard + photo columns) for accurate Excel generation
+      // Summary columns don't include gabinete details, causing defaults like 'CONTAINER'
+      toast.info('Buscando dados completos para exportação...');
+      const fullReports = await fetchReportsForExcel({
+        siteCode: appliedFilters.siteCode || undefined,
+        stateUf: appliedFilters.stateUf || undefined,
+        startDate: appliedFilters.startDate ? new Date(appliedFilters.startDate).toISOString() : undefined,
+        endDate: appliedFilters.endDate ? new Date(appliedFilters.endDate + 'T23:59:59').toISOString() : undefined,
+        operadora: appliedFilters.operadora,
+      });
+      
       // Convert all reports to ChecklistData
-      const allChecklistData = reports.map(report => reportToChecklist(report));
+      const allChecklistData = fullReports.map(report => reportToChecklist(report));
       
       // Generate consolidated Excel
       const excelBlob = generateConsolidatedExcel(allChecklistData);
       const filename = `Relatorios_Consolidados_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xlsx`;
       downloadExcel(excelBlob, filename);
       
-      toast.success(`${reports.length} relatório(s) exportado(s) com sucesso!`);
+      toast.success(`${fullReports.length} relatório(s) exportado(s) com sucesso!`);
     } catch (error) {
       console.error('Error exporting all reports:', error);
       toast.error('Erro ao exportar relatórios');
