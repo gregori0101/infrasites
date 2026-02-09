@@ -59,8 +59,10 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     if (gab && !skipGabinete) {
       // GRUPO 3: GABINETE INFO
       row[`${prefix}_Selecionado`] = 'SIM';
+      row[`${prefix}_Ativo`] = gab.ativo ? 'SIM' : 'NÃO';
       row[`${prefix}_Tipo`] = gab.tipo;
       row[`${prefix}_Com_Protecao`] = gab.comProtecao ? 'SIM' : 'NÃO';
+      row[`${prefix}_Foto_Panoramica_Gabinete`] = getPhotoValue(gab.fotoPanoramicaGabinete);
       
       // Tecnologias Acesso (individual columns)
       TECNOLOGIAS_ACESSO.forEach(tec => {
@@ -187,10 +189,14 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   fibra.abordagens.forEach((abord, i) => {
     row[`Fibra_Abord${i + 1}_Tipo`] = abord.tipoEntrada;
     row[`Fibra_Abord${i + 1}_Descricao`] = abord.descricao || '';
+    row[`Fibra_Abord${i + 1}_Foto`] = getPhotosValue(abord.fotos);
   });
   row['Fibra_Caixas_Passagem_Qtd'] = fibra.qtdCaixasPassagem;
+  row['Fibra_Fotos_Caixas_Passagem'] = getPhotosValue(fibra.fotosCaixasPassagem);
   row['Fibra_Caixas_Subterraneas_Qtd'] = fibra.qtdCaixasSubterraneas;
+  row['Fibra_Fotos_Caixas_Subterraneas'] = getPhotosValue(fibra.fotosCaixasSubterraneas);
   row['Fibra_Subidas_Laterais_Qtd'] = fibra.qtdSubidasLaterais;
+  row['Fibra_Fotos_Subidas_Laterais'] = getPhotosValue(fibra.fotosSubidasLaterais);
   row['Fibra_DGOs_Qtd'] = fibra.qtdDGOs;
   row['Fibra_DGOs_Cordoes_OK_Qtd'] = fibra.dgos.filter((d) => d.estadoCordoes === 'OK').length;
   row['Fibra_DGOs_Cordoes_NOK_Qtd'] = fibra.dgos.filter((d) => d.estadoCordoes === 'NOK').length;
@@ -199,6 +205,8 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row[`Fibra_DGO${i + 1}_ID`] = dgo.identificacao;
     row[`Fibra_DGO${i + 1}_Capacidade`] = `${dgo.capacidadeFO}FO`;
     row[`Fibra_DGO${i + 1}_Cordoes`] = dgo.estadoCordoes;
+    row[`Fibra_DGO${i + 1}_Foto`] = getPhotoValue(dgo.fotoDGO);
+    row[`Fibra_DGO${i + 1}_Cordoes_Foto`] = getPhotoValue(dgo.fotoCordesDetalhada);
   });
   
   // GRUPO ENERGIA - skip if energia section marked NA
@@ -237,6 +245,8 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['GMG_Ultimo_Teste'] = data.gmg.informar ? (data.gmg.ultimoTeste || '') : '';
     row['GMG_Foto_Painel'] = data.gmg.informar ? getPhotoValue(data.gmg.fotoGMG) : '';
     
+    row['Torre_Ninhos'] = data.torre.ninhos ? 'SIM' : 'NÃO';
+    row['Torre_Foto_Ninhos'] = getPhotoValue(data.torre.fotoNinhos);
     row['Torre_Fibras_Protegidas'] = data.torre.fibrasProtegidas ? 'SIM' : 'NÃO';
     row['Torre_Foto_Fibras_Protegidas'] = getPhotoValue(data.torre.fotoFibrasProtegidas);
     row['Torre_Aterramento'] = data.torre.aterramento;
