@@ -17,16 +17,18 @@ const IndexInner = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isChecklistRequested = searchParams.get("checklist") === "true";
-  const isMobile = useIsMobile();
+  const { isMobile, isReady: isMobileReady } = useIsMobile();
 
   // Redirect admins and gestors to dashboard as their landing page (desktop only)
   // On mobile, they go directly to the checklist
   // Also skip redirect if they explicitly requested the checklist via ?checklist=true
+  // Wait for isMobileReady to avoid premature redirect on mobile devices
   React.useEffect(() => {
+    if (!isMobileReady) return;
     if ((isAdmin || isGestor) && !isTecnico && !isChecklistRequested && !isMobile) {
       navigate('/dashboard', { replace: true });
     }
-  }, [isAdmin, isGestor, isTecnico, isChecklistRequested, isMobile, navigate]);
+  }, [isAdmin, isGestor, isTecnico, isChecklistRequested, isMobile, isMobileReady, navigate]);
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
   const [selectedAssignment, setSelectedAssignment] = React.useState<SiteAssignment | null>(null);
 
