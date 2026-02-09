@@ -78,7 +78,7 @@ function dataURLToBlob(dataURL: string): Blob {
 export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePhotoUploadOptions) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const isMobileFromHook = useIsMobile();
+  const { isMobile: isMobileFromHook } = useIsMobile();
 
   // Enhanced mobile detection for iOS Safari and other mobile browsers
   const isMobile =
