@@ -724,6 +724,65 @@ export async function fetchReports(filters?: {
 }
 
 /**
+ * Fetch reports with all data columns needed for Excel export (dashboard cols + photo cols)
+ * This is heavier than summary but needed for accurate Excel generation
+ */
+export async function fetchReportsForExcel(filters?: {
+  siteCode?: string;
+  stateUf?: string;
+  startDate?: string;
+  endDate?: string;
+  operadora?: string;
+}): Promise<ReportRow[]> {
+  const pageSize = 500; // Smaller pages since we fetch more columns
+  let page = 0;
+  let all: ReportRow[] = [];
+  const columns = buildDetailColumns() + ',' + buildPhotoColumns();
+
+  while (true) {
+    let query = supabase
+      .from('reports')
+      .select(columns)
+      .order('created_at', { ascending: false });
+
+    if (filters?.siteCode) {
+      query = query.ilike('site_code', `%${filters.siteCode}%`);
+    }
+    if (filters?.stateUf) {
+      query = query.eq('state_uf', filters.stateUf);
+    }
+    if (filters?.startDate) {
+      query = query.gte('created_at', filters.startDate);
+    }
+    if (filters?.endDate) {
+      query = query.lte('created_at', filters.endDate);
+    }
+    if (filters?.operadora && filters.operadora !== 'all') {
+      query = query.eq('operadora', filters.operadora);
+    }
+
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error } = await query.range(from, to);
+
+    if (error) {
+      console.error('Error fetching reports for Excel export:', error);
+      throw new Error(`Erro ao buscar relatórios para exportação: ${error.message}`);
+    }
+
+    const batch = (data || []) as unknown as ReportRow[];
+    all = all.concat(batch);
+
+    if (batch.length < pageSize) break;
+    page += 1;
+    if (page > 50) break;
+  }
+
+  return all;
+}
+
+/**
  * Fetch single report by ID (sem fotos por padrão para velocidade)
  */
 export async function fetchReportById(id: string): Promise<ReportRow | null> {
