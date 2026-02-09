@@ -88,6 +88,7 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
     // Clear torre photos
     torre: {
       ...data.torre,
+      fotoNinhos: null,
       fotoFibrasProtegidas: null,
       fotoAterramento: null,
       fotoZeladoria: null,
@@ -201,6 +202,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     const gab: GabineteData = {
       ...INITIAL_GABINETE,
       tipo: (report[`${prefix}_tipo`] || 'CONTAINER') as any,
+      ativo: report[`${prefix}_ativo`] === 'NÃO' ? false : true,
       comProtecao: report[`${prefix}_protecao`] === 'SIM',
       tecnologiasAcesso: report[`${prefix}_tecnologias_acesso`]?.split(', ').filter(Boolean) || [],
       tecnologiasTransporte: report[`${prefix}_tecnologias_transporte`]?.split(', ').filter(Boolean) || [],
