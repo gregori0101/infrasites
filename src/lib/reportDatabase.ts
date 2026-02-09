@@ -117,6 +117,7 @@ function buildDashboardColumns(): string {
     const prefix = `gab${g}`;
     cols.push(
       `${prefix}_tipo`,
+      `${prefix}_ativo`,
       `${prefix}_protecao`,
       `${prefix}_tecnologias_acesso`,
       `${prefix}_tecnologias_transporte`,
