@@ -21,7 +21,9 @@ import {
   Building2,
   UserCog,
   FileText,
+  FileSearch,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsForDashboard } from "@/lib/reportDatabase";
@@ -592,7 +594,12 @@ export default function Dashboard() {
         <header className="hidden lg:block border-b border-border bg-card">
           <div className="flex items-center justify-between px-6 py-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
+                <Badge variant="outline" className="text-xs">
+                  {!isVivoUser ? "Empresa: TEL" : filters.operadora === "all" ? "Todas as Empresas" : `Empresa: ${filters.operadora}`}
+                </Badge>
+              </div>
               <p className="text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
             </div>
             <div className="flex items-center gap-2">
@@ -632,8 +639,19 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Empty State */}
+          {!isLoading && !error && reports.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <FileSearch className="w-16 h-16 text-muted-foreground/40 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma vistoria encontrada</h3>
+              <p className="text-muted-foreground max-w-md">
+                Nenhuma vistoria encontrada para a empresa <strong>{!isVivoUser ? "TEL" : filters.operadora === "all" ? "todas" : filters.operadora}</strong>. As vistorias aparecerão aqui conforme forem realizadas pelos técnicos.
+              </p>
+            </div>
+          )}
+
           {/* Content */}
-          {!isLoading && !error && (
+          {!isLoading && !error && reports.length > 0 && (
             <>
               {activePanel === "overview" && (
                 <OverviewPanel
