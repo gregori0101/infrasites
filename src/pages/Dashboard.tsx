@@ -717,6 +717,7 @@ export default function Dashboard() {
                   onDrillDown={(type) => {
                     if (type === "gmg") openDrillDown("sites", "Sites com GMG", (s) => s.filter((site: any) => site.gmgExists));
                     else if (type === "gmg-no") openDrillDown("sites", "Sites sem GMG", (s) => s.filter((site: any) => !site.gmgExists));
+                    else if (type === "gmg-total") openDrillDown("sites", "Todos os Sites", (s) => s);
                     else if (type === "gmg-ok") openDrillDown("sites", "GMG Operacional (OK)", (s) => s.filter((site: any) => {
                       const report = reports.find(r => r.id === site.id);
                       return report && report.gmg_existe === "SIM" && report.gmg_status === "OK";
@@ -740,10 +741,13 @@ export default function Dashboard() {
                   acs={acs}
                   onDrillDown={(type) => {
                     if (type === "all") openDrillDown("sites", "Todos Gabinetes", (s) => s);
+                    else if (type === "total-sites") openDrillDown("sites", "Todos os Sites", (s) => s);
                     else if (type === "ac") openDrillDown("sites", "Sites com Ar Condicionado", (s) => s);
                     else if (type === "fan") openDrillDown("sites", "Sites com Ventilação/Fan", (s) => s);
                     else if (type === "ac-ok") openDrillDown("acs", "Ar Condicionados OK", (a) => a.filter((ac: any) => ac.status === "OK"));
                     else if (type === "ac-nok") openDrillDown("acs", "Ar Condicionados NOK", (a) => a.filter((ac: any) => ac.status === "NOK"));
+                    else if (type === "fan-ok") openDrillDown("sites", "Sites com Fan OK", (s) => s);
+                    else if (type === "fan-nok") openDrillDown("sites", "Sites com Fan NOK", (s) => s);
                     else if (type === "plc-ok") openDrillDown("sites", "Sites com PLC OK", (s) => s);
                     else if (type === "plc-nok") openDrillDown("sites", "Sites com PLC NOK", (s) => s);
                     else if (type === "na") openDrillDown("sites", "Sites sem Climatização", (s) => s);
@@ -756,7 +760,8 @@ export default function Dashboard() {
                   stats={stats}
                   sites={sites}
                   onDrillDown={(type) => {
-                    if (type === "zeladoria") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
+                    if (type === "total") openDrillDown("sites", "Todos os Sites", (s) => s);
+                    else if (type === "zeladoria") openDrillDown("sites", "Zeladoria OK", (s) => s.filter((site: any) => site.zeladoriaOk));
                     else if (type === "zeladoria_nok") openDrillDown("sites", "Zeladoria NOK", (s) => s.filter((site: any) => !site.zeladoriaOk));
                     else if (type === "aterramento") openDrillDown("sites", "Aterramento OK", (s) => s);
                     else if (type === "aterramento_nok") openDrillDown("sites", "Aterramento NOK", (s) => s);

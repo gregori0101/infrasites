@@ -55,6 +55,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
           subtitle="Sites vistoriados"
           icon={Building2}
           iconBg="bg-primary/10 text-primary"
+          onClick={() => onDrillDown?.("all")}
         />
         <StatCard
           title="Sites Protegidos"

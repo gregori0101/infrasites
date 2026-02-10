@@ -60,6 +60,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle="Conformidade geral"
           icon={TrendingUp}
           iconBg={overview.percentOk >= 80 ? "bg-success/10 text-success" : overview.percentOk >= 60 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"}
+          onClick={() => onDrillDown("total")}
         />
       </div>
 
@@ -103,6 +104,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           subtitle="Data do relatório"
           icon={Clock}
           iconBg="bg-muted text-muted-foreground"
+          onClick={() => onDrillDown("total")}
         />
       </div>
 
