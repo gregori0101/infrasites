@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 interface Props {
   stats: PanelStats;
   sites: SiteInfo[];
-  onDrillDown: (type: "zeladoria" | "aterramento" | "zeladoria_nok" | "aterramento_nok") => void;
+  onDrillDown: (type: "total" | "zeladoria" | "aterramento" | "zeladoria_nok" | "aterramento_nok") => void;
 }
 
 export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
@@ -44,6 +44,7 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
           subtitle="Sites vistoriados"
           icon={Building2}
           iconBg="bg-primary/10 text-primary"
+          onClick={() => onDrillDown("total")}
         />
         <StatCard
           title="Zeladoria OK"

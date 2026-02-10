@@ -100,7 +100,10 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
   return (
     <div className="space-y-6">
       {/* CARD DESTAQUE: Total de Baterias Cadastradas */}
-      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30">
+      <Card 
+        className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 cursor-pointer hover:shadow-lg active:scale-[0.99] transition-all"
+        onClick={() => onDrillDown("all")}
+      >
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
@@ -112,6 +115,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                 <p className="text-5xl font-bold text-primary">{stats.totalBatteries}</p>
                 <span className="text-muted-foreground">unidades</span>
               </div>
+              <p className="text-xs text-primary">Ver detalhes →</p>
             </div>
             <div className="text-right text-sm text-muted-foreground space-y-1">
               <div className="flex items-center justify-end gap-2">
@@ -571,13 +575,17 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               </CardContent>
             </Card>
             
-            <Card className="border-muted">
+            <Card 
+              className="border-muted cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+              onClick={() => onDrillDown("all")}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
                     <p className="text-3xl font-bold tracking-tight">{obsolescencia.semBanco}</p>
                     <p className="text-xs text-muted-foreground">Sem bateria registrada</p>
+                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted">
                     <Battery className="w-5 h-5 text-muted-foreground" />

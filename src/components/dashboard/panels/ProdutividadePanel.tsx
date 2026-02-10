@@ -294,6 +294,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
           subtitle={`${stats.technicianRanking.length} técnicos ativos`}
           icon={Users}
           iconBg="bg-purple-100"
+          onClick={() => onDrillDown?.("realizadas")}
         />
       </div>
 

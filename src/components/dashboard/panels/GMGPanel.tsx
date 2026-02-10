@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface Props {
   stats: PanelStats;
-  onDrillDown: (type: "gmg" | "gmg-no" | "gmg-ok" | "gmg-nok" | "gmg-alarme") => void;
+  onDrillDown: (type: "gmg" | "gmg-no" | "gmg-ok" | "gmg-nok" | "gmg-alarme" | "gmg-total") => void;
 }
 
 const CHART_STYLE = {
@@ -49,6 +49,7 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
           subtitle="Sites vistoriados"
           icon={Building2}
           iconBg="bg-primary/10 text-primary"
+          onClick={() => onDrillDown("gmg-total")}
         />
         <StatCard
           title="Sites com GMG"

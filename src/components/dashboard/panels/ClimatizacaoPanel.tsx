@@ -10,7 +10,7 @@ interface Props {
   stats: PanelStats;
   climatizacao: ClimatizacaoInfo[];
   acs: ACInfo[];
-  onDrillDown: (type: "all" | "ac" | "fan" | "ac-ok" | "ac-nok" | "plc-ok" | "plc-nok" | "na") => void;
+  onDrillDown: (type: "all" | "ac" | "fan" | "ac-ok" | "ac-nok" | "plc-ok" | "plc-nok" | "na" | "total-sites" | "fan-ok" | "fan-nok") => void;
 }
 
 export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Props) {
@@ -103,6 +103,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             subtitle="Sites vistoriados"
             icon={Building2}
             iconBg="bg-primary/10 text-primary"
+            onClick={() => onDrillDown("total-sites")}
           />
           <StatCard
             title="Total Gabinetes"
@@ -147,6 +148,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             icon={Fan}
             iconBg="bg-success/10 text-success"
             badge={stats.fanTotal > 0 ? { text: `${Math.round((stats.fanOkCount / Math.max(stats.fanOkCount + stats.fanNokCount, 1)) * 100)}%`, variant: "success" } : undefined}
+            onClick={() => onDrillDown("fan-ok")}
           />
           <StatCard
             title="Fan NOK"
@@ -155,6 +157,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             icon={Fan}
             iconBg="bg-destructive/10 text-destructive"
             badge={stats.fanNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
+            onClick={() => onDrillDown("fan-nok")}
           />
           <StatCard
             title="Com PLC"
@@ -330,6 +333,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                 subtitle="Ar condicionados OK"
                 icon={CheckCircle2}
                 iconBg="bg-cyan-600/10 text-cyan-600"
+                onClick={() => onDrillDown("ac")}
               />
             </div>
 
@@ -491,6 +495,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                 icon={Fan}
                 iconBg="bg-success/10 text-success"
                 badge={stats.fanTotal > 0 ? { text: `${Math.round((stats.fanOkCount / Math.max(stats.fanOkCount + stats.fanNokCount, 1)) * 100)}%`, variant: "success" } : undefined}
+                onClick={() => onDrillDown("fan-ok")}
               />
               <StatCard
                 title="Fan NOK"
@@ -499,6 +504,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                 icon={Fan}
                 iconBg="bg-destructive/10 text-destructive"
                 badge={stats.fanNokCount > 0 ? { text: "Atenção", variant: "destructive" } : undefined}
+                onClick={() => onDrillDown("fan-nok")}
               />
               <StatCard
                 title="Taxa Operacional"
@@ -506,6 +512,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                 subtitle="Fan OK"
                 icon={CheckCircle2}
                 iconBg="bg-emerald-500/10 text-emerald-500"
+                onClick={() => onDrillDown("fan")}
               />
             </div>
 

@@ -65,6 +65,7 @@ export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
           subtitle="Último mês"
           icon={TrendingUp}
           iconBg="bg-accent/10 text-accent"
+          onClick={() => onDrillDown("total")}
         />
       </div>
 
