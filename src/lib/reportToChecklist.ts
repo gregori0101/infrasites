@@ -201,7 +201,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     
     const gab: GabineteData = {
       ...INITIAL_GABINETE,
-      tipo: (report[`${prefix}_tipo`] || 'CONTAINER') as any,
+      tipo: (report[`${prefix}_tipo`] || '') as any,
       ativo: report[`${prefix}_ativo`] === 'NÃO' ? false : true,
       comProtecao: report[`${prefix}_protecao`] === 'SIM',
       tecnologiasAcesso: report[`${prefix}_tecnologias_acesso`]?.split(', ').filter(Boolean) || [],
@@ -209,8 +209,8 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fcc: {
         numFCCs: 1,
         fccs: [{
-          fabricante: (report[`${prefix}_fcc_fabricante`] || 'HUAWEI') as any,
-          tensaoDC: (report[`${prefix}_fcc_tensao`] || '48V') as any,
+          fabricante: (report[`${prefix}_fcc_fabricante`] || '') as any,
+          tensaoDC: (report[`${prefix}_fcc_tensao`] || '') as any,
           gerenciadaSG: report[`${prefix}_fcc_gerenciado`] === 'SIM',
           gerenciavel: report[`${prefix}_fcc_gerenciavel`] === 'SIM',
           consumoDC: safeParseInt(report[`${prefix}_fcc_consumo`]) || 0,
@@ -233,7 +233,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         plcLeadLagStatus: report[`${prefix}_plc_status`]?.includes('/OK') ? 'OK' : 
                           report[`${prefix}_plc_status`]?.includes('/NOK') ? 'NOK' : null,
         fotoPlcLeadLag: null, // Photo field - would need DB column to restore
-        alarmistica: (report[`${prefix}_alarme_status`] || 'SGINFRA U2020') as any,
+        alarmistica: (report[`${prefix}_alarme_status`] || '') as any,
         fotoAR1: report[`${prefix}_clima_foto_ar1`] || null,
         fotoAR2: report[`${prefix}_clima_foto_ar2`] || null,
         fotoAR3: report[`${prefix}_clima_foto_ar3`] || null,

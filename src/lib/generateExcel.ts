@@ -227,6 +227,8 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['Energia_Foto_Quadro_Geral'] = getPhotoValue(data.energia.fotoQuadroGeral);
     row['Energia_Unidade_Consumidora'] = data.energia.unidadeConsumidora || '';
     row['Energia_Foto_Relogio'] = getPhotoValue(data.energia.fotoRelogio);
+    row['Energia_Foto_Placa'] = getPhotoValue((data.energia as any).fotoPlaca);
+    row['Energia_Foto_Cabos'] = getPhotoValue((data.energia as any).fotoCabos);
   } else {
     row['Energia_Secao'] = 'N/A';
   }

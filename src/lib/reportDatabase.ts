@@ -110,6 +110,8 @@ function buildDashboardColumns(): string {
     'geo_longitude',
     'geo_endereco',
     'geo_capturado_em',
+    // Operadora
+    'operadora',
   ];
 
   // Add gabinete columns (no photos)
@@ -174,6 +176,8 @@ function buildPhotoColumns(): string {
     'energia_foto_transformador',
     'energia_foto_quadro_geral',
     'energia_foto_relogio',
+    'energia_foto_placa',
+    'energia_foto_cabos',
     'torre_foto_ninhos',
     'torre_foto_fibras_protegidas',
     'torre_foto_aterramento',
