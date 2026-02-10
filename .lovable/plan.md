@@ -1,46 +1,45 @@
 
-# Correcao de Conteudo das Colunas no Excel
 
-## Problema Raiz
+# Acesso do Gestor TEL ao Dashboard
 
-A funcao `reportToChecklist()` usa **valores padrao falsos** quando um campo do banco de dados e `null`. Isso causa colunas preenchidas com dados incorretos no Excel. Por exemplo:
-- Gabinete tipo sempre mostra "CONTAINER" quando o valor e null
-- FCC fabricante sempre mostra "HUAWEI" quando o valor e null
-- FCC tensao sempre mostra "48V" quando o valor e null  
-- Alarmistica sempre mostra "SGINFRA U2020" quando o valor e null
+## Situacao Atual
 
-Alem disso, a coluna `operadora` **nao e buscada** na funcao `fetchReportsForExcel`, fazendo com que todos os relatorios mostrem "VIVO" independente do valor real.
+Apos analise completa do codigo, o dashboard **ja esta acessivel** para gestores da empresa TEL. O sistema possui todas as pecas necessarias:
 
-## Correcoes Necessarias
+1. **Rota protegida**: A rota `/dashboard` exige apenas o cargo `gestor`, independente da empresa (VIVO ou TEL)
+2. **Filtro de dados**: Usuarios TEL automaticamente recebem o filtro `operadora = 'TEL'`, vendo apenas relatorios da empresa TEL (atualmente existem 4 relatorios TEL no banco)
+3. **Politicas de acesso**: As regras de seguranca do banco permitem que gestores leiam todos os relatorios
+4. **Redirecionamento**: Gestores em desktop sao automaticamente redirecionados para o dashboard ao fazer login
 
-### 1. Arquivo: `src/lib/reportDatabase.ts`
+## Possivel Problema
 
-**Adicionar `operadora` ao `buildDashboardColumns`** para que seja buscado em todas as queries:
-- Adicionar `'operadora'` na lista de colunas base
+Se o gestor TEL nao esta conseguindo ver o dashboard, as causas mais provaveis sao:
 
-**Adicionar fotos de energia faltantes ao `buildPhotoColumns`:**
-- `energia_foto_placa`
-- `energia_foto_cabos`
+- **Poucos dados**: Existem apenas 4 relatorios da empresa TEL no banco, o que pode dar a impressao de dashboard vazio
+- **Acesso mobile**: Em dispositivos moveis, gestores nao sao redirecionados automaticamente para o dashboard -- precisam navegar manualmente via menu
 
-### 2. Arquivo: `src/lib/reportToChecklist.ts`
+## Melhorias Propostas
 
-**Remover defaults falsos** que mascaram dados nulos. Substituir por valores vazios/null:
+Para garantir uma experiencia completa para gestores TEL, as seguintes melhorias serao implementadas:
 
-| Campo | Antes (default incorreto) | Depois (correto) |
-|---|---|---|
-| `gab.tipo` | `report[...] \|\| 'CONTAINER'` | `report[...] \|\| ''` |
-| `fcc.fabricante` | `report[...] \|\| 'HUAWEI'` | `report[...] \|\| ''` |
-| `fcc.tensaoDC` | `report[...] \|\| '48V'` | `report[...] \|\| ''` |
-| `fcc.alarmistica` | `report[...] \|\| 'SGINFRA U2020'` | `report[...] \|\| ''` |
+### 1. Indicador visual de empresa no dashboard
+Adicionar um badge/indicador no cabecalho do dashboard mostrando qual empresa esta sendo visualizada (ex: "Empresa: TEL"), para que o gestor TEL saiba que esta vendo dados filtrados da sua empresa.
 
-### 3. Arquivo: `src/lib/generateExcel.ts`
+### 2. Mensagem quando nao ha dados
+Adicionar uma mensagem amigavel quando o dashboard nao possui relatorios para exibir, informando que ainda nao existem vistorias registradas para a empresa, em vez de mostrar apenas zeros.
 
-**Adicionar colunas de fotos de energia faltantes:**
-- `Energia_Foto_Placa`
-- `Energia_Foto_Cabos`
+## Detalhes Tecnicos
 
-### Resumo de Arquivos Editados
+### Arquivo: `src/pages/Dashboard.tsx`
 
-1. `src/lib/reportDatabase.ts` - Adicionar `operadora` nas colunas do dashboard e fotos de energia no `buildPhotoColumns`
-2. `src/lib/reportToChecklist.ts` - Remover defaults falsos (CONTAINER, HUAWEI, 48V, SGINFRA U2020)
-3. `src/lib/generateExcel.ts` - Adicionar colunas `Energia_Foto_Placa` e `Energia_Foto_Cabos`
+**Alteracao 1 - Badge de empresa no cabecalho:**
+- Adicionar abaixo do titulo "Dashboard Executivo" um badge indicando a empresa ativa
+- Para usuarios TEL: mostrar "Empresa: TEL"  
+- Para usuarios VIVO com filtro ativo: mostrar "Empresa: VIVO" ou "Empresa: TEL"
+- Para usuarios VIVO sem filtro: mostrar "Todas as Empresas"
+
+**Alteracao 2 - Estado vazio amigavel:**
+- Quando `reports.length === 0` e nao esta carregando, mostrar mensagem informativa
+- Texto: "Nenhuma vistoria encontrada para a empresa [NOME]. As vistorias aparecerao aqui conforme forem realizadas pelos tecnicos."
+
+Nenhuma alteracao de banco de dados e necessaria. As politicas de seguranca e o fluxo de dados ja estao corretos.
