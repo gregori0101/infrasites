@@ -1,32 +1,46 @@
 
-
-# Adicionar botao de recusar cadastro na lista de pendentes
+# Excluir solicitacao ao recusar cadastro pendente
 
 ## Problema
 
-Na secao "Aguardando Aprovacao", cada usuario pendente possui apenas o botao de aprovar (icone de check verde). Nao existe um botao para recusar o cadastro diretamente nessa lista.
+Atualmente, ao recusar um cadastro pendente, o sistema apenas marca `approved = false` no registro. A solicitacao permanece na lista de pendentes indefinidamente.
 
 ## Solucao
 
-Adicionar um botao vermelho com icone "X" ao lado do botao de aprovar, na lista de usuarios pendentes. Ao clicar, abre o mesmo dialogo de confirmacao ja existente, mas com a acao de "recusar". A funcao `handleReject` ja existe no codigo e sera reutilizada -- ela remove a aprovacao do usuario, impedindo o acesso ao sistema.
+Quando um administrador recusar um cadastro **pendente** (usuario que nunca foi aprovado), o registro sera **excluido** da tabela `user_roles`. Para usuarios **ja aprovados** que estao tendo o acesso revogado, o comportamento atual sera mantido (marcar `approved = false`).
 
 ## Alteracoes
 
-### Arquivo: `src/pages/UserManagement.tsx`
+### 1. Migracao de banco de dados
 
-Na secao de usuarios pendentes (linhas 371-390), adicionar um segundo botao dentro do `div` de acoes:
+Adicionar uma politica RLS de DELETE na tabela `user_roles` para permitir que administradores excluam registros:
 
-- Botao vermelho com icone `X` (mesmo estilo usado na lista de aprovados)
-- Ao clicar, abre o `confirmDialog` com `action: 'reject'`
-- Texto do dialogo de confirmacao: "Recusar Cadastro" / "Este usuario nao tera acesso ao sistema. Deseja recusar o cadastro?"
-- Atualizar o titulo e descricao do `AlertDialog` para cobrir o caso de recusa de pendente (diferente de revogar acesso de usuario ja aprovado)
+```sql
+CREATE POLICY "Admins can delete roles"
+  ON public.user_roles
+  FOR DELETE
+  TO authenticated
+  USING (is_admin(auth.uid()));
+```
 
-### Detalhes do AlertDialog
+### 2. Arquivo: `src/pages/UserManagement.tsx`
 
-Atualizar os textos do dialogo de confirmacao para diferenciar entre:
-- **Aprovar**: "Aprovar Usuario" / "Este usuario podera acessar o sistema..."
-- **Rejeitar pendente**: "Recusar Cadastro" / "Este usuario nao tera acesso ao sistema. Deseja recusar?"
-- **Revogar aprovado**: "Revogar Acesso" / "Este usuario nao podera mais acessar o sistema..."
+Atualizar a funcao `handleReject` para verificar se o usuario e pendente ou aprovado:
 
-Nenhuma alteracao de banco de dados e necessaria. A logica de rejeicao ja existe e funciona corretamente.
+- **Se pendente** (`approved = false`): executar `DELETE` na tabela `user_roles` onde `user_id = userId`
+- **Se aprovado** (`approved = true`): manter o comportamento atual (UPDATE para `approved = false`)
 
+A logica sera:
+
+```
+const targetUser = users.find(u => u.user_id === userId);
+if (targetUser && !targetUser.approved) {
+  // DELETE - remover registro completamente
+} else {
+  // UPDATE - revogar acesso (comportamento atual)
+}
+```
+
+Mensagens de toast atualizadas:
+- Pendente excluido: "Cadastro recusado" / "A solicitacao de cadastro foi removida"
+- Aprovado revogado: "Acesso revogado" / "O usuario nao pode mais acessar o sistema" (mantido)
