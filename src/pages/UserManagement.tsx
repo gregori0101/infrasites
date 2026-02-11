@@ -171,28 +171,46 @@ export default function UserManagement() {
   const handleReject = async (userId: string) => {
     setActionLoading(userId);
     try {
-      const { error } = await supabase
-        .from('user_roles')
-        .update({
-          approved: false,
-          approved_by: null,
-          approved_at: null,
-        })
-        .eq('user_id', userId);
+      const targetUser = users.find(u => u.user_id === userId);
+      
+      if (targetUser && !targetUser.approved) {
+        // Pending user: delete the registration request entirely
+        const { error } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: 'Acesso revogado',
-        description: 'O usuário não pode mais acessar o sistema',
-      });
+        toast({
+          title: 'Cadastro recusado',
+          description: 'A solicitação de cadastro foi removida',
+        });
+      } else {
+        // Approved user: revoke access
+        const { error } = await supabase
+          .from('user_roles')
+          .update({
+            approved: false,
+            approved_by: null,
+            approved_at: null,
+          })
+          .eq('user_id', userId);
+
+        if (error) throw error;
+
+        toast({
+          title: 'Acesso revogado',
+          description: 'O usuário não pode mais acessar o sistema',
+        });
+      }
       
       fetchUsers();
     } catch (err) {
       console.error('Error rejecting user:', err);
       toast({
         title: 'Erro',
-        description: 'Não foi possível revogar o acesso',
+        description: 'Não foi possível completar a ação',
         variant: 'destructive',
       });
     } finally {
