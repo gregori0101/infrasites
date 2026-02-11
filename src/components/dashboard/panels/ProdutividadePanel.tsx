@@ -168,6 +168,33 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
     return result.sort((a, b) => b.total - a.total);
   }, [stats.technicianRanking, stats.vistoriasPorDiaTecnico, todayFormatted, areaAtuacaoFilter]);
 
+  // Filtered daily data based on area filter
+  const filteredVistoriasPorDia = useMemo(() => {
+    if (areaAtuacaoFilter === "all") {
+      return stats.vistoriasPorDia;
+    }
+    // Build a set of technician IDs matching the area filter
+    const matchingTechIds = new Set(
+      stats.technicianRanking
+        .filter(t => t.areaAtuacao === areaAtuacaoFilter)
+        .map(t => t.id)
+    );
+    // Aggregate vistoriasPorDiaTecnico by day, only for matching technicians
+    const dayMap: Record<string, number> = {};
+    for (const entry of stats.vistoriasPorDiaTecnico) {
+      if (matchingTechIds.has(entry.technicianId)) {
+        dayMap[entry.day] = (dayMap[entry.day] || 0) + entry.count;
+      }
+    }
+    return Object.entries(dayMap)
+      .map(([day, count]) => ({ day, count }))
+      .sort((a, b) => {
+        const [dA, mA] = a.day.split('/').map(Number);
+        const [dB, mB] = b.day.split('/').map(Number);
+        return mA !== mB ? mA - mB : dA - dB;
+      });
+  }, [stats.vistoriasPorDia, stats.vistoriasPorDiaTecnico, stats.technicianRanking, areaAtuacaoFilter]);
+
   // Filtered technicians based on search
   const filteredTechnicians = useMemo(() => {
     if (!searchTechnician.trim()) return technicianProductivity;
@@ -397,10 +424,10 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
           </div>
         </CardHeader>
         <CardContent>
-          {stats.vistoriasPorDia.length > 0 ? (
+          {filteredVistoriasPorDia.length > 0 ? (
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats.vistoriasPorDia}>
+                <LineChart data={filteredVistoriasPorDia}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
                     dataKey="day"
@@ -413,9 +440,9 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
                       if (!active || !payload || !payload.length) return null;
                       
                       const currentValue = payload[0].value as number;
-                      const currentIndex = stats.vistoriasPorDia.findIndex(d => d.day === label);
+                      const currentIndex = filteredVistoriasPorDia.findIndex(d => d.day === label);
                       const previousValue = currentIndex > 0 
-                        ? stats.vistoriasPorDia[currentIndex - 1].count 
+                        ? filteredVistoriasPorDia[currentIndex - 1].count 
                         : null;
                       
                       const difference = previousValue !== null ? currentValue - previousValue : null;
