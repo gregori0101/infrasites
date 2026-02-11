@@ -374,7 +374,7 @@ export default function UserManagement() {
                           variant="outline"
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           disabled={actionLoading === u.user_id}
-                        onClick={() => setConfirmDialog({ 
+                          onClick={() => setConfirmDialog({ 
                             open: true, 
                             userId: u.user_id, 
                             action: 'approve',
@@ -385,6 +385,24 @@ export default function UserManagement() {
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <Check className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={actionLoading === u.user_id}
+                          onClick={() => setConfirmDialog({ 
+                            open: true, 
+                            userId: u.user_id, 
+                            action: 'reject',
+                            email: u.email 
+                          })}
+                        >
+                          {actionLoading === u.user_id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <X className="h-4 w-4" />
                           )}
                         </Button>
                       </div>
@@ -547,12 +565,18 @@ export default function UserManagement() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmDialog?.action === 'approve' ? 'Aprovar Usuário' : 'Revogar Acesso'}
+              {confirmDialog?.action === 'approve' 
+                ? 'Aprovar Usuário' 
+                : users.find(u => u.user_id === confirmDialog?.userId)?.approved 
+                  ? 'Revogar Acesso' 
+                  : 'Recusar Cadastro'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDialog?.action === 'approve'
                 ? 'Este usuário poderá acessar o sistema de checklist. Deseja continuar?'
-                : 'Este usuário não poderá mais acessar o sistema. Deseja continuar?'}
+                : users.find(u => u.user_id === confirmDialog?.userId)?.approved
+                  ? 'Este usuário não poderá mais acessar o sistema. Deseja continuar?'
+                  : 'Este usuário não terá acesso ao sistema. Deseja recusar o cadastro?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -567,7 +591,11 @@ export default function UserManagement() {
               }}
               className={confirmDialog?.action === 'reject' ? 'bg-destructive hover:bg-destructive/90' : ''}
             >
-              {confirmDialog?.action === 'approve' ? 'Aprovar' : 'Revogar'}
+              {confirmDialog?.action === 'approve' 
+                ? 'Aprovar' 
+                : users.find(u => u.user_id === confirmDialog?.userId)?.approved 
+                  ? 'Revogar' 
+                  : 'Recusar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
