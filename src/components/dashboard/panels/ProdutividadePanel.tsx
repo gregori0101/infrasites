@@ -109,7 +109,7 @@ interface Props {
 const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#6b7280", "#ef4444"];
 
 export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "all", onAreaAtuacaoChange }: Props) {
-  const [metaDiaria, setMetaDiaria] = useState<number>(10);
+  const metaDiaria = 30;
   const [searchTechnician, setSearchTechnician] = useState("");
   const totalAtribuidas = stats.totalRealizadas + stats.totalPendentes + stats.totalEmAndamento;
 
@@ -375,17 +375,24 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
               Evolução Diária de Vistorias
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Label htmlFor="meta-input" className="text-xs text-muted-foreground whitespace-nowrap">
-                Meta diária:
-              </Label>
-              <Input
-                id="meta-input"
-                type="number"
-                min={0}
-                value={metaDiaria}
-                onChange={(e) => setMetaDiaria(Number(e.target.value) || 0)}
-                className="w-20 h-7 text-sm"
-              />
+              <Badge variant="outline" className="text-xs">
+                Meta: {metaDiaria}/dia
+              </Badge>
+              {onAreaAtuacaoChange && (
+                <Select
+                  value={areaAtuacaoFilter}
+                  onValueChange={(v) => onAreaAtuacaoChange(v as "all" | "PI" | "REDE")}
+                >
+                  <SelectTrigger className="h-7 w-[110px] text-xs">
+                    <SelectValue placeholder="Área" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas Áreas</SelectItem>
+                    <SelectItem value="PI">PI</SelectItem>
+                    <SelectItem value="REDE">REDE</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </CardHeader>
