@@ -45,11 +45,12 @@ import { ClimatizacaoPanel } from "@/components/dashboard/panels/ClimatizacaoPan
 import { FibraOpticaPanel, FibraStats } from "@/components/dashboard/panels/FibraOpticaPanel";
 import { GMGPanel } from "@/components/dashboard/panels/GMGPanel";
 import { ProdutividadePanel, ProdutividadeStats } from "@/components/dashboard/panels/ProdutividadePanel";
+import { GabinetePanel } from "@/components/dashboard/panels/GabinetePanel";
 import { fetchAssignmentStatsForDashboard } from "@/lib/assignmentDatabase";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade" | "gmg";
+type ActivePanel = "overview" | "dgos" | "energia" | "zeladoria" | "bateria" | "climatizacao" | "fibra" | "produtividade" | "gmg" | "gabinete";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -304,6 +305,7 @@ export default function Dashboard() {
   const panelItems = [
     { id: "overview" as const, label: "Visão Geral", icon: Home },
     { id: "produtividade" as const, label: "Produtividade", icon: Users },
+    { id: "gabinete" as const, label: "Gabinetes", icon: Building2 },
     { id: "bateria" as const, label: "Baterias", icon: Battery },
     { id: "climatizacao" as const, label: "Climatização", icon: Thermometer },
     { id: "fibra" as const, label: "Fibra Óptica", icon: Cable },
@@ -681,6 +683,15 @@ export default function Dashboard() {
                     else if (type === "pendentes") openDrillDown("sites", "Sites com Atribuições Pendentes", (s) => s);
                     else if (type === "nao-vistoriados") openDrillDown("sites", "Sites Não Vistoriados", () => []);
                     else if (type === "base") openDrillDown("sites", "Todos os Sites da Base", (s) => s);
+                  }}
+                />
+              )}
+
+              {activePanel === "gabinete" && (
+                <GabinetePanel
+                  gabinetes={gabinetes}
+                  onDrillDown={(type) => {
+                    openDrillDown("gabinetes", "Todos os Gabinetes", (g) => g);
                   }}
                 />
               )}

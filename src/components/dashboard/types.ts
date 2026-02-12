@@ -58,6 +58,9 @@ export interface GabineteInfo {
   siteCode: string;
   uf: string;
   gabinete: number;
+  tipo: string; // e.g., "CONTAINER", "SHARING", "ABRIGO", etc.
+  protecao: string; // e.g., "SIM", "NÃO", etc.
+  ativo: string; // "Ativo" or "Desativado"
   autonomyRisk: "ok" | "medio" | "alto" | "critico";
   obsolescenciaRisk: "ok" | "medio" | "alto" | "sem_banco";
   hasGMG: boolean;

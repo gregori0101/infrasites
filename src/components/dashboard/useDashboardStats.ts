@@ -685,10 +685,17 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
           if (gabHasChumbo) batteryTypes.push("chumbo");
           if (gabHasLitio) batteryTypes.push("litio");
           
+          const gabTipo = (report[`${prefix}_tipo`] as string) || "N/A";
+          const gabProtecao = (report[`${prefix}_protecao`] as string) || "N/A";
+          const gabAtivo = (report[`${prefix}_ativo`] as string) || "Ativo";
+          
           gabineteInfoList.push({
             siteCode: report.site_code,
             uf,
             gabinete: g,
+            tipo: gabTipo,
+            protecao: gabProtecao,
+            ativo: gabAtivo,
             autonomyRisk: gabAutonomyRisk,
             obsolescenciaRisk: gabObsolStatus,
             hasGMG,
