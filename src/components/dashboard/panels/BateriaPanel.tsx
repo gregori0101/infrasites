@@ -265,6 +265,93 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </div>
       </div>
 
+      {/* SEÇÃO: Proteção das Baterias */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1 h-6 bg-primary rounded-full" />
+          <h2 className="font-semibold text-lg">Proteção das Baterias</h2>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-primary/30">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium text-primary">Total de Baterias</p>
+                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.total}</p>
+                  <p className="text-xs text-muted-foreground">cadastradas</p>
+                </div>
+                <div className="p-3 rounded-xl bg-primary/10">
+                  <Battery className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-success/50">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium text-success">Protegidas</p>
+                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.protegidas}</p>
+                  <p className="text-xs text-muted-foreground">colada ou com gradil</p>
+                </div>
+                <div className="p-3 rounded-xl bg-success/10">
+                  <ShieldCheck className="w-5 h-5 text-success" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/50">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium text-destructive">Não Protegidas</p>
+                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.naoProtegidas}</p>
+                  <p className="text-xs text-muted-foreground">sem colagem nem gradil</p>
+                </div>
+                <div className="p-3 rounded-xl bg-destructive/10">
+                  <ShieldX className="w-5 h-5 text-destructive" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-muted">
+            <CardContent className="p-4">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" /> Coladas:</span>
+                  <span className="font-bold">{protecaoStats.coladas}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1"><Shield className="w-3 h-3" /> Com Gradil:</span>
+                  <span className="font-bold">{protecaoStats.comGradil}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t">
+                  <span className="text-muted-foreground">% Protegidas:</span>
+                  <span className="font-bold text-success">
+                    {protecaoStats.total > 0 ? Math.round((protecaoStats.protegidas / protecaoStats.total) * 100) : 0}%
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="bg-muted/30 border-dashed">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                Uma bateria é considerada <strong className="text-foreground">protegida</strong> se estiver <strong className="text-foreground">colada</strong> ou possuir <strong className="text-foreground">gradil</strong> de proteção. Baterias com gradil também são consideradas protegidas independentemente do status de colagem.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* SEÇÃO 3: Regras de Troca de Bateria */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
@@ -411,93 +498,6 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </div>
         </CardContent>
       </Card>
-
-      {/* SEÇÃO: Proteção das Baterias */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="font-semibold text-lg">Proteção das Baterias</h2>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-primary/30">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <p className="text-sm font-medium text-primary">Total de Baterias</p>
-                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.total}</p>
-                  <p className="text-xs text-muted-foreground">cadastradas</p>
-                </div>
-                <div className="p-3 rounded-xl bg-primary/10">
-                  <Battery className="w-5 h-5 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-success/50">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <p className="text-sm font-medium text-success">Protegidas</p>
-                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.protegidas}</p>
-                  <p className="text-xs text-muted-foreground">colada ou com gradil</p>
-                </div>
-                <div className="p-3 rounded-xl bg-success/10">
-                  <ShieldCheck className="w-5 h-5 text-success" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-destructive/50">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <p className="text-sm font-medium text-destructive">Não Protegidas</p>
-                  <p className="text-3xl font-bold tracking-tight">{protecaoStats.naoProtegidas}</p>
-                  <p className="text-xs text-muted-foreground">sem colagem nem gradil</p>
-                </div>
-                <div className="p-3 rounded-xl bg-destructive/10">
-                  <ShieldX className="w-5 h-5 text-destructive" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-muted">
-            <CardContent className="p-4">
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" /> Coladas:</span>
-                  <span className="font-bold">{protecaoStats.coladas}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1"><Shield className="w-3 h-3" /> Com Gradil:</span>
-                  <span className="font-bold">{protecaoStats.comGradil}</span>
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t">
-                  <span className="text-muted-foreground">% Protegidas:</span>
-                  <span className="font-bold text-success">
-                    {protecaoStats.total > 0 ? Math.round((protecaoStats.protegidas / protecaoStats.total) * 100) : 0}%
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="bg-muted/30 border-dashed">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                Uma bateria é considerada <strong className="text-foreground">protegida</strong> se estiver <strong className="text-foreground">colada</strong> ou possuir <strong className="text-foreground">gradil</strong> de proteção. Baterias com gradil também são consideradas protegidas independentemente do status de colagem.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* SEÇÃO 5: Risco de Autonomia - UNIFICADO */}
       <div className="space-y-4">
