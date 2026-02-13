@@ -453,18 +453,29 @@ export function DrillDownModal({
 
           {type === "gabinetes" && !showingSites && paginatedGabinetes && (
             <ScrollArea className="h-[calc(85vh-320px)] w-full">
-              <div className="min-w-[800px]">
+              <div className="min-w-[1600px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[120px]">Site</TableHead>
                       <TableHead className="min-w-[60px]">UF</TableHead>
                       <TableHead className="min-w-[80px]">Gabinete</TableHead>
+                      <TableHead className="min-w-[100px]">Tipo</TableHead>
+                      <TableHead className="min-w-[80px]">Proteção</TableHead>
+                      <TableHead className="min-w-[80px]">Status</TableHead>
+                      <TableHead className="min-w-[120px]">Tec. Acesso</TableHead>
+                      <TableHead className="min-w-[120px]">Tec. Transporte</TableHead>
+                      <TableHead className="min-w-[120px]">FCC</TableHead>
+                      <TableHead className="min-w-[80px]">URs</TableHead>
+                      <TableHead className="min-w-[120px]">Climatização</TableHead>
+                      <TableHead className="min-w-[80px]">PLC</TableHead>
+                      <TableHead className="min-w-[80px]">Alarme</TableHead>
+                      <TableHead className="min-w-[80px]">Bancos Interl.</TableHead>
                       <TableHead className="min-w-[100px]">Autonomia</TableHead>
                       <TableHead className="min-w-[80px]">Horas</TableHead>
                       <TableHead className="min-w-[120px]">Obsolescência</TableHead>
                       <TableHead className="min-w-[80px]">GMG</TableHead>
-                      <TableHead className="min-w-[100px]">Baterias</TableHead>
+                      <TableHead className="min-w-[80px]">Baterias</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -473,6 +484,40 @@ export function DrillDownModal({
                         <TableCell className="font-medium">{g.siteCode}</TableCell>
                         <TableCell>{g.uf}</TableCell>
                         <TableCell>G{g.gabinete}</TableCell>
+                        <TableCell>{g.tipo || "N/A"}</TableCell>
+                        <TableCell>
+                          {g.protecao?.toUpperCase() === "SIM" ? (
+                            <Badge className="bg-success text-success-foreground">Sim</Badge>
+                          ) : g.protecao?.toUpperCase() === "NÃO" || g.protecao?.toUpperCase() === "NAO" ? (
+                            <Badge className="bg-destructive text-destructive-foreground">Não</Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">{g.protecao || "N/I"}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {g.ativo === "Desativado" ? (
+                            <Badge variant="outline" className="text-muted-foreground">Desativado</Badge>
+                          ) : (
+                            <Badge className="bg-success text-success-foreground">Ativo</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs">{g.tecnologiasAcesso || "—"}</TableCell>
+                        <TableCell className="text-xs">{g.tecnologiasTransporte || "—"}</TableCell>
+                        <TableCell className="text-xs">
+                          {g.fccFabricante ? `${g.fccFabricante}${g.fccTensao ? ` / ${g.fccTensao}` : ""}` : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {g.fccQtdUrInstaladas || g.fccQtdUr
+                            ? `${g.fccQtdUrInstaladas || "?"}/${g.fccQtdUr || "?"}`
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {g.climatizacaoTipo || "—"}
+                          {g.ventiladoresStatus ? ` (${g.ventiladoresStatus})` : ""}
+                        </TableCell>
+                        <TableCell className="text-xs">{g.plcStatus || "—"}</TableCell>
+                        <TableCell className="text-xs">{g.alarmeStatus || "—"}</TableCell>
+                        <TableCell className="text-xs">{g.bancosInterligados || "—"}</TableCell>
                         <TableCell>
                           {g.autonomyRisk === "ok" && <Badge className="bg-success text-success-foreground">OK</Badge>}
                           {g.autonomyRisk === "medio" && <Badge className="bg-warning text-warning-foreground">Médio</Badge>}

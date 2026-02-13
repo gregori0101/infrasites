@@ -702,6 +702,20 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             autonomyHours: gabAutonomyHours,
             totalBatteries: gabBatteries.length,
             batteryTypes,
+            tecnologiasAcesso: (report[`${prefix}_tecnologias_acesso` as keyof typeof report] as string) || "",
+            tecnologiasTransporte: (report[`${prefix}_tecnologias_transporte` as keyof typeof report] as string) || "",
+            fccFabricante: (report[`${prefix}_fcc_fabricante` as keyof typeof report] as string) || "",
+            fccTensao: (report[`${prefix}_fcc_tensao` as keyof typeof report] as string) || "",
+            fccGerenciado: (report[`${prefix}_fcc_gerenciado` as keyof typeof report] as string) || "",
+            fccGerenciavel: (report[`${prefix}_fcc_gerenciavel` as keyof typeof report] as string) || "",
+            fccConsumo: (report[`${prefix}_fcc_consumo` as keyof typeof report] as string) || "",
+            fccQtdUr: (report[`${prefix}_fcc_qtd_ur` as keyof typeof report] as string) || "",
+            fccQtdUrInstaladas: (report[`${prefix}_fcc_qtd_ur_instaladas` as keyof typeof report] as string) || "",
+            climatizacaoTipo: (report[`${prefix}_climatizacao_tipo` as keyof typeof report] as string) || "",
+            ventiladoresStatus: (report[`${prefix}_ventiladores_status` as keyof typeof report] as string) || "",
+            plcStatus: (report[`${prefix}_plc_status` as keyof typeof report] as string) || "",
+            alarmeStatus: (report[`${prefix}_alarme_status` as keyof typeof report] as string) || "",
+            bancosInterligados: (report[`${prefix}_bancos_interligados` as keyof typeof report] as string) || "",
           });
         }
         

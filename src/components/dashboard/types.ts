@@ -67,6 +67,20 @@ export interface GabineteInfo {
   autonomyHours: number;
   totalBatteries: number;
   batteryTypes: string[]; // e.g., ["chumbo", "litio"]
+  tecnologiasAcesso: string;
+  tecnologiasTransporte: string;
+  fccFabricante: string;
+  fccTensao: string;
+  fccGerenciado: string;
+  fccGerenciavel: string;
+  fccConsumo: string;
+  fccQtdUr: string;
+  fccQtdUrInstaladas: string;
+  climatizacaoTipo: string;
+  ventiladoresStatus: string;
+  plcStatus: string;
+  alarmeStatus: string;
+  bancosInterligados: string;
 }
 
 export interface SiteInfo {
