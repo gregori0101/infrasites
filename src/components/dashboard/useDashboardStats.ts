@@ -716,6 +716,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
             plcStatus: (report[`${prefix}_plc_status` as keyof typeof report] as string) || "",
             alarmeStatus: (report[`${prefix}_alarme_status` as keyof typeof report] as string) || "",
             bancosInterligados: (report[`${prefix}_bancos_interligados` as keyof typeof report] as string) || "",
+            reportId: report.id || "",
           });
         }
         
