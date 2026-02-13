@@ -691,7 +691,24 @@ export default function Dashboard() {
                 <GabinetePanel
                   gabinetes={gabinetes}
                   onDrillDown={(type) => {
-                    openDrillDown("gabinetes", "Todos os Gabinetes", (g) => g);
+                    if (type === "protecao-total") openDrillDown("gabinetes", "Todos os Gabinetes", (g) => g);
+                    else if (type === "protecao-sim") openDrillDown("gabinetes", "Gabinetes Protegidos", (g) => g.filter((gab: any) => {
+                      const p = gab.protecao?.toUpperCase();
+                      return p === "SIM";
+                    }));
+                    else if (type === "protecao-nao") openDrillDown("gabinetes", "Gabinetes Não Protegidos", (g) => g.filter((gab: any) => {
+                      const p = gab.protecao?.toUpperCase();
+                      return p === "NÃO" || p === "NAO" || p === "NO";
+                    }));
+                    else if (type === "protecao-ni") openDrillDown("gabinetes", "Gabinetes - Proteção Não Informada", (g) => g.filter((gab: any) => {
+                      const p = gab.protecao?.toUpperCase();
+                      return p !== "SIM" && p !== "NÃO" && p !== "NAO" && p !== "NO";
+                    }));
+                    else if (type.startsWith("tipo-")) {
+                      const tipoName = type.replace("tipo-", "");
+                      openDrillDown("gabinetes", `Gabinetes - ${tipoName}`, (g) => g.filter((gab: any) => (gab.tipo || "N/A") === tipoName));
+                    }
+                    else openDrillDown("gabinetes", "Todos os Gabinetes", (g) => g);
                   }}
                 />
               )}
