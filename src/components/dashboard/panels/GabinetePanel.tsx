@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Building2, Shield, ShieldCheck, ShieldX, Info, ToggleLeft, ToggleRight } from "lucide-react";
+import { Building2, Shield, ShieldCheck, ShieldX, Info, ToggleLeft, ToggleRight, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GabineteInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -61,7 +61,7 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30">
+      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 cursor-pointer hover:shadow-lg active:scale-[0.99] transition-all" onClick={() => onDrillDown("protecao-total")}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
@@ -73,6 +73,9 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
                 <p className="text-5xl font-bold text-primary">{stats.total}</p>
                 <span className="text-muted-foreground">unidades</span>
               </div>
+              <p className="text-xs text-primary flex items-center gap-1">
+                Ver detalhes <ChevronRight className="w-3 h-3" />
+              </p>
             </div>
             <div className="text-right text-sm text-muted-foreground space-y-1">
               <div className="flex items-center justify-end gap-2">
@@ -133,6 +136,7 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
               <Card
                 key={name}
                 className={cn("hover:shadow-md transition-all cursor-pointer hover:border-primary/50 active:scale-[0.98] border", colorClass.split(' ').pop())}
+                onClick={() => onDrillDown(`tipo-${name}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -142,6 +146,9 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
                   <p className="text-2xl font-bold">{count}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {stats.total > 0 ? `${Math.round((count / stats.total) * 100)}%` : '0%'}
+                  </p>
+                  <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                    Ver detalhes <ChevronRight className="w-3 h-3" />
                   </p>
                 </CardContent>
               </Card>
@@ -167,13 +174,16 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-primary/30">
+          <Card className="border-primary/30 cursor-pointer hover:border-primary/50 hover:shadow-lg active:scale-[0.98] transition-all" onClick={() => onDrillDown("protecao-total")}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
                   <p className="text-sm font-medium text-primary">Total</p>
                   <p className="text-3xl font-bold tracking-tight">{stats.total}</p>
                   <p className="text-xs text-muted-foreground">gabinetes</p>
+                  <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                    Ver detalhes <ChevronRight className="w-3 h-3" />
+                  </p>
                 </div>
                 <div className="p-3 rounded-xl bg-primary/10">
                   <Shield className="w-5 h-5 text-primary" />
@@ -182,13 +192,16 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="border-success/50">
+          <Card className="border-success/50 cursor-pointer hover:border-success hover:shadow-lg active:scale-[0.98] transition-all" onClick={() => onDrillDown("protecao-sim")}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
                   <p className="text-sm font-medium text-success">Protegidos</p>
                   <p className="text-3xl font-bold tracking-tight">{stats.protegidos}</p>
                   <p className="text-xs text-muted-foreground">com proteção</p>
+                  <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                    Ver detalhes <ChevronRight className="w-3 h-3" />
+                  </p>
                 </div>
                 <div className="p-3 rounded-xl bg-success/10">
                   <ShieldCheck className="w-5 h-5 text-success" />
@@ -197,13 +210,16 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="border-destructive/50">
+          <Card className="border-destructive/50 cursor-pointer hover:border-destructive hover:shadow-lg active:scale-[0.98] transition-all" onClick={() => onDrillDown("protecao-nao")}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
                   <p className="text-sm font-medium text-destructive">Não Protegidos</p>
                   <p className="text-3xl font-bold tracking-tight">{stats.naoProtegidos}</p>
                   <p className="text-xs text-muted-foreground">sem proteção</p>
+                  <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                    Ver detalhes <ChevronRight className="w-3 h-3" />
+                  </p>
                 </div>
                 <div className="p-3 rounded-xl bg-destructive/10">
                   <ShieldX className="w-5 h-5 text-destructive" />
@@ -212,7 +228,7 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="border-muted">
+          <Card className="border-muted cursor-pointer hover:border-muted-foreground/30 hover:shadow-lg active:scale-[0.98] transition-all" onClick={() => onDrillDown("protecao-ni")}>
             <CardContent className="p-4">
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
@@ -225,6 +241,9 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
                     {stats.total > 0 ? Math.round((stats.protegidos / stats.total) * 100) : 0}%
                   </span>
                 </div>
+                <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                  Ver detalhes <ChevronRight className="w-3 h-3" />
+                </p>
               </div>
             </CardContent>
           </Card>
