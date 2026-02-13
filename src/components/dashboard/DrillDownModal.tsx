@@ -29,6 +29,7 @@ import {
   downloadDrillDownExcel,
 } from "@/lib/generateDrillDownExcel";
 import { BatteryDetailModal } from "./BatteryDetailModal";
+import { SiteDetailModal } from "./SiteDetailModal";
 
 interface Props {
   open: boolean;
@@ -67,6 +68,7 @@ export function DrillDownModal({
   const [page, setPage] = useState(0);
   const [selectedBattery, setSelectedBattery] = useState<BatteryInfo | null>(null);
   const [batteryDetailOpen, setBatteryDetailOpen] = useState(false);
+  const [siteDetailReportId, setSiteDetailReportId] = useState<string | null>(null);
 
   // Check if this is an autonomy/obsolescence drill-down (which supports dual views)
   const isDualViewEnabled = allowSiteView && type === "gabinetes" && sites && sites.length > 0;
@@ -480,7 +482,11 @@ export function DrillDownModal({
                   </TableHeader>
                   <TableBody>
                     {paginatedGabinetes.map((g, idx) => (
-                      <TableRow key={`${g.siteCode}-${g.gabinete}-${idx}`}>
+                      <TableRow 
+                        key={`${g.siteCode}-${g.gabinete}-${idx}`}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => g.reportId && setSiteDetailReportId(g.reportId)}
+                      >
                         <TableCell className="font-medium">{g.siteCode}</TableCell>
                         <TableCell>{g.uf}</TableCell>
                         <TableCell>G{g.gabinete}</TableCell>
@@ -595,6 +601,12 @@ export function DrillDownModal({
           setSelectedBattery(null);
         }}
         battery={selectedBattery}
+      />
+
+      <SiteDetailModal
+        open={!!siteDetailReportId}
+        onClose={() => setSiteDetailReportId(null)}
+        reportId={siteDetailReportId}
       />
     </Dialog>
   );

@@ -81,6 +81,7 @@ export interface GabineteInfo {
   plcStatus: string;
   alarmeStatus: string;
   bancosInterligados: string;
+  reportId: string;
 }
 
 export interface SiteInfo {
