@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug } from "lucide-react";
+import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug, FileEdit, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,9 @@ import { reportToChecklist } from "@/lib/reportToChecklist";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useChecklist } from "@/contexts/ChecklistContext";
+import { useNavigate } from "react-router-dom";
 
 // Helper to parse JSON photo arrays stored in database
 function parsePhotoJson(value: string | null | undefined): string[] {
@@ -186,6 +189,9 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   const [report, setReport] = useState<ReportRow | null>(null);
   const [activeTab, setActiveTab] = useState("geral");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { isAdmin, isGestor, user } = useAuth();
+  const { loadReportForEditing } = useChecklist();
+  const navigate = useNavigate();
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -196,6 +202,24 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     setLightboxImages(images);
     setLightboxIndex(index);
     setLightboxOpen(true);
+  };
+
+  const canEditReport = isAdmin || isGestor || (user && report?.user_id === user.id);
+
+  const handleEditReport = async () => {
+    if (!report?.id) return;
+    try {
+      const fullReport = await fetchFullReportById(report.id);
+      if (!fullReport) { toast.error('Relatório não encontrado'); return; }
+      const checklistData = reportToChecklist(fullReport);
+      loadReportForEditing(checklistData, report.id);
+      onClose();
+      navigate('/');
+      toast.success('Relatório carregado para edição');
+    } catch (err) {
+      console.error('Error loading report for editing:', err);
+      toast.error('Erro ao carregar relatório');
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -262,9 +286,34 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.energia_foto_transformador) {
     allPhotos.push({ url: report.energia_foto_transformador, label: "Transformador", category: "Energia" });
   }
+  if (report?.energia_foto_relogio) {
+    allPhotos.push({ url: report.energia_foto_relogio, label: "Medidor", category: "Energia" });
+  }
+  if (report?.energia_foto_placa) {
+    allPhotos.push({ url: report.energia_foto_placa, label: "Placa", category: "Energia" });
+  }
+  if (report?.energia_foto_cabos) {
+    allPhotos.push({ url: report.energia_foto_cabos, label: "Cabos", category: "Energia" });
+  }
   // GMG photo
   if (report?.gmg_foto_painel) {
     allPhotos.push({ url: report.gmg_foto_painel, label: "Painel do GMG", category: "GMG" });
+  }
+  if (report?.gmg_foto_alarme) {
+    allPhotos.push({ url: report.gmg_foto_alarme, label: "Alarme GMG", category: "GMG" });
+  }
+  // Torre photos
+  if (report?.torre_foto_fibras_protegidas) {
+    allPhotos.push({ url: report.torre_foto_fibras_protegidas, label: "Fibras Protegidas", category: "Torre" });
+  }
+  if (report?.torre_foto_aterramento) {
+    allPhotos.push({ url: report.torre_foto_aterramento, label: "Aterramento", category: "Torre" });
+  }
+  if (report?.torre_foto_zeladoria) {
+    allPhotos.push({ url: report.torre_foto_zeladoria, label: "Zeladoria", category: "Torre" });
+  }
+  if (report?.torre_foto_ninhos) {
+    allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
   }
   // Gabinete photos
   for (let g = 1; g <= 7; g++) {
@@ -406,11 +455,21 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       Alertas Críticos
                     </Badge>
                   )}
-                  {!hasCriticalIssues && (
+                   {!hasCriticalIssues && (
                     <Badge className="bg-green-500/90 text-white gap-1">
                       <CheckCircle className="w-3 h-3" />
                       Site OK
                     </Badge>
+                  )}
+                  {canEditReport && (
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={handleEditReport}
+                    >
+                      <FileEdit className="w-4 h-4 mr-1" />
+                      Editar
+                    </Button>
                   )}
                   <Button 
                     variant="secondary" 
@@ -551,9 +610,28 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       <InfoRow label="Técnico" value={report.technician_name} icon={User} />
                       <InfoRow label="Data" value={`${report.created_date} ${report.created_time}`} icon={Calendar} />
                       <InfoRow label="Gabinetes" value={totalCabinets.toString()} icon={Building2} />
+                      <InfoRow label="Operadora" value={report.operadora || 'VIVO'} />
                       <InfoRow label="Observações" value={report.observacoes} />
                     </CardContent>
                   </Card>
+
+                  {/* Geolocalização */}
+                  {(report.geo_latitude || report.geo_endereco) && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          Geolocalização
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                        <InfoRow label="Latitude" value={report.geo_latitude?.toString()} />
+                        <InfoRow label="Longitude" value={report.geo_longitude?.toString()} />
+                        <InfoRow label="Endereço" value={report.geo_endereco} />
+                        <InfoRow label="Capturado em" value={report.geo_capturado_em ? new Date(report.geo_capturado_em).toLocaleString('pt-BR') : null} />
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {report.panoramic_photo_url && (
                     <Card>
@@ -633,6 +711,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
                             <InfoRow label="Tipo" value={report[`${prefix}_tipo`]} />
                             <InfoRow label="Proteção" value={report[`${prefix}_protecao`]} />
+                            <InfoRow label="Ativo" value={report[`${prefix}_ativo`] || 'SIM'} />
                             <InfoRow label="Tecnologias Acesso" value={report[`${prefix}_tecnologias_acesso`]} icon={Radio} />
                             <InfoRow label="Tecnologias Transporte" value={report[`${prefix}_tecnologias_transporte`]} />
                           </div>
@@ -655,7 +734,8 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                             <InfoRow label="Gerenciada" value={report[`${prefix}_fcc_gerenciado`]} />
                             <InfoRow label="Gerenciável" value={report[`${prefix}_fcc_gerenciavel`]} />
                             <InfoRow label="Consumo DC" value={report[`${prefix}_fcc_consumo`]} />
-                            <InfoRow label="Qtd UR" value={report[`${prefix}_fcc_qtd_ur`]} />
+                            <InfoRow label="Qtd UR Suportadas" value={report[`${prefix}_fcc_qtd_ur`]} />
+                            <InfoRow label="URs Instaladas" value={report[`${prefix}_fcc_qtd_ur_instaladas`]} />
                           </div>
                           <PhotoGrid photos={fccFotos} />
                         </CardContent>
@@ -692,6 +772,8 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                                     <p>Fabricante: {fabricante || "N/A"}</p>
                                     <p>Capacidade: {capacidade ? `${capacidade}Ah` : "N/A"}</p>
                                     <p>Fabricação: {dataFab || "N/A"}</p>
+                                    <p>Colada: {report[`${prefix}_bat${b}_colada`] || "N/A"}</p>
+                                    <p>Com Gradil: {report[`${prefix}_bat${b}_com_gradil`] || "N/A"}</p>
                                   </div>
                                 </div>
                               );
@@ -766,18 +848,35 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                        <InfoRow label="Tipo" value={report.energia_tipo} />
-                        <InfoRow label="Fabricante" value={report.energia_fabricante} />
-                        <InfoRow label="Potência (kVA)" value={report.energia_potencia} />
-                        <InfoRow label="Tensão" value={report.energia_tensao} />
-                        <InfoRow label="Tipo Disjuntor" value={report.energia_tipo_disjuntor} />
-                        <InfoRow label="Corrente Disjuntor" value={report.energia_corrente_disjuntor} />
+                        <InfoRow label="Tipo Quadro" value={report.energia_tipo_quadro} />
+                        <InfoRow label="Fabricante" value={report.energia_fabricante_outra || report.energia_fabricante} />
+                        <InfoRow label="Potência (kVA)" value={report.energia_potencia_kva?.toString()} />
+                        <InfoRow label="Tensão Entrada" value={report.energia_tensao_entrada} />
+                        <InfoRow label="Disjuntor Entrada (A)" value={report.energia_disjuntor_entrada?.toString()} />
+                        <InfoRow label="Disjuntor QDCA (A)" value={report.energia_disjuntor_qdca?.toString()} />
+                        <InfoRow label="Unidade Consumidora" value={report.energia_unidade_consumidora} />
+                        <InfoRow label="Potência Transformador" value={report.energia_potencia_transformador} />
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Transformador:</span>
+                          <StatusBadge status={report.energia_transformador_ok} />
+                        </div>
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Protegido Gradil:</span>
+                          <StatusBadge status={report.energia_protegido_gradil} />
+                        </div>
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Protegido Cadeado:</span>
+                          <StatusBadge status={report.energia_protegido_cadeado} />
+                        </div>
                       </div>
                       
                       {/* Energy Photos */}
                       <PhotoGrid photos={[
                         { url: report.energia_foto_quadro_geral, label: "Quadro Geral" },
                         { url: report.energia_foto_transformador, label: "Transformador" },
+                        { url: report.energia_foto_relogio, label: "Medidor (Relógio)" },
+                        { url: report.energia_foto_placa, label: "Placa" },
+                        { url: report.energia_foto_cabos, label: "Cabos" },
                       ]} />
                     </CardContent>
                   </Card>
@@ -908,22 +1007,31 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
                         <div className="flex items-center gap-2 py-1">
                           <span className="text-sm text-muted-foreground">Possui GMG:</span>
                           <StatusBadge status={report.gmg_existe} />
                         </div>
                         <InfoRow label="Fabricante" value={report.gmg_fabricante} />
                         <InfoRow label="Potência" value={report.gmg_potencia} />
-                        <InfoRow label="Combustível" value={report.gmg_combustivel} />
+                        <InfoRow label="Combustível (%)" value={report.gmg_combustivel} />
+                        <InfoRow label="Capacidade Tanque (L)" value={report.gmg_autonomia?.toString()} />
                         <InfoRow label="Último Teste" value={report.gmg_ultimo_teste} />
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Status:</span>
+                          <StatusBadge status={report.gmg_status} />
+                        </div>
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Alarme Ativo:</span>
+                          <StatusBadge status={report.gmg_alarme_ativo} />
+                        </div>
                       </div>
                       
-                      {/* Foto do Painel do GMG */}
-                      {report.gmg_existe === "SIM" && report.gmg_foto_painel && (
-                        <div className="mt-4">
-                          <PhotoViewer url={report.gmg_foto_painel} label="Painel do GMG" />
-                        </div>
+                      {report.gmg_existe === "SIM" && (
+                        <PhotoGrid photos={[
+                          { url: report.gmg_foto_painel, label: "Painel do GMG" },
+                          { url: report.gmg_foto_alarme, label: "Foto do Alarme" },
+                        ]} />
                       )}
                     </CardContent>
                   </Card>
@@ -936,14 +1044,24 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
                         <div className="flex items-center gap-2 py-1">
                           <span className="text-sm text-muted-foreground">Fibra Protegida:</span>
                           <StatusBadge status={report.torre_protecao_fibra} />
                         </div>
                         <InfoRow label="Aterramento" value={report.torre_aterramento} />
                         <InfoRow label="Zeladoria" value={report.torre_housekeeping} />
+                        <div className="flex items-center gap-2 py-1">
+                          <span className="text-sm text-muted-foreground">Ninhos:</span>
+                          <StatusBadge status={report.torre_ninhos} />
+                        </div>
                       </div>
+                      <PhotoGrid photos={[
+                        { url: report.torre_foto_fibras_protegidas, label: "Fibras Protegidas" },
+                        { url: report.torre_foto_aterramento, label: "Aterramento" },
+                        { url: report.torre_foto_zeladoria, label: "Zeladoria" },
+                        { url: report.torre_foto_ninhos, label: "Ninhos" },
+                      ]} />
                     </CardContent>
                   </Card>
                 </TabsContent>
