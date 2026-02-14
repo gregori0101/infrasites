@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Download, Search, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Download, Search, ChevronLeft, ChevronRight, Pencil, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,11 @@ import { SiteDetailModal } from "./SiteDetailModal";
 import { SiteEditDialog } from "@/components/sites/SiteEditDialog";
 import { fetchSiteByCode, Site } from "@/lib/siteDatabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { useChecklist } from "@/contexts/ChecklistContext";
+import { useNavigate } from "react-router-dom";
+import { fetchFullReportById } from "@/lib/reportDatabase";
+import { reportToChecklist } from "@/lib/reportToChecklist";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -75,6 +80,8 @@ export function DrillDownModal({
   const [editSite, setEditSite] = useState<Site | null>(null);
   const [editSiteOpen, setEditSiteOpen] = useState(false);
   const { isAdmin, isGestor } = useAuth();
+  const { loadReportForEditing } = useChecklist();
+  const navigate = useNavigate();
   const canEdit = isAdmin || isGestor;
 
   const handleEditSite = async (siteCode: string, e: React.MouseEvent) => {
@@ -87,6 +94,22 @@ export function DrillDownModal({
       }
     } catch (err) {
       console.error("Error fetching site for edit:", err);
+    }
+  };
+
+  const handleEditReport = async (reportId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const fullReport = await fetchFullReportById(reportId);
+      if (!fullReport) { toast.error('Relatório não encontrado'); return; }
+      const checklistData = reportToChecklist(fullReport);
+      loadReportForEditing(checklistData, reportId);
+      onClose();
+      navigate('/');
+      toast.success('Relatório carregado para edição');
+    } catch (err) {
+      console.error('Error loading report for editing:', err);
+      toast.error('Erro ao carregar relatório');
     }
   };
 
@@ -514,7 +537,7 @@ export function DrillDownModal({
                       <TableHead className="min-w-[120px]">Obsolescência</TableHead>
                       <TableHead className="min-w-[80px]">GMG</TableHead>
                       <TableHead className="min-w-[80px]">Baterias</TableHead>
-                      {canEdit && <TableHead className="min-w-[60px]">Editar</TableHead>}
+                      {canEdit && <TableHead className="min-w-[100px]">Ações</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -584,15 +607,28 @@ export function DrillDownModal({
                         <TableCell>{g.totalBatteries}</TableCell>
                         {canEdit && (
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={(e) => handleEditSite(g.siteCode, e)}
-                              title="Editar site"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={(e) => handleEditSite(g.siteCode, e)}
+                                title="Editar cadastro do site"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              {g.reportId && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={(e) => handleEditReport(g.reportId!, e)}
+                                  title="Editar relatório da vistoria"
+                                >
+                                  <FileEdit className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         )}
                       </TableRow>
