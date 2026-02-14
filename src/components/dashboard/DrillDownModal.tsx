@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Download, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Search, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,9 @@ import {
 } from "@/lib/generateDrillDownExcel";
 import { BatteryDetailModal } from "./BatteryDetailModal";
 import { SiteDetailModal } from "./SiteDetailModal";
+import { SiteEditDialog } from "@/components/sites/SiteEditDialog";
+import { fetchSiteByCode, Site } from "@/lib/siteDatabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   open: boolean;
@@ -69,6 +72,23 @@ export function DrillDownModal({
   const [selectedBattery, setSelectedBattery] = useState<BatteryInfo | null>(null);
   const [batteryDetailOpen, setBatteryDetailOpen] = useState(false);
   const [siteDetailReportId, setSiteDetailReportId] = useState<string | null>(null);
+  const [editSite, setEditSite] = useState<Site | null>(null);
+  const [editSiteOpen, setEditSiteOpen] = useState(false);
+  const { isAdmin, isGestor } = useAuth();
+  const canEdit = isAdmin || isGestor;
+
+  const handleEditSite = async (siteCode: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const site = await fetchSiteByCode(siteCode);
+      if (site) {
+        setEditSite(site);
+        setEditSiteOpen(true);
+      }
+    } catch (err) {
+      console.error("Error fetching site for edit:", err);
+    }
+  };
 
   // Check if this is an autonomy/obsolescence drill-down (which supports dual views)
   const isDualViewEnabled = allowSiteView && type === "gabinetes" && sites && sites.length > 0;
@@ -278,6 +298,7 @@ export function DrillDownModal({
                       <TableHead className="min-w-[80px]">Gabinetes</TableHead>
                       {autonomyFilter && <TableHead className="min-w-[100px]">Autonomia</TableHead>}
                       {obsolescenciaFilter && <TableHead className="min-w-[120px]">Obsolescência</TableHead>}
+                      {canEdit && <TableHead className="min-w-[60px]">Editar</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -294,6 +315,13 @@ export function DrillDownModal({
                         <TableCell>{s.totalCabinets}</TableCell>
                         {autonomyFilter && <TableCell>{getAutonomyRiskBadge(s.autonomyRisk)}</TableCell>}
                         {obsolescenciaFilter && <TableCell>{getObsolescenciaRiskBadge(s.obsolescenciaRisk)}</TableCell>}
+                        {canEdit && (
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => handleEditSite(s.siteCode, e)} title="Editar site">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -317,6 +345,7 @@ export function DrillDownModal({
                       <TableHead className="min-w-[100px]">Data</TableHead>
                       <TableHead className="min-w-[100px]">Gabinetes</TableHead>
                       <TableHead className="min-w-[120px]">Status</TableHead>
+                      {canEdit && <TableHead className="min-w-[60px]">Editar</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -340,6 +369,13 @@ export function DrillDownModal({
                             <Badge className="bg-success text-success-foreground">OK</Badge>
                           )}
                         </TableCell>
+                        {canEdit && (
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => handleEditSite(s.siteCode, e)} title="Editar site">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -478,6 +514,7 @@ export function DrillDownModal({
                       <TableHead className="min-w-[120px]">Obsolescência</TableHead>
                       <TableHead className="min-w-[80px]">GMG</TableHead>
                       <TableHead className="min-w-[80px]">Baterias</TableHead>
+                      {canEdit && <TableHead className="min-w-[60px]">Editar</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -545,6 +582,19 @@ export function DrillDownModal({
                           )}
                         </TableCell>
                         <TableCell>{g.totalBatteries}</TableCell>
+                        {canEdit && (
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={(e) => handleEditSite(g.siteCode, e)}
+                              title="Editar site"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -607,6 +657,15 @@ export function DrillDownModal({
         open={!!siteDetailReportId}
         onClose={() => setSiteDetailReportId(null)}
         reportId={siteDetailReportId}
+      />
+
+      <SiteEditDialog
+        site={editSite}
+        open={editSiteOpen}
+        onOpenChange={setEditSiteOpen}
+        onSuccess={() => {
+          setEditSite(null);
+        }}
       />
     </Dialog>
   );
