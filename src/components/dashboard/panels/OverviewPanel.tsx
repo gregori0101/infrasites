@@ -69,7 +69,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
         <StatCard
           title="Baterias"
           value={overview.totalBatteries}
-          subtitle={`${overview.batteriesCritical} críticas`}
+          subtitle={`${overview.batteriesOk} OK`}
           icon={Battery}
           iconBg={overview.batteriesCritical > 0 ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}
           onClick={() => onDrillDown("batteries")}
@@ -77,7 +77,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
         <StatCard
           title="Ar Condicionado"
           value={overview.totalACs}
-          subtitle={`${overview.acsNok} com defeito`}
+          subtitle={`${overview.acsOk} OK`}
           icon={Thermometer}
           iconBg={overview.acsNok > 0 ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}
           onClick={() => onDrillDown("acs")}
