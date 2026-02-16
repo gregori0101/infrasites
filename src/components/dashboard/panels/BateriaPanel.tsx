@@ -754,6 +754,64 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               </CardContent>
             </Card>
           </div>
+
+          {/* Pie Chart OK vs NOK - Obsolescência */}
+          {(() => {
+            const totalObsolescencia = obsolescencia.ok + obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
+            const nokObsolescencia = obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
+            return (
+              <Card className="mt-4">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Obsolescência: OK vs NOK</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center gap-8">
+                    <div className="w-48 h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: "OK", value: obsolescencia.ok, color: "hsl(var(--success))" },
+                              { name: "NOK", value: nokObsolescencia, color: "hsl(var(--destructive))" },
+                            ].filter(d => d.value > 0)}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={70}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {[
+                              { name: "OK", value: obsolescencia.ok, color: "hsl(var(--success))" },
+                              { name: "NOK", value: nokObsolescencia, color: "hsl(var(--destructive))" },
+                            ].filter(d => d.value > 0).map((entry, index) => (
+                              <Cell key={`cell-obs-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value: number) => [value, ""]} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-success" />
+                        <span className="text-sm">OK: <strong>{obsolescencia.ok}</strong> {unitLabel}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-destructive" />
+                        <span className="text-sm">NOK: <strong>{nokObsolescencia}</strong> {unitLabel}</span>
+                      </div>
+                      {totalObsolescencia > 0 && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {Math.round((obsolescencia.ok / totalObsolescencia) * 100)}% OK
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
 
         {/* Nota explicativa */}
