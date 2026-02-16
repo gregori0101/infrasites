@@ -121,9 +121,9 @@ export default function Dashboard() {
       let hasMore = true;
 
       while (hasMore) {
-        const { data, error } = await supabase
+      const { data, error } = await supabase
           .from("sites")
-          .select("site_code, tipo, municipio")
+          .select("site_code, tipo, municipio, uf")
           .range(from, from + pageSize - 1);
 
         if (error) {
@@ -324,8 +324,11 @@ export default function Dashboard() {
       ? Math.round((totalRealizadas / totalAtribuidas) * 100) 
       : 0;
 
-    // Total de sites na base
-    const totalSitesBase = sitesData.length;
+    // Total de sites na base - filtered by UF if selected
+    const filteredSitesData = filters.stateUf !== "all"
+      ? sitesData.filter((s: any) => s.uf === filters.stateUf)
+      : sitesData;
+    const totalSitesBase = filteredSitesData.length;
     
     // Sites únicos já vistoriados (usando site_code único) - sem filtro de técnico para mostrar progresso geral
     const sitesVistoriados = new Set(filteredReportsBySiteType.map(r => r.site_code)).size;
@@ -372,7 +375,7 @@ export default function Dashboard() {
       vistoriasPorUf,
       assignmentsByUf: assignmentStats?.byUf || []
     };
-  }, [stats, assignmentStats, technicianEmails, sitesData, filteredReportsBySiteType]);
+  }, [stats, assignmentStats, technicianEmails, sitesData, filteredReportsBySiteType, filters.stateUf]);
 
   // Calculate fiber stats from reports
   const fibraStats = useMemo((): FibraStats => {
