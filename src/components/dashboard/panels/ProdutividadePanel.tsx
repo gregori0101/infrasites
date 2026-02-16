@@ -334,57 +334,54 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
           <ScrollArea className="h-[250px]">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>UF</TableHead>
-                  <TableHead className="text-center">Total Sites</TableHead>
-                  <TableHead className="text-center">Concluídas</TableHead>
-                  <TableHead className="text-center">Pendentes</TableHead>
-                  <TableHead className="text-center">Sem Atribuição</TableHead>
-                  <TableHead className="text-right">% Concluído</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stats.assignmentsByUf.map((row) => {
-                  const percentConcluido = row.totalSites > 0
-                    ? Math.round((row.concluidas / row.totalSites) * 100)
-                    : 0;
-                  return (
-                    <TableRow key={row.uf}>
-                      <TableCell className="font-medium">{row.uf}</TableCell>
-                      <TableCell className="text-center">{row.totalSites}</TableCell>
-                      <TableCell className="text-center text-green-600 font-medium">
-                        {row.concluidas}
-                      </TableCell>
-                      <TableCell className="text-center text-amber-600">
-                        {row.pendentes}
-                      </TableCell>
-                      <TableCell className="text-center text-muted-foreground">
-                        {row.semAtribuicao}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={percentConcluido >= 80 ? "default" : percentConcluido >= 50 ? "secondary" : "destructive"}
-                          className={
-                            percentConcluido >= 80
-                              ? "bg-green-500"
-                              : percentConcluido >= 50
-                              ? "bg-amber-500"
-                              : ""
-                          }
-                        >
-                          {percentConcluido}%
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {stats.assignmentsByUf.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      Sem dados disponíveis
-                    </TableCell>
-                  </TableRow>
-                )}
+                 <TableRow>
+                   <TableHead>UF</TableHead>
+                   <TableHead className="text-center">Total Sites</TableHead>
+                   <TableHead className="text-center">Concluídas</TableHead>
+                   <TableHead className="text-center">Pendentes</TableHead>
+                   <TableHead className="text-right">% Concluídas</TableHead>
+                 </TableRow>
+               </TableHeader>
+               <TableBody>
+                 {stats.assignmentsByUf.map((row) => {
+                   const pendentes = row.totalSites - row.concluidas;
+                   const percentConcluido = row.totalSites > 0
+                     ? Math.round((row.concluidas / row.totalSites) * 100)
+                     : 0;
+                   return (
+                     <TableRow key={row.uf}>
+                       <TableCell className="font-medium">{row.uf}</TableCell>
+                       <TableCell className="text-center">{row.totalSites}</TableCell>
+                       <TableCell className="text-center text-green-600 font-medium">
+                         {row.concluidas}
+                       </TableCell>
+                       <TableCell className="text-center text-amber-600">
+                         {pendentes < 0 ? 0 : pendentes}
+                       </TableCell>
+                       <TableCell className="text-right">
+                         <Badge
+                           variant={percentConcluido >= 80 ? "default" : percentConcluido >= 50 ? "secondary" : "destructive"}
+                           className={
+                             percentConcluido >= 80
+                               ? "bg-green-500"
+                               : percentConcluido >= 50
+                               ? "bg-amber-500"
+                               : ""
+                           }
+                         >
+                           {percentConcluido}%
+                         </Badge>
+                       </TableCell>
+                     </TableRow>
+                   );
+                 })}
+                 {stats.assignmentsByUf.length === 0 && (
+                   <TableRow>
+                     <TableCell colSpan={5} className="text-center text-muted-foreground">
+                       Sem dados disponíveis
+                     </TableCell>
+                   </TableRow>
+                 )}
               </TableBody>
             </Table>
             <ScrollBar orientation="vertical" />
