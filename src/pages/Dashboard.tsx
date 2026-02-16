@@ -330,11 +330,8 @@ export default function Dashboard() {
       : sitesData;
     const totalSitesBase = filteredSitesData.length;
     
-    // Sites únicos já vistoriados (usando site_code único) - sem filtro de técnico para mostrar progresso geral
-    const sitesVistoriados = new Set(filteredReportsBySiteType.map(r => r.site_code)).size;
-    
-    // Sites não vistoriados = total base - sites únicos vistoriados
-    const sitesNaoVistoriados = Math.max(0, totalSitesBase - sitesVistoriados);
+    // Sites não vistoriados = sites na base - vistorias realizadas
+    const sitesNaoVistoriados = Math.max(0, totalSitesBase - totalRealizadas);
 
     // Vistorias por UF from reports
     const vistoriasPorUf = stats.ufDistribution.map(uf => ({
