@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -549,6 +550,58 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               onClick={() => onDrillDown("autonomy-critico")}
             />
           </div>
+
+          {/* Pie Chart OK vs NOK */}
+          <Card className="mt-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Autonomia: OK vs NOK</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center gap-8">
+                <div className="w-48 h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "OK", value: autonomy.ok, color: "hsl(var(--success))" },
+                          { name: "NOK", value: autonomy.medioRisco + autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
+                        ].filter(d => d.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={70}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {[
+                          { name: "OK", value: autonomy.ok, color: "hsl(var(--success))" },
+                          { name: "NOK", value: autonomy.medioRisco + autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
+                        ].filter(d => d.value > 0).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: number) => [value, ""]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-success" />
+                    <span className="text-sm">OK: <strong>{autonomy.ok}</strong> {unitLabel}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-destructive" />
+                    <span className="text-sm">NOK: <strong>{autonomy.medioRisco + autonomy.altoRisco + autonomy.critico}</strong> {unitLabel}</span>
+                  </div>
+                  {totalAutonomy > 0 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {Math.round((autonomy.ok / totalAutonomy) * 100)}% OK
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Card de Critérios - Autonomia */}
