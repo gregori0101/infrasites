@@ -567,7 +567,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
                 bateriasParaTrocaByUf[uf] = (bateriasParaTrocaByUf[uf] || 0) + 1;
               }
               
-              if (estado === "BOA" || !estado) {
+              if (estado === "OK" || estado === "BOA" || !estado) {
                 stats.batteriesOk++;
                 batteryStates.ok++;
               } else {
