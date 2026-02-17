@@ -1,9 +1,10 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug, FileEdit, Globe } from "lucide-react";
+import { X, Download, Loader2, Building2, Battery, Thermometer, Zap, Radio, User, Calendar, MapPin, Image as ImageIcon, AlertTriangle, CheckCircle, Cable, Plug, FileEdit, Globe, Pencil, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lightbox } from "@/components/ui/lightbox";
-import { fetchFullReportById, ReportRow } from "@/lib/reportDatabase";
+import { fetchFullReportById, ReportRow, updateReportField } from "@/lib/reportDatabase";
 import { reportToChecklist } from "@/lib/reportToChecklist";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
 import { toast } from "sonner";
@@ -150,6 +151,93 @@ function InfoRow({ label, value, icon: Icon }: { label: string; value: string | 
   );
 }
 
+function EditableInfoRow({ 
+  label, 
+  value, 
+  icon: Icon, 
+  fieldName, 
+  reportId, 
+  canEdit, 
+  onUpdate,
+  type = "text"
+}: { 
+  label: string; 
+  value: string | null | undefined; 
+  icon?: React.ComponentType<any>; 
+  fieldName: string;
+  reportId: string;
+  canEdit: boolean;
+  onUpdate: (fieldName: string, newValue: string | number | null) => void;
+  type?: "text" | "number";
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const finalValue = type === "number" 
+      ? (editValue ? Number(editValue) : null) 
+      : (editValue.trim() || null);
+    const result = await updateReportField(reportId, fieldName, finalValue);
+    setIsSaving(false);
+    if (result.success) {
+      onUpdate(fieldName, finalValue);
+      setIsEditing(false);
+      toast.success(`${label} atualizado com sucesso`);
+    } else {
+      toast.error(`Erro ao atualizar ${label}`);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditValue(value || "");
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2 py-1">
+        {Icon && <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />}
+        <span className="text-sm text-muted-foreground shrink-0">{label}:</span>
+        <Input
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          type={type}
+          className="h-7 text-sm flex-1 max-w-[200px]"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSave();
+            if (e.key === "Escape") handleCancel();
+          }}
+        />
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3 text-success" />}
+        </Button>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCancel}>
+          <X className="w-3 h-3 text-destructive" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-2 py-1 group">
+      {Icon && <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />}
+      <span className="text-sm text-muted-foreground shrink-0">{label}:</span>
+      <span className="text-sm font-medium">{value || "N/A"}</span>
+      {canEdit && (
+        <button
+          onClick={() => { setEditValue(value || ""); setIsEditing(true); }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 p-0.5 rounded hover:bg-muted"
+        >
+          <Pencil className="w-3 h-3 text-muted-foreground" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 // Inline photo grid for sections with lightbox support
 function PhotoGrid({ photos, allPhotos }: { 
   photos: { url: string | null | undefined; label: string }[];
@@ -205,6 +293,12 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   };
 
   const canEditReport = isAdmin || isGestor || (user && report?.user_id === user.id);
+
+  const handleFieldUpdate = (fieldName: string, newValue: string | number | null) => {
+    if (report) {
+      setReport({ ...report, [fieldName]: newValue });
+    }
+  };
 
   const handleEditReport = async () => {
     if (!report?.id) return;
@@ -605,13 +699,13 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                      <InfoRow label="Site" value={report.site_code} icon={Radio} />
-                      <InfoRow label="UF" value={report.state_uf} icon={MapPin} />
-                      <InfoRow label="Técnico" value={report.technician_name} icon={User} />
+                      <EditableInfoRow label="Site" value={report.site_code} icon={Radio} fieldName="site_code" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                      <EditableInfoRow label="UF" value={report.state_uf} icon={MapPin} fieldName="state_uf" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                      <EditableInfoRow label="Técnico" value={report.technician_name} icon={User} fieldName="technician_name" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                       <InfoRow label="Data" value={`${report.created_date} ${report.created_time}`} icon={Calendar} />
-                      <InfoRow label="Gabinetes" value={totalCabinets.toString()} icon={Building2} />
-                      <InfoRow label="Operadora" value={report.operadora || 'VIVO'} />
-                      <InfoRow label="Observações" value={report.observacoes} />
+                      <EditableInfoRow label="Gabinetes" value={totalCabinets.toString()} icon={Building2} fieldName="total_cabinets" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                      <EditableInfoRow label="Operadora" value={report.operadora || 'VIVO'} fieldName="operadora" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                      <EditableInfoRow label="Observações" value={report.observacoes} fieldName="observacoes" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                     </CardContent>
                   </Card>
 
