@@ -510,6 +510,31 @@ export function buildReportRow(data: ChecklistData): ReportRow {
 }
 
 /**
+ * Update a single field of a report inline
+ */
+export async function updateReportField(
+  reportId: string,
+  fieldName: string,
+  value: string | number | null
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('reports')
+      .update({ [fieldName]: value })
+      .eq('id', reportId);
+
+    if (error) {
+      console.error('Error updating report field:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception updating report field:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Update an existing report in the database (for admin editing)
  */
 export async function updateReportInDatabase(
