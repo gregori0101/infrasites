@@ -1,42 +1,64 @@
 
 
-## Edição inline no modal de detalhes do site
+## Sistema de Ranking e Gamificacao para Tecnicos
 
-Adicionar botoes de edição ao lado de cada campo na seção "Informações do Site" do modal de detalhes, permitindo alterar valores diretamente sem precisar abrir o formulário completo.
+Transformar a experiencia do tecnico em algo mais envolvente, com niveis, pontos de experiencia (XP) e conquistas baseadas nas vistorias realizadas.
 
-### O que muda para o usuário
+### O que muda para o usuario
 
-- Cada campo editável (Site, UF, Técnico, Gabinetes, Operadora, Observações) terá um pequeno icone de lápis ao lado
-- Ao clicar, o campo se transforma em um input editável inline
-- Botões de confirmar e cancelar aparecem ao lado do campo
-- Ao confirmar, o valor é salvo diretamente no banco de dados
-- Campos não editáveis (Data) permanecem somente leitura
-- Somente usuários com permissão (Admin, Gestor, ou autor do relatório) verão os botões de edição
+- Na aba "Minhas Vistorias", um card de perfil aparece no topo mostrando:
+  - **Nivel atual** (ex: "Nivel 5 - Inspetor Senior") com uma barra de progresso para o proximo nivel
+  - **Total de XP** acumulado
+  - **Vistorias realizadas** (hoje / mes / total)
+  - **Ranking** entre todos os tecnicos (posicao)
+  - **Conquistas/Badges** desbloqueados (icones visuais)
 
-### Detalhes técnicos
+- Sistema de **niveis progressivos**:
+  1. Novato (0-4 vistorias)
+  2. Aprendiz (5-14)
+  3. Inspetor (15-29)
+  4. Inspetor Senior (30-49)
+  5. Especialista (50-99)
+  6. Mestre (100-199)
+  7. Lenda (200+)
 
-1. **Nova função `updateReportField` em `src/lib/reportDatabase.ts`**
-   - Atualiza um campo individual diretamente na tabela `reports`
-   - Recebe `reportId`, `fieldName` e `value`
-   - Faz um `.update({ [fieldName]: value }).eq('id', reportId)`
+- **Conquistas/Badges** desbloqueaveis:
+  - "Primeira Vistoria" - completar a primeira
+  - "Maratonista" - 5 vistorias em um unico dia
+  - "Consistente" - vistorias em 5 dias consecutivos
+  - "Centenario" - 100 vistorias no total
+  - "Relampago" - 3 vistorias em um unico dia
 
-2. **Novo componente `EditableInfoRow` no `SiteDetailModal.tsx`**
-   - Substitui o `InfoRow` nos campos editáveis
-   - Estado local para modo edição (toggle entre visualização e input)
-   - Input com o valor atual pré-preenchido
-   - Botões de Check (salvar) e X (cancelar)
-   - Chama `updateReportField` ao confirmar e atualiza o estado local do report
+- **Posicao no ranking** em relacao aos outros tecnicos
 
-3. **Campos editáveis:**
-   - Site (`site_code`)
-   - UF (`state_uf`)
-   - Técnico (`technician_name`)
-   - Gabinetes (`total_cabinets` - input numérico)
-   - Operadora (`operadora`)
-   - Observações (`observacoes`)
+### Detalhes tecnicos
 
-4. **Campos NÃO editáveis** (mantêm InfoRow normal):
-   - Data (preservada como registro original)
+**1. Nova funcao `fetchTechnicianStats` em `src/lib/reportDatabase.ts`**
+- Consulta contagem de reports do usuario logado (total, mes atual, hoje)
+- Consulta contagem total por user_id para calcular ranking relativo
+- Retorna `{ total, monthly, today, rank, totalTechnicians }`
 
-5. **Controle de permissão**: Os botões de edição só aparecem quando `canEditReport` é `true` (mesmo controle já usado para o botão "Editar" do header)
+**2. Novo componente `src/components/technician/TechnicianRankCard.tsx`**
+- Recebe as stats do tecnico e renderiza o card de gamificacao
+- Calcula nivel, XP e progresso com base no total de vistorias
+- Mostra badges conquistados como icones coloridos
+- Barra de progresso animada com Tailwind
+- Design compacto e mobile-first
+
+**3. Logica de niveis e XP (pure functions, sem banco)**
+- Cada vistoria = 10 XP
+- Niveis definidos por thresholds fixos no codigo
+- Badges calculados client-side com base nas stats
+- Sem tabela adicional no banco - tudo derivado da contagem de reports
+
+**4. Integracao no `TechnicianInbox.tsx`**
+- Adicionar o `TechnicianRankCard` no topo da aba "Minhas Vistorias"
+- Usar `useQuery` para buscar as stats do tecnico logado
+- Dados atualizados automaticamente quando a lista de assignments muda
+
+**5. Arquivos a criar/editar:**
+- Criar: `src/components/technician/TechnicianRankCard.tsx`
+- Criar: `src/lib/gamification.ts` (logica de niveis, XP, badges)
+- Editar: `src/lib/reportDatabase.ts` (adicionar `fetchTechnicianStats`)
+- Editar: `src/components/technician/TechnicianInbox.tsx` (integrar o card)
 
