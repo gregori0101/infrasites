@@ -906,6 +906,88 @@ export async function deleteReportById(reportId: string): Promise<void> {
   }
 }
 
+// --- Technician Gamification Stats ---
+
+export interface TechnicianStatsRaw {
+  total: number;
+  monthly: number;
+  today: number;
+  rank: number;
+  totalTechnicians: number;
+  consecutiveDays: number;
+  maxInOneDay: number;
+}
+
+export async function fetchTechnicianStats(userId: string): Promise<TechnicianStatsRaw> {
+  const now = new Date();
+  const todayStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  // Fetch all user reports dates for consecutive days and max-in-one-day calc
+  const { data: userReports, error: userError } = await supabase
+    .from('reports')
+    .select('created_date, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (userError) {
+    console.error('Error fetching technician stats:', userError);
+    return { total: 0, monthly: 0, today: 0, rank: 1, totalTechnicians: 1, consecutiveDays: 0, maxInOneDay: 0 };
+  }
+
+  const allReports = userReports || [];
+  const total = allReports.length;
+  const today = allReports.filter((r) => r.created_date === todayStr).length;
+  const monthly = allReports.filter((r) => r.created_at && r.created_at >= monthStart).length;
+
+  // Max in one day
+  const dayCounts: Record<string, number> = {};
+  for (const r of allReports) {
+    if (r.created_date) {
+      dayCounts[r.created_date] = (dayCounts[r.created_date] || 0) + 1;
+    }
+  }
+  const maxInOneDay = Object.values(dayCounts).length > 0 ? Math.max(...Object.values(dayCounts)) : 0;
+
+  // Consecutive days (from today backwards)
+  let consecutiveDays = 0;
+  const uniqueDays = new Set(allReports.map((r) => r.created_date).filter(Boolean));
+  const checkDate = new Date(now);
+  checkDate.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 365; i++) {
+    const dateStr = `${String(checkDate.getDate()).padStart(2, '0')}/${String(checkDate.getMonth() + 1).padStart(2, '0')}/${checkDate.getFullYear()}`;
+    if (uniqueDays.has(dateStr)) {
+      consecutiveDays++;
+    } else if (i > 0) {
+      break; // Allow today to be missing (hasn't done one yet today)
+    }
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  // Ranking: count reports per user_id for all technicians
+  // We need to get all report counts grouped by user - use a simple approach
+  const { data: allCounts, error: countError } = await supabase
+    .from('reports')
+    .select('user_id');
+
+  let rank = 1;
+  let totalTechnicians = 1;
+
+  if (!countError && allCounts) {
+    const userTotals: Record<string, number> = {};
+    for (const r of allCounts) {
+      if (r.user_id) {
+        userTotals[r.user_id] = (userTotals[r.user_id] || 0) + 1;
+      }
+    }
+    totalTechnicians = Object.keys(userTotals).length || 1;
+    const myTotal = userTotals[userId] || 0;
+    rank = Object.values(userTotals).filter((count) => count > myTotal).length + 1;
+  }
+
+  return { total, monthly, today, rank, totalTechnicians, consecutiveDays, maxInOneDay };
+}
+
 /**
  * Fetch battery photo for a specific gabinete from a report
  * Used for on-demand photo loading in battery detail modal
