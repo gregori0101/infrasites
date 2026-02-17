@@ -20,6 +20,7 @@ const PendingApproval = lazy(() => import("./pages/PendingApproval"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const SiteManagement = lazy(() => import("./pages/SiteManagement"));
 const AssignmentManagement = lazy(() => import("./pages/AssignmentManagement"));
+const Ranking = lazy(() => import("./pages/Ranking"));
 const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -134,6 +135,11 @@ const App = () => {
                   <Route path="/atribuicoes" element={
                     <ProtectedRoute requireGestor>
                       <AssignmentManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/ranking" element={
+                    <ProtectedRoute>
+                      <Ranking />
                     </ProtectedRoute>
                   } />
                   <Route path="/instalar" element={<Install />} />
