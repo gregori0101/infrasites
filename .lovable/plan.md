@@ -1,64 +1,41 @@
 
 
-## Sistema de Ranking e Gamificacao para Tecnicos
+## Pagina de Ranking dos Tecnicos
 
-Transformar a experiencia do tecnico em algo mais envolvente, com niveis, pontos de experiencia (XP) e conquistas baseadas nas vistorias realizadas.
+Criar uma pagina dedicada (`/ranking`) para visualizar o ranking completo de todos os tecnicos, com seus niveis, XP, vistorias e posicao.
 
 ### O que muda para o usuario
 
-- Na aba "Minhas Vistorias", um card de perfil aparece no topo mostrando:
-  - **Nivel atual** (ex: "Nivel 5 - Inspetor Senior") com uma barra de progresso para o proximo nivel
-  - **Total de XP** acumulado
-  - **Vistorias realizadas** (hoje / mes / total)
-  - **Ranking** entre todos os tecnicos (posicao)
-  - **Conquistas/Badges** desbloqueados (icones visuais)
-
-- Sistema de **niveis progressivos**:
-  1. Novato (0-4 vistorias)
-  2. Aprendiz (5-14)
-  3. Inspetor (15-29)
-  4. Inspetor Senior (30-49)
-  5. Especialista (50-99)
-  6. Mestre (100-199)
-  7. Lenda (200+)
-
-- **Conquistas/Badges** desbloqueaveis:
-  - "Primeira Vistoria" - completar a primeira
-  - "Maratonista" - 5 vistorias em um unico dia
-  - "Consistente" - vistorias em 5 dias consecutivos
-  - "Centenario" - 100 vistorias no total
-  - "Relampago" - 3 vistorias em um unico dia
-
-- **Posicao no ranking** em relacao aos outros tecnicos
+- Nova pagina acessivel em `/ranking` com o ranking completo dos tecnicos
+- Tabela ordenada por total de vistorias (mais produtivo no topo)
+- Cada linha mostra: posicao, nome/email do tecnico, nivel com emoji, total de XP, vistorias (total/mes), e badges desbloqueados
+- Card de destaque no topo com o podio (top 3)
+- Acessivel para todos os usuarios logados (tecnicos veem sua posicao destacada)
+- Link para a pagina de ranking no menu/navegacao principal
 
 ### Detalhes tecnicos
 
-**1. Nova funcao `fetchTechnicianStats` em `src/lib/reportDatabase.ts`**
-- Consulta contagem de reports do usuario logado (total, mes atual, hoje)
-- Consulta contagem total por user_id para calcular ranking relativo
-- Retorna `{ total, monthly, today, rank, totalTechnicians }`
+**1. Nova funcao `fetchAllTechniciansRanking` em `src/lib/reportDatabase.ts`**
+- Busca contagem de reports agrupada por `user_id`
+- Cruza com tabela `user_roles` para obter operadora e area de atuacao
+- Busca emails dos usuarios via edge function `get-technician-emails` (ja existente)
+- Calcula stats por tecnico (total, mensal, max em um dia, dias consecutivos)
+- Retorna array ordenado por total de vistorias descendente
 
-**2. Novo componente `src/components/technician/TechnicianRankCard.tsx`**
-- Recebe as stats do tecnico e renderiza o card de gamificacao
-- Calcula nivel, XP e progresso com base no total de vistorias
-- Mostra badges conquistados como icones coloridos
-- Barra de progresso animada com Tailwind
-- Design compacto e mobile-first
+**2. Nova pagina `src/pages/Ranking.tsx`**
+- Card de podio no topo (1o, 2o, 3o lugar) com emojis de medalha
+- Tabela completa com todas as colunas: posicao, tecnico, nivel, XP, vistorias totais, vistorias no mes, badges
+- Linha do usuario logado destacada com cor de fundo diferente
+- Filtro por operadora (VIVO/TEL) se aplicavel
+- Responsivo para mobile
 
-**3. Logica de niveis e XP (pure functions, sem banco)**
-- Cada vistoria = 10 XP
-- Niveis definidos por thresholds fixos no codigo
-- Badges calculados client-side com base nas stats
-- Sem tabela adicional no banco - tudo derivado da contagem de reports
+**3. Rota e navegacao**
+- Adicionar rota `/ranking` em `App.tsx` como rota protegida (usuario aprovado)
+- Adicionar link no menu de navegacao existente
 
-**4. Integracao no `TechnicianInbox.tsx`**
-- Adicionar o `TechnicianRankCard` no topo da aba "Minhas Vistorias"
-- Usar `useQuery` para buscar as stats do tecnico logado
-- Dados atualizados automaticamente quando a lista de assignments muda
-
-**5. Arquivos a criar/editar:**
-- Criar: `src/components/technician/TechnicianRankCard.tsx`
-- Criar: `src/lib/gamification.ts` (logica de niveis, XP, badges)
-- Editar: `src/lib/reportDatabase.ts` (adicionar `fetchTechnicianStats`)
-- Editar: `src/components/technician/TechnicianInbox.tsx` (integrar o card)
+**4. Arquivos a criar/editar:**
+- Criar: `src/pages/Ranking.tsx`
+- Editar: `src/lib/reportDatabase.ts` (adicionar `fetchAllTechniciansRanking`)
+- Editar: `src/App.tsx` (adicionar rota)
+- Editar: `src/pages/Index.tsx` (adicionar link de navegacao para o ranking)
 
