@@ -13,11 +13,12 @@ import {
   updateAssignmentStatus,
   SiteAssignment 
 } from "@/lib/assignmentDatabase";
-import { fetchLatestReportBySiteCode } from "@/lib/reportDatabase";
+import { fetchLatestReportBySiteCode, fetchTechnicianStats } from "@/lib/reportDatabase";
 import { reportToChecklistWithoutPhotos } from "@/lib/reportToChecklist";
 import { PrefillDialog } from "@/components/ui/prefill-dialog";
 import { toast } from "sonner";
 import { ChecklistData } from "@/types/checklist";
+import { TechnicianRankCard } from "./TechnicianRankCard";
 
 interface TechnicianInboxProps {
   onStartChecklist: (assignment: SiteAssignment, prefillData?: ChecklistData) => void;
@@ -34,6 +35,12 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
   const { data: assignments = [], isLoading, refetch } = useQuery({
     queryKey: ['technician-assignments', user?.id],
     queryFn: () => user ? fetchTechnicianAssignments(user.id) : Promise.resolve([]),
+    enabled: !!user,
+  });
+
+  const { data: techStats } = useQuery({
+    queryKey: ['technician-stats', user?.id],
+    queryFn: () => user ? fetchTechnicianStats(user.id) : Promise.resolve(null),
     enabled: !!user,
   });
 
@@ -196,6 +203,8 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
 
   return (
     <div className="space-y-4">
+      {/* Gamification Card */}
+      {techStats && <TechnicianRankCard stats={techStats} />}
       {/* Pending/In Progress Section */}
       {pendingAssignments.length > 0 && (
         <div className="space-y-3">
