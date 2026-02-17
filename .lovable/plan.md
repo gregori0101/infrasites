@@ -1,41 +1,33 @@
 
 
-## Pagina de Ranking dos Tecnicos
+## Correcao: Baterias OK sendo classificadas como NOK no dashboard
 
-Criar uma pagina dedicada (`/ranking`) para visualizar o ranking completo de todos os tecnicos, com seus niveis, XP, vistorias e posicao.
+### Problema identificado
 
-### O que muda para o usuario
+O codigo do dashboard (`useDashboardStats.ts`, linha 570) verifica se o estado da bateria e `"BOA"` para classificar como OK. Porem, o formulario de checklist salva o estado como `"OK"` no banco de dados. Isso faz com que todas as baterias com estado "OK" sejam incorretamente contabilizadas como NOK.
 
-- Nova pagina acessivel em `/ranking` com o ranking completo dos tecnicos
-- Tabela ordenada por total de vistorias (mais produtivo no topo)
-- Cada linha mostra: posicao, nome/email do tecnico, nivel com emoji, total de XP, vistorias (total/mes), e badges desbloqueados
-- Card de destaque no topo com o podio (top 3)
-- Acessivel para todos os usuarios logados (tecnicos veem sua posicao destacada)
-- Link para a pagina de ranking no menu/navegacao principal
+**Dados do site AMCDB no banco:**
+- 10 baterias, todas com `estado = "OK"`
+- Dashboard mostra todas como problematicas porque `"OK" !== "BOA"`
+
+### Solucao
+
+Alterar a condicao na linha 570 de `useDashboardStats.ts` para reconhecer tanto `"OK"` quanto `"BOA"` como estados saudaveis:
+
+```typescript
+// Antes (bugado):
+if (estado === "BOA" || !estado) {
+
+// Depois (corrigido):
+if (estado === "OK" || estado === "BOA" || !estado) {
+```
 
 ### Detalhes tecnicos
 
-**1. Nova funcao `fetchAllTechniciansRanking` em `src/lib/reportDatabase.ts`**
-- Busca contagem de reports agrupada por `user_id`
-- Cruza com tabela `user_roles` para obter operadora e area de atuacao
-- Busca emails dos usuarios via edge function `get-technician-emails` (ja existente)
-- Calcula stats por tecnico (total, mensal, max em um dia, dias consecutivos)
-- Retorna array ordenado por total de vistorias descendente
+**Arquivo a editar:** `src/components/dashboard/useDashboardStats.ts` (linha 570)
 
-**2. Nova pagina `src/pages/Ranking.tsx`**
-- Card de podio no topo (1o, 2o, 3o lugar) com emojis de medalha
-- Tabela completa com todas as colunas: posicao, tecnico, nivel, XP, vistorias totais, vistorias no mes, badges
-- Linha do usuario logado destacada com cor de fundo diferente
-- Filtro por operadora (VIVO/TEL) se aplicavel
-- Responsivo para mobile
-
-**3. Rota e navegacao**
-- Adicionar rota `/ranking` em `App.tsx` como rota protegida (usuario aprovado)
-- Adicionar link no menu de navegacao existente
-
-**4. Arquivos a criar/editar:**
-- Criar: `src/pages/Ranking.tsx`
-- Editar: `src/lib/reportDatabase.ts` (adicionar `fetchAllTechniciansRanking`)
-- Editar: `src/App.tsx` (adicionar rota)
-- Editar: `src/pages/Index.tsx` (adicionar link de navegacao para o ranking)
+- Adicionar `estado === "OK"` na condicao que classifica baterias como saudaveis
+- Manter `"BOA"` por compatibilidade com eventuais registros antigos
+- Manter `!estado` para tratar baterias sem estado definido como OK (comportamento atual)
+- Impacto: corrige a contagem de baterias OK/NOK em todo o dashboard (Overview, painel de Baterias, drill-downs, e indicadores de site)
 
