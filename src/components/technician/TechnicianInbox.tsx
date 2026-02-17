@@ -6,7 +6,7 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Clock, CheckCircle, AlertCircle, Play, Eye, Calendar, History, Loader2
+  Clock, CheckCircle, AlertCircle, Play, Eye, Calendar, History, Loader2, Trophy
 } from "lucide-react";
 import { 
   fetchTechnicianAssignments, 
@@ -25,6 +25,7 @@ interface TechnicianInboxProps {
 }
 
 export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [checkingPrefill, setCheckingPrefill] = React.useState<string | null>(null);
   const [pendingAssignment, setPendingAssignment] = React.useState<SiteAssignment | null>(null);
@@ -205,6 +206,17 @@ export function TechnicianInbox({ onStartChecklist }: TechnicianInboxProps) {
     <div className="space-y-4">
       {/* Gamification Card */}
       {techStats && <TechnicianRankCard stats={techStats} />}
+      
+      {/* Link to full ranking page */}
+      <Button
+        variant="outline"
+        className="w-full flex items-center gap-2"
+        onClick={() => navigate('/ranking')}
+      >
+        <Trophy className="h-4 w-4" />
+        Ver Ranking Completo
+      </Button>
+
       {/* Pending/In Progress Section */}
       {pendingAssignments.length > 0 && (
         <div className="space-y-3">

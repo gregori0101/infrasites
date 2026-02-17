@@ -988,6 +988,98 @@ export async function fetchTechnicianStats(userId: string): Promise<TechnicianSt
   return { total, monthly, today, rank, totalTechnicians, consecutiveDays, maxInOneDay };
 }
 
+// --- All Technicians Ranking ---
+
+export interface TechnicianRankingEntry {
+  userId: string;
+  email: string;
+  total: number;
+  monthly: number;
+  consecutiveDays: number;
+  maxInOneDay: number;
+}
+
+export async function fetchAllTechniciansRanking(): Promise<TechnicianRankingEntry[]> {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  // Fetch all reports (user_id, created_date, created_at)
+  const { data: allReports, error } = await supabase
+    .from('reports')
+    .select('user_id, created_date, created_at');
+
+  if (error || !allReports) {
+    console.error('Error fetching ranking data:', error);
+    return [];
+  }
+
+  // Group by user_id
+  const userMap: Record<string, { dates: string[]; createdAts: string[] }> = {};
+  for (const r of allReports) {
+    if (!r.user_id) continue;
+    if (!userMap[r.user_id]) userMap[r.user_id] = { dates: [], createdAts: [] };
+    if (r.created_date) userMap[r.user_id].dates.push(r.created_date);
+    if (r.created_at) userMap[r.user_id].createdAts.push(r.created_at);
+  }
+
+  // Fetch emails via edge function
+  let emailMap: Record<string, string> = {};
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    const token = session?.session?.access_token;
+    if (token) {
+      const resp = await supabase.functions.invoke('get-technician-emails', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resp.data?.technicians) {
+        for (const t of resp.data.technicians) {
+          emailMap[t.id] = t.email;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching technician emails for ranking:', e);
+  }
+
+  const entries: TechnicianRankingEntry[] = Object.entries(userMap).map(([userId, { dates, createdAts }]) => {
+    const total = dates.length;
+    const monthly = createdAts.filter(ca => ca >= monthStart).length;
+
+    // Max in one day
+    const dayCounts: Record<string, number> = {};
+    for (const d of dates) dayCounts[d] = (dayCounts[d] || 0) + 1;
+    const maxInOneDay = Object.values(dayCounts).length > 0 ? Math.max(...Object.values(dayCounts)) : 0;
+
+    // Consecutive days
+    let consecutiveDays = 0;
+    const uniqueDays = new Set(dates);
+    const checkDate = new Date(now);
+    checkDate.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 365; i++) {
+      const dateStr = `${String(checkDate.getDate()).padStart(2, '0')}/${String(checkDate.getMonth() + 1).padStart(2, '0')}/${checkDate.getFullYear()}`;
+      if (uniqueDays.has(dateStr)) {
+        consecutiveDays++;
+      } else if (i > 0) {
+        break;
+      }
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    return {
+      userId,
+      email: emailMap[userId] || userId,
+      total,
+      monthly,
+      consecutiveDays,
+      maxInOneDay,
+    };
+  });
+
+  // Sort by total desc
+  entries.sort((a, b) => b.total - a.total);
+  return entries;
+}
+
 /**
  * Fetch battery photo for a specific gabinete from a report
  * Used for on-demand photo loading in battery detail modal
