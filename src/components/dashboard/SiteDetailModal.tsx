@@ -802,12 +802,12 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                            <InfoRow label="Tipo" value={report[`${prefix}_tipo`]} />
-                            <InfoRow label="Proteção" value={report[`${prefix}_protecao`]} />
-                            <InfoRow label="Ativo" value={report[`${prefix}_ativo`] || 'SIM'} />
-                            <InfoRow label="Tecnologias Acesso" value={report[`${prefix}_tecnologias_acesso`]} icon={Radio} />
-                            <InfoRow label="Tecnologias Transporte" value={report[`${prefix}_tecnologias_transporte`]} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                            <EditableInfoRow label="Tipo" value={report[`${prefix}_tipo`]} fieldName={`${prefix}_tipo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Proteção" value={report[`${prefix}_protecao`]} fieldName={`${prefix}_protecao`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Ativo" value={report[`${prefix}_ativo`] || 'SIM'} fieldName={`${prefix}_ativo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Tecnologias Acesso" value={report[`${prefix}_tecnologias_acesso`]} icon={Radio} fieldName={`${prefix}_tecnologias_acesso`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Tecnologias Transporte" value={report[`${prefix}_tecnologias_transporte`]} fieldName={`${prefix}_tecnologias_transporte`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                           </div>
                           <PhotoGrid photos={gabFotos} />
                         </CardContent>
@@ -823,13 +823,13 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                            <InfoRow label="Fabricante" value={report[`${prefix}_fcc_fabricante`]} />
-                            <InfoRow label="Tensão DC" value={report[`${prefix}_fcc_tensao`]} />
-                            <InfoRow label="Gerenciada" value={report[`${prefix}_fcc_gerenciado`]} />
-                            <InfoRow label="Gerenciável" value={report[`${prefix}_fcc_gerenciavel`]} />
-                            <InfoRow label="Consumo DC" value={report[`${prefix}_fcc_consumo`]} />
-                            <InfoRow label="Qtd UR Suportadas" value={report[`${prefix}_fcc_qtd_ur`]} />
-                            <InfoRow label="URs Instaladas" value={report[`${prefix}_fcc_qtd_ur_instaladas`]} />
+                            <EditableInfoRow label="Fabricante" value={report[`${prefix}_fcc_fabricante`]} fieldName={`${prefix}_fcc_fabricante`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Tensão DC" value={report[`${prefix}_fcc_tensao`]} fieldName={`${prefix}_fcc_tensao`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Gerenciada" value={report[`${prefix}_fcc_gerenciado`]} fieldName={`${prefix}_fcc_gerenciado`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Gerenciável" value={report[`${prefix}_fcc_gerenciavel`]} fieldName={`${prefix}_fcc_gerenciavel`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Consumo DC" value={report[`${prefix}_fcc_consumo`]} fieldName={`${prefix}_fcc_consumo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Qtd UR Suportadas" value={report[`${prefix}_fcc_qtd_ur`]} fieldName={`${prefix}_fcc_qtd_ur`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="URs Instaladas" value={report[`${prefix}_fcc_qtd_ur_instaladas`]} fieldName={`${prefix}_fcc_qtd_ur_instaladas`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                           </div>
                           <PhotoGrid photos={fccFotos} />
                         </CardContent>
@@ -862,19 +862,20 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                                     <StatusBadge status={estado} />
                                   </div>
                                   <div className="text-xs text-muted-foreground space-y-0.5">
-                                    <p>Tipo: {tipo || "N/A"}</p>
-                                    <p>Fabricante: {fabricante || "N/A"}</p>
-                                    <p>Capacidade: {capacidade ? `${capacidade}Ah` : "N/A"}</p>
-                                    <p>Fabricação: {dataFab || "N/A"}</p>
-                                    <p>Colada: {report[`${prefix}_bat${b}_colada`] || "N/A"}</p>
-                                    <p>Com Gradil: {report[`${prefix}_bat${b}_com_gradil`] || "N/A"}</p>
+                                    <EditableInfoRow label="Tipo" value={tipo} fieldName={`${prefix}_bat${b}_tipo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Fabricante" value={fabricante} fieldName={`${prefix}_bat${b}_fabricante`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Capacidade" value={capacidade ? `${capacidade}` : null} fieldName={`${prefix}_bat${b}_capacidade`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Fabricação" value={dataFab} fieldName={`${prefix}_bat${b}_data_fabricacao`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Estado" value={estado} fieldName={`${prefix}_bat${b}_estado`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Colada" value={report[`${prefix}_bat${b}_colada`]} fieldName={`${prefix}_bat${b}_colada`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                    <EditableInfoRow label="Com Gradil" value={report[`${prefix}_bat${b}_com_gradil`]} fieldName={`${prefix}_bat${b}_com_gradil`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
                           <div className="mt-3">
-                            <InfoRow label="Bancos Interligados" value={report[`${prefix}_bancos_interligados`]} />
+                            <EditableInfoRow label="Bancos Interligados" value={report[`${prefix}_bancos_interligados`]} fieldName={`${prefix}_bancos_interligados`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                           </div>
                           <PhotoGrid photos={batFotos} />
                         </CardContent>
@@ -890,19 +891,10 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2 mb-4">
-                            <InfoRow label="Tipo" value={report[`${prefix}_climatizacao_tipo`]} />
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">Ventiladores:</span>
-                              <StatusBadge status={report[`${prefix}_ventiladores_status`]} />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">PLC:</span>
-                              <StatusBadge status={report[`${prefix}_plc_status`]} />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">Alarme:</span>
-                              <StatusBadge status={report[`${prefix}_alarme_status`]} />
-                            </div>
+                            <EditableInfoRow label="Tipo" value={report[`${prefix}_climatizacao_tipo`]} fieldName={`${prefix}_climatizacao_tipo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Ventiladores" value={report[`${prefix}_ventiladores_status`]} fieldName={`${prefix}_ventiladores_status`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="PLC" value={report[`${prefix}_plc_status`]} fieldName={`${prefix}_plc_status`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                            <EditableInfoRow label="Alarme" value={report[`${prefix}_alarme_status`]} fieldName={`${prefix}_alarme_status`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                           </div>
 
                           <Separator className="my-3" />
@@ -916,10 +908,10 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                               if (!modelo && !status) return null;
 
                               return (
-                                <div key={a} className="p-2 border rounded bg-muted/30 text-center">
+                                <div key={a} className="p-2 border rounded bg-muted/30">
                                   <p className="text-xs font-medium mb-1">AC {a}</p>
-                                  <p className="text-xs text-muted-foreground mb-1">{modelo || "N/A"}</p>
-                                  <StatusBadge status={status} />
+                                  <EditableInfoRow label="Modelo" value={modelo} fieldName={`${prefix}_ac${a}_modelo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                  <EditableInfoRow label="Status" value={status} fieldName={`${prefix}_ac${a}_status`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                                 </div>
                               );
                             })}
@@ -942,26 +934,17 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                        <InfoRow label="Tipo Quadro" value={report.energia_tipo_quadro} />
-                        <InfoRow label="Fabricante" value={report.energia_fabricante_outra || report.energia_fabricante} />
-                        <InfoRow label="Potência (kVA)" value={report.energia_potencia_kva?.toString()} />
-                        <InfoRow label="Tensão Entrada" value={report.energia_tensao_entrada} />
-                        <InfoRow label="Disjuntor Entrada (A)" value={report.energia_disjuntor_entrada?.toString()} />
-                        <InfoRow label="Disjuntor QDCA (A)" value={report.energia_disjuntor_qdca?.toString()} />
-                        <InfoRow label="Unidade Consumidora" value={report.energia_unidade_consumidora} />
-                        <InfoRow label="Potência Transformador" value={report.energia_potencia_transformador} />
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Transformador:</span>
-                          <StatusBadge status={report.energia_transformador_ok} />
-                        </div>
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Protegido Gradil:</span>
-                          <StatusBadge status={report.energia_protegido_gradil} />
-                        </div>
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Protegido Cadeado:</span>
-                          <StatusBadge status={report.energia_protegido_cadeado} />
-                        </div>
+                        <EditableInfoRow label="Tipo Quadro" value={report.energia_tipo_quadro} fieldName="energia_tipo_quadro" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Fabricante" value={report.energia_fabricante_outra || report.energia_fabricante} fieldName="energia_fabricante" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Potência (kVA)" value={report.energia_potencia_kva?.toString()} fieldName="energia_potencia_kva" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Tensão Entrada" value={report.energia_tensao_entrada} fieldName="energia_tensao_entrada" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Disjuntor Entrada (A)" value={report.energia_disjuntor_entrada?.toString()} fieldName="energia_disjuntor_entrada" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Disjuntor QDCA (A)" value={report.energia_disjuntor_qdca?.toString()} fieldName="energia_disjuntor_qdca" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Unidade Consumidora" value={report.energia_unidade_consumidora} fieldName="energia_unidade_consumidora" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Potência Transformador" value={report.energia_potencia_transformador} fieldName="energia_potencia_transformador" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Transformador" value={report.energia_transformador_ok} fieldName="energia_transformador_ok" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Protegido Gradil" value={report.energia_protegido_gradil} fieldName="energia_protegido_gradil" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Protegido Cadeado" value={report.energia_protegido_cadeado} fieldName="energia_protegido_cadeado" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                       </div>
                       
                       {/* Energy Photos */}
@@ -987,11 +970,11 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                        <InfoRow label="Qtd Abordagens" value={report.fibra_qtd_abordagens?.toString()} />
-                        <InfoRow label="Caixas de Passagem" value={report.fibra_caixas_passagem_qtd?.toString()} />
-                        <InfoRow label="Caixas Subterrâneas" value={report.fibra_caixas_subterraneas_qtd?.toString()} />
-                        <InfoRow label="Subidas Laterais" value={report.fibra_subidas_laterais_qtd?.toString()} />
-                        <InfoRow label="Total DGOs" value={report.fibra_dgos_qtd?.toString()} />
+                        <EditableInfoRow label="Qtd Abordagens" value={report.fibra_qtd_abordagens?.toString()} fieldName="fibra_qtd_abordagens" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Caixas de Passagem" value={report.fibra_caixas_passagem_qtd?.toString()} fieldName="fibra_caixas_passagem_qtd" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Caixas Subterrâneas" value={report.fibra_caixas_subterraneas_qtd?.toString()} fieldName="fibra_caixas_subterraneas_qtd" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Subidas Laterais" value={report.fibra_subidas_laterais_qtd?.toString()} fieldName="fibra_subidas_laterais_qtd" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Total DGOs" value={report.fibra_dgos_qtd?.toString()} fieldName="fibra_dgos_qtd" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
                         <div className="flex items-center gap-2 py-1">
                           <span className="text-sm text-muted-foreground">DGOs OK:</span>
                           <Badge className="bg-success text-success-foreground">{report.fibra_dgos_ok_qtd || 0}</Badge>
@@ -1018,8 +1001,8 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                             <div key={num} className="p-3 border rounded-lg bg-muted/30">
                               <p className="font-medium mb-2">Abordagem {num}</p>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                                <InfoRow label="Tipo" value={tipo} />
-                                <InfoRow label="Descrição" value={descricao} />
+                                <EditableInfoRow label="Tipo" value={tipo} fieldName={`fibra_abord${num}_tipo`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                <EditableInfoRow label="Descrição" value={descricao} fieldName={`fibra_abord${num}_descricao`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                               </div>
                               {foto && (
                                 <div className="mt-3">
@@ -1074,9 +1057,9 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                                   <StatusBadge status={dgoCordoes} />
                                 </div>
                                 <div className="text-xs text-muted-foreground space-y-0.5 mb-3">
-                                  <p>ID: {dgoId || "N/A"}</p>
-                                  <p>Capacidade: {dgoCapacidade || "N/A"}</p>
-                                  <p>Estado Cordões: {dgoCordoes || "N/A"}</p>
+                                  <EditableInfoRow label="ID" value={dgoId} fieldName={`fibra_dgo${d}_id`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                  <EditableInfoRow label="Capacidade" value={dgoCapacidade} fieldName={`fibra_dgo${d}_capacidade`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                                  <EditableInfoRow label="Estado Cordões" value={dgoCordoes} fieldName={`fibra_dgo${d}_cordoes`} reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                                 </div>
                                 <PhotoGrid photos={[
                                   { url: dgoFoto, label: `DGO ${d}` },
@@ -1102,23 +1085,14 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Possui GMG:</span>
-                          <StatusBadge status={report.gmg_existe} />
-                        </div>
-                        <InfoRow label="Fabricante" value={report.gmg_fabricante} />
-                        <InfoRow label="Potência" value={report.gmg_potencia} />
-                        <InfoRow label="Combustível (%)" value={report.gmg_combustivel} />
-                        <InfoRow label="Capacidade Tanque (L)" value={report.gmg_autonomia?.toString()} />
-                        <InfoRow label="Último Teste" value={report.gmg_ultimo_teste} />
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Status:</span>
-                          <StatusBadge status={report.gmg_status} />
-                        </div>
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Alarme Ativo:</span>
-                          <StatusBadge status={report.gmg_alarme_ativo} />
-                        </div>
+                        <EditableInfoRow label="Possui GMG" value={report.gmg_existe} fieldName="gmg_existe" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Fabricante" value={report.gmg_fabricante} fieldName="gmg_fabricante" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Potência" value={report.gmg_potencia} fieldName="gmg_potencia" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Combustível (%)" value={report.gmg_combustivel} fieldName="gmg_combustivel" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Capacidade Tanque (L)" value={report.gmg_autonomia?.toString()} fieldName="gmg_autonomia" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} type="number" />
+                        <EditableInfoRow label="Último Teste" value={report.gmg_ultimo_teste} fieldName="gmg_ultimo_teste" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Status" value={report.gmg_status} fieldName="gmg_status" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Alarme Ativo" value={report.gmg_alarme_ativo} fieldName="gmg_alarme_ativo" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                       </div>
                       
                       {report.gmg_existe === "SIM" && (
@@ -1139,16 +1113,10 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Fibra Protegida:</span>
-                          <StatusBadge status={report.torre_protecao_fibra} />
-                        </div>
-                        <InfoRow label="Aterramento" value={report.torre_aterramento} />
-                        <InfoRow label="Zeladoria" value={report.torre_housekeeping} />
-                        <div className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-muted-foreground">Ninhos:</span>
-                          <StatusBadge status={report.torre_ninhos} />
-                        </div>
+                        <EditableInfoRow label="Fibra Protegida" value={report.torre_protecao_fibra} fieldName="torre_protecao_fibra" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Aterramento" value={report.torre_aterramento} fieldName="torre_aterramento" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Zeladoria" value={report.torre_housekeeping} fieldName="torre_housekeeping" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Ninhos" value={report.torre_ninhos} fieldName="torre_ninhos" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                       </div>
                       <PhotoGrid photos={[
                         { url: report.torre_foto_fibras_protegidas, label: "Fibras Protegidas" },
