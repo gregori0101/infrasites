@@ -1,46 +1,27 @@
 
 
-## Edição Inline em Todas as Abas do Modal de Detalhes
+## Adicionar Porcentagem nos Cards de Risco (Autonomia e Obsolescencia)
 
-Atualmente, a edição inline (clicar no lápis para editar diretamente) funciona apenas na aba "Geral" (campos Site, UF, Técnico, etc.). Esta alteração expande a funcionalidade para todas as abas do modal.
+Adicionar a porcentagem que cada categoria representa do total, exibida como badge nos cards de risco de autonomia e obsolescencia no painel de Baterias.
 
-### Abas e campos que passarão a ser editáveis
+### O que muda para o usuario
 
-**Abas de Gabinete (Gab 1, Gab 2, ...)**
-- Informações: Tipo, Proteção, Ativo, Tecnologias Acesso, Tecnologias Transporte
-- FCC: Fabricante, Tensão DC, Gerenciada, Gerenciável, Consumo DC, Qtd UR Suportadas, URs Instaladas
-- Baterias: Tipo, Fabricante, Capacidade, Data Fabricação, Estado, Colada, Com Gradil (dentro de cada banco) e Bancos Interligados
-- Climatização: Tipo, Ventiladores/PLC/Alarme status, Modelo e Status de cada AC
+- Cada card de risco (OK, Medio Risco, Alto Risco, Critico, Sem Banco) passa a exibir um badge com a porcentagem que aquela categoria representa do total
+- Exemplo: se ha 58 OK de 449 total, o card OK mostra "13%"
+- Melhora a leitura rapida dos dados sem precisar fazer calculo mental
 
-**Aba Energia**
-- Tipo Quadro, Fabricante, Potência, Tensão Entrada, Disjuntor Entrada, Disjuntor QDCA, Unidade Consumidora, Potência Transformador, Transformador OK, Protegido Gradil, Protegido Cadeado
+### Detalhes tecnicos
 
-**Aba Fibra**
-- Qtd Abordagens, Caixas de Passagem, Caixas Subterrâneas, Subidas Laterais, Total DGOs
-- Tipo e Descrição de cada abordagem
-- ID, Capacidade e Estado Cordões de cada DGO
+**Arquivo a editar:** `src/components/dashboard/panels/BateriaPanel.tsx`
 
-**Aba GMG/Torre**
-- GMG: Possui GMG, Fabricante, Potência, Combustível, Capacidade Tanque, Último Teste, Status, Alarme Ativo
-- Torre: Fibra Protegida, Aterramento, Zeladoria, Ninhos
+**1. Cards de Risco de Autonomia (AutonomyRiskCard)**
+- Adicionar prop `percentage` ao componente `AutonomyRiskCard` (linhas 79-119)
+- Exibir badge com a porcentagem ao lado do valor numerico
+- Calcular: `Math.round((value / totalAutonomy) * 100)` para cada card
+- Passar a porcentagem nas 4 instancias (OK, Medio, Alto, Critico) nas linhas 516-551
 
-### O que muda para o usuário
+**2. Cards de Risco de Obsolescencia (cards inline, linhas 680-755)**
+- Adicionar badge de porcentagem em cada card (OK, Medio Risco, Alto Risco, Sem Banco)
+- Calcular usando `totalObsolescencia` que ja existe no escopo do pie chart mas sera movido para ficar acessivel nos cards
 
-- Em todas as abas, ao passar o mouse sobre um campo de texto, aparece o ícone de lápis (igual já funciona na aba Geral)
-- Apenas usuários autorizados (Admin, Gestor ou autor do relatório) veem o ícone de edição
-- As alterações são salvas diretamente no banco de dados em tempo real
-
-### Detalhes técnicos
-
-**Arquivo a editar:** `src/components/dashboard/SiteDetailModal.tsx`
-
-Todas as instâncias de `InfoRow` nas abas de Gabinete, Energia, Fibra e GMG/Torre serão substituídas por `EditableInfoRow`, passando os parâmetros necessários:
-- `fieldName`: nome da coluna no banco (ex: `gab1_tipo`, `energia_tipo_quadro`, `gmg_fabricante`)
-- `reportId`: ID do relatório atual
-- `canEdit`: permissão do usuário (já calculada como `canEditReport`)
-- `onUpdate`: callback `handleFieldUpdate` (já existente)
-- `type`: "number" para campos numéricos
-
-Os campos que usam `StatusBadge` inline (como Ventiladores, PLC, Alarme, GMG existe) também serão convertidos para `EditableInfoRow` para permitir a edição do valor.
-
-Nenhuma alteração de banco de dados é necessária - a função `updateReportField` já suporta qualquer campo da tabela `reports`.
+**Formato do badge:** texto pequeno colorido ao lado do valor, usando o mesmo estilo de badge ja utilizado nos StatCards do projeto (ex: `bg-success/10 text-success` para OK, `bg-destructive/10 text-destructive` para critico).
