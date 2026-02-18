@@ -515,9 +515,15 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 flex-wrap">
             <Battery className="w-4 h-4" />
             {unitLabelSingular} por Risco de Autonomia ({totalAutonomy} {unitLabel})
+            {totalAutonomy > 0 && (
+              <>
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-success/10 text-success">OK: {Math.round((autonomy.ok / totalAutonomy) * 100)}%</span>
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {Math.round(((autonomy.medioRisco + autonomy.altoRisco + autonomy.critico) / totalAutonomy) * 100)}%</span>
+              </>
+            )}
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <AutonomyRiskCard
@@ -689,9 +695,15 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             const pct = (v: number) => totalObsolescencia > 0 ? Math.round((v / totalObsolescencia) * 100) : 0;
             return (
               <>
-                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 flex-wrap">
                   <Battery className="w-4 h-4" />
                   {unitLabelSingular} por Risco de Obsolescência ({totalObsolescencia} {unitLabel})
+                  {totalObsolescencia > 0 && (
+                    <>
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-success/10 text-success">OK: {pct(obsolescencia.ok)}%</span>
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {pct(obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco)}%</span>
+                    </>
+                  )}
                 </h3>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card 
