@@ -80,6 +80,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
     title, 
     value, 
     subtitle,
+    percentage,
     icon: Icon, 
     colorClass,
     bgClass,
@@ -88,6 +89,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
     title: string; 
     value: number; 
     subtitle: string;
+    percentage: number;
     icon: React.ElementType; 
     colorClass: string;
     bgClass: string;
@@ -104,7 +106,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <p className={`text-sm font-medium ${colorClass}`}>{title}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-bold tracking-tight">{value}</p>
+              <span className={cn("text-xs font-medium px-1.5 py-0.5 rounded", bgClass)}>
+                {percentage}%
+              </span>
+            </div>
             <p className="text-xs text-muted-foreground">{subtitle}</p>
             {onClick && (
               <p className="text-xs text-primary mt-1">Ver detalhes →</p>
@@ -517,6 +524,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               title="OK"
               value={autonomy.ok}
               subtitle="≥ 6h (sem GMG) ou ≥ 4h (com GMG)"
+              percentage={totalAutonomy > 0 ? Math.round((autonomy.ok / totalAutonomy) * 100) : 0}
               icon={ShieldCheck}
               colorClass="text-success"
               bgClass="bg-success/10 text-success"
@@ -526,6 +534,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               title="Médio Risco"
               value={autonomy.medioRisco}
               subtitle="≥ 4h e < 6h (sem gerador)"
+              percentage={totalAutonomy > 0 ? Math.round((autonomy.medioRisco / totalAutonomy) * 100) : 0}
               icon={ShieldAlert}
               colorClass="text-warning"
               bgClass="bg-warning/10 text-warning"
@@ -535,6 +544,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               title="Alto Risco"
               value={autonomy.altoRisco}
               subtitle="≥ 2h e < 4h de autonomia"
+              percentage={totalAutonomy > 0 ? Math.round((autonomy.altoRisco / totalAutonomy) * 100) : 0}
               icon={ShieldAlert}
               colorClass="text-accent"
               bgClass="bg-accent/10 text-accent"
@@ -544,6 +554,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               title="Crítico"
               value={autonomy.critico}
               subtitle="< 2 horas de autonomia"
+              percentage={totalAutonomy > 0 ? Math.round((autonomy.critico / totalAutonomy) * 100) : 0}
               icon={ShieldX}
               colorClass="text-destructive"
               bgClass="bg-destructive/10 text-destructive"
@@ -673,87 +684,107 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
         {/* Painel de Obsolescência - UNIFICADO */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Battery className="w-4 h-4" />
-            {unitLabelSingular} por Risco de Obsolescência (todas as baterias)
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card 
-              className="border-success/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
-              onClick={() => onDrillDown("obsolete-ok")}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-success">OK</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.ok}</p>
-                    <p className="text-xs text-muted-foreground">Baterias dentro do prazo</p>
-                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-success/10">
-                    <ShieldCheck className="w-5 h-5 text-success" />
-                  </div>
+          {(() => {
+            const totalObsolescencia = obsolescencia.ok + obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
+            const pct = (v: number) => totalObsolescencia > 0 ? Math.round((v / totalObsolescencia) * 100) : 0;
+            return (
+              <>
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Battery className="w-4 h-4" />
+                  {unitLabelSingular} por Risco de Obsolescência ({totalObsolescencia} {unitLabel})
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card 
+                    className="border-success/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+                    onClick={() => onDrillDown("obsolete-ok")}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium text-success">OK</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-3xl font-bold tracking-tight">{obsolescencia.ok}</p>
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-success/10 text-success">{pct(obsolescencia.ok)}%</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Baterias dentro do prazo</p>
+                          <p className="text-xs text-primary mt-1">Ver detalhes →</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-success/10">
+                          <ShieldCheck className="w-5 h-5 text-success" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card 
+                    className="border-warning/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+                    onClick={() => onDrillDown("obsolete-medio")}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium text-warning">Médio Risco</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-3xl font-bold tracking-tight">{obsolescencia.medioRisco}</p>
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-warning/10 text-warning">{pct(obsolescencia.medioRisco)}%</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Atenção recomendada</p>
+                          <p className="text-xs text-primary mt-1">Ver detalhes →</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-warning/10">
+                          <ShieldAlert className="w-5 h-5 text-warning" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card 
+                    className="border-destructive/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+                    onClick={() => onDrillDown("obsolete-alto")}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium text-destructive">Alto Risco</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-3xl font-bold tracking-tight">{obsolescencia.altoRisco}</p>
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">{pct(obsolescencia.altoRisco)}%</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Substituição recomendada</p>
+                          <p className="text-xs text-primary mt-1">Ver detalhes →</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-destructive/10">
+                          <ShieldX className="w-5 h-5 text-destructive" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card 
+                    className="border-muted cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
+                    onClick={() => onDrillDown("all")}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-3xl font-bold tracking-tight">{obsolescencia.semBanco}</p>
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{pct(obsolescencia.semBanco)}%</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Sem bateria registrada</p>
+                          <p className="text-xs text-primary mt-1">Ver detalhes →</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted">
+                      <Battery className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card 
-              className="border-warning/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
-              onClick={() => onDrillDown("obsolete-medio")}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-warning">Médio Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.medioRisco}</p>
-                    <p className="text-xs text-muted-foreground">Atenção recomendada</p>
-                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-warning/10">
-                    <ShieldAlert className="w-5 h-5 text-warning" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card 
-              className="border-destructive/50 cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
-              onClick={() => onDrillDown("obsolete-alto")}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-destructive">Alto Risco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.altoRisco}</p>
-                    <p className="text-xs text-muted-foreground">Substituição recomendada</p>
-                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-destructive/10">
-                    <ShieldX className="w-5 h-5 text-destructive" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card 
-              className="border-muted cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
-              onClick={() => onDrillDown("all")}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">Sem Banco</p>
-                    <p className="text-3xl font-bold tracking-tight">{obsolescencia.semBanco}</p>
-                    <p className="text-xs text-muted-foreground">Sem bateria registrada</p>
-                    <p className="text-xs text-primary mt-1">Ver detalhes →</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-muted">
-                    <Battery className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </>
+            );
+          })()}
 
           {/* Pie Chart OK vs NOK - Obsolescência */}
           {(() => {
