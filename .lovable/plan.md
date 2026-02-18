@@ -1,33 +1,46 @@
 
 
-## Correcao: Baterias OK sendo classificadas como NOK no dashboard
+## Edição Inline em Todas as Abas do Modal de Detalhes
 
-### Problema identificado
+Atualmente, a edição inline (clicar no lápis para editar diretamente) funciona apenas na aba "Geral" (campos Site, UF, Técnico, etc.). Esta alteração expande a funcionalidade para todas as abas do modal.
 
-O codigo do dashboard (`useDashboardStats.ts`, linha 570) verifica se o estado da bateria e `"BOA"` para classificar como OK. Porem, o formulario de checklist salva o estado como `"OK"` no banco de dados. Isso faz com que todas as baterias com estado "OK" sejam incorretamente contabilizadas como NOK.
+### Abas e campos que passarão a ser editáveis
 
-**Dados do site AMCDB no banco:**
-- 10 baterias, todas com `estado = "OK"`
-- Dashboard mostra todas como problematicas porque `"OK" !== "BOA"`
+**Abas de Gabinete (Gab 1, Gab 2, ...)**
+- Informações: Tipo, Proteção, Ativo, Tecnologias Acesso, Tecnologias Transporte
+- FCC: Fabricante, Tensão DC, Gerenciada, Gerenciável, Consumo DC, Qtd UR Suportadas, URs Instaladas
+- Baterias: Tipo, Fabricante, Capacidade, Data Fabricação, Estado, Colada, Com Gradil (dentro de cada banco) e Bancos Interligados
+- Climatização: Tipo, Ventiladores/PLC/Alarme status, Modelo e Status de cada AC
 
-### Solucao
+**Aba Energia**
+- Tipo Quadro, Fabricante, Potência, Tensão Entrada, Disjuntor Entrada, Disjuntor QDCA, Unidade Consumidora, Potência Transformador, Transformador OK, Protegido Gradil, Protegido Cadeado
 
-Alterar a condicao na linha 570 de `useDashboardStats.ts` para reconhecer tanto `"OK"` quanto `"BOA"` como estados saudaveis:
+**Aba Fibra**
+- Qtd Abordagens, Caixas de Passagem, Caixas Subterrâneas, Subidas Laterais, Total DGOs
+- Tipo e Descrição de cada abordagem
+- ID, Capacidade e Estado Cordões de cada DGO
 
-```typescript
-// Antes (bugado):
-if (estado === "BOA" || !estado) {
+**Aba GMG/Torre**
+- GMG: Possui GMG, Fabricante, Potência, Combustível, Capacidade Tanque, Último Teste, Status, Alarme Ativo
+- Torre: Fibra Protegida, Aterramento, Zeladoria, Ninhos
 
-// Depois (corrigido):
-if (estado === "OK" || estado === "BOA" || !estado) {
-```
+### O que muda para o usuário
 
-### Detalhes tecnicos
+- Em todas as abas, ao passar o mouse sobre um campo de texto, aparece o ícone de lápis (igual já funciona na aba Geral)
+- Apenas usuários autorizados (Admin, Gestor ou autor do relatório) veem o ícone de edição
+- As alterações são salvas diretamente no banco de dados em tempo real
 
-**Arquivo a editar:** `src/components/dashboard/useDashboardStats.ts` (linha 570)
+### Detalhes técnicos
 
-- Adicionar `estado === "OK"` na condicao que classifica baterias como saudaveis
-- Manter `"BOA"` por compatibilidade com eventuais registros antigos
-- Manter `!estado` para tratar baterias sem estado definido como OK (comportamento atual)
-- Impacto: corrige a contagem de baterias OK/NOK em todo o dashboard (Overview, painel de Baterias, drill-downs, e indicadores de site)
+**Arquivo a editar:** `src/components/dashboard/SiteDetailModal.tsx`
 
+Todas as instâncias de `InfoRow` nas abas de Gabinete, Energia, Fibra e GMG/Torre serão substituídas por `EditableInfoRow`, passando os parâmetros necessários:
+- `fieldName`: nome da coluna no banco (ex: `gab1_tipo`, `energia_tipo_quadro`, `gmg_fabricante`)
+- `reportId`: ID do relatório atual
+- `canEdit`: permissão do usuário (já calculada como `canEditReport`)
+- `onUpdate`: callback `handleFieldUpdate` (já existente)
+- `type`: "number" para campos numéricos
+
+Os campos que usam `StatusBadge` inline (como Ventiladores, PLC, Alarme, GMG existe) também serão convertidos para `EditableInfoRow` para permitir a edição do valor.
+
+Nenhuma alteração de banco de dados é necessária - a função `updateReportField` já suporta qualquer campo da tabela `reports`.
