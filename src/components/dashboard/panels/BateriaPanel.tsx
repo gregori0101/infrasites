@@ -521,7 +521,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             {totalAutonomy > 0 && (
               <>
                 <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-success/10 text-success">OK: {Math.round((autonomy.ok / totalAutonomy) * 100)}%</span>
-                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {Math.round(((autonomy.medioRisco + autonomy.altoRisco + autonomy.critico) / totalAutonomy) * 100)}%</span>
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {Math.round(((autonomy.altoRisco + autonomy.critico) / totalAutonomy) * 100)}%</span>
               </>
             )}
           </h3>
@@ -581,7 +581,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                       <Pie
                         data={[
                           { name: "OK", value: autonomy.ok, color: "hsl(var(--success))" },
-                          { name: "NOK", value: autonomy.medioRisco + autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
+                          { name: "NOK", value: autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
                         ].filter(d => d.value > 0)}
                         cx="50%"
                         cy="50%"
@@ -592,7 +592,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                       >
                         {[
                           { name: "OK", value: autonomy.ok, color: "hsl(var(--success))" },
-                          { name: "NOK", value: autonomy.medioRisco + autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
+                          { name: "NOK", value: autonomy.altoRisco + autonomy.critico, color: "hsl(var(--destructive))" },
                         ].filter(d => d.value > 0).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
@@ -608,7 +608,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-destructive" />
-                    <span className="text-sm">NOK: <strong>{autonomy.medioRisco + autonomy.altoRisco + autonomy.critico}</strong> {unitLabel}</span>
+                    <span className="text-sm">NOK: <strong>{autonomy.altoRisco + autonomy.critico}</strong> {unitLabel}</span>
                   </div>
                   {totalAutonomy > 0 && (
                     <p className="text-xs text-muted-foreground mt-2">
@@ -701,7 +701,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                   {totalObsolescencia > 0 && (
                     <>
                       <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-success/10 text-success">OK: {pct(obsolescencia.ok)}%</span>
-                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {pct(obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco)}%</span>
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">NOK: {pct(obsolescencia.altoRisco + obsolescencia.semBanco)}%</span>
                     </>
                   )}
                 </h3>
@@ -801,7 +801,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           {/* Pie Chart OK vs NOK - Obsolescência */}
           {(() => {
             const totalObsolescencia = obsolescencia.ok + obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
-            const nokObsolescencia = obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
+            const nokObsolescencia = obsolescencia.altoRisco + obsolescencia.semBanco;
             return (
               <Card className="mt-4">
                 <CardHeader className="pb-2">
