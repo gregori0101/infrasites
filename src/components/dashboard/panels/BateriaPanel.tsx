@@ -612,7 +612,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                   </div>
                   {totalAutonomy > 0 && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      {Math.round((autonomy.ok / totalAutonomy) * 100)}% OK · {Math.round(((autonomy.altoRisco + autonomy.critico) / totalAutonomy) * 100)}% NOK
+                      {Math.round(((autonomy.ok + autonomy.medioRisco) / totalAutonomy) * 100)}% OK · {Math.round(((autonomy.altoRisco + autonomy.critico) / totalAutonomy) * 100)}% NOK
                     </p>
                   )}
                 </div>
@@ -846,7 +846,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                       </div>
                       {totalObsolescencia > 0 && (
                         <p className="text-xs text-muted-foreground mt-2">
-                          {Math.round((obsolescencia.ok / totalObsolescencia) * 100)}% OK · {Math.round(((obsolescencia.altoRisco + obsolescencia.semBanco) / totalObsolescencia) * 100)}% NOK
+                          {Math.round(((obsolescencia.ok + obsolescencia.medioRisco) / totalObsolescencia) * 100)}% OK · {Math.round(((obsolescencia.altoRisco + obsolescencia.semBanco) / totalObsolescencia) * 100)}% NOK
                         </p>
                       )}
                     </div>
