@@ -331,8 +331,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
           <CardTitle className="text-base">Detalhamento por UF</CardTitle>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[250px]">
-            <Table>
+          <Table>
               <TableHeader>
                  <TableRow>
                    <TableHead>UF</TableHead>
@@ -383,9 +382,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
                    </TableRow>
                  )}
               </TableBody>
-            </Table>
-            <ScrollBar orientation="vertical" />
-          </ScrollArea>
+          </Table>
         </CardContent>
       </Card>
 
