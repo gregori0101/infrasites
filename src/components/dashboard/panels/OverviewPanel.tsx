@@ -11,19 +11,28 @@ interface Props {
   onDrillDown: (type: "total" | "ok" | "nok" | "batteries" | "batteries-critical" | "acs" | "acs-nok" | "gmg" | "zeladoria-ok") => void;
 }
 
+const COLORS = {
+  ok: "hsl(142, 76%, 36%)",
+  nok: "hsl(0, 84%, 60%)",
+};
+
 export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
   const { overview } = stats;
   
   const statusChart = [
-    { name: "Sites OK", value: overview.sitesOk, color: "#22c55e" },
-    { name: "Sites NOK", value: overview.sitesNok, color: "#ef4444" },
+    { name: "Sites OK", value: overview.sitesOk, color: COLORS.ok },
+    { name: "Sites NOK", value: overview.sitesNok, color: COLORS.nok },
   ].filter(item => item.value > 0);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-[#003366] rounded-full" />
-        <h2 className="font-semibold text-lg">Visão Geral - Painel Principal</h2>
+    <div className="space-y-6">
+      {/* Section Title */}
+      <div className="flex items-center gap-3">
+        <div className="w-1.5 h-7 bg-primary rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Visão Geral</h2>
+          <p className="text-xs text-muted-foreground">Resumo da infraestrutura</p>
+        </div>
       </div>
 
       {/* Main Stats Row */}
@@ -33,7 +42,7 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
           value={overview.totalSites}
           subtitle="Sites vistoriados"
           icon={LayoutDashboard}
-          iconBg="bg-[#003366]/10 text-[#003366]"
+          iconBg="bg-primary/10 text-primary"
           onClick={() => onDrillDown("total")}
         />
         <StatCard
@@ -110,33 +119,46 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
 
       {/* Status Chart */}
       {statusChart.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#003366]" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <TrendingUp className="w-3.5 h-3.5 text-primary" />
+              </div>
               Distribuição de Status
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-52">
+          <CardContent className="px-6">
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={statusChart}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={65}
+                    outerRadius={85}
+                    paddingAngle={4}
                     dataKey="value"
+                    strokeWidth={2}
+                    stroke="hsl(var(--card))"
                     label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                   >
                     {statusChart.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '0.75rem', 
+                      border: '1px solid hsl(var(--border))',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      fontSize: '0.8rem'
+                    }} 
+                  />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
