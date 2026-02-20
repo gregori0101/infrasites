@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsForDashboard } from "@/lib/reportDatabase";
+import { cn } from "@/lib/utils";
 
 // Dashboard components
 import { DashboardFiltersBar } from "@/components/dashboard/DashboardFilters";
@@ -455,45 +456,46 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-56 bg-card border-r border-border hidden lg:flex flex-col z-40">
-        <div className="p-4 border-b border-border bg-gradient-to-r from-[#003366] to-[#004d99]">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <Radio className="w-5 h-5 text-white" />
+      <aside className="fixed left-0 top-0 h-full w-60 bg-card border-r border-border hidden lg:flex flex-col z-40 shadow-lg">
+        <div className="p-5 border-b border-border bg-gradient-to-br from-primary to-primary/80">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-white/15 rounded-xl backdrop-blur-sm">
+              <Radio className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-bold text-white">InfraSites</h1>
-              <p className="text-xs text-white/70">Dashboard Executivo</p>
+              <h1 className="font-bold text-primary-foreground text-lg tracking-tight">InfraSites</h1>
+              <p className="text-xs text-primary-foreground/60 font-medium">Dashboard Executivo</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-3">
-          <p className="text-xs text-muted-foreground mb-2 px-2">Painéis</p>
-          <ul className="space-y-1">
+        <nav className="flex-1 p-3 overflow-y-auto">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold mb-3 px-3">Painéis</p>
+          <ul className="space-y-0.5">
             {panelItems.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => setActivePanel(item.id)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     activePanel === item.id
-                      ? "bg-[#003366]/10 text-[#003366] border-l-2 border-[#003366]"
-                      : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
+                      ? "bg-primary/10 text-primary shadow-sm border border-primary/15"
+                      : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className={cn("w-4 h-4", activePanel === item.id && "text-primary")} />
                   {item.label}
                 </button>
               </li>
             ))}
           </ul>
 
-          <p className="text-xs text-muted-foreground mb-2 px-2 mt-6">Gestão</p>
-          <ul className="space-y-1">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold mb-3 px-3 mt-6">Gestão</p>
+          <ul className="space-y-0.5">
             <li>
               <button
                 onClick={() => navigate("/atribuicoes")}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
               >
                 <ClipboardList className="w-4 h-4" />
                 Atribuir Vistorias
@@ -504,7 +506,7 @@ export default function Dashboard() {
                 <li>
                   <button
                     onClick={() => navigate("/sites")}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
                   >
                     <Building2 className="w-4 h-4" />
                     Gestão de Sites
@@ -513,7 +515,7 @@ export default function Dashboard() {
                 <li>
                   <button
                     onClick={() => navigate("/usuarios")}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
                   >
                     <UserCog className="w-4 h-4" />
                     Gerenciar Usuários
@@ -524,7 +526,7 @@ export default function Dashboard() {
             <li>
               <button
                 onClick={() => navigate("/historico")}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
               >
                 <FileText className="w-4 h-4" />
                 Relatórios
@@ -533,7 +535,7 @@ export default function Dashboard() {
             <li>
               <button
                 onClick={() => navigate("/?checklist=true")}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
               >
                 <MapPin className="w-4 h-4" />
                 Checklist
@@ -542,9 +544,9 @@ export default function Dashboard() {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground">Última atualização</p>
-          <p className="text-sm font-medium">
+        <div className="p-4 border-t border-border bg-muted/30">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Última atualização</p>
+          <p className="text-sm font-semibold mt-1">
             {dataUpdatedAt
               ? format(new Date(dataUpdatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })
               : "—"}
@@ -553,39 +555,39 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-56">
+      <main className="lg:ml-60">
         {/* Header Mobile */}
-        <header className="lg:hidden sticky top-0 z-50 bg-[#003366] text-white shadow-sm">
+        <header className="lg:hidden sticky top-0 z-50 bg-gradient-to-r from-primary to-primary/85 text-primary-foreground shadow-md">
           <div className="px-4 py-3 flex items-center gap-3">
             <VivoLogo className="h-6" />
             <div className="flex-1">
-              <h1 className="font-bold">Dashboard</h1>
+              <h1 className="font-bold text-lg tracking-tight">Dashboard</h1>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => refetch()}
               disabled={isLoading}
-              className="text-white hover:bg-white/10"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
             </Button>
           </div>
 
-
           {/* Mobile Panel Tabs */}
-          <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+          <div className="px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
             {panelItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActivePanel(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200",
                   activePanel === item.id
-                    ? "bg-white text-[#003366]"
-                    : "bg-white/20 text-white/80"
-                }`}
+                    ? "bg-primary-foreground text-primary shadow-md"
+                    : "bg-primary-foreground/15 text-primary-foreground/80 hover:bg-primary-foreground/25"
+                )}
               >
-                <item.icon className="w-3 h-3" />
+                <item.icon className="w-3.5 h-3.5" />
                 {item.label}
               </button>
             ))}
@@ -593,26 +595,27 @@ export default function Dashboard() {
         </header>
 
         {/* Desktop Header */}
-        <header className="hidden lg:block border-b border-border bg-card">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div>
+        <header className="hidden lg:block border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-30">
+          <div className="flex items-center justify-between px-8 py-5">
+            <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-foreground">Dashboard Executivo</h1>
-                <Badge variant="outline" className="text-xs">
-                  {!isVivoUser ? "Empresa: TEL" : filters.operadora === "all" ? "Todas as Empresas" : `Empresa: ${filters.operadora}`}
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard Executivo</h1>
+                <Badge variant="outline" className="text-xs font-semibold border-primary/30 text-primary">
+                  {!isVivoUser ? "TEL" : filters.operadora === "all" ? "Todas" : filters.operadora}
                 </Badge>
               </div>
-              <p className="text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
+              <p className="text-sm text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading} className="gap-2">
+                <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                Atualizar
               </Button>
             </div>
           </div>
         </header>
 
-        <div className="p-4 lg:p-6 space-y-6">
+        <div className="p-4 lg:px-8 lg:py-6 space-y-6">
           {/* Global Filters */}
           <DashboardFiltersBar
             filters={filters}
@@ -628,8 +631,9 @@ export default function Dashboard() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="flex items-center justify-center py-20">
-              <RefreshCw className="w-8 h-8 animate-spin text-[#003366]" />
+            <div className="flex flex-col items-center justify-center py-24 gap-3">
+              <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Carregando dados...</p>
             </div>
           )}
 
