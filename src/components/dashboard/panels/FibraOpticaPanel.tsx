@@ -9,6 +9,7 @@ import {
   Pie,
   Cell,
   Tooltip,
+  Legend,
 } from "recharts";
 
 export interface FibraStats {
@@ -35,16 +36,27 @@ interface Props {
   onDrillDown?: (type: "protegidos" | "desprotegidos" | "dgos-ok" | "dgos-nok" | "all") => void;
 }
 
+const TOOLTIP_STYLE = {
+  borderRadius: '0.75rem',
+  border: '1px solid hsl(var(--border))',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  fontSize: '0.8rem',
+  backgroundColor: "hsl(var(--card))",
+};
+
 export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
   const dgosPercent = stats.totalDGOs > 0 
     ? Math.round((stats.dgosOk / stats.totalDGOs) * 100) 
     : 0;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-blue-500 rounded-full" />
-        <h2 className="font-semibold text-lg">Painel Fibra Óptica</h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1.5 h-7 bg-blue-500 rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Painel Fibra Óptica</h2>
+          <p className="text-xs text-muted-foreground">Abordagens, DGOs e infraestrutura</p>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -97,8 +109,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
 
       {/* Secondary Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="pt-4 px-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
                 <Box className="w-5 h-5 text-amber-500" />
@@ -110,8 +122,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="pt-4 px-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-slate-500/10 flex items-center justify-center">
                 <Box className="w-5 h-5 text-slate-500" />
@@ -123,8 +135,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="pt-4 px-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                 <ArrowUpCircle className="w-5 h-5 text-cyan-500" />
@@ -141,14 +153,16 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Proteção de Fibra */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Cable className="w-4 h-4 text-blue-500" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-blue-500/10">
+                <Cable className="w-3.5 h-3.5 text-blue-500" />
+              </div>
               Proteção de Fibra (Abordagens)
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.protecaoChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
@@ -157,10 +171,12 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
                       data={stats.protecaoChart}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={5}
+                      innerRadius={65}
+                      outerRadius={85}
+                      paddingAngle={4}
                       dataKey="value"
+                      strokeWidth={2}
+                      stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}
                       labelLine={false}
                     >
@@ -168,13 +184,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -187,14 +198,16 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
         </Card>
 
         {/* Status DGOs */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-500" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-purple-500/10">
+                <Layers className="w-3.5 h-3.5 text-purple-500" />
+              </div>
               Status dos DGOs
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.dgosStatusChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
@@ -203,10 +216,12 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
                       data={stats.dgosStatusChart}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={5}
+                      innerRadius={65}
+                      outerRadius={85}
+                      paddingAngle={4}
                       dataKey="value"
+                      strokeWidth={2}
+                      stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}
                       labelLine={false}
                     >
@@ -214,13 +229,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -234,8 +244,8 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
       </div>
 
       {/* Summary Card */}
-      <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5">
-        <CardContent className="pt-4">
+      <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-border/60 shadow-sm">
+        <CardContent className="pt-4 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Cable className="w-6 h-6 text-blue-500" />

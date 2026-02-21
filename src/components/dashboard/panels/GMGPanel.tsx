@@ -18,10 +18,12 @@ interface Props {
   onDrillDown: (type: "gmg" | "gmg-no" | "gmg-ok" | "gmg-nok" | "gmg-alarme" | "gmg-total") => void;
 }
 
-const CHART_STYLE = {
+const TOOLTIP_STYLE = {
+  borderRadius: '0.75rem',
+  border: '1px solid hsl(var(--border))',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  fontSize: '0.8rem',
   backgroundColor: "hsl(var(--card))",
-  border: "1px solid hsl(var(--border))",
-  borderRadius: "8px",
 };
 
 export function GMGPanel({ stats, onDrillDown }: Props) {
@@ -35,10 +37,13 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
   ].filter(d => d.value > 0);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-warning rounded-full" />
-        <h2 className="font-semibold text-lg">Painel GMG (Gerador)</h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1.5 h-7 bg-warning rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Painel GMG (Gerador)</h2>
+          <p className="text-xs text-muted-foreground">Status operacional e distribuição dos geradores</p>
+        </div>
       </div>
 
       {/* GMG KPIs */}
@@ -98,27 +103,30 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
 
       {/* GMG Charts Row */}
       <div className="grid lg:grid-cols-3 gap-4">
-        {/* GMG Distribution (Com/Sem) */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Zap className="w-4 h-4 text-accent" />
+        {/* GMG Distribution */}
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-accent/10">
+                <Zap className="w-3.5 h-3.5 text-accent" />
+              </div>
               Distribuição GMG
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.energiaStatus.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={stats.energiaStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value"
+                    <Pie data={stats.energiaStatus} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
+                      strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
                       {stats.energiaStatus.map((entry, i) => (
                         <Cell key={`gmg-dist-${i}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} />
-                    <Legend />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -130,27 +138,30 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
           </CardContent>
         </Card>
 
-        {/* GMG Status (OK/NOK) */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-success" />
+        {/* GMG Status */}
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-success/10">
+                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              </div>
               Status Operacional GMG
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {gmgStatusChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={gmgStatusChart} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value"
+                    <Pie data={gmgStatusChart} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
+                      strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
                       {gmgStatusChart.map((entry, i) => (
                         <Cell key={`gmg-st-${i}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} />
-                    <Legend />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -163,26 +174,29 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
         </Card>
 
         {/* GMG Combustível */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Fuel className="w-4 h-4 text-warning" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-warning/10">
+                <Fuel className="w-3.5 h-3.5 text-warning" />
+              </div>
               Tipo de Combustível
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.gmgCombustivelDistribution.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={stats.gmgCombustivelDistribution} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value"
+                    <Pie data={stats.gmgCombustivelDistribution} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
+                      strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
                       {stats.gmgCombustivelDistribution.map((entry, i) => (
                         <Cell key={`comb-${i}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} />
-                    <Legend />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -198,14 +212,16 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
       {/* GMG Detail Tables Row */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* GMG Fabricantes */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Factory className="w-4 h-4 text-accent" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-accent/10">
+                <Factory className="w-3.5 h-3.5 text-accent" />
+              </div>
               Fabricantes de GMG
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.gmgFabricanteDistribution.length > 0 ? (
               <div className="space-y-2 max-h-52 overflow-y-auto">
                 {stats.gmgFabricanteDistribution.map((item, i) => (
@@ -224,14 +240,16 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
         </Card>
 
         {/* GMG Potências */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-primary" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Gauge className="w-3.5 h-3.5 text-primary" />
+              </div>
               Potências de GMG
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.gmgPotenciaDistribution.length > 0 ? (
               <div className="space-y-2 max-h-52 overflow-y-auto">
                 {stats.gmgPotenciaDistribution.map((item, i) => (

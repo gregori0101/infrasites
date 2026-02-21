@@ -124,9 +124,12 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
 
       {/* Tipo de Gabinete */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="font-semibold text-lg">Tipo de Gabinete</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-primary rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Tipo de Gabinete</h2>
+            <p className="text-xs text-muted-foreground">Distribuição por classificação física</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
@@ -168,9 +171,12 @@ export function GabinetePanel({ gabinetes, onDrillDown }: Props) {
 
       {/* Proteção */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-warning rounded-full" />
-          <h2 className="font-semibold text-lg">Proteção dos Gabinetes</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-warning rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Proteção dos Gabinetes</h2>
+            <p className="text-xs text-muted-foreground">Status de segurança física</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

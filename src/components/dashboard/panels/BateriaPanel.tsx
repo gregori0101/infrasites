@@ -161,9 +161,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO 1: Baterias de Chumbo */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-slate-500 rounded-full" />
-          <h2 className="font-semibold text-lg">Baterias de Chumbo (Polímero e Monobloco)</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-slate-500 rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Baterias de Chumbo (Polímero e Monobloco)</h2>
+            <p className="text-xs text-muted-foreground">Distribuição por UF</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
@@ -218,9 +221,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO 2: Baterias de Lítio */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-emerald-500 rounded-full" />
-          <h2 className="font-semibold text-lg">Baterias de Lítio</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-emerald-500 rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Baterias de Lítio</h2>
+            <p className="text-xs text-muted-foreground">Distribuição por UF</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
@@ -275,9 +281,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO: Proteção das Baterias */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="font-semibold text-lg">Proteção das Baterias</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-primary rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Proteção das Baterias</h2>
+            <p className="text-xs text-muted-foreground">Colagem e gradil de proteção</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -362,9 +371,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO 3: Regras de Troca de Bateria */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-destructive rounded-full" />
-          <h2 className="font-semibold text-lg">Regras de Troca de Bateria</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-destructive rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Regras de Troca de Bateria</h2>
+            <p className="text-xs text-muted-foreground">Critérios obrigatórios de substituição</p>
+          </div>
         </div>
 
         {/* Regras Obrigatórias (texto explicativo) */}
@@ -509,9 +521,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO 5: Risco de Autonomia - UNIFICADO */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="font-semibold text-lg">Risco de Autonomia de Bateria</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-primary rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Risco de Autonomia de Bateria</h2>
+            <p className="text-xs text-muted-foreground">Classificação por horas de backup</p>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -569,7 +584,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
           </div>
 
           {/* Pie Chart OK vs NOK */}
-          <Card className="mt-4">
+          <Card className="mt-4 border-border/60 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Autonomia: OK vs NOK</CardTitle>
             </CardHeader>
@@ -585,9 +600,11 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                         ].filter(d => d.value > 0)}
                         cx="50%"
                         cy="50%"
-                        innerRadius={40}
-                        outerRadius={70}
-                        paddingAngle={2}
+                        innerRadius={65}
+                        outerRadius={85}
+                        paddingAngle={4}
+                        strokeWidth={2}
+                        stroke="hsl(var(--card))"
                         dataKey="value"
                       >
                         {[
@@ -683,9 +700,12 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
       {/* SEÇÃO 6: Obsolescência - UNIFICADA */}
       <div className="space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-6 bg-warning rounded-full" />
-          <h2 className="font-semibold text-lg">Risco de Obsolescência de Bateria</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1.5 h-7 bg-warning rounded-full" />
+          <div>
+            <h2 className="font-bold text-lg tracking-tight">Risco de Obsolescência de Bateria</h2>
+            <p className="text-xs text-muted-foreground">Classificação por tempo de uso</p>
+          </div>
         </div>
 
         {/* Painel de Obsolescência - UNIFICADO */}
@@ -803,7 +823,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             const totalObsolescencia = obsolescencia.ok + obsolescencia.medioRisco + obsolescencia.altoRisco + obsolescencia.semBanco;
             const nokObsolescencia = obsolescencia.altoRisco + obsolescencia.semBanco;
             return (
-              <Card className="mt-4">
+              <Card className="mt-4 border-border/60 shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">Obsolescência: OK vs NOK</CardTitle>
                 </CardHeader>
@@ -819,9 +839,11 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                             ].filter(d => d.value > 0)}
                             cx="50%"
                             cy="50%"
-                            innerRadius={40}
-                            outerRadius={70}
-                            paddingAngle={2}
+                            innerRadius={65}
+                            outerRadius={85}
+                            paddingAngle={4}
+                            strokeWidth={2}
+                            stroke="hsl(var(--card))"
                             dataKey="value"
                           >
                             {[

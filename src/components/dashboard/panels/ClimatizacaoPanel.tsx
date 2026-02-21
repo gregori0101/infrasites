@@ -54,9 +54,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-cyan-600 rounded-full" />
-        <h2 className="font-semibold text-lg">Painel Climatização</h2>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1.5 h-7 bg-cyan-600 rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Painel Climatização</h2>
+          <p className="text-xs text-muted-foreground">Ar condicionado, ventilação e PLC</p>
+        </div>
       </div>
 
       {/* Toggle Visão Gabinete / Equipamento */}
@@ -182,10 +185,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
         <div className="grid lg:grid-cols-2 gap-4">
           {/* Type Distribution Pie */}
           {stats.climatizacaoChart.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Thermometer className="w-4 h-4 text-cyan-600" />
+          <Card className="border-border/60 shadow-sm">
+              <CardHeader className="pb-2 px-6">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-cyan-600/10">
+                    <Thermometer className="w-3.5 h-3.5 text-cyan-600" />
+                  </div>
                   Distribuição por Tipo
                 </CardTitle>
               </CardHeader>
@@ -197,9 +202,11 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                         data={stats.climatizacaoChart}
                         cx="50%"
                         cy="50%"
-                        innerRadius={40}
-                        outerRadius={65}
-                        paddingAngle={5}
+                        innerRadius={65}
+                        outerRadius={85}
+                        paddingAngle={4}
+                        strokeWidth={2}
+                        stroke="hsl(var(--card))"
                         dataKey="value"
                         label={({ name, value }) => `${name}: ${value}`}
                       >
@@ -207,8 +214,8 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip contentStyle={{ borderRadius: '0.75rem', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '0.8rem', backgroundColor: 'hsl(var(--card))' }} />
+                      <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -218,10 +225,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
 
           {/* PLC & Fan Bar Chart */}
           {(stats.plcOkCount + stats.plcNokCount + stats.fanOkCount + stats.fanNokCount) > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Gauge className="w-4 h-4 text-violet-500" />
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader className="pb-2 px-6">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-violet-500/10">
+                    <Gauge className="w-3.5 h-3.5 text-violet-500" />
+                  </div>
                   Status PLC & Fan por Site
                 </CardTitle>
               </CardHeader>
@@ -341,10 +350,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
             <div className="grid lg:grid-cols-2 gap-4">
               {/* Equipment Status Bar */}
               {(stats.acsOkCount + stats.acsNokCount) > 0 && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-cyan-600" />
+                <Card className="border-border/60 shadow-sm">
+                  <CardHeader className="pb-2 px-6">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-cyan-600/10">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-600" />
+                      </div>
                       Status Ar Condicionado
                     </CardTitle>
                   </CardHeader>
@@ -387,10 +398,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
 
               {/* AC Model Distribution */}
               {modelDistribution.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Wind className="w-4 h-4 text-blue-500" />
+                <Card className="border-border/60 shadow-sm">
+                  <CardHeader className="pb-2 px-6">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-blue-500/10">
+                        <Wind className="w-3.5 h-3.5 text-blue-500" />
+                      </div>
                       Modelos de Ar Condicionado
                     </CardTitle>
                   </CardHeader>
@@ -402,9 +415,11 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                             data={modelDistribution}
                             cx="50%"
                             cy="50%"
-                            innerRadius={40}
-                            outerRadius={65}
-                            paddingAngle={3}
+                            innerRadius={65}
+                            outerRadius={85}
+                            paddingAngle={4}
+                            strokeWidth={2}
+                            stroke="hsl(var(--card))"
                             dataKey="value"
                             label={({ name, value }) => `${name}: ${value}`}
                           >
@@ -412,8 +427,8 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip />
-                          <Legend wrapperStyle={{ fontSize: 11 }} />
+                          <Tooltip contentStyle={{ borderRadius: '0.75rem', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '0.8rem', backgroundColor: 'hsl(var(--card))' }} />
+                          <Legend wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500 }} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -424,10 +439,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
 
             {/* AC Model Table */}
             {modelDistribution.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Wrench className="w-4 h-4 text-blue-500" />
+              <Card className="border-border/60 shadow-sm">
+                <CardHeader className="pb-2 px-6">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-blue-500/10">
+                      <Wrench className="w-3.5 h-3.5 text-blue-500" />
+                    </div>
                     Detalhamento por Modelo
                   </CardTitle>
                 </CardHeader>
@@ -518,10 +535,12 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
 
             {/* Fan Status Bar */}
             {(stats.fanOkCount + stats.fanNokCount) > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Fan className="w-4 h-4 text-emerald-500" />
+              <Card className="border-border/60 shadow-sm">
+                <CardHeader className="pb-2 px-6">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10">
+                      <Fan className="w-3.5 h-3.5 text-emerald-500" />
+                    </div>
                     Status Fan / Ventilação
                   </CardTitle>
                 </CardHeader>
