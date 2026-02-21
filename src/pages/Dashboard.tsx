@@ -22,7 +22,9 @@ import {
   UserCog,
   FileText,
   FileSearch,
+  Menu,
 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
@@ -572,6 +574,60 @@ export default function Dashboard() {
             >
               <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
             </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-6 space-y-1">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold mb-3 px-3">Gestão</p>
+                  <button
+                    onClick={() => navigate("/atribuicoes")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                  >
+                    <ClipboardList className="w-4 h-4" />
+                    Atribuir Vistorias
+                  </button>
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => navigate("/sites")}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                      >
+                        <Building2 className="w-4 h-4" />
+                        Gestão de Sites
+                      </button>
+                      <button
+                        onClick={() => navigate("/usuarios")}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                      >
+                        <UserCog className="w-4 h-4" />
+                        Gerenciar Usuários
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => navigate("/historico")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Relatórios
+                  </button>
+                  <button
+                    onClick={() => navigate("/?checklist=true")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Checklist
+                  </button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
 
           {/* Mobile Panel Tabs */}
