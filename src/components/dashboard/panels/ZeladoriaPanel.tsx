@@ -30,10 +30,13 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
     : 0;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-success rounded-full" />
-        <h2 className="font-semibold text-lg">Painel Zeladoria / Torre</h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1.5 h-7 bg-success rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Painel Zeladoria / Torre</h2>
+          <p className="text-xs text-muted-foreground">Limpeza, conservação e aterramento</p>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -85,11 +88,11 @@ export function ZeladoriaPanel({ stats, sites, onDrillDown }: Props) {
       </div>
 
       {/* Progress Bars */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Indicadores de Conformidade</CardTitle>
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="pb-2 px-6">
+          <CardTitle className="text-sm font-semibold">Indicadores de Conformidade</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 px-6">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">

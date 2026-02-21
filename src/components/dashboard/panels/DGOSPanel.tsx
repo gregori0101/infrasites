@@ -21,12 +21,23 @@ interface Props {
   onDrillDown: (type: "total" | "ok" | "nok") => void;
 }
 
+const TOOLTIP_STYLE = {
+  borderRadius: '0.75rem',
+  border: '1px solid hsl(var(--border))',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  fontSize: '0.8rem',
+  backgroundColor: "hsl(var(--card))",
+};
+
 export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1 h-6 bg-primary rounded-full" />
-        <h2 className="font-semibold text-lg">Painel DGOS - Dados Gerais</h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1.5 h-7 bg-primary rounded-full" />
+        <div>
+          <h2 className="font-bold text-lg tracking-tight">Painel DGOS - Dados Gerais</h2>
+          <p className="text-xs text-muted-foreground">Visão geral dos sites inspecionados</p>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -72,14 +83,16 @@ export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Monthly Trend */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <TrendingUp className="w-3.5 h-3.5 text-primary" />
+              </div>
               Vistorias por Mês
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.vistoriasPorMes.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
@@ -91,13 +104,7 @@ export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
                       className="text-muted-foreground"
                     />
                     <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
                     <Line
                       type="monotone"
                       dataKey="count"
@@ -118,14 +125,16 @@ export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
         </Card>
 
         {/* UF Distribution */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" />
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="pb-2 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <MapPin className="w-3.5 h-3.5 text-primary" />
+              </div>
               Distribuição por UF
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6">
             {stats.ufDistribution.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
@@ -138,11 +147,7 @@ export function DGOSPanel({ stats, sites, onDrillDown }: Props) {
                       tick={{ fontSize: 12 }}
                     />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
+                      contentStyle={TOOLTIP_STYLE}
                       formatter={(value, name) => [
                         value,
                         name === "ok" ? "OK" : name === "nok" ? "Problemas" : "Total",

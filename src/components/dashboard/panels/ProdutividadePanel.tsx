@@ -326,11 +326,11 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
       </div>
 
       {/* Tabela Detalhada por UF - Movida para cima */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Detalhamento por UF</CardTitle>
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="pb-2 px-6">
+          <CardTitle className="text-base font-semibold">Detalhamento por UF</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6">
           <Table>
               <TableHeader>
                  <TableRow>
@@ -388,7 +388,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
 
       {/* Gráficos de Evolução */}
       {/* Evolução Diária - Full Width */}
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -518,7 +518,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
       </Card>
 
       {/* Produtividade Completa dos Técnicos - Full Width */}
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -665,7 +665,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
       </Card>
 
       {/* Status por UF */}
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <MapPin className="w-4 h-4 text-blue-500" />
@@ -687,9 +687,11 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
+                      borderRadius: '0.75rem',
+                      border: '1px solid hsl(var(--border))',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      fontSize: '0.8rem',
+                      backgroundColor: "hsl(var(--card))",
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -711,7 +713,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
       {/* Produtividade Diária por Técnico e UF */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Produtividade Diária por Técnico */}
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
@@ -768,7 +770,7 @@ export function ProdutividadePanel({ stats, onDrillDown, areaAtuacaoFilter = "al
         </Card>
 
         {/* Produtividade Diária por UF */}
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <MapPin className="w-4 h-4 text-primary" />
