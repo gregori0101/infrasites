@@ -18,8 +18,13 @@ import {
   RefreshCw,
   Mail,
   Calendar,
-  UserCog
+  UserCog,
+  KeyRound,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -68,6 +73,14 @@ export default function UserManagement() {
     action: 'approve' | 'reject';
     email: string;
   } | null>(null);
+  const [passwordDialog, setPasswordDialog] = useState<{
+    open: boolean;
+    userId: string;
+    email: string;
+  } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
@@ -309,6 +322,43 @@ export default function UserManagement() {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!passwordDialog || !newPassword) return;
+    if (newPassword.length < 6) {
+      toast({
+        title: 'Senha muito curta',
+        description: 'A senha deve ter pelo menos 6 caracteres',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { userId: passwordDialog.userId, newPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: 'Senha alterada',
+        description: `Senha de ${passwordDialog.email} foi atualizada com sucesso`,
+      });
+      setPasswordDialog(null);
+      setNewPassword('');
+      setShowPassword(false);
+    } catch (err: any) {
+      console.error('Error resetting password:', err);
+      toast({
+        title: 'Erro',
+        description: err?.message || 'Não foi possível alterar a senha',
+        variant: 'destructive',
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
 
@@ -543,6 +593,19 @@ export default function UserManagement() {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                title="Alterar senha"
+                                disabled={actionLoading === u.user_id}
+                                onClick={() => {
+                                  setPasswordDialog({ open: true, userId: u.user_id, email: u.email });
+                                  setNewPassword('');
+                                  setShowPassword(false);
+                                }}
+                              >
+                                <KeyRound className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 disabled={actionLoading === u.user_id}
                                 onClick={() => setConfirmDialog({ 
@@ -614,6 +677,62 @@ export default function UserManagement() {
                 : users.find(u => u.user_id === confirmDialog?.userId)?.approved 
                   ? 'Revogar' 
                   : 'Recusar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={passwordDialog?.open} onOpenChange={(open) => {
+        if (!open) {
+          setPasswordDialog(null);
+          setNewPassword('');
+          setShowPassword(false);
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Alterar Senha
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Definir nova senha para <span className="font-medium">{passwordDialog?.email}</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4 space-y-3">
+            <Label htmlFor="new-password">Nova Senha</Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            {newPassword.length > 0 && newPassword.length < 6 && (
+              <p className="text-xs text-destructive">A senha deve ter pelo menos 6 caracteres</p>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handlePasswordReset}
+              disabled={passwordLoading || newPassword.length < 6}
+            >
+              {passwordLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Alterar Senha
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
