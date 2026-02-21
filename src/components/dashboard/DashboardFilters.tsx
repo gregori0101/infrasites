@@ -39,7 +39,7 @@ interface Props {
 }
 
 export function DashboardFiltersBar({ filters, onFiltersChange, uniqueUFs, uniqueTechnicians, uniqueSiteTypes, uniqueSiteCodes, uniqueMunicipios, showOperadoraFilter = false, showAreaAtuacaoFilter = false }: Props) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const hasActiveFilters = 
     filters.technician || 
