@@ -21,6 +21,8 @@ const UserManagement = lazy(() => import("./pages/UserManagement"));
 const SiteManagement = lazy(() => import("./pages/SiteManagement"));
 const AssignmentManagement = lazy(() => import("./pages/AssignmentManagement"));
 const Ranking = lazy(() => import("./pages/Ranking"));
+const Profile = lazy(() => import("./pages/Profile"));
+const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
 const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -140,6 +142,16 @@ const App = () => {
                   <Route path="/ranking" element={
                     <ProtectedRoute>
                       <Ranking />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/perfil" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/logs" element={
+                    <ProtectedRoute requireAdmin>
+                      <ActivityLogs />
                     </ProtectedRoute>
                   } />
                   <Route path="/instalar" element={<Install />} />

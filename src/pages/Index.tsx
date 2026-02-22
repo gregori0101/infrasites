@@ -6,7 +6,8 @@ import { useChecklist } from "@/contexts/ChecklistContext";
 import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, Inbox } from "lucide-react";
+import { ClipboardList, Inbox, UserCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChecklistData } from "@/types/checklist";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -73,22 +74,27 @@ const IndexInner = () => {
         <div className="min-h-screen bg-background">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
             <div className="sticky top-0 z-40 bg-card border-b">
-              <TabsList className="w-full justify-start rounded-none h-12 p-0 bg-transparent">
-                <TabsTrigger 
-                  value="inbox" 
-                  className="flex-1 h-full rounded-none data-[state=active]:bg-primary/10 data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  <Inbox className="w-4 h-4 mr-2" />
-                  Minhas Vistorias
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="checklist"
-                  className="flex-1 h-full rounded-none data-[state=active]:bg-primary/10 data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  <ClipboardList className="w-4 h-4 mr-2" />
-                  Checklist
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex items-center">
+                <TabsList className="flex-1 justify-start rounded-none h-12 p-0 bg-transparent">
+                  <TabsTrigger 
+                    value="inbox" 
+                    className="flex-1 h-full rounded-none data-[state=active]:bg-primary/10 data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                  >
+                    <Inbox className="w-4 h-4 mr-2" />
+                    Minhas Vistorias
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="checklist"
+                    className="flex-1 h-full rounded-none data-[state=active]:bg-primary/10 data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                  >
+                    <ClipboardList className="w-4 h-4 mr-2" />
+                    Checklist
+                  </TabsTrigger>
+                </TabsList>
+                <Button variant="ghost" size="icon" className="mr-2" onClick={() => navigate('/perfil')}>
+                  <UserCircle className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
             
             <TabsContent value="inbox" className="mt-0 p-4">

@@ -68,6 +68,7 @@ import {
   AssignmentStatus
 } from "@/lib/assignmentDatabase";
 import vivoLogo from "@/assets/vivo-logo.png";
+import { logActivity } from "@/lib/activityLogger";
 
 interface Technician {
   id: string;
@@ -125,9 +126,10 @@ export default function AssignmentManagement() {
 
   const createMutation = useMutation({
     mutationFn: createAssignment,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
       queryClient.invalidateQueries({ queryKey: ['all-sites'] });
+      logActivity('assignment_created', 'assignment', undefined, { site_id: selectedSite, technician_id: selectedTechnician });
       toast.success('Vistoria atribuída com sucesso');
       setAssignDialogOpen(false);
       resetForm();
@@ -142,6 +144,7 @@ export default function AssignmentManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
       queryClient.invalidateQueries({ queryKey: ['all-sites'] });
+      logActivity('assignment_deleted', 'assignment', assignmentToDelete?.id, { site_code: assignmentToDelete?.site?.site_code });
       toast.success('Atribuição removida');
       setDeleteDialogOpen(false);
       setAssignmentToDelete(null);
