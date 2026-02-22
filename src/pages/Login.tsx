@@ -43,16 +43,32 @@ export default function Login() {
       return;
     }
 
+    if (!password || password.length < 6) {
+      setError('A nova senha deve ter pelo menos 6 caracteres');
+      setIsLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
+      const { data, error: fnError } = await supabase.functions.invoke('public-reset-password', {
+        body: { email, newPassword: password },
       });
 
-      if (error) {
-        setError(error.message);
+      if (fnError) {
+        setError('Erro ao redefinir senha');
+      } else if (data?.error) {
+        setError(data.error);
       } else {
-        setSuccess('Se este email estiver cadastrado, você receberá um link para redefinir sua senha.');
+        setSuccess('Senha redefinida com sucesso! Faça login com a nova senha.');
         setEmail('');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (err) {
       setError('Erro ao processar sua solicitação');
@@ -142,7 +158,7 @@ export default function Login() {
   };
 
   const getDescription = () => {
-    if (isForgotPassword) return 'Informe seu email para receber o link de recuperação';
+    if (isForgotPassword) return 'Informe seu email e escolha uma nova senha';
     return isLogin
       ? 'Acesse o sistema de checklist de sites'
       : 'Cadastre-se para acessar o sistema (requer aprovação)';
@@ -178,6 +194,30 @@ export default function Login() {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Nova Senha</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewPassword">Confirmar Nova Senha</Label>
+                  <Input
+                    id="confirmNewPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
                 {error && (
                   <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
                     <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -198,7 +238,7 @@ export default function Login() {
                   ) : (
                     <KeyRound className="w-4 h-4 mr-2" />
                   )}
-                  Enviar Link de Recuperação
+                  Redefinir Senha
                 </Button>
 
                 <div className="text-center">
@@ -209,6 +249,8 @@ export default function Login() {
                       setViewMode('login');
                       setError('');
                       setSuccess('');
+                      setPassword('');
+                      setConfirmPassword('');
                     }}
                   >
                     <ArrowLeft className="w-3 h-3" />
