@@ -23,6 +23,8 @@ import {
   FileText,
   FileSearch,
   Menu,
+  UserCircle,
+  ScrollText,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -539,8 +541,28 @@ export default function Dashboard() {
                 onClick={() => navigate("/?checklist=true")}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
               >
-                <MapPin className="w-4 h-4" />
+              <MapPin className="w-4 h-4" />
                 Checklist
+              </button>
+            </li>
+            {isAdmin && (
+              <li>
+                <button
+                  onClick={() => navigate("/logs")}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                >
+                  <ScrollText className="w-4 h-4" />
+                  Logs de Atividade
+                </button>
+              </li>
+            )}
+            <li>
+              <button
+                onClick={() => navigate("/perfil")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+              >
+                <UserCircle className="w-4 h-4" />
+                Meu Perfil
               </button>
             </li>
           </ul>
@@ -624,6 +646,22 @@ export default function Dashboard() {
                   >
                     <MapPin className="w-4 h-4" />
                     Checklist
+                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate("/logs")}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                    >
+                      <ScrollText className="w-4 h-4" />
+                      Logs de Atividade
+                    </button>
+                  )}
+                  <button
+                    onClick={() => navigate("/perfil")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                  >
+                    <UserCircle className="w-4 h-4" />
+                    Meu Perfil
                   </button>
                 </nav>
               </SheetContent>

@@ -29,6 +29,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet';
+import { logActivity } from '@/lib/activityLogger';
 import {
   Select,
   SelectContent,
@@ -162,6 +163,8 @@ export default function UserManagement() {
 
       if (error) throw error;
 
+      await logActivity('user_approved', 'user', userId, { email: users.find(u => u.user_id === userId)?.email });
+
       toast({
         title: 'Usuário aprovado',
         description: 'O usuário agora pode acessar o sistema',
@@ -195,6 +198,8 @@ export default function UserManagement() {
 
         if (error) throw error;
 
+        await logActivity('user_rejected', 'user', userId, { email: targetUser?.email });
+
         toast({
           title: 'Cadastro recusado',
           description: 'A solicitação de cadastro foi removida',
@@ -211,6 +216,8 @@ export default function UserManagement() {
           .eq('user_id', userId);
 
         if (error) throw error;
+
+        await logActivity('user_access_revoked', 'user', userId, { email: targetUser?.email });
 
         toast({
           title: 'Acesso revogado',
@@ -241,6 +248,8 @@ export default function UserManagement() {
         .eq('user_id', userId);
 
       if (error) throw error;
+
+      await logActivity('user_role_changed', 'user', userId, { newRole, email: users.find(u => u.user_id === userId)?.email });
 
       const roleLabels = {
         administrador: 'Administrador',
@@ -275,6 +284,8 @@ export default function UserManagement() {
         .eq('user_id', userId);
 
       if (error) throw error;
+
+      await logActivity('user_operadora_changed', 'user', userId, { newOperadora, email: users.find(u => u.user_id === userId)?.email });
 
       toast({
         title: 'Empresa alterada',
@@ -339,6 +350,8 @@ export default function UserManagement() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      await logActivity('password_reset_admin', 'user', passwordDialog.userId, { email: passwordDialog.email });
 
       toast({
         title: 'Senha alterada',

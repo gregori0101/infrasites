@@ -11,6 +11,7 @@ interface UserRole {
   user_id: string;
   role: AppRole;
   operadora: Operadora;
+  area_atuacao: string | null;
   approved: boolean;
   approved_by: string | null;
   approved_at: string | null;

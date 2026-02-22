@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChecklist } from "@/contexts/ChecklistContext";
+import { logActivity } from "@/lib/activityLogger";
 
 const ESTADOS_BR = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -271,6 +272,7 @@ export default function ReportsHistory() {
       // Avoid broken references: clear any assignment that points to this report.
       await clearReportLinkFromAssignments(selectedReport.id);
       await deleteReportById(selectedReport.id);
+      await logActivity('report_deleted', 'report', selectedReport.id, { site_code: selectedReport.site_code });
       toast.success("Relatório excluído com sucesso!");
       setSelectedReport(null);
       setShouldDeletePhotos(false);
