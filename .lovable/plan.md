@@ -1,101 +1,124 @@
 
-# Plano: Atualizar e Profissionalizar Todos os Painéis do Dashboard
 
-## Objetivo
-Padronizar a aparencia visual de todos os paineis do dashboard, aplicando um estilo consistente e profissional em cada um. Atualmente, os paineis possuem estilos mistos -- alguns usam headers com barra colorida, outros com gradiente; tooltips, graficos e cards tem estilos diferentes entre si. O objetivo e unificar tudo.
+# Plano: Perfil do Usuario + Logs de Atividade
 
-## Mudancas Visuais a Aplicar
+## 1. Pagina de Perfil do Usuario
 
-### 1. Headers de Secao Padronizados (todos os paineis)
-- Usar a mesma estrutura: barra lateral colorida (`w-1.5 h-7 rounded-full`) + titulo em negrito + subtitulo em texto pequeno
-- Aplicar em: DGOS, Energia, Zeladoria, Climatizacao, Fibra Optica, GMG, Gabinete, Produtividade, Bateria
+### O que sera feito
+Uma nova pagina `/perfil` acessivel por todos os usuarios autenticados, contendo:
 
-### 2. Cards de Graficos Refinados (todos os paineis)
-- Bordas sutis (`border-border/60`)
-- Sombra leve (`shadow-sm`)
-- CardHeader com icone em container arredondado (`p-1.5 rounded-lg bg-primary/10`)
-- Titulo `text-sm font-semibold` com icone ao lado
-- Aplicar em: DGOS, Energia, Zeladoria, Climatizacao, Fibra Optica, GMG
+- **Dados pessoais**: email, cargo, operadora, area de atuacao, data de cadastro
+- **Alterar senha**: formulario para o usuario redefinir sua propria senha (usando a edge function `public-reset-password` ja existente)
+- **Estatisticas pessoais** (para tecnicos): total de vistorias, vistorias no mes, nivel, badges desbloqueados, progresso para o proximo nivel
+- **Botao de logout** destacado
 
-### 3. Graficos (Pie/Bar/Line) Padronizados
-- Pie charts: `innerRadius={65}`, `outerRadius={85}`, `paddingAngle={4}`, `strokeWidth={2}`, `stroke="hsl(var(--card))"`
-- Tooltip style unificado: `borderRadius: '0.75rem'`, `border: '1px solid hsl(var(--border))'`, `boxShadow`, `fontSize: '0.8rem'`
-- Legend: `fontSize: '0.75rem'`, `fontWeight: 500`
-- Aplicar a todos os graficos em todos os paineis
+### Arquivos envolvidos
+| Arquivo | Acao |
+|---------|------|
+| `src/pages/Profile.tsx` | Criar - pagina completa de perfil |
+| `src/App.tsx` | Editar - adicionar rota `/perfil` protegida |
+| `src/pages/Index.tsx` | Editar - adicionar link de perfil no header do tecnico |
+| `src/pages/Dashboard.tsx` | Editar - adicionar link de perfil no menu mobile e sidebar |
 
-### 4. Espacamento Consistente
-- `space-y-6` entre secoes principais
-- `gap-4` nos grids de cards
-- `mb-3` apos section headers
+---
 
-### 5. Cards de KPI (StatCard) -- ja atualizado
-- Manter o estilo atualizado com uppercase, tracking-wide, etc.
+## 2. Logs de Atividade (Audit Trail)
 
-## Arquivos a Editar
+### O que sera feito
+Registrar acoes importantes dos usuarios em uma tabela `activity_logs` e exibi-las em uma pagina acessivel apenas por administradores.
 
-| Arquivo | Alteracoes |
-|---------|-----------|
-| `DGOSPanel.tsx` | Headers de secao refinados, tooltips e graficos padronizados, bordas dos cards |
-| `EnergiaPanel.tsx` | Headers, graficos pie/bar com estilo unificado, tooltips |
-| `ZeladoriaPanel.tsx` | Header padronizado, card de progress com bordas refinadas |
-| `ClimatizacaoPanel.tsx` | Headers, graficos padronizados, tooltips unificados |
-| `FibraOpticaPanel.tsx` | Headers, graficos pie padronizados, card de resumo refinado |
-| `GMGPanel.tsx` | Headers, graficos pie com estilo consistente, cards de fabricante/potencia |
-| `GabinetePanel.tsx` | Headers padronizados com subtitulo |
-| `ProdutividadePanel.tsx` | Headers de secao, cards de KPI com iconBg refinado, tabela com bordas |
-| `BateriaPanel.tsx` | Headers padronizados com subtitulo, graficos pie com estilo unificado |
+### Acoes registradas
+- Aprovacao/rejeicao de usuarios
+- Alteracao de cargo ou operadora
+- Exclusao de relatorios
+- Reset de senha por administrador
+- Criacao/exclusao de atribuicoes de vistoria
 
-## Detalhes Tecnicos
+### Tabela no banco de dados
 
-### Estilo padrao de Header de Secao:
-```tsx
-<div className="flex items-center gap-3">
-  <div className="w-1.5 h-7 bg-[COR] rounded-full" />
-  <div>
-    <h2 className="font-bold text-lg tracking-tight">Titulo</h2>
-    <p className="text-xs text-muted-foreground">Subtitulo</p>
-  </div>
-</div>
+```text
+activity_logs
+-----------------------------------------
+id          uuid (PK, gen_random_uuid)
+user_id     uuid (quem fez a acao)
+action      text (ex: 'user_approved', 'report_deleted')
+target_type text (ex: 'user', 'report', 'assignment')
+target_id   text (ID do objeto afetado)
+details     jsonb (metadados extras)
+created_at  timestamptz (now())
 ```
 
-### Estilo padrao de Card de Grafico:
-```tsx
-<Card className="border-border/60 shadow-sm">
-  <CardHeader className="pb-2 px-6">
-    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-      <div className="p-1.5 rounded-lg bg-[COR]/10">
-        <Icon className="w-3.5 h-3.5 text-[COR]" />
-      </div>
-      Titulo do Grafico
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="px-6">...</CardContent>
-</Card>
+### RLS
+- Administradores podem ler todos os logs
+- Nenhum usuario pode inserir via client (insercao via funcao SECURITY DEFINER)
+
+### Funcao de insercao segura
+
+Uma funcao `log_activity(action, target_type, target_id, details)` com SECURITY DEFINER que captura automaticamente o `auth.uid()` do usuario logado.
+
+### Pagina de visualizacao
+| Arquivo | Acao |
+|---------|------|
+| `src/pages/ActivityLogs.tsx` | Criar - tabela com filtros por acao, data e usuario |
+| `src/lib/activityLogger.ts` | Criar - funcao helper para chamar `log_activity` RPC |
+| `src/App.tsx` | Editar - adicionar rota `/logs` protegida (admin) |
+| `src/pages/Dashboard.tsx` | Editar - adicionar link no menu |
+
+### Integracao nos pontos de acao
+Adicionar chamadas ao logger nos seguintes arquivos:
+- `src/pages/UserManagement.tsx` - ao aprovar, rejeitar, alterar cargo
+- `src/pages/ReportsHistory.tsx` - ao excluir relatorio
+- `src/pages/AssignmentManagement.tsx` - ao criar/excluir atribuicao
+
+---
+
+## 3. Detalhes Tecnicos
+
+### Migracao SQL
+
+```sql
+-- Tabela de logs
+CREATE TABLE public.activity_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  action text NOT NULL,
+  target_type text NOT NULL,
+  target_id text,
+  details jsonb DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
+
+-- Somente admins podem ler
+CREATE POLICY "Admins can view logs"
+  ON public.activity_logs FOR SELECT
+  USING (public.is_admin(auth.uid()));
+
+-- Funcao segura para inserir logs
+CREATE OR REPLACE FUNCTION public.log_activity(
+  _action text,
+  _target_type text,
+  _target_id text DEFAULT NULL,
+  _details jsonb DEFAULT '{}'
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.activity_logs (user_id, action, target_type, target_id, details)
+  VALUES (auth.uid(), _action, _target_type, _target_id, _details);
+END;
+$$;
 ```
 
-### Estilo padrao de Tooltip:
-```tsx
-contentStyle={{
-  borderRadius: '0.75rem',
-  border: '1px solid hsl(var(--border))',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  fontSize: '0.8rem'
-}}
-```
+### Ordem de implementacao
+1. Migracao SQL (tabela + funcao + RLS)
+2. Pagina de Perfil (`/perfil`)
+3. Helper de logging (`activityLogger.ts`)
+4. Pagina de Logs (`/logs`)
+5. Integrar logging nas acoes existentes
+6. Adicionar links de navegacao (perfil + logs) no menu mobile e sidebar
 
-### Estilo padrao de Pie Chart:
-```tsx
-<Pie
-  innerRadius={65}
-  outerRadius={85}
-  paddingAngle={4}
-  strokeWidth={2}
-  stroke="hsl(var(--card))"
-/>
-```
-
-## Ordem de Implementacao
-1. DGOSPanel + EnergiaPanel (paineis com mais graficos)
-2. GMGPanel + ZeladoriaPanel + FibraOpticaPanel
-3. ClimatizacaoPanel + GabinetePanel
-4. ProdutividadePanel + BateriaPanel (ajustes menores nos headers)
