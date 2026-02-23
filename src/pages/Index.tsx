@@ -5,31 +5,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
+import { ChecklistData } from "@/types/checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, Inbox, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChecklistData } from "@/types/checklist";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 const IndexInner = () => {
   const { isTecnico, isGestor, isAdmin } = useAuth();
   const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport } = useChecklist();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const isChecklistRequested = searchParams.get("checklist") === "true";
-  const { isMobile, isReady: isMobileReady } = useIsMobile();
-
-  // Redirect admins and gestors to dashboard as their landing page (desktop only)
-  // On mobile, they go directly to the checklist
-  // Also skip redirect if they explicitly requested the checklist via ?checklist=true
-  // Wait for isMobileReady to avoid premature redirect on mobile devices
-  React.useEffect(() => {
-    if (!isMobileReady) return;
-    if ((isAdmin || isGestor) && !isTecnico && !isChecklistRequested && !isMobile) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [isAdmin, isGestor, isTecnico, isChecklistRequested, isMobile, isMobileReady, navigate]);
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
   const [selectedAssignment, setSelectedAssignment] = React.useState<SiteAssignment | null>(null);
 

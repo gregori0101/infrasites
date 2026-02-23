@@ -12,7 +12,9 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 
 // Lazy-loaded pages for code splitting
+const Home = lazy(() => import("./pages/Home"));
 const Index = lazy(() => import("./pages/Index"));
+const AuditoriaOS = lazy(() => import("./pages/AuditoriaOS"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ReportsHistory = lazy(() => import("./pages/ReportsHistory"));
 const Login = lazy(() => import("./pages/Login"));
@@ -112,7 +114,17 @@ const App = () => {
                   {/* Protected routes */}
                   <Route path="/" element={
                     <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/checklist" element={
+                    <ProtectedRoute>
                       <Index />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria" element={
+                    <ProtectedRoute>
+                      <AuditoriaOS />
                     </ProtectedRoute>
                   } />
                   <Route path="/dashboard" element={
