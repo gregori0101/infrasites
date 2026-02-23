@@ -1,10 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileSearch } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import AuditoriaGestorView from "@/components/auditoria/AuditoriaGestorView";
+import AuditoriaTechnicianView from "@/components/auditoria/AuditoriaTechnicianView";
 
 export default function AuditoriaOS() {
   const navigate = useNavigate();
+  const { isGestor, isTecnico } = useAuth();
 
   return (
     <>
@@ -20,16 +24,10 @@ export default function AuditoriaOS() {
           <h1 className="font-semibold text-foreground">Auditoria OS</h1>
         </header>
 
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center space-y-4">
-            <div className="mx-auto h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
-              <FileSearch className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">Em breve</h2>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              O módulo de Auditoria de Ordens de Serviço está em desenvolvimento.
-            </p>
-          </div>
+        <main className="flex-1 p-4 max-w-3xl mx-auto w-full">
+          {isGestor ? <AuditoriaGestorView /> : isTecnico ? <AuditoriaTechnicianView /> : (
+            <p className="text-center text-muted-foreground py-12">Sem permissão para acessar este módulo.</p>
+          )}
         </main>
       </div>
     </>
