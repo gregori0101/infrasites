@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
 import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2, KeyRound, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet';
@@ -22,6 +23,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [operadora, setOperadora] = useState<Operadora>('VIVO');
+  const [lgpdConsent, setLgpdConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -89,6 +91,12 @@ export default function Login() {
       return;
     }
 
+    if (!isLogin && !lgpdConsent) {
+      setError('Você precisa aceitar a Política de Privacidade para se cadastrar');
+      setIsLoading(false);
+      return;
+    }
+
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres');
       setIsLoading(false);
@@ -132,10 +140,14 @@ export default function Login() {
             setError(error.message);
           }
         } else if (signUpData?.user) {
-          // Update user_roles with operadora after signup
+          // Update user_roles with operadora and LGPD consent after signup
           await supabase
             .from('user_roles')
-            .update({ operadora })
+            .update({ 
+              operadora,
+              lgpd_consent: true,
+              lgpd_consent_at: new Date().toISOString(),
+            })
             .eq('user_id', signUpData.user.id);
           
           setSuccess('Cadastro realizado! Aguarde a aprovação de um gestor para acessar o sistema.');
@@ -143,6 +155,7 @@ export default function Login() {
           setPassword('');
           setConfirmPassword('');
           setOperadora('VIVO');
+          setLgpdConsent(false);
         }
       }
     } catch (err) {
@@ -312,6 +325,23 @@ export default function Login() {
                         <SelectItem value="TEL">TEL</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+
+                {!isLogin && (
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="lgpd-consent"
+                      checked={lgpdConsent}
+                      onCheckedChange={(checked) => setLgpdConsent(checked === true)}
+                    />
+                    <Label htmlFor="lgpd-consent" className="text-sm leading-snug cursor-pointer">
+                      Li e concordo com a{' '}
+                      <Link to="/privacidade" target="_blank" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                        Política de Privacidade
+                      </Link>{' '}
+                      e o tratamento dos meus dados pessoais conforme a LGPD.
+                    </Label>
                   </div>
                 )}
 

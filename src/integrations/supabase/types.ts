@@ -2125,6 +2125,8 @@ export type Database = {
           area_atuacao: string | null
           created_at: string
           id: string
+          lgpd_consent: boolean
+          lgpd_consent_at: string | null
           operadora: string | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
@@ -2136,6 +2138,8 @@ export type Database = {
           area_atuacao?: string | null
           created_at?: string
           id?: string
+          lgpd_consent?: boolean
+          lgpd_consent_at?: string | null
           operadora?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
@@ -2147,6 +2151,8 @@ export type Database = {
           area_atuacao?: string | null
           created_at?: string
           id?: string
+          lgpd_consent?: boolean
+          lgpd_consent_at?: string | null
           operadora?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
