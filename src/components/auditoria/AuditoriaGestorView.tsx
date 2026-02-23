@@ -27,6 +27,7 @@ export default function AuditoriaGestorView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [techEmails, setTechEmails] = useState<Record<string, string>>({});
   const [generatingPdf, setGeneratingPdf] = useState<string | null>(null);
+  const [auditResults, setAuditResults] = useState<Record<string, 'aprovado' | 'reprovado' | null>>({});
 
   const loadOrders = async () => {
     setLoading(true);
@@ -45,6 +46,24 @@ export default function AuditoriaGestorView() {
           setTechEmails(emailMap);
         }
       }
+
+      // Fetch audit result for concluded orders
+      const concludedOrders = data.filter(o => o.status === 'concluido');
+      const resultsMap: Record<string, 'aprovado' | 'reprovado' | null> = {};
+      await Promise.all(concludedOrders.map(async (order) => {
+        try {
+          const items = await fetchAuditOrderItems(order.id);
+          if (items.length === 0) {
+            resultsMap[order.id] = null;
+          } else {
+            const hasNaoConforme = items.some(i => i.status === 'nao_conforme');
+            resultsMap[order.id] = hasNaoConforme ? 'reprovado' : 'aprovado';
+          }
+        } catch {
+          resultsMap[order.id] = null;
+        }
+      }));
+      setAuditResults(resultsMap);
     } catch (err) {
       console.error(err);
       toast.error("Erro ao carregar ordens de serviço");
@@ -117,6 +136,16 @@ export default function AuditoriaGestorView() {
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[order.status] || ''}`}>
                         {statusLabels[order.status] || order.status}
                       </span>
+                      {auditResults[order.id] === 'aprovado' && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          Aprovado
+                        </span>
+                      )}
+                      {auditResults[order.id] === 'reprovado' && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                          Reprovado
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{order.motivo}</p>
                     <div className="flex gap-4 text-xs text-muted-foreground">
