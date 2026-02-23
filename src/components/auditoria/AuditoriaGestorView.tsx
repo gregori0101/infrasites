@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2, RefreshCw } from "lucide-react";
-import { fetchAuditOrders, type AuditOrder } from "@/lib/auditoriaDatabase";
+import { Plus, Loader2, RefreshCw, FileText } from "lucide-react";
+import { fetchAuditOrders, fetchAuditOrderItems, type AuditOrder } from "@/lib/auditoriaDatabase";
+import { generateAuditPDF } from "@/lib/generateAuditPDF";
 import { supabase } from "@/integrations/supabase/client";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ export default function AuditoriaGestorView() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [techEmails, setTechEmails] = useState<Record<string, string>>({});
+  const [generatingPdf, setGeneratingPdf] = useState<string | null>(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -32,7 +34,6 @@ export default function AuditoriaGestorView() {
       const data = await fetchAuditOrders();
       setOrders(data);
 
-      // Fetch technician emails
       const techIds = [...new Set(data.map(o => o.technician_id))];
       if (techIds.length > 0) {
         const { data: fnData } = await supabase.functions.invoke('get-technician-emails', {
@@ -58,6 +59,21 @@ export default function AuditoriaGestorView() {
     setDialogOpen(false);
     loadOrders();
     toast.success("OS criada com sucesso!");
+  };
+
+  const handleDownloadPdf = async (order: AuditOrder) => {
+    setGeneratingPdf(order.id);
+    try {
+      const items = await fetchAuditOrderItems(order.id);
+      const email = techEmails[order.technician_id] || order.technician_id.slice(0, 8);
+      await generateAuditPDF(order, items, email);
+      toast.success("PDF gerado com sucesso!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao gerar PDF");
+    } finally {
+      setGeneratingPdf(null);
+    }
   };
 
   if (loading) {
@@ -108,6 +124,19 @@ export default function AuditoriaGestorView() {
                       {order.deadline && <span>Prazo: {new Date(order.deadline).toLocaleDateString('pt-BR')}</span>}
                     </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDownloadPdf(order)}
+                    disabled={generatingPdf === order.id}
+                    title="Baixar PDF"
+                  >
+                    {generatingPdf === order.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
