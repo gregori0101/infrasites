@@ -41,14 +41,14 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if user is gestor or admin
+    // Check if user is approved (any role can read technician list for ranking/auditoria)
     const { data: userRole } = await supabaseAdmin
       .from('user_roles')
       .select('role, approved')
       .eq('user_id', user.id)
       .single()
 
-    if (!userRole?.approved || (userRole.role !== 'gestor' && userRole.role !== 'administrador')) {
+    if (!userRole?.approved) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
