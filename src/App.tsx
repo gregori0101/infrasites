@@ -23,6 +23,7 @@ const AssignmentManagement = lazy(() => import("./pages/AssignmentManagement"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -154,6 +155,7 @@ const App = () => {
                       <ActivityLogs />
                     </ProtectedRoute>
                   } />
+                  <Route path="/privacidade" element={<PrivacyPolicy />} />
                   <Route path="/instalar" element={<Install />} />
                   
                   <Route path="*" element={<NotFound />} />
