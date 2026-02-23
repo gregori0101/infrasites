@@ -40,8 +40,8 @@ export default function AuditoriaCreateDialog({ open, onOpenChange, onCreated }:
         const ids = techs.map(t => t.user_id);
         if (ids.length === 0) { setTechnicians([]); return; }
         const { data } = await supabase.functions.invoke('get-technician-emails', { body: { technicianIds: ids } });
-        if (data?.emails) {
-          setTechnicians(data.emails.map((e: { id: string; email: string }) => ({ id: e.id, email: e.email })));
+        if (data?.technicians) {
+          setTechnicians(data.technicians.map((e: { id: string; email: string }) => ({ id: e.id, email: e.email })));
         }
       } catch { /* ignore */ }
     })();

@@ -38,9 +38,9 @@ export default function AuditoriaGestorView() {
         const { data: fnData } = await supabase.functions.invoke('get-technician-emails', {
           body: { technicianIds: techIds },
         });
-        if (fnData?.emails) {
+        if (fnData?.technicians) {
           const emailMap: Record<string, string> = {};
-          fnData.emails.forEach((e: { id: string; email: string }) => { emailMap[e.id] = e.email; });
+          fnData.technicians.forEach((e: { id: string; email: string }) => { emailMap[e.id] = e.email; });
           setTechEmails(emailMap);
         }
       }
