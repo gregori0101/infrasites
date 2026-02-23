@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.get-user-emails]
 verify_jwt = false
+
+[functions.public-reset-password]
+verify_jwt = false
+
+[functions.admin-reset-password]
+verify_jwt = false
