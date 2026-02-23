@@ -44,6 +44,98 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_order_items: {
+        Row: {
+          audited_at: string | null
+          created_at: string
+          descricao: string
+          foto_url: string | null
+          id: string
+          observacao: string | null
+          order_id: string
+          quantidade: number
+          quantidade_auditada: number | null
+          status: string
+          unidade: string
+        }
+        Insert: {
+          audited_at?: string | null
+          created_at?: string
+          descricao: string
+          foto_url?: string | null
+          id?: string
+          observacao?: string | null
+          order_id: string
+          quantidade?: number
+          quantidade_auditada?: number | null
+          status?: string
+          unidade?: string
+        }
+        Update: {
+          audited_at?: string | null
+          created_at?: string
+          descricao?: string
+          foto_url?: string | null
+          id?: string
+          observacao?: string | null
+          order_id?: string
+          quantidade?: number
+          quantidade_auditada?: number | null
+          status?: string
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "audit_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_orders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          deadline: string | null
+          id: string
+          motivo: string
+          notes: string | null
+          os_number: string
+          site_code: string
+          status: string
+          technician_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          deadline?: string | null
+          id?: string
+          motivo: string
+          notes?: string | null
+          os_number: string
+          site_code: string
+          status?: string
+          technician_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          id?: string
+          motivo?: string
+          notes?: string | null
+          os_number?: string
+          site_code?: string
+          status?: string
+          technician_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           assinatura_digital: string | null
