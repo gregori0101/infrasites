@@ -177,16 +177,14 @@ export default function AuditoriaGestorView() {
                     </div>
                   </div>
                   <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                    {order.status === 'concluido' && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setReassignOrder(order)}
-                        title="Devolver / Encaminhar"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setReassignOrder(order)}
+                      title="Alterar técnico / Encaminhar"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="outline"
                       size="icon"
