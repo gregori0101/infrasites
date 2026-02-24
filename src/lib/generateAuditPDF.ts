@@ -20,6 +20,18 @@ const statusLabels: Record<string, string> = {
   nao_conforme: 'Nao Conforme',
 };
 
+// Helper to parse foto_url which can be a single URL string or JSON array
+function parsePhotos(fotoUrl: string | null): string[] {
+  if (!fotoUrl) return [];
+  try {
+    const parsed = JSON.parse(fotoUrl);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // Not JSON, treat as single URL
+  }
+  return [fotoUrl];
+}
+
 async function loadImageAsBase64(url: string): Promise<string | null> {
   try {
     const res = await fetch(url);
@@ -213,7 +225,6 @@ export async function generateAuditPDF(
 
     for (let i = 0; i < vals.length; i++) {
       if (i === 5) {
-        // Color-code status
         if (isConforme) doc.setTextColor(...SUCCESS);
         else if (isNaoConforme) doc.setTextColor(...DANGER);
         else doc.setTextColor(...GRAY_MEDIUM);
@@ -256,34 +267,46 @@ export async function generateAuditPDF(
   y += 18;
 
   // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
-  const photosItems = items.filter(i => i.foto_url);
-  if (photosItems.length > 0) {
+  // Collect all photos from all items into a flat list with metadata
+  const allPhotos: { url: string; descricao: string; status: string }[] = [];
+  for (const item of items) {
+    const photos = parsePhotos(item.foto_url);
+    for (let pi = 0; pi < photos.length; pi++) {
+      allPhotos.push({
+        url: photos[pi],
+        descricao: photos.length > 1 ? `${item.descricao} (${pi + 1}/${photos.length})` : item.descricao,
+        status: item.status,
+      });
+    }
+  }
+
+  if (allPhotos.length > 0) {
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
-    const imgW = (contentWidth - 6) / 2; // 2 columns with 6mm gap
+    const imgW = (contentWidth - 6) / 2;
     const imgH = imgW * 0.75;
     const labelH = 10;
     const blockH = imgH + labelH + 4;
 
-    for (let i = 0; i < photosItems.length; i += 2) {
+    for (let i = 0; i < allPhotos.length; i += 2) {
       checkPage(blockH + 4);
 
-      for (let col = 0; col < 2 && i + col < photosItems.length; col++) {
-        const item = photosItems[i + col];
+      for (let col = 0; col < 2 && i + col < allPhotos.length; col++) {
+        const photo = allPhotos[i + col];
         const xPos = margin + col * (imgW + 6);
-        const imgData = await loadImageAsBase64(item.foto_url!);
+        const imgData = await loadImageAsBase64(photo.url);
 
         // Item label
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...GRAY_DARK);
-        const label = (item.descricao || '').substring(0, 40);
+        const label = (photo.descricao || '').substring(0, 40);
         doc.text(label, xPos + 1, y + 3);
 
-        const statusText = statusLabels[item.status] || item.status;
-        const isConforme = item.status === 'conforme';
+        const statusText = statusLabels[photo.status] || photo.status;
+        const isConforme = photo.status === 'conforme';
         if (isConforme) doc.setTextColor(...SUCCESS);
-        else if (item.status === 'nao_conforme') doc.setTextColor(...DANGER);
+        else if (photo.status === 'nao_conforme') doc.setTextColor(...DANGER);
         else doc.setTextColor(...GRAY_MEDIUM);
         doc.setFont('helvetica', 'normal');
         doc.text(statusText, xPos + 1, y + 7);

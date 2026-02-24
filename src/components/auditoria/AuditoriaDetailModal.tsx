@@ -19,6 +19,18 @@ const statusLabels: Record<string, string> = {
   nao_conforme: "Não Conforme",
 };
 
+// Helper to parse foto_url which can be a single URL string or JSON array
+function parsePhotos(fotoUrl: string | null): string[] {
+  if (!fotoUrl) return [];
+  try {
+    const parsed = JSON.parse(fotoUrl);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // Not JSON, treat as single URL
+  }
+  return [fotoUrl];
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -85,7 +97,8 @@ function EditableField({ value, onSave, type = "text", className = "" }: {
 export default function AuditoriaDetailModal({ open, onOpenChange, order, techEmail, canEdit = true, onOrderUpdated }: Props) {
   const [items, setItems] = useState<AuditOrderItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const loadItems = useCallback(() => {
     if (!order) return;
@@ -125,6 +138,13 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
     await updateAuditItem(itemId, { [field]: value } as any);
     loadItems();
     toast.success("Item atualizado");
+  };
+
+  const openLightbox = (item: AuditOrderItem) => {
+    const photos = parsePhotos(item.foto_url);
+    if (photos.length === 0) return;
+    setLightboxImages(photos.map((url, i) => ({ url, label: `${item.descricao} - Foto ${i + 1}` })));
+    setLightboxIndex(0);
   };
 
   return (
@@ -249,7 +269,7 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
                       <TableHead className="w-20 text-right">Auditado</TableHead>
                       <TableHead className="w-28">Status</TableHead>
                       <TableHead>Observação</TableHead>
-                      <TableHead className="w-10">Foto</TableHead>
+                      <TableHead className="w-16">Fotos</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -267,7 +287,7 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
                           idx={idx}
                           canEdit={canEdit}
                           onSave={saveItemField}
-                          onPhotoClick={() => item.foto_url && setLightboxUrl(item.foto_url)}
+                          onPhotoClick={() => openLightbox(item)}
                         />
                       ))
                     )}
@@ -279,12 +299,12 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
         </DialogContent>
       </Dialog>
 
-      {lightboxUrl && (
+      {lightboxImages.length > 0 && (
         <Lightbox
-          images={[{ url: lightboxUrl, label: 'Evidência' }]}
-          initialIndex={0}
+          images={lightboxImages}
+          initialIndex={lightboxIndex}
           open={true}
-          onClose={() => setLightboxUrl(null)}
+          onClose={() => setLightboxImages([])}
         />
       )}
     </>
@@ -302,6 +322,8 @@ function EditableItemRow({ item, idx, canEdit, onSave, onPhotoClick }: {
   const [editField, setEditField] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const photos = parsePhotos(item.foto_url);
 
   const startEdit = (field: string, currentValue: string | number | null) => {
     setEditField(field);
@@ -409,9 +431,10 @@ function EditableItemRow({ item, idx, canEdit, onSave, onPhotoClick }: {
         {renderCell('observacao', item.observacao)}
       </TableCell>
       <TableCell>
-        {item.foto_url ? (
-          <button onClick={onPhotoClick} className="text-primary hover:text-primary/80">
+        {photos.length > 0 ? (
+          <button onClick={onPhotoClick} className="text-primary hover:text-primary/80 flex items-center gap-1">
             <ImageIcon className="h-4 w-4" />
+            {photos.length > 1 && <span className="text-xs">{photos.length}</span>}
           </button>
         ) : (
           <span className="text-muted-foreground/40">-</span>
