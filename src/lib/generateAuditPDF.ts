@@ -300,7 +300,7 @@ export async function generateAuditPDF(
 
   // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
   // Collect all photos from all items into a flat list with metadata
-  const allPhotos: { url: string; descricao: string; status: string }[] = [];
+  const allPhotos: { url: string; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null }[] = [];
   for (const item of items) {
     const photos = parsePhotos(item.foto_url);
     for (let pi = 0; pi < photos.length; pi++) {
@@ -308,6 +308,10 @@ export async function generateAuditPDF(
         url: photos[pi],
         descricao: photos.length > 1 ? `${item.descricao} (${pi + 1}/${photos.length})` : item.descricao,
         status: item.status,
+        unidade: item.unidade,
+        quantidade: item.quantidade,
+        quantidade_auditada: item.quantidade_auditada,
+        observacao: item.observacao,
       });
     }
   }
@@ -316,8 +320,8 @@ export async function generateAuditPDF(
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
     const imgW = (contentWidth - 6) / 2;
-    const maxImgH = imgW * 1.2; // allow taller images (portrait photos)
-    const labelH = 10;
+    const maxImgH = imgW * 1.2;
+    const labelH = 24; // increased to fit extra info
 
     for (let i = 0; i < allPhotos.length; i += 2) {
       // Pre-load both images to calculate real heights
@@ -343,18 +347,36 @@ export async function generateAuditPDF(
         const { photo, imgData } = pair[col];
         const xPos = margin + col * (imgW + 6);
 
+        // Line 1: Description (bold)
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...GRAY_DARK);
-        const label = (photo.descricao || '').substring(0, 40);
-        doc.text(label, xPos + 1, y + 3);
+        const descLabel = doc.splitTextToSize(photo.descricao || '-', imgW - 4);
+        doc.text(descLabel[0] || '-', xPos + 1, y + 3);
 
+        // Line 2: Unidade | Previsto | Auditado
+        doc.setFontSize(6.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...GRAY_MEDIUM);
+        const detailLine = `${photo.unidade || '-'} | Prev: ${photo.quantidade ?? '-'} | Aud: ${photo.quantidade_auditada ?? '-'}`;
+        doc.text(detailLine, xPos + 1, y + 7);
+
+        // Line 3: Status
         const statusText = statusLabels[photo.status] || photo.status;
         if (photo.status === 'conforme') doc.setTextColor(...SUCCESS);
         else if (photo.status === 'nao_conforme') doc.setTextColor(...DANGER);
         else doc.setTextColor(...GRAY_MEDIUM);
-        doc.setFont('helvetica', 'normal');
-        doc.text(statusText, xPos + 1, y + 7);
+        doc.setFont('helvetica', 'bold');
+        doc.text(statusText, xPos + 1, y + 11);
+
+        // Line 4: Observation (if any)
+        if (photo.observacao) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(6);
+          doc.setTextColor(...GRAY_DARK);
+          const obsLines = doc.splitTextToSize(photo.observacao, imgW - 4);
+          doc.text(obsLines.slice(0, 3).join('\n'), xPos + 1, y + 15);
+        }
 
         if (imgData) {
           try {
