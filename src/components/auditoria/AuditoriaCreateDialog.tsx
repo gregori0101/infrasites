@@ -169,14 +169,12 @@ export default function AuditoriaCreateDialog({ open, onOpenChange, onCreated }:
                         />
                       </TableCell>
                       <TableCell className="p-1.5">
-                        <Select value={item.unidade} onValueChange={v => updateItem(idx, 'unidade', v)}>
-                          <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {['UNI', 'm', 'm2', 'm3', 'M', 'CJ', 'PC'].map(u => (
-                              <SelectItem key={u} value={u}>{u}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          placeholder="UNI"
+                          value={item.unidade}
+                          onChange={e => updateItem(idx, 'unidade', e.target.value)}
+                          className="h-8 text-sm uppercase"
+                        />
                       </TableCell>
                       <TableCell className="p-1.5">
                         <Input
