@@ -255,31 +255,55 @@ export async function generateAuditPDF(
 
   y += 18;
 
-  // --- Fotos de Evidencia ---
+  // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
   const photosItems = items.filter(i => i.foto_url);
   if (photosItems.length > 0) {
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
-    for (const item of photosItems) {
-      checkPage(60);
-      const imgData = await loadImageAsBase64(item.foto_url!);
-      if (imgData) {
-        doc.setFontSize(8);
+    const imgW = (contentWidth - 6) / 2; // 2 columns with 6mm gap
+    const imgH = imgW * 0.75;
+    const labelH = 10;
+    const blockH = imgH + labelH + 4;
+
+    for (let i = 0; i < photosItems.length; i += 2) {
+      checkPage(blockH + 4);
+
+      for (let col = 0; col < 2 && i + col < photosItems.length; col++) {
+        const item = photosItems[i + col];
+        const xPos = margin + col * (imgW + 6);
+        const imgData = await loadImageAsBase64(item.foto_url!);
+
+        // Item label
+        doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...GRAY_DARK);
-        doc.text(`Item: ${item.descricao.substring(0, 60)}`, margin + 2, y + 3);
-        y += 6;
+        const label = (item.descricao || '').substring(0, 40);
+        doc.text(label, xPos + 1, y + 3);
 
-        try {
-          doc.addImage(imgData, 'JPEG', margin, y, 50, 40);
-          y += 44;
-        } catch {
+        const statusText = statusLabels[item.status] || item.status;
+        const isConforme = item.status === 'conforme';
+        if (isConforme) doc.setTextColor(...SUCCESS);
+        else if (item.status === 'nao_conforme') doc.setTextColor(...DANGER);
+        else doc.setTextColor(...GRAY_MEDIUM);
+        doc.setFont('helvetica', 'normal');
+        doc.text(statusText, xPos + 1, y + 7);
+
+        if (imgData) {
+          try {
+            doc.addImage(imgData, 'JPEG', xPos, y + labelH, imgW, imgH);
+          } catch {
+            doc.setFontSize(7);
+            doc.setTextColor(...GRAY_MEDIUM);
+            doc.text('[Imagem nao disponivel]', xPos + 2, y + labelH + 10);
+          }
+        } else {
           doc.setFontSize(7);
           doc.setTextColor(...GRAY_MEDIUM);
-          doc.text('[Imagem nao disponivel]', margin + 2, y + 4);
-          y += 8;
+          doc.text('[Imagem nao disponivel]', xPos + 2, y + labelH + 10);
         }
       }
+
+      y += blockH;
     }
   }
 
