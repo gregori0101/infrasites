@@ -545,6 +545,15 @@ export default function Dashboard() {
                 Checklist
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => navigate("/auditoria")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+              >
+                <FileSearch className="w-4 h-4" />
+                Auditoria OS
+              </button>
+            </li>
             {isAdmin && (
               <li>
                 <button
@@ -646,6 +655,13 @@ export default function Dashboard() {
                   >
                     <MapPin className="w-4 h-4" />
                     Checklist
+                  </button>
+                  <button
+                    onClick={() => navigate("/auditoria")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+                  >
+                    <FileSearch className="w-4 h-4" />
+                    Auditoria OS
                   </button>
                   {isAdmin && (
                     <button

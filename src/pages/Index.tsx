@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet";
 import { SiteAssignment } from "@/lib/assignmentDatabase";
 import { ChecklistData } from "@/types/checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, Inbox, UserCircle } from "lucide-react";
+import { ClipboardList, Inbox, UserCircle, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -76,6 +76,9 @@ const IndexInner = () => {
                     Checklist
                   </TabsTrigger>
                 </TabsList>
+                <Button variant="ghost" size="icon" onClick={() => navigate('/auditoria')}>
+                  <FileSearch className="w-5 h-5" />
+                </Button>
                 <Button variant="ghost" size="icon" className="mr-2" onClick={() => navigate('/perfil')}>
                   <UserCircle className="w-5 h-5" />
                 </Button>
