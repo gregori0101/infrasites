@@ -34,6 +34,8 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case "Escape":
+          e.stopPropagation();
+          e.preventDefault();
           onClose();
           break;
         case "ArrowLeft":
@@ -136,6 +138,8 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
     <div
       className="fixed inset-0 z-[100] bg-black/95 flex flex-col"
       onClick={handleBackdropClick}
+      onKeyDown={e => e.stopPropagation()}
+      onPointerDown={e => e.stopPropagation()}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-black/50 shrink-0">
