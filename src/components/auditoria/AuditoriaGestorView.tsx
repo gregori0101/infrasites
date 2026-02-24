@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2, RefreshCw, FileText } from "lucide-react";
+import { Plus, Loader2, RefreshCw, FileText, RotateCcw } from "lucide-react";
 import { fetchAuditOrders, fetchAuditOrderItems, type AuditOrder } from "@/lib/auditoriaDatabase";
 import { generateAuditPDF } from "@/lib/generateAuditPDF";
 import { supabase } from "@/integrations/supabase/client";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
+import AuditoriaReassignDialog from "./AuditoriaReassignDialog";
 import { toast } from "sonner";
 
 const statusLabels: Record<string, string> = {
@@ -28,6 +29,7 @@ export default function AuditoriaGestorView() {
   const [techEmails, setTechEmails] = useState<Record<string, string>>({});
   const [generatingPdf, setGeneratingPdf] = useState<string | null>(null);
   const [auditResults, setAuditResults] = useState<Record<string, 'aprovado' | 'reprovado' | null>>({});
+  const [reassignOrder, setReassignOrder] = useState<AuditOrder | null>(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -153,19 +155,31 @@ export default function AuditoriaGestorView() {
                       {order.deadline && <span>Prazo: {new Date(order.deadline).toLocaleDateString('pt-BR')}</span>}
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDownloadPdf(order)}
-                    disabled={generatingPdf === order.id}
-                    title="Baixar PDF"
-                  >
-                    {generatingPdf === order.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <FileText className="h-4 w-4" />
+                  <div className="flex gap-1">
+                    {order.status === 'concluido' && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setReassignOrder(order)}
+                        title="Devolver / Encaminhar"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
                     )}
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDownloadPdf(order)}
+                      disabled={generatingPdf === order.id}
+                      title="Baixar PDF"
+                    >
+                      {generatingPdf === order.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileText className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -177,6 +191,16 @@ export default function AuditoriaGestorView() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onCreated={handleCreated}
+      />
+
+      <AuditoriaReassignDialog
+        open={!!reassignOrder}
+        onOpenChange={(open) => !open && setReassignOrder(null)}
+        order={reassignOrder}
+        onReassigned={() => {
+          setReassignOrder(null);
+          loadOrders();
+        }}
       />
     </div>
   );

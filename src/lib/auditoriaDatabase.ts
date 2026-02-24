@@ -125,6 +125,36 @@ export async function updateAuditItem(
   if (error) throw error;
 }
 
+// ---- Reassign / Return ----
+
+export async function reassignAuditOrder(orderId: string, newTechnicianId: string, resetItems: boolean = true) {
+  // Update order: change technician, reset status
+  const { error: orderError } = await supabase
+    .from('audit_orders')
+    .update({
+      technician_id: newTechnicianId,
+      status: 'pendente',
+      completed_at: null,
+    })
+    .eq('id', orderId);
+  if (orderError) throw orderError;
+
+  if (resetItems) {
+    // Reset all items to pendente
+    const { error: itemsError } = await supabase
+      .from('audit_order_items')
+      .update({
+        status: 'pendente',
+        quantidade_auditada: null,
+        observacao: null,
+        foto_url: null,
+        audited_at: null,
+      })
+      .eq('order_id', orderId);
+    if (itemsError) throw itemsError;
+  }
+}
+
 // ---- Technicians list (for assignment) ----
 
 export async function fetchApprovedTechnicians() {
