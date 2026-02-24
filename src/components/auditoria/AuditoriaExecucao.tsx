@@ -5,10 +5,29 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, Check, X, Camera } from "lucide-react";
+import { ArrowLeft, Loader2, Check, X, Camera, Plus, Trash2, ZoomIn } from "lucide-react";
 import { fetchAuditOrderItems, updateAuditItem, updateAuditOrderStatus, type AuditOrder, type AuditOrderItem } from "@/lib/auditoriaDatabase";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
+// Helper to parse foto_url which can be a single URL string or JSON array
+function parsePhotos(fotoUrl: string | null): string[] {
+  if (!fotoUrl) return [];
+  try {
+    const parsed = JSON.parse(fotoUrl);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // Not JSON, treat as single URL
+  }
+  return [fotoUrl];
+}
+
+function photosToString(photos: string[]): string | null {
+  if (photos.length === 0) return null;
+  if (photos.length === 1) return photos[0];
+  return JSON.stringify(photos);
+}
 
 interface Props {
   order: AuditOrder;
@@ -51,7 +70,6 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
         foto_url: item.foto_url ?? undefined,
       });
 
-      // If order is still pendente, move to em_andamento
       if (order.status === 'pendente') {
         await updateAuditOrderStatus(order.id, 'em_andamento');
       }
@@ -69,17 +87,40 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
     setSaving(item.id);
     try {
       const ext = file.name.split('.').pop() || 'jpg';
-      const path = `audit/${order.id}/${item.id}.${ext}`;
+      const timestamp = Date.now();
+      const path = `audit/${order.id}/${item.id}_${timestamp}.${ext}`;
       const { error: uploadError } = await supabase.storage.from('report-photos').upload(path, file, { upsert: true });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('report-photos').getPublicUrl(path);
-      await updateAuditItem(item.id, { foto_url: urlData.publicUrl });
-      setItems(prev => prev.map(i => i.id === item.id ? { ...i, foto_url: urlData.publicUrl } : i));
+      const currentPhotos = parsePhotos(item.foto_url);
+      const newPhotos = [...currentPhotos, urlData.publicUrl];
+      const newFotoUrl = photosToString(newPhotos);
+
+      await updateAuditItem(item.id, { foto_url: newFotoUrl ?? undefined });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, foto_url: newFotoUrl } : i));
       toast.success("Foto enviada");
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao enviar foto");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleRemovePhoto = async (item: AuditOrderItem, photoIndex: number) => {
+    const currentPhotos = parsePhotos(item.foto_url);
+    const newPhotos = currentPhotos.filter((_, i) => i !== photoIndex);
+    const newFotoUrl = photosToString(newPhotos);
+
+    setSaving(item.id);
+    try {
+      await updateAuditItem(item.id, { foto_url: newFotoUrl ?? undefined });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, foto_url: newFotoUrl } : i));
+      toast.success("Foto removida");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao remover foto");
     } finally {
       setSaving(null);
     }
@@ -130,101 +171,145 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
 
       {/* Items */}
       <div className="space-y-3">
-        {items.map((item, idx) => (
-          <Card key={item.id} className={item.status !== 'pendente' ? 'border-l-4 border-l-green-500' : ''}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium text-foreground text-sm">
-                    {idx + 1}. {item.descricao}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {item.quantidade} {item.unidade}
-                  </p>
+        {items.map((item, idx) => {
+          const photos = parsePhotos(item.foto_url);
+          return (
+            <Card key={item.id} className={item.status !== 'pendente' ? 'border-l-4 border-l-green-500' : ''}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">
+                      {idx + 1}. {item.descricao}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.quantidade} {item.unidade}
+                    </p>
+                  </div>
+                  <Badge variant={item.status === 'conforme' ? 'default' : item.status === 'nao_conforme' ? 'destructive' : 'secondary'} className="text-xs">
+                    {item.status === 'conforme' ? 'Conforme' : item.status === 'nao_conforme' ? 'Não Conforme' : 'Pendente'}
+                  </Badge>
                 </div>
-                <Badge variant={item.status === 'conforme' ? 'default' : item.status === 'nao_conforme' ? 'destructive' : 'secondary'} className="text-xs">
-                  {item.status === 'conforme' ? 'Conforme' : item.status === 'nao_conforme' ? 'Não Conforme' : 'Pendente'}
-                </Badge>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Qtd Auditada</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      className="h-8 text-sm"
+                      value={item.quantidade_auditada ?? ''}
+                      onChange={e => handleUpdateItem(item, 'quantidade_auditada', e.target.value ? Number(e.target.value) : null)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Status</Label>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant={item.status === 'conforme' ? 'default' : 'outline'}
+                        className="flex-1 h-8 text-xs"
+                        onClick={() => handleUpdateItem(item, 'status', 'conforme')}
+                      >
+                        <Check className="h-3 w-3 mr-0.5" /> OK
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={item.status === 'nao_conforme' ? 'destructive' : 'outline'}
+                        className="flex-1 h-8 text-xs"
+                        onClick={() => handleUpdateItem(item, 'status', 'nao_conforme')}
+                      >
+                        <X className="h-3 w-3 mr-0.5" /> NOK
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-1">
-                  <Label className="text-xs">Qtd Auditada</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    className="h-8 text-sm"
-                    value={item.quantidade_auditada ?? ''}
-                    onChange={e => handleUpdateItem(item, 'quantidade_auditada', e.target.value ? Number(e.target.value) : null)}
+                  <Label className="text-xs">Observação</Label>
+                  <Textarea
+                    className="text-sm min-h-[40px]"
+                    rows={1}
+                    placeholder="Observação..."
+                    value={item.observacao || ''}
+                    onChange={e => handleUpdateItem(item, 'observacao', e.target.value)}
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Status</Label>
-                  <div className="flex gap-1">
+
+                {/* Photos section */}
+                <div className="space-y-2">
+                  {photos.length > 0 && (
+                    <div className="flex gap-2 flex-wrap">
+                      {photos.map((photo, pIdx) => (
+                        <div key={pIdx} className="relative group w-16 h-16">
+                          <img src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-full rounded object-cover border" />
+                          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all rounded flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <button className="bg-background/80 rounded-full p-1">
+                                  <ZoomIn className="h-3 w-3" />
+                                </button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl p-0 overflow-hidden">
+                                <img src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-auto" />
+                              </DialogContent>
+                            </Dialog>
+                            <button
+                              className="bg-destructive/80 text-destructive-foreground rounded-full p-1"
+                              onClick={() => handleRemovePhoto(item, pIdx)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                          <span className="absolute -top-1 -left-1 bg-muted text-muted-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                            {pIdx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handlePhotoUpload(item, file);
+                          if (e.target) e.target.value = '';
+                        }}
+                      />
+                      <div className="flex items-center gap-1 text-xs text-primary hover:underline">
+                        {photos.length > 0 ? (
+                          <><Plus className="h-3.5 w-3.5" /> Adicionar foto</>
+                        ) : (
+                          <><Camera className="h-3.5 w-3.5" /> Tirar foto</>
+                        )}
+                      </div>
+                    </label>
+                    {photos.length > 0 && (
+                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                        {photos.length} foto{photos.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    <div className="flex-1" />
                     <Button
                       size="sm"
-                      variant={item.status === 'conforme' ? 'default' : 'outline'}
-                      className="flex-1 h-8 text-xs"
-                      onClick={() => handleUpdateItem(item, 'status', 'conforme')}
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => handleSaveItem(item)}
+                      disabled={saving === item.id}
                     >
-                      <Check className="h-3 w-3 mr-0.5" /> OK
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={item.status === 'nao_conforme' ? 'destructive' : 'outline'}
-                      className="flex-1 h-8 text-xs"
-                      onClick={() => handleUpdateItem(item, 'status', 'nao_conforme')}
-                    >
-                      <X className="h-3 w-3 mr-0.5" /> NOK
+                      {saving === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Salvar'}
                     </Button>
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs">Observação</Label>
-                <Textarea
-                  className="text-sm min-h-[40px]"
-                  rows={1}
-                  placeholder="Observação..."
-                  value={item.observacao || ''}
-                  onChange={e => handleUpdateItem(item, 'observacao', e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (file) handlePhotoUpload(item, file);
-                    }}
-                  />
-                  <div className="flex items-center gap-1 text-xs text-primary hover:underline">
-                    <Camera className="h-3.5 w-3.5" /> {item.foto_url ? 'Alterar foto' : 'Tirar foto'}
-                  </div>
-                </label>
-                {item.foto_url && (
-                  <img src={item.foto_url} alt="Evidência" className="h-10 w-10 rounded object-cover border" />
-                )}
-                <div className="flex-1" />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  onClick={() => handleSaveItem(item)}
-                  disabled={saving === item.id}
-                >
-                  {saving === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Salvar'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Finish */}
