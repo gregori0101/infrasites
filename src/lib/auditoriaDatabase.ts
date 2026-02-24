@@ -172,6 +172,26 @@ export async function deleteAuditOrder(orderId: string) {
   if (error) throw error;
 }
 
+// ---- Update order fields ----
+
+export async function updateAuditOrder(
+  orderId: string,
+  update: { os_number?: string; site_code?: string; motivo?: string; deadline?: string | null; notes?: string | null }
+) {
+  const payload: Record<string, unknown> = {};
+  if (update.os_number !== undefined) payload.os_number = update.os_number;
+  if (update.site_code !== undefined) payload.site_code = update.site_code.toUpperCase();
+  if (update.motivo !== undefined) payload.motivo = update.motivo;
+  if (update.deadline !== undefined) payload.deadline = update.deadline || null;
+  if (update.notes !== undefined) payload.notes = update.notes || null;
+
+  const { error } = await supabase
+    .from('audit_orders')
+    .update(payload)
+    .eq('id', orderId);
+  if (error) throw error;
+}
+
 // ---- Technicians list (for assignment) ----
 
 export async function fetchApprovedTechnicians() {

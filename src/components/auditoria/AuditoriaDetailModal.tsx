@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, XCircle, Clock, Image as ImageIcon } from "lucide-react";
-import { fetchAuditOrderItems, type AuditOrder, type AuditOrderItem } from "@/lib/auditoriaDatabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, CheckCircle, XCircle, Clock, Image as ImageIcon, Pencil, Check, X } from "lucide-react";
+import { fetchAuditOrderItems, updateAuditOrder, updateAuditItem, type AuditOrder, type AuditOrderItem } from "@/lib/auditoriaDatabase";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Lightbox } from "@/components/ui/lightbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const statusLabels: Record<string, string> = {
   pendente: "Pendente",
@@ -19,21 +24,82 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   order: AuditOrder | null;
   techEmail: string;
+  canEdit?: boolean;
+  onOrderUpdated?: () => void;
 }
 
-export default function AuditoriaDetailModal({ open, onOpenChange, order, techEmail }: Props) {
+// Inline editable text field
+function EditableField({ value, onSave, type = "text", className = "" }: {
+  value: string;
+  onSave: (val: string) => Promise<void>;
+  type?: "text" | "date" | "textarea";
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (draft === value) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      await onSave(draft);
+      setEditing(false);
+    } catch {
+      toast.error("Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => { setDraft(value); setEditing(false); };
+
+  if (!editing) {
+    return (
+      <div className={`group flex items-center gap-1 ${className}`}>
+        <span className="font-medium text-foreground">{value || '-'}</span>
+        <button onClick={() => { setDraft(value); setEditing(true); }} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary">
+          <Pencil className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      {type === "textarea" ? (
+        <Textarea value={draft} onChange={e => setDraft(e.target.value)} className="text-xs min-h-[40px] h-10" autoFocus />
+      ) : (
+        <Input type={type} value={draft} onChange={e => setDraft(e.target.value)} className="h-7 text-xs" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') handleCancel(); }} />
+      )}
+      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave} disabled={saving}>
+        {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-green-600" />}
+      </Button>
+      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleCancel} disabled={saving}>
+        <X className="h-3 w-3 text-destructive" />
+      </Button>
+    </div>
+  );
+}
+
+export default function AuditoriaDetailModal({ open, onOpenChange, order, techEmail, canEdit = true, onOrderUpdated }: Props) {
   const [items, setItems] = useState<AuditOrderItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open || !order) return;
+  const loadItems = useCallback(() => {
+    if (!order) return;
     setLoading(true);
     fetchAuditOrderItems(order.id)
       .then(setItems)
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, [open, order]);
+  }, [order]);
+
+  useEffect(() => {
+    if (!open || !order) return;
+    loadItems();
+  }, [open, order, loadItems]);
 
   if (!order) return null;
 
@@ -47,6 +113,19 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
   const deadline = order.deadline ? new Date(order.deadline).toLocaleDateString('pt-BR') : '-';
   const createdAt = new Date(order.created_at).toLocaleDateString('pt-BR');
   const completedAt = order.completed_at ? new Date(order.completed_at).toLocaleDateString('pt-BR') : '-';
+
+  const saveOrderField = async (field: string, value: string) => {
+    await updateAuditOrder(order.id, { [field]: value });
+    (order as unknown as Record<string, unknown>)[field] = value;
+    onOrderUpdated?.();
+    toast.success("Campo atualizado");
+  };
+
+  const saveItemField = async (itemId: string, field: string, value: string | number) => {
+    await updateAuditItem(itemId, { [field]: value } as any);
+    loadItems();
+    toast.success("Item atualizado");
+  };
 
   return (
     <>
@@ -78,8 +157,28 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
           {/* Dados da OS */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 rounded-lg bg-muted/50 text-sm">
             <div>
+              <span className="text-muted-foreground text-xs font-medium">Nº OS</span>
+              {canEdit ? (
+                <EditableField value={order.os_number} onSave={v => saveOrderField('os_number', v)} />
+              ) : (
+                <p className="font-medium text-foreground">{order.os_number}</p>
+              )}
+            </div>
+            <div>
+              <span className="text-muted-foreground text-xs font-medium">Site</span>
+              {canEdit ? (
+                <EditableField value={order.site_code} onSave={v => saveOrderField('site_code', v)} />
+              ) : (
+                <p className="font-medium text-foreground">{order.site_code}</p>
+              )}
+            </div>
+            <div>
               <span className="text-muted-foreground text-xs font-medium">Motivo</span>
-              <p className="font-medium text-foreground">{order.motivo}</p>
+              {canEdit ? (
+                <EditableField value={order.motivo} onSave={v => saveOrderField('motivo', v)} />
+              ) : (
+                <p className="font-medium text-foreground">{order.motivo}</p>
+              )}
             </div>
             <div>
               <span className="text-muted-foreground text-xs font-medium">Técnico</span>
@@ -87,7 +186,11 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
             </div>
             <div>
               <span className="text-muted-foreground text-xs font-medium">Prazo</span>
-              <p className="font-medium text-foreground">{deadline}</p>
+              {canEdit ? (
+                <EditableField value={order.deadline || ''} onSave={v => saveOrderField('deadline', v)} type="date" />
+              ) : (
+                <p className="font-medium text-foreground">{deadline}</p>
+              )}
             </div>
             <div>
               <span className="text-muted-foreground text-xs font-medium">Criação</span>
@@ -97,12 +200,14 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
               <span className="text-muted-foreground text-xs font-medium">Conclusão</span>
               <p className="font-medium text-foreground">{completedAt}</p>
             </div>
-            {order.notes && (
-              <div className="col-span-2 sm:col-span-3">
-                <span className="text-muted-foreground text-xs font-medium">Observações</span>
-                <p className="font-medium text-foreground">{order.notes}</p>
-              </div>
-            )}
+            <div className="col-span-2 sm:col-span-3">
+              <span className="text-muted-foreground text-xs font-medium">Observações</span>
+              {canEdit ? (
+                <EditableField value={order.notes || ''} onSave={v => saveOrderField('notes', v)} type="textarea" />
+              ) : (
+                <p className="font-medium text-foreground">{order.notes || '-'}</p>
+              )}
+            </div>
           </div>
 
           {/* Itens */}
@@ -156,42 +261,14 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
                       </TableRow>
                     ) : (
                       items.map((item, idx) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
-                          <TableCell className="font-medium text-foreground text-xs">{item.descricao}</TableCell>
-                          <TableCell className="text-xs uppercase">{item.unidade}</TableCell>
-                          <TableCell className="text-right">{item.quantidade}</TableCell>
-                          <TableCell className="text-right">{item.quantidade_auditada ?? '-'}</TableCell>
-                          <TableCell>
-                            {item.status === 'conforme' && (
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
-                                <CheckCircle className="h-3.5 w-3.5" /> Conforme
-                              </span>
-                            )}
-                            {item.status === 'nao_conforme' && (
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
-                                <XCircle className="h-3.5 w-3.5" /> Não Conforme
-                              </span>
-                            )}
-                            {item.status === 'pendente' && (
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                                <Clock className="h-3.5 w-3.5" /> Pendente
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground max-w-[120px] truncate" title={item.observacao || ''}>
-                            {item.observacao || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {item.foto_url ? (
-                              <button onClick={() => setLightboxUrl(item.foto_url)} className="text-primary hover:text-primary/80">
-                                <ImageIcon className="h-4 w-4" />
-                              </button>
-                            ) : (
-                              <span className="text-muted-foreground/40">-</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
+                        <EditableItemRow
+                          key={item.id}
+                          item={item}
+                          idx={idx}
+                          canEdit={canEdit}
+                          onSave={saveItemField}
+                          onPhotoClick={() => item.foto_url && setLightboxUrl(item.foto_url)}
+                        />
                       ))
                     )}
                   </TableBody>
@@ -211,5 +288,135 @@ export default function AuditoriaDetailModal({ open, onOpenChange, order, techEm
         />
       )}
     </>
+  );
+}
+
+// Extracted row component for item editing
+function EditableItemRow({ item, idx, canEdit, onSave, onPhotoClick }: {
+  item: AuditOrderItem;
+  idx: number;
+  canEdit: boolean;
+  onSave: (itemId: string, field: string, value: string | number) => Promise<void>;
+  onPhotoClick: () => void;
+}) {
+  const [editField, setEditField] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const startEdit = (field: string, currentValue: string | number | null) => {
+    setEditField(field);
+    setDraft(String(currentValue ?? ''));
+  };
+
+  const handleSave = async () => {
+    if (!editField) return;
+    setSaving(true);
+    try {
+      const value = ['quantidade', 'quantidade_auditada'].includes(editField) ? Number(draft) : draft;
+      await onSave(item.id, editField, value);
+    } finally {
+      setSaving(false);
+      setEditField(null);
+    }
+  };
+
+  const handleCancel = () => { setEditField(null); setDraft(''); };
+
+  const renderCell = (field: string, value: string | number | null, className = '') => {
+    if (canEdit && editField === field) {
+      return (
+        <div className="flex items-center gap-0.5">
+          <Input value={draft} onChange={e => setDraft(e.target.value)} className="h-6 text-xs w-full" autoFocus
+            onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') handleCancel(); }} />
+          <button onClick={handleSave} disabled={saving} className="text-green-600 hover:text-green-700">
+            {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+          </button>
+          <button onClick={handleCancel} className="text-destructive"><X className="h-3 w-3" /></button>
+        </div>
+      );
+    }
+    return (
+      <div className={`group/cell flex items-center gap-0.5 ${className}`}>
+        <span>{value ?? '-'}</span>
+        {canEdit && (
+          <button onClick={() => startEdit(field, value)} className="opacity-0 group-hover/cell:opacity-100 text-muted-foreground hover:text-primary">
+            <Pencil className="h-2.5 w-2.5" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <TableRow>
+      <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+      <TableCell className="font-medium text-foreground text-xs">
+        {renderCell('descricao', item.descricao)}
+      </TableCell>
+      <TableCell className="text-xs uppercase">
+        {renderCell('unidade', item.unidade)}
+      </TableCell>
+      <TableCell className="text-right">
+        {renderCell('quantidade', item.quantidade)}
+      </TableCell>
+      <TableCell className="text-right">
+        {renderCell('quantidade_auditada', item.quantidade_auditada)}
+      </TableCell>
+      <TableCell>
+        {canEdit && editField === 'status' ? (
+          <div className="flex items-center gap-0.5">
+            <Select value={draft} onValueChange={async (val) => {
+              setSaving(true);
+              try { await onSave(item.id, 'status', val); } finally { setSaving(false); setEditField(null); }
+            }}>
+              <SelectTrigger className="h-6 text-xs w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="conforme">Conforme</SelectItem>
+                <SelectItem value="nao_conforme">Não Conforme</SelectItem>
+              </SelectContent>
+            </Select>
+            <button onClick={handleCancel} className="text-destructive"><X className="h-3 w-3" /></button>
+          </div>
+        ) : (
+          <div className="group/cell flex items-center gap-0.5">
+            {item.status === 'conforme' && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+                <CheckCircle className="h-3.5 w-3.5" /> Conforme
+              </span>
+            )}
+            {item.status === 'nao_conforme' && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+                <XCircle className="h-3.5 w-3.5" /> Não Conforme
+              </span>
+            )}
+            {item.status === 'pendente' && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" /> Pendente
+              </span>
+            )}
+            {canEdit && (
+              <button onClick={() => startEdit('status', item.status)} className="opacity-0 group-hover/cell:opacity-100 text-muted-foreground hover:text-primary">
+                <Pencil className="h-2.5 w-2.5" />
+              </button>
+            )}
+          </div>
+        )}
+      </TableCell>
+      <TableCell className="text-xs text-muted-foreground max-w-[120px]">
+        {renderCell('observacao', item.observacao)}
+      </TableCell>
+      <TableCell>
+        {item.foto_url ? (
+          <button onClick={onPhotoClick} className="text-primary hover:text-primary/80">
+            <ImageIcon className="h-4 w-4" />
+          </button>
+        ) : (
+          <span className="text-muted-foreground/40">-</span>
+        )}
+      </TableCell>
+    </TableRow>
   );
 }

@@ -253,6 +253,8 @@ export default function AuditoriaGestorView() {
         onOpenChange={(open) => !open && setDetailOrder(null)}
         order={detailOrder}
         techEmail={detailOrder ? (techEmails[detailOrder.technician_id] || detailOrder.technician_id.slice(0, 8)) : ''}
+        canEdit={true}
+        onOrderUpdated={loadOrders}
       />
     </div>
   );
