@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2, RefreshCw, FileText, RotateCcw } from "lucide-react";
-import { fetchAuditOrders, fetchAuditOrderItems, type AuditOrder } from "@/lib/auditoriaDatabase";
+import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2 } from "lucide-react";
+import { fetchAuditOrders, fetchAuditOrderItems, deleteAuditOrder, type AuditOrder } from "@/lib/auditoriaDatabase";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { generateAuditPDF } from "@/lib/generateAuditPDF";
 import { supabase } from "@/integrations/supabase/client";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
@@ -30,6 +31,8 @@ export default function AuditoriaGestorView() {
   const [generatingPdf, setGeneratingPdf] = useState<string | null>(null);
   const [auditResults, setAuditResults] = useState<Record<string, 'aprovado' | 'reprovado' | null>>({});
   const [reassignOrder, setReassignOrder] = useState<AuditOrder | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AuditOrder | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -75,6 +78,22 @@ export default function AuditoriaGestorView() {
   };
 
   useEffect(() => { loadOrders(); }, []);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteAuditOrder(deleteTarget.id);
+      toast.success("OS excluída com sucesso!");
+      loadOrders();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao excluir OS");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   const handleCreated = () => {
     setDialogOpen(false);
@@ -179,6 +198,15 @@ export default function AuditoriaGestorView() {
                         <FileText className="h-4 w-4" />
                       )}
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setDeleteTarget(order)}
+                      title="Excluir OS"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -202,6 +230,24 @@ export default function AuditoriaGestorView() {
           loadOrders();
         }}
       />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir OS?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A OS <strong>{deleteTarget?.os_number}</strong> e todos os seus itens serão excluídos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -155,6 +155,23 @@ export async function reassignAuditOrder(orderId: string, newTechnicianId: strin
   }
 }
 
+// ---- Delete ----
+
+export async function deleteAuditOrder(orderId: string) {
+  // Delete items first (cascade should handle, but explicit is safer)
+  const { error: itemsError } = await supabase
+    .from('audit_order_items')
+    .delete()
+    .eq('order_id', orderId);
+  if (itemsError) throw itemsError;
+
+  const { error } = await supabase
+    .from('audit_orders')
+    .delete()
+    .eq('id', orderId);
+  if (error) throw error;
+}
+
 // ---- Technicians list (for assignment) ----
 
 export async function fetchApprovedTechnicians() {
