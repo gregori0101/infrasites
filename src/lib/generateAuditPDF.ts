@@ -298,6 +298,20 @@ export async function generateAuditPDF(
 
   y += 18;
 
+  // --- Status APROVADO / REPROVADO ---
+  const isAprovado = naoConformes === 0 && pendentes === 0 && items.length > 0;
+  const resultLabel = isAprovado ? 'APROVADO' : 'REPROVADO';
+  const resultColor: [number, number, number] = isAprovado ? SUCCESS : DANGER;
+
+  checkPage(20);
+  doc.setFillColor(...resultColor);
+  doc.roundedRect(margin, y, contentWidth, 16, 2, 2, 'F');
+  doc.setTextColor(...WHITE);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(resultLabel, pageWidth / 2, y + 11, { align: 'center' });
+  y += 22;
+
   // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
   // Collect all photos from all items into a flat list with metadata
   const allPhotos: { url: string; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null }[] = [];
