@@ -228,10 +228,11 @@ export async function generateAuditPDF(
     const isConforme = item.status === 'conforme';
     const isNaoConforme = item.status === 'nao_conforme';
 
-    // Wrap observation text to fit the column
+    // Wrap description and observation text
+    const descLines = doc.splitTextToSize(item.descricao || '-', colWidths[1] - 4);
     const obsText = item.observacao || '-';
     const obsLines = doc.splitTextToSize(obsText, colWidths[6] - 4);
-    const rowH = Math.max(8, obsLines.length * 3.5 + 2);
+    const rowH = Math.max(8, Math.max(descLines.length, obsLines.length) * 3.5 + 2);
 
     checkPage(rowH);
     const isEven = idx % 2 === 0;
@@ -240,25 +241,25 @@ export async function generateAuditPDF(
       doc.rect(margin, y - 1, contentWidth, rowH, 'F');
     }
 
-    const vals = [
-      String(idx + 1),
-      (item.descricao || '').substring(0, 24),
-      item.unidade || '-',
-      String(item.quantidade ?? '-'),
-      String(item.quantidade_auditada ?? '-'),
-      statusText,
-    ];
+    // Column values (single-line columns)
+    doc.setTextColor(...GRAY_DARK);
+    doc.text(String(idx + 1), colX[0] + 2, y + 4);
 
-    for (let i = 0; i < vals.length; i++) {
-      if (i === 5) {
-        if (isConforme) doc.setTextColor(...SUCCESS);
-        else if (isNaoConforme) doc.setTextColor(...DANGER);
-        else doc.setTextColor(...GRAY_MEDIUM);
-      } else {
-        doc.setTextColor(...GRAY_DARK);
-      }
-      doc.text(vals[i], colX[i] + 2, y + 4);
-    }
+    // Description with wrapping
+    doc.setTextColor(...GRAY_DARK);
+    doc.text(descLines, colX[1] + 2, y + 4);
+
+    // Unit, Previsto, Auditado
+    doc.setTextColor(...GRAY_DARK);
+    doc.text(item.unidade || '-', colX[2] + 2, y + 4);
+    doc.text(String(item.quantidade ?? '-'), colX[3] + 2, y + 4);
+    doc.text(String(item.quantidade_auditada ?? '-'), colX[4] + 2, y + 4);
+
+    // Status with color
+    if (isConforme) doc.setTextColor(...SUCCESS);
+    else if (isNaoConforme) doc.setTextColor(...DANGER);
+    else doc.setTextColor(...GRAY_MEDIUM);
+    doc.text(statusText, colX[5] + 2, y + 4);
 
     // Observation column with wrapping
     doc.setTextColor(...GRAY_DARK);
