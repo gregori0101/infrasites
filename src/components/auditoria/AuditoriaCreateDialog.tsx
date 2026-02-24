@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, ClipboardPaste } from "lucide-react";
 import { createAuditOrder, fetchApprovedTechnicians, type NewAuditOrderItem } from "@/lib/auditoriaDatabase";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -31,6 +31,8 @@ export default function AuditoriaCreateDialog({ open, onOpenChange, onCreated }:
   const [items, setItems] = useState<NewAuditOrderItem[]>([emptyItem()]);
   const [technicians, setTechnicians] = useState<TechOption[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showBulkPaste, setShowBulkPaste] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -48,6 +50,39 @@ export default function AuditoriaCreateDialog({ open, onOpenChange, onCreated }:
   }, [open]);
 
   const addItem = () => setItems(prev => [...prev, emptyItem()]);
+
+  const handleBulkPaste = () => {
+    if (!bulkText.trim()) return;
+    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+    const parsed: NewAuditOrderItem[] = [];
+    for (const line of lines) {
+      // Split by tab (from spreadsheet) or by 2+ spaces
+      const parts = line.includes('\t') ? line.split('\t') : line.split(/\s{2,}/);
+      if (parts.length >= 3) {
+        const descricao = parts[0].trim();
+        const unidade = parts[1].trim();
+        const qtdStr = parts[2].trim().replace(',', '.');
+        const quantidade = parseFloat(qtdStr) || 0;
+        if (descricao) parsed.push({ descricao, unidade, quantidade });
+      } else if (parts.length === 2) {
+        const descricao = parts[0].trim();
+        const unidade = parts[1].trim();
+        if (descricao) parsed.push({ descricao, unidade, quantidade: 1 });
+      } else if (parts.length === 1 && parts[0].trim()) {
+        parsed.push({ descricao: parts[0].trim(), unidade: 'UNI', quantidade: 1 });
+      }
+    }
+    if (parsed.length > 0) {
+      // Replace empty default items or append
+      const hasOnlyEmpty = items.length === 1 && !items[0].descricao.trim();
+      setItems(hasOnlyEmpty ? parsed : [...items, ...parsed]);
+      setBulkText("");
+      setShowBulkPaste(false);
+      toast.success(`${parsed.length} itens importados`);
+    } else {
+      toast.error("Nenhum item reconhecido. Cole dados com colunas separadas por TAB ou espaços.");
+    }
+  };
 
   const removeItem = (idx: number) => {
     if (items.length <= 1) return;
@@ -142,10 +177,32 @@ export default function AuditoriaCreateDialog({ open, onOpenChange, onCreated }:
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold">Itens da OS</Label>
-              <Button variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-3 w-3 mr-1" /> Adicionar
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowBulkPaste(!showBulkPaste)}>
+                  <ClipboardPaste className="h-3 w-3 mr-1" /> Colar em massa
+                </Button>
+                <Button variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar
+                </Button>
+              </div>
             </div>
+
+            {showBulkPaste && (
+              <div className="space-y-2 p-3 border rounded-lg bg-muted/50">
+                <Label className="text-sm">Cole os dados da planilha (Descrição | Unidade | Quantidade)</Label>
+                <Textarea
+                  placeholder={"Fornecimento e instalação de cabo...\tm\t550\nServiços Eventuais...\tUNI\t18"}
+                  value={bulkText}
+                  onChange={e => setBulkText(e.target.value)}
+                  rows={5}
+                  className="text-xs font-mono"
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" size="sm" onClick={() => { setShowBulkPaste(false); setBulkText(""); }}>Cancelar</Button>
+                  <Button size="sm" onClick={handleBulkPaste}>Importar itens</Button>
+                </div>
+              </div>
+            )}
 
             <div className="border rounded-lg overflow-hidden">
               <Table>
