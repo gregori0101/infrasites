@@ -199,7 +199,7 @@ export async function generateAuditPDF(
   sectionTitle('ITENS AUDITADOS');
 
   // Table header
-  const colWidths = [10, 52, 16, 22, 22, 26, 38];
+  const colWidths = [8, 42, 14, 18, 18, 24, 62];
   const colHeaders = ['#', 'Descricao', 'Unid.', 'Previsto', 'Auditado', 'Status', 'Observacao'];
   const colX: number[] = [];
   let cx = margin;
@@ -221,29 +221,32 @@ export async function generateAuditPDF(
 
   // Table rows
   items.forEach((item, idx) => {
-    checkPage(10);
-    const isEven = idx % 2 === 0;
-    if (isEven) {
-      doc.setFillColor(...GRAY_LIGHT);
-      doc.rect(margin, y - 1, contentWidth, 8, 'F');
-    }
-
     doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...GRAY_DARK);
 
     const statusText = statusLabels[item.status] || item.status;
     const isConforme = item.status === 'conforme';
     const isNaoConforme = item.status === 'nao_conforme';
 
+    // Wrap observation text to fit the column
+    const obsText = item.observacao || '-';
+    const obsLines = doc.splitTextToSize(obsText, colWidths[6] - 4);
+    const rowH = Math.max(8, obsLines.length * 3.5 + 2);
+
+    checkPage(rowH);
+    const isEven = idx % 2 === 0;
+    if (isEven) {
+      doc.setFillColor(...GRAY_LIGHT);
+      doc.rect(margin, y - 1, contentWidth, rowH, 'F');
+    }
+
     const vals = [
       String(idx + 1),
-      (item.descricao || '').substring(0, 30),
+      (item.descricao || '').substring(0, 24),
       item.unidade || '-',
       String(item.quantidade ?? '-'),
       String(item.quantidade_auditada ?? '-'),
       statusText,
-      (item.observacao || '-').substring(0, 22),
     ];
 
     for (let i = 0; i < vals.length; i++) {
@@ -256,7 +259,12 @@ export async function generateAuditPDF(
       }
       doc.text(vals[i], colX[i] + 2, y + 4);
     }
-    y += 8;
+
+    // Observation column with wrapping
+    doc.setTextColor(...GRAY_DARK);
+    doc.text(obsLines, colX[6] + 2, y + 4);
+
+    y += rowH;
   });
 
   y += 4;
