@@ -32,17 +32,25 @@ function parsePhotos(fotoUrl: string | null): string[] {
   return [fotoUrl];
 }
 
-async function loadImageAsBase64(url: string): Promise<string | null> {
+async function loadImageAsBase64(url: string): Promise<{ data: string; width: number; height: number } | null> {
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
     const blob = await res.blob();
-    return new Promise((resolve) => {
+    const dataUrl: string = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
+      reader.onerror = () => reject();
       reader.readAsDataURL(blob);
     });
+    // Get real dimensions
+    const dims = await new Promise<{ width: number; height: number }>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => resolve({ width: 4, height: 3 }); // fallback
+      img.src = dataUrl;
+    });
+    return { data: dataUrl, width: dims.width, height: dims.height };
   } catch {
     return null;
   }
@@ -284,19 +292,33 @@ export async function generateAuditPDF(
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
     const imgW = (contentWidth - 6) / 2;
-    const imgH = imgW * 0.75;
+    const maxImgH = imgW * 0.75;
     const labelH = 10;
-    const blockH = imgH + labelH + 4;
 
     for (let i = 0; i < allPhotos.length; i += 2) {
-      checkPage(blockH + 4);
-
+      // Pre-load both images to calculate real heights
+      const pair: { photo: typeof allPhotos[0]; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[] = [];
       for (let col = 0; col < 2 && i + col < allPhotos.length; col++) {
         const photo = allPhotos[i + col];
-        const xPos = margin + col * (imgW + 6);
         const imgData = await loadImageAsBase64(photo.url);
+        pair.push({ photo, imgData });
+      }
 
-        // Item label
+      // Calculate fitted heights preserving aspect ratio
+      const fittedHeights = pair.map(({ imgData }) => {
+        if (!imgData) return maxImgH;
+        const ratio = imgData.height / imgData.width;
+        return Math.min(imgW * ratio, maxImgH);
+      });
+      const rowImgH = Math.max(...fittedHeights);
+      const blockH = rowImgH + labelH + 4;
+
+      checkPage(blockH + 4);
+
+      for (let col = 0; col < pair.length; col++) {
+        const { photo, imgData } = pair[col];
+        const xPos = margin + col * (imgW + 6);
+
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...GRAY_DARK);
@@ -304,8 +326,7 @@ export async function generateAuditPDF(
         doc.text(label, xPos + 1, y + 3);
 
         const statusText = statusLabels[photo.status] || photo.status;
-        const isConforme = photo.status === 'conforme';
-        if (isConforme) doc.setTextColor(...SUCCESS);
+        if (photo.status === 'conforme') doc.setTextColor(...SUCCESS);
         else if (photo.status === 'nao_conforme') doc.setTextColor(...DANGER);
         else doc.setTextColor(...GRAY_MEDIUM);
         doc.setFont('helvetica', 'normal');
@@ -313,7 +334,14 @@ export async function generateAuditPDF(
 
         if (imgData) {
           try {
-            doc.addImage(imgData, 'JPEG', xPos, y + labelH, imgW, imgH);
+            const ratio = imgData.height / imgData.width;
+            let drawW = imgW;
+            let drawH = imgW * ratio;
+            if (drawH > maxImgH) {
+              drawH = maxImgH;
+              drawW = maxImgH / ratio;
+            }
+            doc.addImage(imgData.data, 'JPEG', xPos, y + labelH, drawW, drawH);
           } catch {
             doc.setFontSize(7);
             doc.setTextColor(...GRAY_MEDIUM);
