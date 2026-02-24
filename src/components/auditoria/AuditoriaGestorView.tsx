@@ -9,6 +9,7 @@ import { generateAuditPDF } from "@/lib/generateAuditPDF";
 import { supabase } from "@/integrations/supabase/client";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
 import AuditoriaReassignDialog from "./AuditoriaReassignDialog";
+import AuditoriaDetailModal from "./AuditoriaDetailModal";
 import { toast } from "sonner";
 
 const statusLabels: Record<string, string> = {
@@ -33,6 +34,7 @@ export default function AuditoriaGestorView() {
   const [reassignOrder, setReassignOrder] = useState<AuditOrder | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AuditOrder | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [detailOrder, setDetailOrder] = useState<AuditOrder | null>(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -147,7 +149,7 @@ export default function AuditoriaGestorView() {
       ) : (
         <div className="space-y-3">
           {orders.map(order => (
-            <Card key={order.id} className="hover:shadow-md transition-shadow">
+            <Card key={order.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDetailOrder(order)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0 space-y-1">
@@ -174,7 +176,7 @@ export default function AuditoriaGestorView() {
                       {order.deadline && <span>Prazo: {new Date(order.deadline).toLocaleDateString('pt-BR')}</span>}
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                     {order.status === 'concluido' && (
                       <Button
                         variant="outline"
@@ -248,6 +250,12 @@ export default function AuditoriaGestorView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AuditoriaDetailModal
+        open={!!detailOrder}
+        onOpenChange={(open) => !open && setDetailOrder(null)}
+        order={detailOrder}
+        techEmail={detailOrder ? (techEmails[detailOrder.technician_id] || detailOrder.technician_id.slice(0, 8)) : ''}
+      />
     </div>
   );
 }
