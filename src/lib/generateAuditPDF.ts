@@ -32,7 +32,7 @@ function parsePhotos(fotoUrl: string | null): string[] {
   return [fotoUrl];
 }
 
-async function loadImageAsBase64(url: string): Promise<{ data: string; width: number; height: number } | null> {
+async function loadImageAsBase64(url: string): Promise<{ data: string; width: number; height: number; format: string } | null> {
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
@@ -43,14 +43,29 @@ async function loadImageAsBase64(url: string): Promise<{ data: string; width: nu
       reader.onerror = () => reject();
       reader.readAsDataURL(blob);
     });
-    // Get real dimensions
-    const dims = await new Promise<{ width: number; height: number }>((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-      img.onerror = () => resolve({ width: 4, height: 3 }); // fallback
+    // Detect format from data URL
+    let format = 'JPEG';
+    if (dataUrl.startsWith('data:image/png')) format = 'PNG';
+    else if (dataUrl.startsWith('data:image/webp')) format = 'PNG'; // jsPDF doesn't support webp, convert via canvas
+
+    // Get real dimensions via canvas (also normalizes webp/other formats)
+    const imgResult = await new Promise<{ data: string; width: number; height: number; format: string } | null>((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        // Draw to canvas to normalize the image (handles rotation, webp, etc.)
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve({ data: dataUrl, width: img.naturalWidth, height: img.naturalHeight, format }); return; }
+        ctx.drawImage(img, 0, 0);
+        const normalizedData = canvas.toDataURL('image/jpeg', 0.85);
+        resolve({ data: normalizedData, width: img.naturalWidth, height: img.naturalHeight, format: 'JPEG' });
+      };
+      img.onerror = () => resolve(null);
       img.src = dataUrl;
     });
-    return { data: dataUrl, width: dims.width, height: dims.height };
+    return imgResult;
   } catch {
     return null;
   }
@@ -292,7 +307,7 @@ export async function generateAuditPDF(
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
     const imgW = (contentWidth - 6) / 2;
-    const maxImgH = imgW * 0.75;
+    const maxImgH = imgW * 1.2; // allow taller images (portrait photos)
     const labelH = 10;
 
     for (let i = 0; i < allPhotos.length; i += 2) {
@@ -341,7 +356,7 @@ export async function generateAuditPDF(
               drawH = maxImgH;
               drawW = maxImgH / ratio;
             }
-            doc.addImage(imgData.data, 'JPEG', xPos, y + labelH, drawW, drawH);
+            doc.addImage(imgData.data, imgData.format, xPos, y + labelH, drawW, drawH);
           } catch {
             doc.setFontSize(7);
             doc.setTextColor(...GRAY_MEDIUM);
