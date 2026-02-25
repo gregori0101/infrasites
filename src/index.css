@@ -234,3 +234,171 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* ========== Fiber Guardian Module Styles ========== */
+
+:root {
+  /* FG Status colors */
+  --fg-status-pendente: 45 93% 47%;
+  --fg-status-enviado: 206 100% 33%;
+  --fg-status-revisao: 25 95% 53%;
+  --fg-status-concluido: 142 76% 36%;
+
+  /* FG Sync indicator */
+  --fg-sync-pending: 45 93% 47%;
+  --fg-sync-synced: 142 76% 36%;
+  --fg-sync-error: 0 84% 60%;
+}
+
+.dark {
+  --fg-status-pendente: 45 93% 47%;
+  --fg-status-enviado: 206 100% 45%;
+  --fg-status-revisao: 25 95% 53%;
+  --fg-status-concluido: 142 76% 36%;
+}
+
+@layer components {
+  /* FG Glass morphism header */
+  .fg-glass-header {
+    @apply sticky top-0 z-50 backdrop-blur-lg bg-primary/95 text-primary-foreground shadow-lg border-b border-primary-foreground/10;
+  }
+
+  /* FG Page entry animation */
+  .fg-page-enter {
+    animation: fgPageEnter 0.35s ease-out;
+  }
+
+  @keyframes fgPageEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FG Stagger list animation */
+  .fg-stagger-list > * {
+    animation: fgStaggerIn 0.3s ease-out backwards;
+  }
+  .fg-stagger-list > *:nth-child(1) { animation-delay: 0ms; }
+  .fg-stagger-list > *:nth-child(2) { animation-delay: 40ms; }
+  .fg-stagger-list > *:nth-child(3) { animation-delay: 80ms; }
+  .fg-stagger-list > *:nth-child(4) { animation-delay: 120ms; }
+  .fg-stagger-list > *:nth-child(5) { animation-delay: 160ms; }
+  .fg-stagger-list > *:nth-child(6) { animation-delay: 200ms; }
+  .fg-stagger-list > *:nth-child(7) { animation-delay: 240ms; }
+  .fg-stagger-list > *:nth-child(8) { animation-delay: 280ms; }
+  .fg-stagger-list > *:nth-child(9) { animation-delay: 320ms; }
+  .fg-stagger-list > *:nth-child(10) { animation-delay: 360ms; }
+
+  @keyframes fgStaggerIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FG Card hover effect */
+  .fg-card-interactive {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99];
+  }
+
+  .fg-field-button {
+    @apply min-h-[56px] text-lg font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all duration-150;
+  }
+
+  .fg-status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide transition-colors duration-150;
+  }
+
+  .fg-causa-badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide transition-colors duration-150;
+  }
+
+  .fg-sync-indicator {
+    @apply w-3 h-3 rounded-full animate-pulse;
+  }
+
+  .fg-card-field {
+    @apply bg-card rounded-xl border border-border shadow-sm p-4;
+  }
+
+  /* FG Branded loader */
+  .fg-branded-loader {
+    @apply relative w-14 h-14;
+  }
+
+  .fg-branded-loader::before {
+    content: '';
+    @apply absolute inset-0 rounded-full border-[3px] border-muted;
+  }
+
+  .fg-branded-loader::after {
+    content: '';
+    @apply absolute inset-0 rounded-full border-[3px] border-transparent border-t-primary;
+    animation: fgLoaderSpin 0.8s linear infinite;
+  }
+
+  @keyframes fgLoaderSpin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+/* FG Shimmer skeleton */
+.fg-shimmer-skeleton {
+  @apply relative overflow-hidden;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.08) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: fgShimmer 1.5s infinite;
+}
+
+@keyframes fgShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* FG Leaflet map styles */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius);
+}
+
+/* FG Calendar day urgency markers */
+.fg-calendar-day-vencido::after,
+.fg-calendar-day-proximo::after,
+.fg-calendar-day-no-prazo::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.fg-calendar-day-vencido::after {
+  background-color: hsl(var(--destructive));
+}
+
+.fg-calendar-day-proximo::after {
+  background-color: hsl(var(--warning));
+}
+
+.fg-calendar-day-no-prazo::after {
+  background-color: hsl(var(--success));
+}
+
+/* FG Safe area for mobile */
+.fg-safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.fg-safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
