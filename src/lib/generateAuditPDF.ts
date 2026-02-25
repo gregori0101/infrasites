@@ -312,111 +312,137 @@ export async function generateAuditPDF(
   doc.text(resultLabel, pageWidth / 2, y + 11, { align: 'center' });
   y += 22;
 
-  // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
-  // Collect all photos from all items into a flat list with metadata
-  const allPhotos: { url: string; itemNum: number; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null }[] = [];
+  // --- Fotos de Evidencia agrupadas por item ---
+  // Group photos by item
+  const itemsWithPhotos: { itemNum: number; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null; photos: string[] }[] = [];
   for (let idx = 0; idx < items.length; idx++) {
     const item = items[idx];
     const photos = parsePhotos(item.foto_url);
-    for (let pi = 0; pi < photos.length; pi++) {
-      allPhotos.push({
-        url: photos[pi],
+    if (photos.length > 0) {
+      itemsWithPhotos.push({
         itemNum: idx + 1,
-        descricao: photos.length > 1 ? `${item.descricao} (${pi + 1}/${photos.length})` : item.descricao,
+        descricao: item.descricao,
         status: item.status,
         unidade: item.unidade,
         quantidade: item.quantidade,
         quantidade_auditada: item.quantidade_auditada,
         observacao: item.observacao,
+        photos,
       });
     }
   }
 
-  if (allPhotos.length > 0) {
+  if (itemsWithPhotos.length > 0) {
     sectionTitle('EVIDENCIAS FOTOGRAFICAS');
 
     const imgW = (contentWidth - 6) / 2;
     const maxImgH = imgW * 1.2;
-    const labelH = 24; // increased to fit extra info
+    const labelH = 20;
 
-    for (let i = 0; i < allPhotos.length; i += 2) {
-      // Pre-load both images to calculate real heights
-      const pair: { photo: typeof allPhotos[0]; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[] = [];
-      for (let col = 0; col < 2 && i + col < allPhotos.length; col++) {
-        const photo = allPhotos[i + col];
-        const imgData = await loadImageAsBase64(photo.url);
-        pair.push({ photo, imgData });
+    for (const item of itemsWithPhotos) {
+      // --- Item header (printed once) ---
+      checkPage(24);
+
+      // Description
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GRAY_DARK);
+      const descLines = doc.splitTextToSize(`#${item.itemNum} - ${item.descricao || '-'}`, contentWidth - 4);
+      doc.text(descLines, margin + 1, y + 4);
+      const descH = descLines.length * 3.5;
+      y += descH + 1;
+
+      // Detail line: Unidade | Previsto | Auditado
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...GRAY_MEDIUM);
+      const detailLine = `${item.unidade || '-'} | Prev: ${item.quantidade ?? '-'} | Aud: ${item.quantidade_auditada ?? '-'}`;
+      doc.text(detailLine, margin + 1, y + 3);
+      y += 4;
+
+      // Status
+      const statusText = statusLabels[item.status] || item.status;
+      if (item.status === 'conforme') doc.setTextColor(...SUCCESS);
+      else if (item.status === 'nao_conforme') doc.setTextColor(...DANGER);
+      else doc.setTextColor(...GRAY_MEDIUM);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.text(statusText, margin + 1, y + 3);
+      y += 4;
+
+      // Observation
+      if (item.observacao) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.5);
+        doc.setTextColor(...GRAY_DARK);
+        const obsLines = doc.splitTextToSize(item.observacao, contentWidth - 4);
+        doc.text(obsLines.slice(0, 3), margin + 1, y + 3);
+        y += Math.min(obsLines.length, 3) * 3 + 2;
       }
 
-      // Calculate fitted heights preserving aspect ratio
-      const fittedHeights = pair.map(({ imgData }) => {
-        if (!imgData) return maxImgH;
-        const ratio = imgData.height / imgData.width;
-        return Math.min(imgW * ratio, maxImgH);
-      });
-      const rowImgH = Math.max(...fittedHeights);
-      const blockH = rowImgH + labelH + 4;
+      y += 2;
 
-      checkPage(blockH + 4);
-
-      for (let col = 0; col < pair.length; col++) {
-        const { photo, imgData } = pair[col];
-        const xPos = margin + col * (imgW + 6);
-
-        // Line 1: Description (bold)
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...GRAY_DARK);
-        const descLabel = doc.splitTextToSize(`#${photo.itemNum} - ${photo.descricao || '-'}`, imgW - 4);
-        doc.text(descLabel[0] || '-', xPos + 1, y + 3);
-
-        // Line 2: Unidade | Previsto | Auditado
-        doc.setFontSize(6.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...GRAY_MEDIUM);
-        const detailLine = `${photo.unidade || '-'} | Prev: ${photo.quantidade ?? '-'} | Aud: ${photo.quantidade_auditada ?? '-'}`;
-        doc.text(detailLine, xPos + 1, y + 7);
-
-        // Line 3: Status
-        const statusText = statusLabels[photo.status] || photo.status;
-        if (photo.status === 'conforme') doc.setTextColor(...SUCCESS);
-        else if (photo.status === 'nao_conforme') doc.setTextColor(...DANGER);
-        else doc.setTextColor(...GRAY_MEDIUM);
-        doc.setFont('helvetica', 'bold');
-        doc.text(statusText, xPos + 1, y + 11);
-
-        // Line 4: Observation (if any)
-        if (photo.observacao) {
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(6);
-          doc.setTextColor(...GRAY_DARK);
-          const obsLines = doc.splitTextToSize(photo.observacao, imgW - 4);
-          doc.text(obsLines.slice(0, 3).join('\n'), xPos + 1, y + 15);
+      // --- Photos in pairs ---
+      for (let i = 0; i < item.photos.length; i += 2) {
+        const pair: { url: string; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[] = [];
+        for (let col = 0; col < 2 && i + col < item.photos.length; col++) {
+          const imgData = await loadImageAsBase64(item.photos[i + col]);
+          pair.push({ url: item.photos[i + col], imgData });
         }
 
-        if (imgData) {
-          try {
-            const ratio = imgData.height / imgData.width;
-            let drawW = imgW;
-            let drawH = imgW * ratio;
-            if (drawH > maxImgH) {
-              drawH = maxImgH;
-              drawW = maxImgH / ratio;
+        const fittedHeights = pair.map(({ imgData }) => {
+          if (!imgData) return maxImgH;
+          const ratio = imgData.height / imgData.width;
+          return Math.min(imgW * ratio, maxImgH);
+        });
+        const rowImgH = Math.max(...fittedHeights);
+
+        // Photo label height (just the number e.g. "Foto 1/3")
+        const photoLabelH = item.photos.length > 1 ? 5 : 0;
+        const blockH = rowImgH + photoLabelH + 2;
+
+        checkPage(blockH + 4);
+
+        for (let col = 0; col < pair.length; col++) {
+          const { imgData } = pair[col];
+          const xPos = margin + col * (imgW + 6);
+          let photoY = y;
+
+          // Photo number label (only if multiple photos)
+          if (item.photos.length > 1) {
+            doc.setFontSize(6.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...GRAY_MEDIUM);
+            doc.text(`Foto ${i + col + 1}/${item.photos.length}`, xPos + 1, photoY + 3);
+            photoY += photoLabelH;
+          }
+
+          if (imgData) {
+            try {
+              const ratio = imgData.height / imgData.width;
+              let drawW = imgW;
+              let drawH = imgW * ratio;
+              if (drawH > maxImgH) {
+                drawH = maxImgH;
+                drawW = maxImgH / ratio;
+              }
+              doc.addImage(imgData.data, imgData.format, xPos, photoY, drawW, drawH);
+            } catch {
+              doc.setFontSize(7);
+              doc.setTextColor(...GRAY_MEDIUM);
+              doc.text('[Imagem nao disponivel]', xPos + 2, photoY + 10);
             }
-            doc.addImage(imgData.data, imgData.format, xPos, y + labelH, drawW, drawH);
-          } catch {
+          } else {
             doc.setFontSize(7);
             doc.setTextColor(...GRAY_MEDIUM);
-            doc.text('[Imagem nao disponivel]', xPos + 2, y + labelH + 10);
+            doc.text('[Imagem nao disponivel]', xPos + 2, photoY + 10);
           }
-        } else {
-          doc.setFontSize(7);
-          doc.setTextColor(...GRAY_MEDIUM);
-          doc.text('[Imagem nao disponivel]', xPos + 2, y + labelH + 10);
         }
+
+        y += blockH;
       }
 
-      y += blockH;
+      y += 6; // spacing between items
     }
   }
 
