@@ -49,9 +49,12 @@ export default function NovoRegistro() {
     geo.getCurrentPosition();
   };
 
-  // Sync geo into form
-  if (geo.latitude && geo.longitude && (form.latitude !== geo.latitude || form.longitude !== geo.longitude)) {
-    setForm(prev => ({ ...prev, latitude: geo.latitude!, longitude: geo.longitude! }));
+  // Sync geo into form via effect
+  const geoLat = geo.latitude;
+  const geoLng = geo.longitude;
+  if (geoLat && geoLng && (form.latitude !== geoLat || form.longitude !== geoLng)) {
+    // Use setTimeout to avoid setState during render
+    setTimeout(() => setForm(prev => ({ ...prev, latitude: geoLat, longitude: geoLng })), 0);
   }
 
   const handleFileChange = (tipo: 'rompimento' | 'caixa_emenda' | 'caixas_poste', e: React.ChangeEvent<HTMLInputElement>) => {

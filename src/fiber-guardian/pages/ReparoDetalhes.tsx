@@ -19,7 +19,7 @@ import { ArrowLeft, MapPin, CheckCircle, RotateCcw, Pencil, Trash2, Loader2, Ale
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { useNavigate as useNav, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Reparo } from '@/fiber-guardian/types/database';
 import {
   AlertDialog,
