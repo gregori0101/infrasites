@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, Check, X, Camera, Plus, Trash2, ZoomIn } from "lucide-react";
+import { ArrowLeft, Loader2, Check, X, Camera, Plus, Trash2 } from "lucide-react";
 import { fetchAuditOrderItems, updateAuditItem, updateAuditOrderStatus, type AuditOrder, type AuditOrderItem } from "@/lib/auditoriaDatabase";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Lightbox } from "@/components/ui/lightbox";
 
 // Helper to parse foto_url which can be a single URL string or JSON array
 function parsePhotos(fotoUrl: string | null): string[] {
@@ -39,6 +39,15 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (photos: string[], index: number, itemDesc: string) => {
+    setLightboxImages(photos.map((url, i) => ({ url, label: `${itemDesc} — Foto ${i + 1}` })));
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   const loadItems = async () => {
     setLoading(true);
@@ -241,18 +250,13 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
                     <div className="flex gap-2 flex-wrap">
                       {photos.map((photo, pIdx) => (
                         <div key={pIdx} className="relative group w-16 h-16">
-                          <img src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-full rounded object-cover border" />
+                          <img
+                            src={photo}
+                            alt={`Evidência ${pIdx + 1}`}
+                            className="w-full h-full rounded object-cover border cursor-pointer"
+                            onClick={() => openLightbox(photos, pIdx, item.descricao)}
+                          />
                           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all rounded flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <button className="bg-background/80 rounded-full p-1">
-                                  <ZoomIn className="h-3 w-3" />
-                                </button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl p-0 overflow-hidden">
-                                <img src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-auto" />
-                              </DialogContent>
-                            </Dialog>
                             <button
                               className="bg-destructive/80 text-destructive-foreground rounded-full p-1"
                               onClick={() => handleRemovePhoto(item, pIdx)}
@@ -324,6 +328,13 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
           Finalizar Auditoria
         </Button>
       )}
+      {/* Lightbox */}
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
