@@ -340,10 +340,27 @@ export async function generateAuditPDF(
     const labelH = 20;
 
     for (const item of itemsWithPhotos) {
-      // --- Item header (printed once) ---
-      checkPage(24);
+      // Pre-load first pair of photos to estimate total height for keeping header + first photos together
+      const firstPair: { url: string; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[] = [];
+      for (let col = 0; col < 2 && col < item.photos.length; col++) {
+        const imgData = await loadImageAsBase64(item.photos[col]);
+        firstPair.push({ url: item.photos[col], imgData });
+      }
 
-      // Description
+      const firstFittedHeights = firstPair.map(({ imgData }) => {
+        if (!imgData) return maxImgH;
+        const ratio = imgData.height / imgData.width;
+        return Math.min(imgW * ratio, maxImgH);
+      });
+      const firstRowImgH = Math.max(...firstFittedHeights);
+      const photoLabelH = item.photos.length > 1 ? 5 : 0;
+      const firstPhotoBlockH = firstRowImgH + photoLabelH + 2;
+
+      // Estimate header height + first photo row to keep them on the same page
+      const headerEstimate = 24;
+      checkPage(headerEstimate + firstPhotoBlockH + 4);
+
+      // --- Item header (printed once) ---
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...GRAY_DARK);
@@ -352,7 +369,6 @@ export async function generateAuditPDF(
       const descH = descLines.length * 3.5;
       y += descH + 1;
 
-      // Detail line: Unidade | Previsto | Auditado
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...GRAY_MEDIUM);
@@ -360,7 +376,6 @@ export async function generateAuditPDF(
       doc.text(detailLine, margin + 1, y + 3);
       y += 4;
 
-      // Status
       const statusText = statusLabels[item.status] || item.status;
       if (item.status === 'conforme') doc.setTextColor(...SUCCESS);
       else if (item.status === 'nao_conforme') doc.setTextColor(...DANGER);
@@ -370,7 +385,6 @@ export async function generateAuditPDF(
       doc.text(statusText, margin + 1, y + 3);
       y += 4;
 
-      // Observation
       if (item.observacao) {
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(6.5);
@@ -384,10 +398,15 @@ export async function generateAuditPDF(
 
       // --- Photos in pairs ---
       for (let i = 0; i < item.photos.length; i += 2) {
-        const pair: { url: string; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[] = [];
-        for (let col = 0; col < 2 && i + col < item.photos.length; col++) {
-          const imgData = await loadImageAsBase64(item.photos[i + col]);
-          pair.push({ url: item.photos[i + col], imgData });
+        let pair: { url: string; imgData: Awaited<ReturnType<typeof loadImageAsBase64>> }[];
+        if (i === 0) {
+          pair = firstPair;
+        } else {
+          pair = [];
+          for (let col = 0; col < 2 && i + col < item.photos.length; col++) {
+            const imgData = await loadImageAsBase64(item.photos[i + col]);
+            pair.push({ url: item.photos[i + col], imgData });
+          }
         }
 
         const fittedHeights = pair.map(({ imgData }) => {
@@ -396,19 +415,17 @@ export async function generateAuditPDF(
           return Math.min(imgW * ratio, maxImgH);
         });
         const rowImgH = Math.max(...fittedHeights);
-
-        // Photo label height (just the number e.g. "Foto 1/3")
-        const photoLabelH = item.photos.length > 1 ? 5 : 0;
         const blockH = rowImgH + photoLabelH + 2;
 
-        checkPage(blockH + 4);
+        if (i > 0) {
+          checkPage(blockH + 4);
+        }
 
         for (let col = 0; col < pair.length; col++) {
           const { imgData } = pair[col];
           const xPos = margin + col * (imgW + 6);
           let photoY = y;
 
-          // Photo number label (only if multiple photos)
           if (item.photos.length > 1) {
             doc.setFontSize(6.5);
             doc.setFont('helvetica', 'normal');
@@ -442,7 +459,7 @@ export async function generateAuditPDF(
         y += blockH;
       }
 
-      y += 6; // spacing between items
+      y += 6;
     }
   }
 
