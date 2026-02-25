@@ -27,6 +27,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
+const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -169,6 +170,12 @@ const App = () => {
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
                   <Route path="/instalar" element={<Install />} />
+                  <Route path="/auditoria-ta" element={
+                    <ProtectedRoute>
+                      <AuditoriaTA />
+                    </ProtectedRoute>
+                  } />
+                  
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

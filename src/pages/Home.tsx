@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard } from "lucide-react";
+import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable } from "lucide-react";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 
@@ -73,6 +73,24 @@ export default function Home() {
                     <h2 className="font-semibold text-lg text-foreground">Auditoria OS</h2>
                     <p className="text-sm text-muted-foreground">
                       Auditoria de ordens de serviço
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Auditoria TA */}
+              <Card
+                className="cursor-pointer border-2 border-transparent hover:border-primary/50 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                onClick={() => navigate("/auditoria-ta")}
+              >
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="flex-shrink-0 h-14 w-14 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <Cable className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-semibold text-lg text-foreground">Auditoria TA</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Registro e auditoria de reparos de fibra óptica
                     </p>
                   </div>
                 </CardContent>
