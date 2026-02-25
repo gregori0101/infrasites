@@ -15,7 +15,7 @@ const DANGER: [number, number, number] = [239, 68, 68];
 const statusLabels: Record<string, string> = {
   pendente: 'Pendente',
   em_andamento: 'Em Andamento',
-  concluido: 'Concluido',
+  concluido: 'Vistoriado',
   conforme: 'Conforme',
   nao_conforme: 'Nao Conforme',
 };
