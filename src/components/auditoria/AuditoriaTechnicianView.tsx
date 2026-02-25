@@ -9,7 +9,7 @@ import { toast } from "sonner";
 const statusLabels: Record<string, string> = {
   pendente: "Pendente",
   em_andamento: "Em Andamento",
-  concluido: "Concluído",
+  concluido: "Vistoriado",
 };
 
 const statusColors: Record<string, string> = {
