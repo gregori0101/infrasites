@@ -44,6 +44,41 @@ export type Database = {
         }
         Relationships: []
       }
+      atividades_reparo: {
+        Row: {
+          criado_em: string
+          descricao: string | null
+          id: string
+          reparo_id: string
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          reparo_id: string
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          reparo_id?: string
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atividades_reparo_reparo_id_fkey"
+            columns: ["reparo_id"]
+            isOneToOne: false
+            referencedRelation: "reparos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_order_items: {
         Row: {
           audited_at: string | null
@@ -133,6 +168,185 @@ export type Database = {
           site_code?: string
           status?: string
           technician_id?: string
+        }
+        Relationships: []
+      }
+      fg_profiles: {
+        Row: {
+          avatar_url: string | null
+          criado_em: string
+          email: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          criado_em?: string
+          email?: string
+          id: string
+          nome?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          criado_em?: string
+          email?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      fotos_reparo: {
+        Row: {
+          caminho_arquivo: string
+          criado_em: string
+          id: string
+          ordem: number
+          reparo_id: string
+          tipo_foto: string
+          titulo: string | null
+        }
+        Insert: {
+          caminho_arquivo: string
+          criado_em?: string
+          id?: string
+          ordem?: number
+          reparo_id: string
+          tipo_foto?: string
+          titulo?: string | null
+        }
+        Update: {
+          caminho_arquivo?: string
+          criado_em?: string
+          id?: string
+          ordem?: number
+          reparo_id?: string
+          tipo_foto?: string
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fotos_reparo_reparo_id_fkey"
+            columns: ["reparo_id"]
+            isOneToOne: false
+            referencedRelation: "reparos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metas_tecnico: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          mes: string
+          meta_reparos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          mes: string
+          meta_reparos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          mes?: string
+          meta_reparos?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reparos: {
+        Row: {
+          atualizado_em: string
+          caixa_bomba: boolean
+          categoria: string
+          causa: string
+          conclusao_ta: string
+          criado_em: string
+          email_enviado: boolean
+          email_enviado_em: string | null
+          fim_trabalho: string | null
+          id: string
+          inicio_trabalho: string | null
+          latitude: number | null
+          longitude: number | null
+          observacao_definitivo: string | null
+          observacao_prevencao: string | null
+          observacoes: string | null
+          prazo_vistoria: string | null
+          rnc_aplicada: boolean
+          rnc_aplicada_em: string | null
+          rnc_observacao: string | null
+          sincronizado: boolean
+          status: string
+          ta_titulo: string
+          tecnicos_reparo: string | null
+          tipo_rede: string | null
+          trecho: string | null
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          caixa_bomba?: boolean
+          categoria?: string
+          causa?: string
+          conclusao_ta?: string
+          criado_em?: string
+          email_enviado?: boolean
+          email_enviado_em?: string | null
+          fim_trabalho?: string | null
+          id?: string
+          inicio_trabalho?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          observacao_definitivo?: string | null
+          observacao_prevencao?: string | null
+          observacoes?: string | null
+          prazo_vistoria?: string | null
+          rnc_aplicada?: boolean
+          rnc_aplicada_em?: string | null
+          rnc_observacao?: string | null
+          sincronizado?: boolean
+          status?: string
+          ta_titulo: string
+          tecnicos_reparo?: string | null
+          tipo_rede?: string | null
+          trecho?: string | null
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          caixa_bomba?: boolean
+          categoria?: string
+          causa?: string
+          conclusao_ta?: string
+          criado_em?: string
+          email_enviado?: boolean
+          email_enviado_em?: string | null
+          fim_trabalho?: string | null
+          id?: string
+          inicio_trabalho?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          observacao_definitivo?: string | null
+          observacao_prevencao?: string | null
+          observacoes?: string | null
+          prazo_vistoria?: string | null
+          rnc_aplicada?: boolean
+          rnc_aplicada_em?: string | null
+          rnc_observacao?: string | null
+          sincronizado?: boolean
+          status?: string
+          ta_titulo?: string
+          tecnicos_reparo?: string | null
+          tipo_rede?: string | null
+          trecho?: string | null
+          usuario_id?: string
         }
         Relationships: []
       }
@@ -2124,6 +2338,41 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      revisoes_reparo: {
+        Row: {
+          criado_em: string
+          id: string
+          mensagem: string
+          reparo_id: string
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          mensagem: string
+          reparo_id: string
+          tipo?: string
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          mensagem?: string
+          reparo_id?: string
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revisoes_reparo_reparo_id_fkey"
+            columns: ["reparo_id"]
+            isOneToOne: false
+            referencedRelation: "reparos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_assignments: {
         Row: {
