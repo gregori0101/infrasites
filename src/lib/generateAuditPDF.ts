@@ -314,12 +314,14 @@ export async function generateAuditPDF(
 
   // --- Fotos de Evidencia (lado a lado, 2 por linha) ---
   // Collect all photos from all items into a flat list with metadata
-  const allPhotos: { url: string; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null }[] = [];
-  for (const item of items) {
+  const allPhotos: { url: string; itemNum: number; descricao: string; status: string; unidade: string; quantidade: number; quantidade_auditada: number | null; observacao: string | null }[] = [];
+  for (let idx = 0; idx < items.length; idx++) {
+    const item = items[idx];
     const photos = parsePhotos(item.foto_url);
     for (let pi = 0; pi < photos.length; pi++) {
       allPhotos.push({
         url: photos[pi],
+        itemNum: idx + 1,
         descricao: photos.length > 1 ? `${item.descricao} (${pi + 1}/${photos.length})` : item.descricao,
         status: item.status,
         unidade: item.unidade,
@@ -365,7 +367,7 @@ export async function generateAuditPDF(
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...GRAY_DARK);
-        const descLabel = doc.splitTextToSize(photo.descricao || '-', imgW - 4);
+        const descLabel = doc.splitTextToSize(`#${photo.itemNum} - ${photo.descricao || '-'}`, imgW - 4);
         doc.text(descLabel[0] || '-', xPos + 1, y + 3);
 
         // Line 2: Unidade | Previsto | Auditado
