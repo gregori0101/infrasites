@@ -1,32 +1,56 @@
+# Plano de Migração: Fiber Guardian → InfraSites
 
+## Status: Fase 1 Concluída ✅
 
-# Corrigir visualizacao de fotos na Auditoria
+### Fase 1 — Fundação (CONCLUÍDA)
+- [x] Criar tabelas no banco (reparos, fotos_reparo, revisoes_reparo, atividades_reparo, metas_tecnico, fg_profiles)
+- [x] Criar bucket de storage `fotos-reparos`
+- [x] RLS policies para todas as tabelas
+- [x] Realtime habilitado para reparos
+- [x] Copiar tipos (`src/fiber-guardian/types/database.ts`)
+- [x] Copiar constantes (`src/fiber-guardian/lib/constants.ts`)
+- [x] Copiar gamification (`src/fiber-guardian/lib/gamification.ts`)
+- [x] Copiar imageCompression (`src/fiber-guardian/lib/imageCompression.ts`)
+- [x] Copiar offlineDb (`src/fiber-guardian/lib/offlineDb.ts`)
+- [x] Criar auth compatibility wrapper (`src/fiber-guardian/hooks/useFGAuth.tsx`)
+- [x] Copiar hooks: useOnlineStatus, useGeolocation
+- [x] Adicionar botão "Auditoria TA" na Home
+- [x] Criar página placeholder AuditoriaTA
+- [x] Adicionar rota `/auditoria-ta` no App.tsx
+- [x] Instalar dependência `idb`
 
-## Problema
-Na pagina `AuditoriaExecucao.tsx`, cada foto usa um componente `Dialog` individual embutido inline. Isso causa problemas ao fechar e navegar entre fotos, pois cada Dialog e independente e conflita com o Dialog pai.
+### Fase 2 — Hooks de Dados (PENDENTE)
+- [ ] Copiar/adaptar `useReparos.tsx` (usar `useFGAuth`, queries com `fg_profiles`)
+- [ ] Copiar/adaptar `useRevisoes.tsx`
+- [ ] Copiar/adaptar `useAtividades.tsx`
+- [ ] Copiar/adaptar `useMetas.tsx`
+- [ ] Copiar/adaptar `useSidebarCounts.tsx`
 
-## Solucao
-Substituir os Dialogs individuais por foto pelo componente `Lightbox` (ja existente no projeto e ja usado em `AuditoriaDetailModal.tsx`), que suporta navegacao entre fotos, zoom, rotacao e fechamento correto.
+### Fase 3 — Componentes UI específicos do FG (PENDENTE)
+- [ ] StatusBadge, CausaBadge, CategoriaBadge, TipoRedeBadge
+- [ ] ConnectionStatus, PhotoPicker
 
-## Mudancas
+### Fase 4 — Componentes de Funcionalidade (PENDENTE)
+- [ ] filters/ (AdvancedFilters, MultiSelectFilter)
+- [ ] revisao/ (RevisaoDialog, RevisaoList, ReenvioForm, RespostaTecnicoCard)
+- [ ] admin/ (15 componentes)
+- [ ] tecnico/ (10 componentes)
+- [ ] analytics/, map/, shared/, enviar-vistoria/, layout/
 
-### `src/components/auditoria/AuditoriaExecucao.tsx`
+### Fase 5 — Páginas (PENDENTE)
+- [ ] NovoRegistro → `/auditoria-ta/novo-registro`
+- [ ] TecnicoDashboard, AdminDashboard
+- [ ] ReparoDetalhes → `/auditoria-ta/reparo/:id`
+- [ ] MapaReparos (requer leaflet)
+- [ ] Analytics, ExportarExcel, RankingGamificado
+- [ ] CalendarioVistorias, EnviarVistoria
 
-1. **Importacoes**: Remover `Dialog, DialogContent, DialogTrigger`. Adicionar import do `Lightbox`. Adicionar estado para controlar o lightbox.
+### Fase 6 — Dependências Extras (PENDENTE)
+- [ ] leaflet, react-leaflet, react-leaflet-cluster
+- [ ] CSS custom (variáveis status/causa)
+- [ ] Tabela email_config
 
-2. **Adicionar estado global do lightbox** no componente:
-   - `lightboxImages`: array de `{url, label}`
-   - `lightboxIndex`: indice inicial
-   - `lightboxOpen`: boolean
-
-3. **Substituir o Dialog inline por cada foto**: Ao clicar na miniatura ou no botao de zoom, abrir o Lightbox com todas as fotos do item, posicionado na foto clicada.
-
-4. **Renderizar o Lightbox uma unica vez** fora do loop de items, no final do componente.
-
-### Detalhes tecnicos
-
-- O clique na miniatura da foto abrira o lightbox com todas as fotos daquele item, iniciando na foto clicada
-- O clique no botao de lixeira continuara removendo a foto diretamente (sem abrir lightbox)
-- O Lightbox sera renderizado uma vez no final do JSX com `open={lightboxOpen}` e `onClose` resetando o estado
-- Remover import de `ZoomIn` (nao sera mais necessario inline) e `Dialog/DialogContent/DialogTrigger`
-
+### Notas de Adaptação
+- `useFGAuth` wraps AuthContext: admin+gestor→isAdmin, tecnico→isTecnico
+- Queries a `profiles` usam `fg_profiles`
+- Componentes UI padrão já existem — NÃO copiar
