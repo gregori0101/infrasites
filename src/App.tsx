@@ -30,6 +30,16 @@ const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Fiber Guardian pages
+const FGTecnicoDashboard = lazy(() => import("./fiber-guardian/pages/TecnicoDashboard"));
+const FGAdminDashboard = lazy(() => import("./fiber-guardian/pages/AdminDashboard"));
+const FGNovoRegistro = lazy(() => import("./fiber-guardian/pages/NovoRegistro"));
+const FGMeusReparos = lazy(() => import("./fiber-guardian/pages/MeusReparos"));
+const FGReparoDetalhes = lazy(() => import("./fiber-guardian/pages/ReparoDetalhes"));
+const FGAnalytics = lazy(() => import("./fiber-guardian/pages/Analytics"));
+const FGRanking = lazy(() => import("./fiber-guardian/pages/RankingGamificado"));
+const FGExportar = lazy(() => import("./fiber-guardian/pages/ExportarExcel"));
+
 const queryClient = new QueryClient();
 
 // Loading fallback component
@@ -170,9 +180,51 @@ const App = () => {
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
                   <Route path="/instalar" element={<Install />} />
+
+                  {/* Auditoria TA (Fiber Guardian) routes */}
                   <Route path="/auditoria-ta" element={
                     <ProtectedRoute>
                       <AuditoriaTA />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/tecnico" element={
+                    <ProtectedRoute>
+                      <FGTecnicoDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/admin" element={
+                    <ProtectedRoute requireGestor>
+                      <FGAdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/novo-registro" element={
+                    <ProtectedRoute>
+                      <FGNovoRegistro />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/meus-reparos" element={
+                    <ProtectedRoute>
+                      <FGMeusReparos />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/reparo/:id" element={
+                    <ProtectedRoute>
+                      <FGReparoDetalhes />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/analytics" element={
+                    <ProtectedRoute>
+                      <FGAnalytics />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/ranking" element={
+                    <ProtectedRoute>
+                      <FGRanking />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/exportar" element={
+                    <ProtectedRoute requireGestor>
+                      <FGExportar />
                     </ProtectedRoute>
                   } />
                   
