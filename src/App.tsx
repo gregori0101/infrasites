@@ -39,6 +39,7 @@ const FGReparoDetalhes = lazy(() => import("./fiber-guardian/pages/ReparoDetalhe
 const FGAnalytics = lazy(() => import("./fiber-guardian/pages/Analytics"));
 const FGRanking = lazy(() => import("./fiber-guardian/pages/RankingGamificado"));
 const FGExportar = lazy(() => import("./fiber-guardian/pages/ExportarExcel"));
+const FGMapaReparos = lazy(() => import("./fiber-guardian/pages/MapaReparos"));
 
 const queryClient = new QueryClient();
 
@@ -225,6 +226,11 @@ const App = () => {
                   <Route path="/auditoria-ta/exportar" element={
                     <ProtectedRoute requireGestor>
                       <FGExportar />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria-ta/mapa" element={
+                    <ProtectedRoute>
+                      <FGMapaReparos />
                     </ProtectedRoute>
                   } />
                   

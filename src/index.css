@@ -402,3 +402,29 @@
 .fg-safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Safe area for bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: inherit;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+}
+
+/* Custom marker reset */
+.custom-marker {
+  background: none !important;
+  border: none !important;
+}

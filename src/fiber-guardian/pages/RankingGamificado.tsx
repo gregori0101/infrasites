@@ -1,16 +1,13 @@
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
 import { useFGAuth } from '@/fiber-guardian/hooks/useFGAuth';
 import { useReparos } from '@/fiber-guardian/hooks/useReparos';
+import { FGLayout } from '@/fiber-guardian/components/layout/FGLayout';
 import { calcularPontos, getNivel, getProgressoNivel, getBadgesConquistadas, TecnicoStats } from '@/fiber-guardian/lib/gamification';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Trophy, Loader2 } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 
 export default function RankingGamificado() {
-  const navigate = useNavigate();
   const { user, loading } = useFGAuth();
   const { reparos, loading: reparosLoading } = useReparos();
 
@@ -49,63 +46,52 @@ export default function RankingGamificado() {
 
   if (loading || reparosLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <FGLayout title="Ranking" showBack>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </FGLayout>
     );
   }
 
   const medals = ['🥇', '🥈', '🥉'];
 
   return (
-    <>
-      <Helmet><title>Ranking | Auditoria TA</title></Helmet>
-      <div className="min-h-screen bg-background flex flex-col">
-        <header className="border-b bg-card px-4 py-3 flex items-center gap-3 sticky top-0 z-40">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <Trophy className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-bold text-foreground">Ranking</h1>
-        </header>
-
-        <main className="flex-1 p-4 space-y-3">
-          {ranking.length === 0 ? (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">Nenhum dado disponível.</CardContent></Card>
-          ) : (
-            ranking.map((r, i) => (
-              <Card key={r.uid} className={`${r.isCurrentUser ? 'ring-2 ring-primary' : ''}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl w-8 text-center">{i < 3 ? medals[i] : `${i + 1}º`}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-foreground truncate">{r.nome}</p>
-                        {r.isCurrentUser && <span className="text-xs text-primary font-medium">(você)</span>}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs font-medium bg-gradient-to-r ${r.nivel.cor} bg-clip-text text-transparent`}>
-                          Nv.{r.nivel.nivel} {r.nivel.nome}
-                        </span>
-                        <span className="text-xs text-muted-foreground">• {r.pontos} pts • {r.total} reparos</span>
-                      </div>
-                      <Progress value={r.progresso} className="h-1.5 mt-1.5" />
-                    </div>
+    <FGLayout title="Ranking" showBack headerRight={<Trophy className="h-5 w-5 text-primary" />}>
+      {ranking.length === 0 ? (
+        <Card><CardContent className="p-8 text-center text-muted-foreground">Nenhum dado disponível.</CardContent></Card>
+      ) : (
+        ranking.map((r, i) => (
+          <Card key={r.uid} className={`${r.isCurrentUser ? 'ring-2 ring-primary' : ''}`}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl w-8 text-center">{i < 3 ? medals[i] : `${i + 1}º`}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-foreground truncate">{r.nome}</p>
+                    {r.isCurrentUser && <span className="text-xs text-primary font-medium">(você)</span>}
                   </div>
-                  {r.badges.length > 0 && (
-                    <div className="flex gap-1 mt-2 flex-wrap pl-11">
-                      {r.badges.slice(0, 5).map(b => (
-                        <span key={b.id} title={b.descricao} className="text-sm">{b.icone}</span>
-                      ))}
-                      {r.badges.length > 5 && <span className="text-xs text-muted-foreground">+{r.badges.length - 5}</span>}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </main>
-      </div>
-    </>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs font-medium bg-gradient-to-r ${r.nivel.cor} bg-clip-text text-transparent`}>
+                      Nv.{r.nivel.nivel} {r.nivel.nome}
+                    </span>
+                    <span className="text-xs text-muted-foreground">• {r.pontos} pts • {r.total} reparos</span>
+                  </div>
+                  <Progress value={r.progresso} className="h-1.5 mt-1.5" />
+                </div>
+              </div>
+              {r.badges.length > 0 && (
+                <div className="flex gap-1 mt-2 flex-wrap pl-11">
+                  {r.badges.slice(0, 5).map(b => (
+                    <span key={b.id} title={b.descricao} className="text-sm">{b.icone}</span>
+                  ))}
+                  {r.badges.length > 5 && <span className="text-xs text-muted-foreground">+{r.badges.length - 5}</span>}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </FGLayout>
   );
 }
