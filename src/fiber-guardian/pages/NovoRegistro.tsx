@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useFGAuth } from '@/fiber-guardian/hooks/useFGAuth';
@@ -50,12 +50,11 @@ export default function NovoRegistro() {
   };
 
   // Sync geo into form via effect
-  const geoLat = geo.latitude;
-  const geoLng = geo.longitude;
-  if (geoLat && geoLng && (form.latitude !== geoLat || form.longitude !== geoLng)) {
-    // Use setTimeout to avoid setState during render
-    setTimeout(() => setForm(prev => ({ ...prev, latitude: geoLat, longitude: geoLng })), 0);
-  }
+  useEffect(() => {
+    if (geo.latitude && geo.longitude) {
+      setForm(prev => ({ ...prev, latitude: geo.latitude!, longitude: geo.longitude! }));
+    }
+  }, [geo.latitude, geo.longitude]);
 
   const handleFileChange = (tipo: 'rompimento' | 'caixa_emenda' | 'caixas_poste', e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
