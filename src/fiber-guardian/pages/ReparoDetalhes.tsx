@@ -15,7 +15,8 @@ import { getConclusaoLabel } from '@/fiber-guardian/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, CheckCircle, RotateCcw, Pencil, Trash2, Loader2, AlertTriangle, Send, MessageSquare } from 'lucide-react';
+import { MapPin, CheckCircle, RotateCcw, Pencil, Trash2, Loader2, AlertTriangle, Send, MessageSquare, FileDown } from 'lucide-react';
+import { generateReparoPDF } from '@/fiber-guardian/lib/generateReparoPDF';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -41,6 +42,7 @@ export default function ReparoDetalhes() {
   const [editOpen, setEditOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const reparo = useMemo(() => reparos.find(r => r.id === id), [reparos, id]);
 
@@ -203,6 +205,22 @@ export default function ReparoDetalhes() {
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap pb-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={pdfLoading}
+            onClick={async () => {
+              setPdfLoading(true);
+              try {
+                await generateReparoPDF(reparo);
+                toast.success('PDF gerado!');
+              } catch { toast.error('Erro ao gerar PDF'); }
+              finally { setPdfLoading(false); }
+            }}
+          >
+            <FileDown className="h-4 w-4 mr-1" />
+            {pdfLoading ? 'Gerando...' : 'Baixar PDF'}
+          </Button>
           {isAdmin && (
             <>
               {reparo.status !== 'concluido' && (
