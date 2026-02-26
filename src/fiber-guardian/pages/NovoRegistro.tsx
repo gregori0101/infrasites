@@ -14,7 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { VoiceInput } from '@/fiber-guardian/components/tecnico/VoiceInput';
-import { MapPin, Send, Save, Loader2 } from 'lucide-react';
+import { PhotoPicker } from '@/fiber-guardian/components/ui/photo-picker';
+import { MapPin, Send, Save, Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function NovoRegistro() {
@@ -101,16 +102,26 @@ export default function NovoRegistro() {
     }
   };
 
+  const handlePhotoPicked = (tipo: 'rompimento' | 'caixa_emenda' | 'caixas_poste', files: FileList | null) => {
+    if (!files) return;
+    setForm(prev => ({
+      ...prev,
+      fotos: { ...prev.fotos, [tipo]: [...prev.fotos[tipo], ...Array.from(files)] },
+    }));
+  };
+
   const renderFotoSection = (tipo: 'rompimento' | 'caixa_emenda' | 'caixas_poste', label: string, required: boolean) => (
     <div className="space-y-2">
       <Label>{label}{required ? ' *' : ' (opcional)'}</Label>
-      <input
-        type="file"
-        accept="image/*"
+      <PhotoPicker
+        onPhotosSelected={(files) => handlePhotoPicked(tipo, files)}
         multiple
-        onChange={e => handleFileChange(tipo, e)}
-        className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-      />
+      >
+        <Button variant="outline" className="w-full justify-center gap-2">
+          <Camera className="w-4 h-4" />
+          Adicionar foto
+        </Button>
+      </PhotoPicker>
       {form.fotos[tipo].length > 0 && (
         <div className="flex gap-2 flex-wrap">
           {form.fotos[tipo].map((f, i) => (
