@@ -1,14 +1,9 @@
-import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Navigate } from "react-router-dom";
 import { useFGAuth } from "@/fiber-guardian/hooks/useFGAuth";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, FileText, BarChart3, Trophy, Download, Loader2 } from "lucide-react";
-import { VivoLogo } from "@/components/ui/vivo-logo";
+import { Loader2 } from "lucide-react";
 
 export default function AuditoriaTA() {
-  const navigate = useNavigate();
-  const { profile, isAdmin, loading } = useFGAuth();
+  const { isAdmin, loading } = useFGAuth();
 
   if (loading) {
     return (
@@ -18,12 +13,9 @@ export default function AuditoriaTA() {
     );
   }
 
-  // Redirect to role-specific dashboard
   if (isAdmin) {
-    navigate("/auditoria-ta/admin", { replace: true });
-    return null;
+    return <Navigate to="/auditoria-ta/admin" replace />;
   }
 
-  navigate("/auditoria-ta/tecnico", { replace: true });
-  return null;
+  return <Navigate to="/auditoria-ta/tecnico" replace />;
 }
