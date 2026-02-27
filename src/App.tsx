@@ -15,6 +15,7 @@ import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 const Home = lazy(() => import("./pages/Home"));
 const Index = lazy(() => import("./pages/Index"));
 const AuditoriaOS = lazy(() => import("./pages/AuditoriaOS"));
+const AuditoriaOSDashboard = lazy(() => import("./pages/AuditoriaOSDashboard"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ReportsHistory = lazy(() => import("./pages/ReportsHistory"));
 const Login = lazy(() => import("./pages/Login"));
@@ -137,6 +138,11 @@ const App = () => {
                   <Route path="/auditoria" element={
                     <ProtectedRoute>
                       <AuditoriaOS />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/auditoria/dashboard" element={
+                    <ProtectedRoute requireGestor>
+                      <AuditoriaOSDashboard />
                     </ProtectedRoute>
                   } />
                   <Route path="/dashboard" element={
