@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AuditoriaGestorView from "@/components/auditoria/AuditoriaGestorView";
 import AuditoriaTechnicianView from "@/components/auditoria/AuditoriaTechnicianView";
@@ -22,6 +22,12 @@ export default function AuditoriaOS() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="font-semibold text-foreground">Auditoria OS</h1>
+          <div className="flex-1" />
+          {isGestor && (
+            <Button variant="outline" size="icon" onClick={() => navigate("/auditoria/dashboard")} title="Dashboard">
+              <LayoutDashboard className="h-4 w-4" />
+            </Button>
+          )}
         </header>
 
         <main className="flex-1 p-4 max-w-3xl mx-auto w-full">
