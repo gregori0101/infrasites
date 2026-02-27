@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2, Search } from "lucide-react";
 import { fetchAuditOrders, fetchAuditOrderItems, deleteAuditOrder, type AuditOrder } from "@/lib/auditoriaDatabase";
+import { MultiSelectFilter } from "@/fiber-guardian/components/filters/MultiSelectFilter";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { generateAuditPDF } from "@/lib/generateAuditPDF";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +37,11 @@ export default function AuditoriaGestorView() {
   const [deleteTarget, setDeleteTarget] = useState<AuditOrder | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [detailOrder, setDetailOrder] = useState<AuditOrder | null>(null);
+
+  // Filters
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [techFilter, setTechFilter] = useState<string[]>([]);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -80,6 +87,32 @@ export default function AuditoriaGestorView() {
   };
 
   useEffect(() => { loadOrders(); }, []);
+
+  const techOptions = useMemo(() => {
+    const ids = [...new Set(orders.map(o => o.technician_id))];
+    return ids.map(id => ({ value: id, label: techEmails[id] || id.slice(0, 8) }));
+  }, [orders, techEmails]);
+
+  const statusOptions = [
+    { value: 'pendente', label: 'Pendente' },
+    { value: 'em_andamento', label: 'Em Andamento' },
+    { value: 'concluido', label: 'Vistoriado' },
+  ];
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      if (statusFilter.length > 0 && !statusFilter.includes(o.status)) return false;
+      if (techFilter.length > 0 && !techFilter.includes(o.technician_id)) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const matchOs = o.os_number.toLowerCase().includes(q);
+        const matchSite = o.site_code.toLowerCase().includes(q);
+        const matchMotivo = o.motivo.toLowerCase().includes(q);
+        if (!matchOs && !matchSite && !matchMotivo) return false;
+      }
+      return true;
+    });
+  }, [orders, statusFilter, techFilter, search]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -140,15 +173,44 @@ export default function AuditoriaGestorView() {
         </div>
       </div>
 
-      {orders.length === 0 ? (
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por OS, site ou motivo..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <MultiSelectFilter
+          label="Status"
+          options={statusOptions}
+          selected={statusFilter}
+          onChange={setStatusFilter}
+          placeholder="Status"
+          className="w-full sm:w-[160px]"
+        />
+        <MultiSelectFilter
+          label="Técnico"
+          options={techOptions}
+          selected={techFilter}
+          onChange={setTechFilter}
+          placeholder="Técnico"
+          className="w-full sm:w-[180px]"
+        />
+      </div>
+
+      {filteredOrders.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
-            Nenhuma OS cadastrada. Clique em "Nova OS" para criar.
+            {orders.length === 0 ? 'Nenhuma OS cadastrada. Clique em "Nova OS" para criar.' : 'Nenhuma OS encontrada com os filtros aplicados.'}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {orders.map(order => (
+          {filteredOrders.map(order => (
             <Card key={order.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDetailOrder(order)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
