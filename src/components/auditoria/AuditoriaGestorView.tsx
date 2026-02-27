@@ -42,6 +42,7 @@ export default function AuditoriaGestorView() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [techFilter, setTechFilter] = useState<string[]>([]);
+  const [ufFilter, setUfFilter] = useState<string[]>([]);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -99,10 +100,16 @@ export default function AuditoriaGestorView() {
     { value: 'concluido', label: 'Vistoriado' },
   ];
 
+  const ufOptions = useMemo(() => {
+    const ufs = [...new Set(orders.map(o => o.site_code.slice(0, 2).toUpperCase()))].sort();
+    return ufs.map(uf => ({ value: uf, label: uf }));
+  }, [orders]);
+
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
       if (statusFilter.length > 0 && !statusFilter.includes(o.status)) return false;
       if (techFilter.length > 0 && !techFilter.includes(o.technician_id)) return false;
+      if (ufFilter.length > 0 && !ufFilter.includes(o.site_code.slice(0, 2).toUpperCase())) return false;
       if (search) {
         const q = search.toLowerCase();
         const matchOs = o.os_number.toLowerCase().includes(q);
@@ -112,7 +119,7 @@ export default function AuditoriaGestorView() {
       }
       return true;
     });
-  }, [orders, statusFilter, techFilter, search]);
+  }, [orders, statusFilter, techFilter, ufFilter, search]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -199,6 +206,14 @@ export default function AuditoriaGestorView() {
           onChange={setTechFilter}
           placeholder="Técnico"
           className="w-full sm:w-[180px]"
+        />
+        <MultiSelectFilter
+          label="UF"
+          options={ufOptions}
+          selected={ufFilter}
+          onChange={setUfFilter}
+          placeholder="UF"
+          className="w-full sm:w-[120px]"
         />
       </div>
 
