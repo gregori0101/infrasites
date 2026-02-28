@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { DismissableLayerBranch } from "@radix-ui/react-dismissable-layer";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -136,8 +137,9 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
   const currentImage = images[currentIndex];
 
   return createPortal(
+    <DismissableLayerBranch>
     <div
-      className="fixed inset-0 z-[100] bg-black/95 flex flex-col"
+      className="fixed inset-0 z-[100] bg-black/95 flex flex-col pointer-events-auto"
       onClick={handleBackdropClick}
       onKeyDown={e => e.stopPropagation()}
       onPointerDown={e => e.stopPropagation()}
@@ -195,10 +197,10 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
       {/* Image Container */}
       <div
         className="flex-1 flex items-center justify-center overflow-hidden relative"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onPointerDown={(e) => { if (zoom > 1) { setIsDragging(true); setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y }); } }}
+        onPointerMove={(e) => { if (isDragging && zoom > 1) { setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); } }}
+        onPointerUp={() => setIsDragging(false)}
+        onPointerLeave={() => setIsDragging(false)}
         onWheel={handleWheel}
       >
         {/* Previous Button */}
@@ -266,7 +268,8 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
           </div>
         </div>
       )}
-    </div>,
+    </div>
+    </DismissableLayerBranch>,
     document.body
   );
 }
