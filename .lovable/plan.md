@@ -1,21 +1,45 @@
 
-## Fix: Lightbox Photo Controls Not Working in Auditoria OS
+Objetivo: corrigir definitivamente os controles da galeria de fotos (zoom, rotação, navegação e fechar) dentro da Auditoria de OS, especialmente no cenário mobile mostrado no print.
 
-### Problem
-When viewing photos from the Auditoria OS detail modal, the Lightbox controls (zoom in, zoom out, rotate, close) do not respond to clicks. This happens because:
+Diagnóstico encontrado:
+- O Lightbox já está em portal (`document.body`), mas quando ele abre por cima de um modal Radix (`Dialog`), ele continua fora da “árvore interativa” do `DismissableLayer`.
+- Em diálogos modais, o Radix bloqueia interações fora da camada ativa (`pointer-events` + outside detection). Isso faz os cliques/toques no Lightbox serem ignorados ou tratados como interação “fora” do modal principal.
+- Resultado prático: ferramentas visíveis, mas com comportamento inconsistente (não respondem corretamente).
 
-- The `AuditoriaDetailModal` uses a Radix `Dialog`, which renders its content via a **React portal** attached to `document.body`
-- The `Lightbox` is a simple `fixed` div rendered as a sibling to the Dialog in JSX, but without a portal -- so it ends up **behind** the Dialog's portal layer in the DOM
-- Even though the Lightbox has `z-index: 100`, the Dialog portal's stacking context blocks pointer events from reaching it
+Implementação proposta (mínima e global):
+1) Tornar o Lightbox reconhecido como área interativa válida dos modais Radix
+- Arquivo: `src/components/ui/lightbox.tsx`
+- Envolver o container raiz do Lightbox com `DismissableLayerBranch` de `@radix-ui/react-dismissable-layer`.
+- Isso impede que toques/cliques no Lightbox sejam tratados como “outside interaction” do modal pai.
 
-### Solution
-Wrap the Lightbox component's output in a **React portal** (`ReactDOM.createPortal`) to `document.body`, ensuring it renders at the top of the DOM tree, above the Radix Dialog portal.
+2) Garantir recebimento de ponteiros quando o modal pai estiver ativo
+- No mesmo container raiz do Lightbox, aplicar explicitamente `pointer-events-auto` (Tailwind).
+- Isso elimina o bloqueio herdado de ponteiros em cenários com modal ativo.
 
-### Changes
+3) Ajuste de robustez para mobile (toque)
+- Revisar os handlers de interação para manter consistência em touch:
+  - preservar funcionamento dos botões de toolbar (zoom/rotate/close),
+  - manter navegação por setas e miniaturas,
+  - sem regressão de backdrop click para fechar.
+- Se necessário, substituir handlers estritamente de mouse por pointer handlers no bloco de arraste (para funcionar melhor em Android/iOS ao dar zoom e mover imagem).
 
-**File: `src/components/ui/lightbox.tsx`**
-- Import `createPortal` from `react-dom`
-- Wrap the entire Lightbox render output in `createPortal(..., document.body)`
-- This ensures the Lightbox always sits above any Radix Dialog overlay, regardless of where it's used
+Validação (E2E, obrigatória):
+1. Abrir Auditoria de OS (gestor) → abrir detalhe da OS → abrir foto.
+2. Testar, em sequência:
+   - Zoom + e Zoom -
+   - Rotacionar
+   - Próxima/Anterior
+   - Seleção por miniatura
+   - Fechar no “X”
+3. Confirmar que:
+   - os botões respondem ao toque/clique,
+   - o modal de detalhe não fecha indevidamente durante uso do Lightbox,
+   - ao fechar Lightbox, volta normalmente ao detalhe da OS.
+4. Repetir em viewport mobile (390x844) para validar o cenário do print.
 
-This is a single-file, minimal change that fixes the issue globally for all usages of the Lightbox component.
+Arquivos impactados:
+- `src/components/ui/lightbox.tsx` (principal, correção global de interação em cima de modais Radix).
+
+Risco e mitigação:
+- Risco: ajuste de camada afetar outros usos do Lightbox.
+- Mitigação: como o ajuste é no componente compartilhado, farei teste rápido também em outro ponto que usa Lightbox (ex.: dashboard/site detail) para garantir que não houve regressão.
