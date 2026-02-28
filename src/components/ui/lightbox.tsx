@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -134,7 +135,7 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
 
   const currentImage = images[currentIndex];
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] bg-black/95 flex flex-col"
       onClick={handleBackdropClick}
@@ -265,6 +266,7 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
