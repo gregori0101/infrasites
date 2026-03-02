@@ -155,6 +155,59 @@ export async function reassignAuditOrder(orderId: string, newTechnicianId: strin
   }
 }
 
+// ---- Duplicate ----
+
+export async function duplicateAuditOrder(orderId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Usuário não autenticado');
+
+  // Fetch original order
+  const { data: original, error: fetchErr } = await supabase
+    .from('audit_orders')
+    .select('*')
+    .eq('id', orderId)
+    .single();
+  if (fetchErr) throw fetchErr;
+
+  // Create duplicate order
+  const { data: newOrder, error: orderErr } = await supabase
+    .from('audit_orders')
+    .insert({
+      os_number: `${original.os_number}-COPIA`,
+      site_code: original.site_code,
+      motivo: original.motivo,
+      technician_id: original.technician_id,
+      created_by: user.id,
+      deadline: original.deadline,
+      notes: original.notes,
+    })
+    .select()
+    .single();
+  if (orderErr) throw orderErr;
+
+  // Fetch and duplicate items
+  const { data: items, error: itemsFetchErr } = await supabase
+    .from('audit_order_items')
+    .select('*')
+    .eq('order_id', orderId);
+  if (itemsFetchErr) throw itemsFetchErr;
+
+  if (items && items.length > 0) {
+    const newItems = items.map(item => ({
+      order_id: newOrder.id,
+      descricao: item.descricao,
+      unidade: item.unidade,
+      quantidade: item.quantidade,
+    }));
+    const { error: insertErr } = await supabase
+      .from('audit_order_items')
+      .insert(newItems);
+    if (insertErr) throw insertErr;
+  }
+
+  return newOrder as AuditOrder;
+}
+
 // ---- Delete ----
 
 export async function deleteAuditOrder(orderId: string) {
