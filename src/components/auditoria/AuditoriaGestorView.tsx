@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2, Search, Copy, Download, ClipboardList, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2, Search, Copy, Download, ClipboardList, AlertTriangle, CheckCircle2, Clock, Play } from "lucide-react";
 import { fetchAuditOrders, fetchAuditOrderItems, deleteAuditOrder, duplicateAuditOrder, type AuditOrder } from "@/lib/auditoriaDatabase";
 import { MultiSelectFilter } from "@/fiber-guardian/components/filters/MultiSelectFilter";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -17,6 +17,7 @@ import { isBefore, addDays } from "date-fns";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
 import AuditoriaReassignDialog from "./AuditoriaReassignDialog";
 import AuditoriaDetailModal from "./AuditoriaDetailModal";
+import AuditoriaExecucao from "./AuditoriaExecucao";
 import { toast } from "sonner";
 
 const statusLabels: Record<string, string> = {
@@ -43,7 +44,7 @@ export default function AuditoriaGestorView() {
   const [deleting, setDeleting] = useState(false);
   const [detailOrder, setDetailOrder] = useState<AuditOrder | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
-
+  const [executingOrder, setExecutingOrder] = useState<AuditOrder | null>(null);
   // Filters
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -264,6 +265,16 @@ export default function AuditoriaGestorView() {
     }
   };
 
+  // If executing an order, show execution view
+  if (executingOrder) {
+    return (
+      <AuditoriaExecucao
+        order={executingOrder}
+        onBack={() => { setExecutingOrder(null); loadOrders(); }}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -418,6 +429,9 @@ export default function AuditoriaGestorView() {
                     </div>
                   </div>
                   <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                    <Button variant="outline" size="icon" onClick={() => setExecutingOrder(order)} title="Executar auditoria">
+                      <Play className="h-4 w-4" />
+                    </Button>
                     <Button variant="outline" size="icon" onClick={() => handleDuplicate(order)} disabled={duplicating === order.id} title="Duplicar OS">
                       {duplicating === order.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
                     </Button>
