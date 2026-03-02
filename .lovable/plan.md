@@ -1,53 +1,112 @@
 
 
-## Melhorias no Dashboard de Auditoria de OS
+## Melhorias Profissionais na Auditoria de OS
 
-Objetivo: tornar o painel mais completo e informativo, mantendo o visual limpo e simples que ja existe.
+Conjunto de funcionalidades que elevam o modulo a um nivel profissional de gestao, sem alterar o banco de dados.
 
-### Novos indicadores e seções
+---
 
-**1. Taxa de Conclusao e Aprovacao (KPI cards extras)**
-- Adicionar card "Taxa Conclusao" mostrando percentual (concluidos/total) com barra de progresso visual
-- Adicionar card "Taxa Aprovacao" mostrando percentual (aprovados/concluidos) 
-- Usar as props `subtitle` e `trend` do StatCard existente para enriquecer os cards atuais
+### 1. Mini Dashboard no topo da visao do Gestor
 
-**2. Filtro de periodo**
-- Adicionar seletor simples de periodo no header: "Todos", "Ultimos 7 dias", "Ultimos 30 dias", "Ultimos 90 dias"
-- Filtrar todos os dados/graficos conforme o periodo selecionado
-- Chips simples usando botoes com variant outline/default
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
 
-**3. Card de Motivos mais frequentes**
-- Novo card com mini lista dos top 5 motivos de auditoria
-- Barra horizontal simples mostrando a proporcao de cada motivo
-- Extraido do campo `motivo` das ordens
+Adicionar uma faixa de 4 mini cards no topo da listagem com:
+- Total de OS (no periodo)
+- Pendentes
+- Vencidas (deadline passado e status != concluido) com destaque vermelho
+- Taxa de aprovacao (%) com barra de progresso
 
-**4. Card de OS Vencidas / Proximas do Prazo**
-- Contar ordens com `deadline` passado e status != concluido (vencidas)
-- Contar ordens com deadline nos proximos 7 dias (proximas do prazo)
-- Exibir como StatCard com destaque visual (badge destructive/warning)
+Calculados a partir dos dados ja carregados (orders + auditResults). Permite ao gestor ter visao rapida sem precisar abrir o dashboard separado.
 
-**5. Timeline de atividade recente**
-- Pequena lista das ultimas 5 OS concluidas, mostrando site_code, data de conclusao e resultado (aprovado/reprovado)
-- Card simples com lista vertical
+---
 
-**6. Melhoria no grafico de tecnicos**
-- Incluir taxa de aprovacao por tecnico (aprovados/concluidos) no tooltip
-- Adicionar coluna de aprovados no grafico stacked
+### 2. Filtro por Resultado (Aprovado / Reprovado)
 
-### Mudancas tecnicas
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
 
-**Arquivo: `src/pages/AuditoriaOSDashboard.tsx`**
+Adicionar um novo MultiSelectFilter para "Resultado" com opcoes: Aprovado, Reprovado, Sem resultado. Integrado ao filteredOrders existente, filtrando pela mesma logica de auditResults ja calculada.
 
-- Adicionar estado `periodFilter` com opcoes de periodo
-- Criar `filteredOrders` via useMemo que filtra por periodo
-- Substituir `orders` por `filteredOrders` em todos os calculos de KPI e graficos
-- Adicionar novos useMemo para:
-  - `taxaConclusao` e `taxaAprovacao` (percentuais)
-  - `motivoData` (top 5 motivos com contagem)
-  - `deadlineStats` (vencidas e proximas do prazo)
-  - `recentActivity` (ultimas 5 concluidas)
-- Reorganizar layout dos KPI cards para incluir os novos (grid 2x4 em desktop)
-- Adicionar nova row de cards: Motivos + Atividade Recente (grid 2 colunas)
-- Enriquecer techData com dados de aprovacao
+---
 
-Nenhuma mudanca no banco de dados. Tudo calculado client-side a partir dos dados ja carregados.
+### 3. Ordenacao da lista de OS
+
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
+
+Adicionar seletor de ordenacao ao lado dos filtros com opcoes:
+- Mais recente (padrao)
+- Mais antiga
+- Prazo mais proximo
+- Site (A-Z)
+
+Implementado via useMemo que ordena o filteredOrders conforme a opcao selecionada.
+
+---
+
+### 4. Selecao em lote e exclusao em massa
+
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
+
+- Checkbox em cada card de OS para selecao multipla
+- Barra de acoes flutuante quando ha itens selecionados: "X selecionados | Excluir selecionados"
+- Dialog de confirmacao antes de excluir em massa
+- Botao "Selecionar todos" / "Limpar selecao"
+
+---
+
+### 5. Duplicar OS
+
+**Arquivo: `src/lib/auditoriaDatabase.ts`** - nova funcao `duplicateAuditOrder`
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`** - botao de duplicar no card
+
+Funcionalidade: copia todos os dados da OS (exceto id, status e datas) e todos os itens, criando uma nova OS com status "pendente". Util para criar auditorias recorrentes no mesmo site.
+
+Novo botao com icone `Copy` ao lado dos botoes existentes em cada card.
+
+---
+
+### 6. Exportar lista de OS para Excel
+
+**Arquivo: `src/lib/generateAuditExcel.ts`** (novo arquivo)
+**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`** - botao no header
+
+Gera planilha Excel (xlsx) com todas as OS filtradas, incluindo:
+- Numero OS, Site, Motivo, Tecnico, Status, Resultado, Prazo, Criacao, Conclusao
+
+Botao "Exportar" no header do painel, ao lado do botao "Nova OS". Usa a biblioteca xlsx ja instalada.
+
+---
+
+### 7. Melhorias na visao do Tecnico
+
+**Arquivo: `src/components/auditoria/AuditoriaTechnicianView.tsx`**
+
+- Indicador de prazo com cor: verde (> 7 dias), amarelo (< 7 dias), vermelho (vencida)
+- Barra de progresso mostrando itens auditados vs total (requer fetch dos items count)
+- Separar OS por status: "Pendentes" e "Concluidas" em secoes colapsaveis
+- Contador de OS no header ("3 pendentes, 2 concluidas")
+
+---
+
+### 8. Barra de progresso na Execucao
+
+**Arquivo: `src/components/auditoria/AuditoriaExecucao.tsx`**
+
+- Adicionar barra de progresso visual no topo mostrando (auditados / total)
+- Indicador de prazo restante (ex: "3 dias restantes" ou "Vencida!")
+- Auto-scroll para o proximo item pendente apos salvar
+- Botao "Expandir/Recolher todos"
+
+---
+
+### Resumo tecnico
+
+| Arquivo | Tipo |
+|---|---|
+| `src/components/auditoria/AuditoriaGestorView.tsx` | Modificar |
+| `src/components/auditoria/AuditoriaTechnicianView.tsx` | Modificar |
+| `src/components/auditoria/AuditoriaExecucao.tsx` | Modificar |
+| `src/lib/auditoriaDatabase.ts` | Modificar (add duplicateAuditOrder) |
+| `src/lib/generateAuditExcel.ts` | Criar |
+
+Nenhuma alteracao no banco de dados. Tudo calculado client-side.
+
