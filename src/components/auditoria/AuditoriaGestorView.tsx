@@ -5,13 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2, Search, Copy, Download, ClipboardList, AlertTriangle, CheckCircle2, Clock, Play } from "lucide-react";
+import { Plus, Loader2, RefreshCw, FileText, RotateCcw, Trash2, Search, Copy, Download, ClipboardList, AlertTriangle, CheckCircle2, Clock, Play, Database } from "lucide-react";
 import { fetchAuditOrders, fetchAuditOrderItems, deleteAuditOrder, duplicateAuditOrder, type AuditOrder } from "@/lib/auditoriaDatabase";
 import { MultiSelectFilter } from "@/fiber-guardian/components/filters/MultiSelectFilter";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { generateAuditPDF } from "@/lib/generateAuditPDF";
-import { generateAuditExcel } from "@/lib/generateAuditExcel";
+import { generateAuditExcel, generateFullAuditExcel } from "@/lib/generateAuditExcel";
 import { supabase } from "@/integrations/supabase/client";
+import { PaginationControls, usePagination } from "@/components/ui/pagination-controls";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { isBefore, addDays } from "date-fns";
 import AuditoriaCreateDialog from "./AuditoriaCreateDialog";
@@ -52,6 +53,10 @@ export default function AuditoriaGestorView() {
   const [ufFilter, setUfFilter] = useState<string[]>([]);
   const [resultFilter, setResultFilter] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exportingFull, setExportingFull] = useState(false);
 
   // Batch selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -173,6 +178,12 @@ export default function AuditoriaGestorView() {
     return result;
   }, [orders, statusFilter, techFilter, ufFilter, resultFilter, search, auditResults, sortBy]);
 
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [statusFilter, techFilter, ufFilter, resultFilter, search, sortBy]);
+
+  const { totalPages, getPageItems, totalItems } = usePagination(filteredOrders, 15);
+  const pageItems = getPageItems(currentPage);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -247,6 +258,23 @@ export default function AuditoriaGestorView() {
     }
     generateAuditExcel({ orders: filteredOrders, techEmails, auditResults });
     toast.success("Excel exportado!");
+  };
+
+  const handleExportFullExcel = async () => {
+    if (orders.length === 0) {
+      toast.error("Nenhuma OS para exportar");
+      return;
+    }
+    setExportingFull(true);
+    try {
+      await generateFullAuditExcel({ orders, techEmails, auditResults });
+      toast.success("Excel completo exportado!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao gerar Excel completo");
+    } finally {
+      setExportingFull(false);
+    }
   };
 
   const toggleSelect = (id: string) => {
@@ -338,8 +366,11 @@ export default function AuditoriaGestorView() {
           <Button variant="outline" size="icon" onClick={loadOrders} title="Recarregar">
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel} title="Exportar Excel">
+          <Button variant="outline" size="sm" onClick={handleExportExcel} title="Exportar Excel filtrado">
             <Download className="h-4 w-4 mr-1" /> Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportFullExcel} disabled={exportingFull} title="Exportar Excel completo com itens">
+            {exportingFull ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Database className="h-4 w-4 mr-1" />} Excel Completo
           </Button>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" /> Nova OS
@@ -397,7 +428,7 @@ export default function AuditoriaGestorView() {
               Selecionar todas
             </button>
           )}
-          {filteredOrders.map(order => (
+          {pageItems.map(order => (
             <Card key={order.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDetailOrder(order)}>
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
@@ -449,6 +480,14 @@ export default function AuditoriaGestorView() {
               </CardContent>
             </Card>
           ))}
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalItems}
+            itemsPerPage={15}
+            showingLabel="OS"
+          />
         </div>
       )}
 
