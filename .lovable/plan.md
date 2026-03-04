@@ -1,42 +1,57 @@
 
 
-## Paginacao e Excel completo na Auditoria de OS
+## Aumentar limite de baterias por gabinete de 6 para 12
 
-### 1. Paginacao da lista de OS
+O limite atual de 6 bancos de bateria por gabinete e imposto tanto pelo banco de dados (colunas fixas) quanto pelo codigo front-end. Para permitir mais de 7 bancos, proponho aumentar para **12 bancos por gabinete**.
 
-**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
+---
 
-- Adicionar estado `currentPage` (default 1), resetado para 1 quando filtros mudam
-- Usar o hook `usePagination` ja existente em `src/components/ui/pagination-controls.tsx` para calcular paginas
-- Renderizar apenas os itens da pagina atual (`getPageItems(currentPage)`) no lugar de `filteredOrders.map`
-- Adicionar o componente `PaginationControls` abaixo da lista de cards
-- 15 itens por pagina
+### 1. Migracao de banco de dados
 
-### 2. Excel com dados completos (incluindo itens)
+Para cada gabinete (1-7), adicionar colunas para bancos 7-12:
+- `gabX_bat7_tipo`, `gabX_bat7_fabricante`, `gabX_bat7_capacidade`, `gabX_bat7_data_fabricacao`, `gabX_bat7_estado`, `gabX_bat7_colada`, `gabX_bat7_com_gradil`
+- Repetido para bat8, bat9, bat10, bat11, bat12
+- Total: 7 gabinetes x 6 novos bancos x 7 colunas = **294 novas colunas** (todas text, nullable)
 
-**Arquivo: `src/lib/generateAuditExcel.ts`**
+### 2. Front-end - Formulario
 
-Criar nova funcao `generateFullAuditExcel` que:
-- Recebe todas as orders (sem filtro)
-- Para cada order, faz fetch dos items via `fetchAuditOrderItems`
-- Gera planilha com 2 abas:
-  - **Aba "Auditorias"**: dados das OS (numero, site, motivo, tecnico, status, resultado, prazo, notas, criacao, conclusao)
-  - **Aba "Itens"**: todos os itens de todas as OS (numero OS, descricao, unidade, quantidade, quantidade auditada, status, observacao, data auditoria)
-- Auto-width nas colunas
+**`src/components/steps/Step4Baterias.tsx`**
+- Alterar limite de 6 para 12 em `addBanco`, `disabled`, e contador visual
 
-**Arquivo: `src/components/auditoria/AuditoriaGestorView.tsx`**
+### 3. Persistencia
 
-- Adicionar botao "Excel Completo" ao lado do botao "Excel" existente
-- O botao existente continua exportando apenas as OS filtradas (resumo)
-- O novo botao exporta TODAS as OS com todos os itens detalhados
-- Indicador de loading durante a geracao (pode demorar por causa dos fetches dos itens)
+**`src/lib/reportDatabase.ts`**
+- Loop `for (let j = 0; j < 6` → `j < 12`
+- Adicionar colunas bat7-bat12 ao `buildDashboardColumns()`
 
-### Mudancas tecnicas
+**`src/lib/reportToChecklist.ts`**
+- Loop `for (let j = 0; j < 6` → `j < 12`
 
-| Arquivo | Tipo |
+**`src/lib/generateExcel.ts`**
+- Loop `for (let j = 0; j < 6` → `j < 12`
+
+### 4. Dashboard
+
+**`src/components/dashboard/useDashboardStats.ts`**
+- Ambos os loops `b <= 6` → `b <= 12`
+
+**`src/components/dashboard/SiteDetailModal.tsx`**
+- Loop `b <= 6` → `b <= 12`
+- `Array.from({ length: 6 }` → `{ length: 12 }`
+
+**`src/components/dashboard/BatteryDetailModal.tsx`**
+- Verificar e ajustar loops se existirem
+
+### Resumo
+
+| Arquivo | Acao |
 |---|---|
-| `src/components/auditoria/AuditoriaGestorView.tsx` | Modificar (paginacao + botao excel completo) |
-| `src/lib/generateAuditExcel.ts` | Modificar (nova funcao generateFullAuditExcel) |
-
-Nenhuma alteracao no banco de dados.
+| Migracao SQL | 294 colunas novas (bat7-bat12 x 7 gabs) |
+| `Step4Baterias.tsx` | Limite 6→12 |
+| `reportDatabase.ts` | Loop 6→12 + colunas dashboard |
+| `reportToChecklist.ts` | Loop 6→12 |
+| `generateExcel.ts` | Loop 6→12 |
+| `useDashboardStats.ts` | Loops 6→12 |
+| `SiteDetailModal.tsx` | Loops 6→12 |
+| `BatteryDetailModal.tsx` | Verificar/ajustar |
 
