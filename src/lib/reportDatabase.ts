@@ -138,8 +138,8 @@ function buildDashboardColumns(): string {
       `${prefix}_alarme_status`,
     );
 
-    // Batteries (6 per gabinete)
-    for (let b = 1; b <= 6; b++) {
+    // Batteries (12 per gabinete)
+    for (let b = 1; b <= 12; b++) {
       cols.push(
         `${prefix}_bat${b}_tipo`,
         `${prefix}_bat${b}_fabricante`,
@@ -335,9 +335,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
         }
       }
       
-      // Batteries (up to 6) - skip if Baterias section marked NA
+      // Batteries (up to 12) - skip if Baterias section marked NA
       if (!skipBaterias) {
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < 12; j++) {
           const banco = gab.baterias.bancos[j];
           if (banco) {
             row[`${prefix}_bat${j + 1}_tipo`] = banco.tipo || null;

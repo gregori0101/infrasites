@@ -58,7 +58,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
   };
 
   const addBanco = () => {
-    if (gabinete.baterias.bancos.length < 6) {
+    if (gabinete.baterias.bancos.length < 12) {
       updateBaterias({
         bancos: [...gabinete.baterias.bancos, { ...EMPTY_BANCO }],
         numBancos: gabinete.baterias.numBancos + 1
@@ -86,7 +86,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
             Baterias - Gabinete {currentGabinete + 1}
           </span>
           <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
-            {gabinete.baterias.bancos.length}/6 bancos
+            {gabinete.baterias.bancos.length}/12 bancos
           </span>
         </div>
 
@@ -98,7 +98,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                 variant="outline"
                 size="sm"
                 onClick={addBanco}
-                disabled={gabinete.baterias.bancos.length >= 6}
+                disabled={gabinete.baterias.bancos.length >= 12}
                 className="gap-1"
               >
                 <Plus className="w-4 h-4" />

@@ -108,7 +108,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
         row[`${prefix}_Num_Bancos`] = gab.baterias.numBancos;
         row[`${prefix}_Bancos_Interligados`] = gab.baterias.bancosInterligados ? 'SIM' : 'NÃO';
         
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < 12; j++) {
           const banco = gab.baterias.bancos[j];
           if (banco) {
             row[`${prefix}_Banco${j + 1}_Tipo`] = banco.tipo;
