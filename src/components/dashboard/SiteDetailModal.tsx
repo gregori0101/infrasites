@@ -470,7 +470,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     const currentYear = new Date().getFullYear();
     
     for (let g = 1; g <= totalCabinets; g++) {
-      for (let b = 1; b <= 6; b++) {
+      for (let b = 1; b <= 12; b++) {
         const estado = report?.[`gab${g}_bat${b}_estado`];
         const dataFab = report?.[`gab${g}_bat${b}_data_fabricacao`];
         
@@ -845,7 +845,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {Array.from({ length: 6 }, (_, j) => {
+                            {Array.from({ length: 12 }, (_, j) => {
                               const b = j + 1;
                               const tipo = report[`${prefix}_bat${b}_tipo`];
                               const fabricante = report[`${prefix}_bat${b}_fabricante`];

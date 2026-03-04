@@ -438,6 +438,27 @@ export type Database = {
           gab1_bat1_estado: string | null
           gab1_bat1_fabricante: string | null
           gab1_bat1_tipo: string | null
+          gab1_bat10_capacidade: string | null
+          gab1_bat10_colada: string | null
+          gab1_bat10_com_gradil: string | null
+          gab1_bat10_data_fabricacao: string | null
+          gab1_bat10_estado: string | null
+          gab1_bat10_fabricante: string | null
+          gab1_bat10_tipo: string | null
+          gab1_bat11_capacidade: string | null
+          gab1_bat11_colada: string | null
+          gab1_bat11_com_gradil: string | null
+          gab1_bat11_data_fabricacao: string | null
+          gab1_bat11_estado: string | null
+          gab1_bat11_fabricante: string | null
+          gab1_bat11_tipo: string | null
+          gab1_bat12_capacidade: string | null
+          gab1_bat12_colada: string | null
+          gab1_bat12_com_gradil: string | null
+          gab1_bat12_data_fabricacao: string | null
+          gab1_bat12_estado: string | null
+          gab1_bat12_fabricante: string | null
+          gab1_bat12_tipo: string | null
           gab1_bat2_capacidade: string | null
           gab1_bat2_colada: string | null
           gab1_bat2_com_gradil: string | null
@@ -473,6 +494,27 @@ export type Database = {
           gab1_bat6_estado: string | null
           gab1_bat6_fabricante: string | null
           gab1_bat6_tipo: string | null
+          gab1_bat7_capacidade: string | null
+          gab1_bat7_colada: string | null
+          gab1_bat7_com_gradil: string | null
+          gab1_bat7_data_fabricacao: string | null
+          gab1_bat7_estado: string | null
+          gab1_bat7_fabricante: string | null
+          gab1_bat7_tipo: string | null
+          gab1_bat8_capacidade: string | null
+          gab1_bat8_colada: string | null
+          gab1_bat8_com_gradil: string | null
+          gab1_bat8_data_fabricacao: string | null
+          gab1_bat8_estado: string | null
+          gab1_bat8_fabricante: string | null
+          gab1_bat8_tipo: string | null
+          gab1_bat9_capacidade: string | null
+          gab1_bat9_colada: string | null
+          gab1_bat9_com_gradil: string | null
+          gab1_bat9_data_fabricacao: string | null
+          gab1_bat9_estado: string | null
+          gab1_bat9_fabricante: string | null
+          gab1_bat9_tipo: string | null
           gab1_clima_foto_ar1: string | null
           gab1_clima_foto_ar2: string | null
           gab1_clima_foto_ar3: string | null
@@ -518,6 +560,27 @@ export type Database = {
           gab2_bat1_estado: string | null
           gab2_bat1_fabricante: string | null
           gab2_bat1_tipo: string | null
+          gab2_bat10_capacidade: string | null
+          gab2_bat10_colada: string | null
+          gab2_bat10_com_gradil: string | null
+          gab2_bat10_data_fabricacao: string | null
+          gab2_bat10_estado: string | null
+          gab2_bat10_fabricante: string | null
+          gab2_bat10_tipo: string | null
+          gab2_bat11_capacidade: string | null
+          gab2_bat11_colada: string | null
+          gab2_bat11_com_gradil: string | null
+          gab2_bat11_data_fabricacao: string | null
+          gab2_bat11_estado: string | null
+          gab2_bat11_fabricante: string | null
+          gab2_bat11_tipo: string | null
+          gab2_bat12_capacidade: string | null
+          gab2_bat12_colada: string | null
+          gab2_bat12_com_gradil: string | null
+          gab2_bat12_data_fabricacao: string | null
+          gab2_bat12_estado: string | null
+          gab2_bat12_fabricante: string | null
+          gab2_bat12_tipo: string | null
           gab2_bat2_capacidade: string | null
           gab2_bat2_colada: string | null
           gab2_bat2_com_gradil: string | null
@@ -553,6 +616,27 @@ export type Database = {
           gab2_bat6_estado: string | null
           gab2_bat6_fabricante: string | null
           gab2_bat6_tipo: string | null
+          gab2_bat7_capacidade: string | null
+          gab2_bat7_colada: string | null
+          gab2_bat7_com_gradil: string | null
+          gab2_bat7_data_fabricacao: string | null
+          gab2_bat7_estado: string | null
+          gab2_bat7_fabricante: string | null
+          gab2_bat7_tipo: string | null
+          gab2_bat8_capacidade: string | null
+          gab2_bat8_colada: string | null
+          gab2_bat8_com_gradil: string | null
+          gab2_bat8_data_fabricacao: string | null
+          gab2_bat8_estado: string | null
+          gab2_bat8_fabricante: string | null
+          gab2_bat8_tipo: string | null
+          gab2_bat9_capacidade: string | null
+          gab2_bat9_colada: string | null
+          gab2_bat9_com_gradil: string | null
+          gab2_bat9_data_fabricacao: string | null
+          gab2_bat9_estado: string | null
+          gab2_bat9_fabricante: string | null
+          gab2_bat9_tipo: string | null
           gab2_clima_foto_ar1: string | null
           gab2_clima_foto_ar2: string | null
           gab2_clima_foto_ar3: string | null
@@ -598,6 +682,27 @@ export type Database = {
           gab3_bat1_estado: string | null
           gab3_bat1_fabricante: string | null
           gab3_bat1_tipo: string | null
+          gab3_bat10_capacidade: string | null
+          gab3_bat10_colada: string | null
+          gab3_bat10_com_gradil: string | null
+          gab3_bat10_data_fabricacao: string | null
+          gab3_bat10_estado: string | null
+          gab3_bat10_fabricante: string | null
+          gab3_bat10_tipo: string | null
+          gab3_bat11_capacidade: string | null
+          gab3_bat11_colada: string | null
+          gab3_bat11_com_gradil: string | null
+          gab3_bat11_data_fabricacao: string | null
+          gab3_bat11_estado: string | null
+          gab3_bat11_fabricante: string | null
+          gab3_bat11_tipo: string | null
+          gab3_bat12_capacidade: string | null
+          gab3_bat12_colada: string | null
+          gab3_bat12_com_gradil: string | null
+          gab3_bat12_data_fabricacao: string | null
+          gab3_bat12_estado: string | null
+          gab3_bat12_fabricante: string | null
+          gab3_bat12_tipo: string | null
           gab3_bat2_capacidade: string | null
           gab3_bat2_colada: string | null
           gab3_bat2_com_gradil: string | null
@@ -633,6 +738,27 @@ export type Database = {
           gab3_bat6_estado: string | null
           gab3_bat6_fabricante: string | null
           gab3_bat6_tipo: string | null
+          gab3_bat7_capacidade: string | null
+          gab3_bat7_colada: string | null
+          gab3_bat7_com_gradil: string | null
+          gab3_bat7_data_fabricacao: string | null
+          gab3_bat7_estado: string | null
+          gab3_bat7_fabricante: string | null
+          gab3_bat7_tipo: string | null
+          gab3_bat8_capacidade: string | null
+          gab3_bat8_colada: string | null
+          gab3_bat8_com_gradil: string | null
+          gab3_bat8_data_fabricacao: string | null
+          gab3_bat8_estado: string | null
+          gab3_bat8_fabricante: string | null
+          gab3_bat8_tipo: string | null
+          gab3_bat9_capacidade: string | null
+          gab3_bat9_colada: string | null
+          gab3_bat9_com_gradil: string | null
+          gab3_bat9_data_fabricacao: string | null
+          gab3_bat9_estado: string | null
+          gab3_bat9_fabricante: string | null
+          gab3_bat9_tipo: string | null
           gab3_clima_foto_ar1: string | null
           gab3_clima_foto_ar2: string | null
           gab3_clima_foto_ar3: string | null
@@ -678,6 +804,27 @@ export type Database = {
           gab4_bat1_estado: string | null
           gab4_bat1_fabricante: string | null
           gab4_bat1_tipo: string | null
+          gab4_bat10_capacidade: string | null
+          gab4_bat10_colada: string | null
+          gab4_bat10_com_gradil: string | null
+          gab4_bat10_data_fabricacao: string | null
+          gab4_bat10_estado: string | null
+          gab4_bat10_fabricante: string | null
+          gab4_bat10_tipo: string | null
+          gab4_bat11_capacidade: string | null
+          gab4_bat11_colada: string | null
+          gab4_bat11_com_gradil: string | null
+          gab4_bat11_data_fabricacao: string | null
+          gab4_bat11_estado: string | null
+          gab4_bat11_fabricante: string | null
+          gab4_bat11_tipo: string | null
+          gab4_bat12_capacidade: string | null
+          gab4_bat12_colada: string | null
+          gab4_bat12_com_gradil: string | null
+          gab4_bat12_data_fabricacao: string | null
+          gab4_bat12_estado: string | null
+          gab4_bat12_fabricante: string | null
+          gab4_bat12_tipo: string | null
           gab4_bat2_capacidade: string | null
           gab4_bat2_colada: string | null
           gab4_bat2_com_gradil: string | null
@@ -713,6 +860,27 @@ export type Database = {
           gab4_bat6_estado: string | null
           gab4_bat6_fabricante: string | null
           gab4_bat6_tipo: string | null
+          gab4_bat7_capacidade: string | null
+          gab4_bat7_colada: string | null
+          gab4_bat7_com_gradil: string | null
+          gab4_bat7_data_fabricacao: string | null
+          gab4_bat7_estado: string | null
+          gab4_bat7_fabricante: string | null
+          gab4_bat7_tipo: string | null
+          gab4_bat8_capacidade: string | null
+          gab4_bat8_colada: string | null
+          gab4_bat8_com_gradil: string | null
+          gab4_bat8_data_fabricacao: string | null
+          gab4_bat8_estado: string | null
+          gab4_bat8_fabricante: string | null
+          gab4_bat8_tipo: string | null
+          gab4_bat9_capacidade: string | null
+          gab4_bat9_colada: string | null
+          gab4_bat9_com_gradil: string | null
+          gab4_bat9_data_fabricacao: string | null
+          gab4_bat9_estado: string | null
+          gab4_bat9_fabricante: string | null
+          gab4_bat9_tipo: string | null
           gab4_clima_foto_ar1: string | null
           gab4_clima_foto_ar2: string | null
           gab4_clima_foto_ar3: string | null
@@ -758,6 +926,27 @@ export type Database = {
           gab5_bat1_estado: string | null
           gab5_bat1_fabricante: string | null
           gab5_bat1_tipo: string | null
+          gab5_bat10_capacidade: string | null
+          gab5_bat10_colada: string | null
+          gab5_bat10_com_gradil: string | null
+          gab5_bat10_data_fabricacao: string | null
+          gab5_bat10_estado: string | null
+          gab5_bat10_fabricante: string | null
+          gab5_bat10_tipo: string | null
+          gab5_bat11_capacidade: string | null
+          gab5_bat11_colada: string | null
+          gab5_bat11_com_gradil: string | null
+          gab5_bat11_data_fabricacao: string | null
+          gab5_bat11_estado: string | null
+          gab5_bat11_fabricante: string | null
+          gab5_bat11_tipo: string | null
+          gab5_bat12_capacidade: string | null
+          gab5_bat12_colada: string | null
+          gab5_bat12_com_gradil: string | null
+          gab5_bat12_data_fabricacao: string | null
+          gab5_bat12_estado: string | null
+          gab5_bat12_fabricante: string | null
+          gab5_bat12_tipo: string | null
           gab5_bat2_capacidade: string | null
           gab5_bat2_colada: string | null
           gab5_bat2_com_gradil: string | null
@@ -793,6 +982,27 @@ export type Database = {
           gab5_bat6_estado: string | null
           gab5_bat6_fabricante: string | null
           gab5_bat6_tipo: string | null
+          gab5_bat7_capacidade: string | null
+          gab5_bat7_colada: string | null
+          gab5_bat7_com_gradil: string | null
+          gab5_bat7_data_fabricacao: string | null
+          gab5_bat7_estado: string | null
+          gab5_bat7_fabricante: string | null
+          gab5_bat7_tipo: string | null
+          gab5_bat8_capacidade: string | null
+          gab5_bat8_colada: string | null
+          gab5_bat8_com_gradil: string | null
+          gab5_bat8_data_fabricacao: string | null
+          gab5_bat8_estado: string | null
+          gab5_bat8_fabricante: string | null
+          gab5_bat8_tipo: string | null
+          gab5_bat9_capacidade: string | null
+          gab5_bat9_colada: string | null
+          gab5_bat9_com_gradil: string | null
+          gab5_bat9_data_fabricacao: string | null
+          gab5_bat9_estado: string | null
+          gab5_bat9_fabricante: string | null
+          gab5_bat9_tipo: string | null
           gab5_clima_foto_ar1: string | null
           gab5_clima_foto_ar2: string | null
           gab5_clima_foto_ar3: string | null
@@ -838,6 +1048,27 @@ export type Database = {
           gab6_bat1_estado: string | null
           gab6_bat1_fabricante: string | null
           gab6_bat1_tipo: string | null
+          gab6_bat10_capacidade: string | null
+          gab6_bat10_colada: string | null
+          gab6_bat10_com_gradil: string | null
+          gab6_bat10_data_fabricacao: string | null
+          gab6_bat10_estado: string | null
+          gab6_bat10_fabricante: string | null
+          gab6_bat10_tipo: string | null
+          gab6_bat11_capacidade: string | null
+          gab6_bat11_colada: string | null
+          gab6_bat11_com_gradil: string | null
+          gab6_bat11_data_fabricacao: string | null
+          gab6_bat11_estado: string | null
+          gab6_bat11_fabricante: string | null
+          gab6_bat11_tipo: string | null
+          gab6_bat12_capacidade: string | null
+          gab6_bat12_colada: string | null
+          gab6_bat12_com_gradil: string | null
+          gab6_bat12_data_fabricacao: string | null
+          gab6_bat12_estado: string | null
+          gab6_bat12_fabricante: string | null
+          gab6_bat12_tipo: string | null
           gab6_bat2_capacidade: string | null
           gab6_bat2_colada: string | null
           gab6_bat2_com_gradil: string | null
@@ -873,6 +1104,27 @@ export type Database = {
           gab6_bat6_estado: string | null
           gab6_bat6_fabricante: string | null
           gab6_bat6_tipo: string | null
+          gab6_bat7_capacidade: string | null
+          gab6_bat7_colada: string | null
+          gab6_bat7_com_gradil: string | null
+          gab6_bat7_data_fabricacao: string | null
+          gab6_bat7_estado: string | null
+          gab6_bat7_fabricante: string | null
+          gab6_bat7_tipo: string | null
+          gab6_bat8_capacidade: string | null
+          gab6_bat8_colada: string | null
+          gab6_bat8_com_gradil: string | null
+          gab6_bat8_data_fabricacao: string | null
+          gab6_bat8_estado: string | null
+          gab6_bat8_fabricante: string | null
+          gab6_bat8_tipo: string | null
+          gab6_bat9_capacidade: string | null
+          gab6_bat9_colada: string | null
+          gab6_bat9_com_gradil: string | null
+          gab6_bat9_data_fabricacao: string | null
+          gab6_bat9_estado: string | null
+          gab6_bat9_fabricante: string | null
+          gab6_bat9_tipo: string | null
           gab6_clima_foto_ar1: string | null
           gab6_clima_foto_ar2: string | null
           gab6_clima_foto_ar3: string | null
@@ -918,6 +1170,27 @@ export type Database = {
           gab7_bat1_estado: string | null
           gab7_bat1_fabricante: string | null
           gab7_bat1_tipo: string | null
+          gab7_bat10_capacidade: string | null
+          gab7_bat10_colada: string | null
+          gab7_bat10_com_gradil: string | null
+          gab7_bat10_data_fabricacao: string | null
+          gab7_bat10_estado: string | null
+          gab7_bat10_fabricante: string | null
+          gab7_bat10_tipo: string | null
+          gab7_bat11_capacidade: string | null
+          gab7_bat11_colada: string | null
+          gab7_bat11_com_gradil: string | null
+          gab7_bat11_data_fabricacao: string | null
+          gab7_bat11_estado: string | null
+          gab7_bat11_fabricante: string | null
+          gab7_bat11_tipo: string | null
+          gab7_bat12_capacidade: string | null
+          gab7_bat12_colada: string | null
+          gab7_bat12_com_gradil: string | null
+          gab7_bat12_data_fabricacao: string | null
+          gab7_bat12_estado: string | null
+          gab7_bat12_fabricante: string | null
+          gab7_bat12_tipo: string | null
           gab7_bat2_capacidade: string | null
           gab7_bat2_colada: string | null
           gab7_bat2_com_gradil: string | null
@@ -953,6 +1226,27 @@ export type Database = {
           gab7_bat6_estado: string | null
           gab7_bat6_fabricante: string | null
           gab7_bat6_tipo: string | null
+          gab7_bat7_capacidade: string | null
+          gab7_bat7_colada: string | null
+          gab7_bat7_com_gradil: string | null
+          gab7_bat7_data_fabricacao: string | null
+          gab7_bat7_estado: string | null
+          gab7_bat7_fabricante: string | null
+          gab7_bat7_tipo: string | null
+          gab7_bat8_capacidade: string | null
+          gab7_bat8_colada: string | null
+          gab7_bat8_com_gradil: string | null
+          gab7_bat8_data_fabricacao: string | null
+          gab7_bat8_estado: string | null
+          gab7_bat8_fabricante: string | null
+          gab7_bat8_tipo: string | null
+          gab7_bat9_capacidade: string | null
+          gab7_bat9_colada: string | null
+          gab7_bat9_com_gradil: string | null
+          gab7_bat9_data_fabricacao: string | null
+          gab7_bat9_estado: string | null
+          gab7_bat9_fabricante: string | null
+          gab7_bat9_tipo: string | null
           gab7_clima_foto_ar1: string | null
           gab7_clima_foto_ar2: string | null
           gab7_clima_foto_ar3: string | null
@@ -1100,6 +1394,27 @@ export type Database = {
           gab1_bat1_estado?: string | null
           gab1_bat1_fabricante?: string | null
           gab1_bat1_tipo?: string | null
+          gab1_bat10_capacidade?: string | null
+          gab1_bat10_colada?: string | null
+          gab1_bat10_com_gradil?: string | null
+          gab1_bat10_data_fabricacao?: string | null
+          gab1_bat10_estado?: string | null
+          gab1_bat10_fabricante?: string | null
+          gab1_bat10_tipo?: string | null
+          gab1_bat11_capacidade?: string | null
+          gab1_bat11_colada?: string | null
+          gab1_bat11_com_gradil?: string | null
+          gab1_bat11_data_fabricacao?: string | null
+          gab1_bat11_estado?: string | null
+          gab1_bat11_fabricante?: string | null
+          gab1_bat11_tipo?: string | null
+          gab1_bat12_capacidade?: string | null
+          gab1_bat12_colada?: string | null
+          gab1_bat12_com_gradil?: string | null
+          gab1_bat12_data_fabricacao?: string | null
+          gab1_bat12_estado?: string | null
+          gab1_bat12_fabricante?: string | null
+          gab1_bat12_tipo?: string | null
           gab1_bat2_capacidade?: string | null
           gab1_bat2_colada?: string | null
           gab1_bat2_com_gradil?: string | null
@@ -1135,6 +1450,27 @@ export type Database = {
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
           gab1_bat6_tipo?: string | null
+          gab1_bat7_capacidade?: string | null
+          gab1_bat7_colada?: string | null
+          gab1_bat7_com_gradil?: string | null
+          gab1_bat7_data_fabricacao?: string | null
+          gab1_bat7_estado?: string | null
+          gab1_bat7_fabricante?: string | null
+          gab1_bat7_tipo?: string | null
+          gab1_bat8_capacidade?: string | null
+          gab1_bat8_colada?: string | null
+          gab1_bat8_com_gradil?: string | null
+          gab1_bat8_data_fabricacao?: string | null
+          gab1_bat8_estado?: string | null
+          gab1_bat8_fabricante?: string | null
+          gab1_bat8_tipo?: string | null
+          gab1_bat9_capacidade?: string | null
+          gab1_bat9_colada?: string | null
+          gab1_bat9_com_gradil?: string | null
+          gab1_bat9_data_fabricacao?: string | null
+          gab1_bat9_estado?: string | null
+          gab1_bat9_fabricante?: string | null
+          gab1_bat9_tipo?: string | null
           gab1_clima_foto_ar1?: string | null
           gab1_clima_foto_ar2?: string | null
           gab1_clima_foto_ar3?: string | null
@@ -1180,6 +1516,27 @@ export type Database = {
           gab2_bat1_estado?: string | null
           gab2_bat1_fabricante?: string | null
           gab2_bat1_tipo?: string | null
+          gab2_bat10_capacidade?: string | null
+          gab2_bat10_colada?: string | null
+          gab2_bat10_com_gradil?: string | null
+          gab2_bat10_data_fabricacao?: string | null
+          gab2_bat10_estado?: string | null
+          gab2_bat10_fabricante?: string | null
+          gab2_bat10_tipo?: string | null
+          gab2_bat11_capacidade?: string | null
+          gab2_bat11_colada?: string | null
+          gab2_bat11_com_gradil?: string | null
+          gab2_bat11_data_fabricacao?: string | null
+          gab2_bat11_estado?: string | null
+          gab2_bat11_fabricante?: string | null
+          gab2_bat11_tipo?: string | null
+          gab2_bat12_capacidade?: string | null
+          gab2_bat12_colada?: string | null
+          gab2_bat12_com_gradil?: string | null
+          gab2_bat12_data_fabricacao?: string | null
+          gab2_bat12_estado?: string | null
+          gab2_bat12_fabricante?: string | null
+          gab2_bat12_tipo?: string | null
           gab2_bat2_capacidade?: string | null
           gab2_bat2_colada?: string | null
           gab2_bat2_com_gradil?: string | null
@@ -1215,6 +1572,27 @@ export type Database = {
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
           gab2_bat6_tipo?: string | null
+          gab2_bat7_capacidade?: string | null
+          gab2_bat7_colada?: string | null
+          gab2_bat7_com_gradil?: string | null
+          gab2_bat7_data_fabricacao?: string | null
+          gab2_bat7_estado?: string | null
+          gab2_bat7_fabricante?: string | null
+          gab2_bat7_tipo?: string | null
+          gab2_bat8_capacidade?: string | null
+          gab2_bat8_colada?: string | null
+          gab2_bat8_com_gradil?: string | null
+          gab2_bat8_data_fabricacao?: string | null
+          gab2_bat8_estado?: string | null
+          gab2_bat8_fabricante?: string | null
+          gab2_bat8_tipo?: string | null
+          gab2_bat9_capacidade?: string | null
+          gab2_bat9_colada?: string | null
+          gab2_bat9_com_gradil?: string | null
+          gab2_bat9_data_fabricacao?: string | null
+          gab2_bat9_estado?: string | null
+          gab2_bat9_fabricante?: string | null
+          gab2_bat9_tipo?: string | null
           gab2_clima_foto_ar1?: string | null
           gab2_clima_foto_ar2?: string | null
           gab2_clima_foto_ar3?: string | null
@@ -1260,6 +1638,27 @@ export type Database = {
           gab3_bat1_estado?: string | null
           gab3_bat1_fabricante?: string | null
           gab3_bat1_tipo?: string | null
+          gab3_bat10_capacidade?: string | null
+          gab3_bat10_colada?: string | null
+          gab3_bat10_com_gradil?: string | null
+          gab3_bat10_data_fabricacao?: string | null
+          gab3_bat10_estado?: string | null
+          gab3_bat10_fabricante?: string | null
+          gab3_bat10_tipo?: string | null
+          gab3_bat11_capacidade?: string | null
+          gab3_bat11_colada?: string | null
+          gab3_bat11_com_gradil?: string | null
+          gab3_bat11_data_fabricacao?: string | null
+          gab3_bat11_estado?: string | null
+          gab3_bat11_fabricante?: string | null
+          gab3_bat11_tipo?: string | null
+          gab3_bat12_capacidade?: string | null
+          gab3_bat12_colada?: string | null
+          gab3_bat12_com_gradil?: string | null
+          gab3_bat12_data_fabricacao?: string | null
+          gab3_bat12_estado?: string | null
+          gab3_bat12_fabricante?: string | null
+          gab3_bat12_tipo?: string | null
           gab3_bat2_capacidade?: string | null
           gab3_bat2_colada?: string | null
           gab3_bat2_com_gradil?: string | null
@@ -1295,6 +1694,27 @@ export type Database = {
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
           gab3_bat6_tipo?: string | null
+          gab3_bat7_capacidade?: string | null
+          gab3_bat7_colada?: string | null
+          gab3_bat7_com_gradil?: string | null
+          gab3_bat7_data_fabricacao?: string | null
+          gab3_bat7_estado?: string | null
+          gab3_bat7_fabricante?: string | null
+          gab3_bat7_tipo?: string | null
+          gab3_bat8_capacidade?: string | null
+          gab3_bat8_colada?: string | null
+          gab3_bat8_com_gradil?: string | null
+          gab3_bat8_data_fabricacao?: string | null
+          gab3_bat8_estado?: string | null
+          gab3_bat8_fabricante?: string | null
+          gab3_bat8_tipo?: string | null
+          gab3_bat9_capacidade?: string | null
+          gab3_bat9_colada?: string | null
+          gab3_bat9_com_gradil?: string | null
+          gab3_bat9_data_fabricacao?: string | null
+          gab3_bat9_estado?: string | null
+          gab3_bat9_fabricante?: string | null
+          gab3_bat9_tipo?: string | null
           gab3_clima_foto_ar1?: string | null
           gab3_clima_foto_ar2?: string | null
           gab3_clima_foto_ar3?: string | null
@@ -1340,6 +1760,27 @@ export type Database = {
           gab4_bat1_estado?: string | null
           gab4_bat1_fabricante?: string | null
           gab4_bat1_tipo?: string | null
+          gab4_bat10_capacidade?: string | null
+          gab4_bat10_colada?: string | null
+          gab4_bat10_com_gradil?: string | null
+          gab4_bat10_data_fabricacao?: string | null
+          gab4_bat10_estado?: string | null
+          gab4_bat10_fabricante?: string | null
+          gab4_bat10_tipo?: string | null
+          gab4_bat11_capacidade?: string | null
+          gab4_bat11_colada?: string | null
+          gab4_bat11_com_gradil?: string | null
+          gab4_bat11_data_fabricacao?: string | null
+          gab4_bat11_estado?: string | null
+          gab4_bat11_fabricante?: string | null
+          gab4_bat11_tipo?: string | null
+          gab4_bat12_capacidade?: string | null
+          gab4_bat12_colada?: string | null
+          gab4_bat12_com_gradil?: string | null
+          gab4_bat12_data_fabricacao?: string | null
+          gab4_bat12_estado?: string | null
+          gab4_bat12_fabricante?: string | null
+          gab4_bat12_tipo?: string | null
           gab4_bat2_capacidade?: string | null
           gab4_bat2_colada?: string | null
           gab4_bat2_com_gradil?: string | null
@@ -1375,6 +1816,27 @@ export type Database = {
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
           gab4_bat6_tipo?: string | null
+          gab4_bat7_capacidade?: string | null
+          gab4_bat7_colada?: string | null
+          gab4_bat7_com_gradil?: string | null
+          gab4_bat7_data_fabricacao?: string | null
+          gab4_bat7_estado?: string | null
+          gab4_bat7_fabricante?: string | null
+          gab4_bat7_tipo?: string | null
+          gab4_bat8_capacidade?: string | null
+          gab4_bat8_colada?: string | null
+          gab4_bat8_com_gradil?: string | null
+          gab4_bat8_data_fabricacao?: string | null
+          gab4_bat8_estado?: string | null
+          gab4_bat8_fabricante?: string | null
+          gab4_bat8_tipo?: string | null
+          gab4_bat9_capacidade?: string | null
+          gab4_bat9_colada?: string | null
+          gab4_bat9_com_gradil?: string | null
+          gab4_bat9_data_fabricacao?: string | null
+          gab4_bat9_estado?: string | null
+          gab4_bat9_fabricante?: string | null
+          gab4_bat9_tipo?: string | null
           gab4_clima_foto_ar1?: string | null
           gab4_clima_foto_ar2?: string | null
           gab4_clima_foto_ar3?: string | null
@@ -1420,6 +1882,27 @@ export type Database = {
           gab5_bat1_estado?: string | null
           gab5_bat1_fabricante?: string | null
           gab5_bat1_tipo?: string | null
+          gab5_bat10_capacidade?: string | null
+          gab5_bat10_colada?: string | null
+          gab5_bat10_com_gradil?: string | null
+          gab5_bat10_data_fabricacao?: string | null
+          gab5_bat10_estado?: string | null
+          gab5_bat10_fabricante?: string | null
+          gab5_bat10_tipo?: string | null
+          gab5_bat11_capacidade?: string | null
+          gab5_bat11_colada?: string | null
+          gab5_bat11_com_gradil?: string | null
+          gab5_bat11_data_fabricacao?: string | null
+          gab5_bat11_estado?: string | null
+          gab5_bat11_fabricante?: string | null
+          gab5_bat11_tipo?: string | null
+          gab5_bat12_capacidade?: string | null
+          gab5_bat12_colada?: string | null
+          gab5_bat12_com_gradil?: string | null
+          gab5_bat12_data_fabricacao?: string | null
+          gab5_bat12_estado?: string | null
+          gab5_bat12_fabricante?: string | null
+          gab5_bat12_tipo?: string | null
           gab5_bat2_capacidade?: string | null
           gab5_bat2_colada?: string | null
           gab5_bat2_com_gradil?: string | null
@@ -1455,6 +1938,27 @@ export type Database = {
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
           gab5_bat6_tipo?: string | null
+          gab5_bat7_capacidade?: string | null
+          gab5_bat7_colada?: string | null
+          gab5_bat7_com_gradil?: string | null
+          gab5_bat7_data_fabricacao?: string | null
+          gab5_bat7_estado?: string | null
+          gab5_bat7_fabricante?: string | null
+          gab5_bat7_tipo?: string | null
+          gab5_bat8_capacidade?: string | null
+          gab5_bat8_colada?: string | null
+          gab5_bat8_com_gradil?: string | null
+          gab5_bat8_data_fabricacao?: string | null
+          gab5_bat8_estado?: string | null
+          gab5_bat8_fabricante?: string | null
+          gab5_bat8_tipo?: string | null
+          gab5_bat9_capacidade?: string | null
+          gab5_bat9_colada?: string | null
+          gab5_bat9_com_gradil?: string | null
+          gab5_bat9_data_fabricacao?: string | null
+          gab5_bat9_estado?: string | null
+          gab5_bat9_fabricante?: string | null
+          gab5_bat9_tipo?: string | null
           gab5_clima_foto_ar1?: string | null
           gab5_clima_foto_ar2?: string | null
           gab5_clima_foto_ar3?: string | null
@@ -1500,6 +2004,27 @@ export type Database = {
           gab6_bat1_estado?: string | null
           gab6_bat1_fabricante?: string | null
           gab6_bat1_tipo?: string | null
+          gab6_bat10_capacidade?: string | null
+          gab6_bat10_colada?: string | null
+          gab6_bat10_com_gradil?: string | null
+          gab6_bat10_data_fabricacao?: string | null
+          gab6_bat10_estado?: string | null
+          gab6_bat10_fabricante?: string | null
+          gab6_bat10_tipo?: string | null
+          gab6_bat11_capacidade?: string | null
+          gab6_bat11_colada?: string | null
+          gab6_bat11_com_gradil?: string | null
+          gab6_bat11_data_fabricacao?: string | null
+          gab6_bat11_estado?: string | null
+          gab6_bat11_fabricante?: string | null
+          gab6_bat11_tipo?: string | null
+          gab6_bat12_capacidade?: string | null
+          gab6_bat12_colada?: string | null
+          gab6_bat12_com_gradil?: string | null
+          gab6_bat12_data_fabricacao?: string | null
+          gab6_bat12_estado?: string | null
+          gab6_bat12_fabricante?: string | null
+          gab6_bat12_tipo?: string | null
           gab6_bat2_capacidade?: string | null
           gab6_bat2_colada?: string | null
           gab6_bat2_com_gradil?: string | null
@@ -1535,6 +2060,27 @@ export type Database = {
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
           gab6_bat6_tipo?: string | null
+          gab6_bat7_capacidade?: string | null
+          gab6_bat7_colada?: string | null
+          gab6_bat7_com_gradil?: string | null
+          gab6_bat7_data_fabricacao?: string | null
+          gab6_bat7_estado?: string | null
+          gab6_bat7_fabricante?: string | null
+          gab6_bat7_tipo?: string | null
+          gab6_bat8_capacidade?: string | null
+          gab6_bat8_colada?: string | null
+          gab6_bat8_com_gradil?: string | null
+          gab6_bat8_data_fabricacao?: string | null
+          gab6_bat8_estado?: string | null
+          gab6_bat8_fabricante?: string | null
+          gab6_bat8_tipo?: string | null
+          gab6_bat9_capacidade?: string | null
+          gab6_bat9_colada?: string | null
+          gab6_bat9_com_gradil?: string | null
+          gab6_bat9_data_fabricacao?: string | null
+          gab6_bat9_estado?: string | null
+          gab6_bat9_fabricante?: string | null
+          gab6_bat9_tipo?: string | null
           gab6_clima_foto_ar1?: string | null
           gab6_clima_foto_ar2?: string | null
           gab6_clima_foto_ar3?: string | null
@@ -1580,6 +2126,27 @@ export type Database = {
           gab7_bat1_estado?: string | null
           gab7_bat1_fabricante?: string | null
           gab7_bat1_tipo?: string | null
+          gab7_bat10_capacidade?: string | null
+          gab7_bat10_colada?: string | null
+          gab7_bat10_com_gradil?: string | null
+          gab7_bat10_data_fabricacao?: string | null
+          gab7_bat10_estado?: string | null
+          gab7_bat10_fabricante?: string | null
+          gab7_bat10_tipo?: string | null
+          gab7_bat11_capacidade?: string | null
+          gab7_bat11_colada?: string | null
+          gab7_bat11_com_gradil?: string | null
+          gab7_bat11_data_fabricacao?: string | null
+          gab7_bat11_estado?: string | null
+          gab7_bat11_fabricante?: string | null
+          gab7_bat11_tipo?: string | null
+          gab7_bat12_capacidade?: string | null
+          gab7_bat12_colada?: string | null
+          gab7_bat12_com_gradil?: string | null
+          gab7_bat12_data_fabricacao?: string | null
+          gab7_bat12_estado?: string | null
+          gab7_bat12_fabricante?: string | null
+          gab7_bat12_tipo?: string | null
           gab7_bat2_capacidade?: string | null
           gab7_bat2_colada?: string | null
           gab7_bat2_com_gradil?: string | null
@@ -1615,6 +2182,27 @@ export type Database = {
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
           gab7_bat6_tipo?: string | null
+          gab7_bat7_capacidade?: string | null
+          gab7_bat7_colada?: string | null
+          gab7_bat7_com_gradil?: string | null
+          gab7_bat7_data_fabricacao?: string | null
+          gab7_bat7_estado?: string | null
+          gab7_bat7_fabricante?: string | null
+          gab7_bat7_tipo?: string | null
+          gab7_bat8_capacidade?: string | null
+          gab7_bat8_colada?: string | null
+          gab7_bat8_com_gradil?: string | null
+          gab7_bat8_data_fabricacao?: string | null
+          gab7_bat8_estado?: string | null
+          gab7_bat8_fabricante?: string | null
+          gab7_bat8_tipo?: string | null
+          gab7_bat9_capacidade?: string | null
+          gab7_bat9_colada?: string | null
+          gab7_bat9_com_gradil?: string | null
+          gab7_bat9_data_fabricacao?: string | null
+          gab7_bat9_estado?: string | null
+          gab7_bat9_fabricante?: string | null
+          gab7_bat9_tipo?: string | null
           gab7_clima_foto_ar1?: string | null
           gab7_clima_foto_ar2?: string | null
           gab7_clima_foto_ar3?: string | null
@@ -1762,6 +2350,27 @@ export type Database = {
           gab1_bat1_estado?: string | null
           gab1_bat1_fabricante?: string | null
           gab1_bat1_tipo?: string | null
+          gab1_bat10_capacidade?: string | null
+          gab1_bat10_colada?: string | null
+          gab1_bat10_com_gradil?: string | null
+          gab1_bat10_data_fabricacao?: string | null
+          gab1_bat10_estado?: string | null
+          gab1_bat10_fabricante?: string | null
+          gab1_bat10_tipo?: string | null
+          gab1_bat11_capacidade?: string | null
+          gab1_bat11_colada?: string | null
+          gab1_bat11_com_gradil?: string | null
+          gab1_bat11_data_fabricacao?: string | null
+          gab1_bat11_estado?: string | null
+          gab1_bat11_fabricante?: string | null
+          gab1_bat11_tipo?: string | null
+          gab1_bat12_capacidade?: string | null
+          gab1_bat12_colada?: string | null
+          gab1_bat12_com_gradil?: string | null
+          gab1_bat12_data_fabricacao?: string | null
+          gab1_bat12_estado?: string | null
+          gab1_bat12_fabricante?: string | null
+          gab1_bat12_tipo?: string | null
           gab1_bat2_capacidade?: string | null
           gab1_bat2_colada?: string | null
           gab1_bat2_com_gradil?: string | null
@@ -1797,6 +2406,27 @@ export type Database = {
           gab1_bat6_estado?: string | null
           gab1_bat6_fabricante?: string | null
           gab1_bat6_tipo?: string | null
+          gab1_bat7_capacidade?: string | null
+          gab1_bat7_colada?: string | null
+          gab1_bat7_com_gradil?: string | null
+          gab1_bat7_data_fabricacao?: string | null
+          gab1_bat7_estado?: string | null
+          gab1_bat7_fabricante?: string | null
+          gab1_bat7_tipo?: string | null
+          gab1_bat8_capacidade?: string | null
+          gab1_bat8_colada?: string | null
+          gab1_bat8_com_gradil?: string | null
+          gab1_bat8_data_fabricacao?: string | null
+          gab1_bat8_estado?: string | null
+          gab1_bat8_fabricante?: string | null
+          gab1_bat8_tipo?: string | null
+          gab1_bat9_capacidade?: string | null
+          gab1_bat9_colada?: string | null
+          gab1_bat9_com_gradil?: string | null
+          gab1_bat9_data_fabricacao?: string | null
+          gab1_bat9_estado?: string | null
+          gab1_bat9_fabricante?: string | null
+          gab1_bat9_tipo?: string | null
           gab1_clima_foto_ar1?: string | null
           gab1_clima_foto_ar2?: string | null
           gab1_clima_foto_ar3?: string | null
@@ -1842,6 +2472,27 @@ export type Database = {
           gab2_bat1_estado?: string | null
           gab2_bat1_fabricante?: string | null
           gab2_bat1_tipo?: string | null
+          gab2_bat10_capacidade?: string | null
+          gab2_bat10_colada?: string | null
+          gab2_bat10_com_gradil?: string | null
+          gab2_bat10_data_fabricacao?: string | null
+          gab2_bat10_estado?: string | null
+          gab2_bat10_fabricante?: string | null
+          gab2_bat10_tipo?: string | null
+          gab2_bat11_capacidade?: string | null
+          gab2_bat11_colada?: string | null
+          gab2_bat11_com_gradil?: string | null
+          gab2_bat11_data_fabricacao?: string | null
+          gab2_bat11_estado?: string | null
+          gab2_bat11_fabricante?: string | null
+          gab2_bat11_tipo?: string | null
+          gab2_bat12_capacidade?: string | null
+          gab2_bat12_colada?: string | null
+          gab2_bat12_com_gradil?: string | null
+          gab2_bat12_data_fabricacao?: string | null
+          gab2_bat12_estado?: string | null
+          gab2_bat12_fabricante?: string | null
+          gab2_bat12_tipo?: string | null
           gab2_bat2_capacidade?: string | null
           gab2_bat2_colada?: string | null
           gab2_bat2_com_gradil?: string | null
@@ -1877,6 +2528,27 @@ export type Database = {
           gab2_bat6_estado?: string | null
           gab2_bat6_fabricante?: string | null
           gab2_bat6_tipo?: string | null
+          gab2_bat7_capacidade?: string | null
+          gab2_bat7_colada?: string | null
+          gab2_bat7_com_gradil?: string | null
+          gab2_bat7_data_fabricacao?: string | null
+          gab2_bat7_estado?: string | null
+          gab2_bat7_fabricante?: string | null
+          gab2_bat7_tipo?: string | null
+          gab2_bat8_capacidade?: string | null
+          gab2_bat8_colada?: string | null
+          gab2_bat8_com_gradil?: string | null
+          gab2_bat8_data_fabricacao?: string | null
+          gab2_bat8_estado?: string | null
+          gab2_bat8_fabricante?: string | null
+          gab2_bat8_tipo?: string | null
+          gab2_bat9_capacidade?: string | null
+          gab2_bat9_colada?: string | null
+          gab2_bat9_com_gradil?: string | null
+          gab2_bat9_data_fabricacao?: string | null
+          gab2_bat9_estado?: string | null
+          gab2_bat9_fabricante?: string | null
+          gab2_bat9_tipo?: string | null
           gab2_clima_foto_ar1?: string | null
           gab2_clima_foto_ar2?: string | null
           gab2_clima_foto_ar3?: string | null
@@ -1922,6 +2594,27 @@ export type Database = {
           gab3_bat1_estado?: string | null
           gab3_bat1_fabricante?: string | null
           gab3_bat1_tipo?: string | null
+          gab3_bat10_capacidade?: string | null
+          gab3_bat10_colada?: string | null
+          gab3_bat10_com_gradil?: string | null
+          gab3_bat10_data_fabricacao?: string | null
+          gab3_bat10_estado?: string | null
+          gab3_bat10_fabricante?: string | null
+          gab3_bat10_tipo?: string | null
+          gab3_bat11_capacidade?: string | null
+          gab3_bat11_colada?: string | null
+          gab3_bat11_com_gradil?: string | null
+          gab3_bat11_data_fabricacao?: string | null
+          gab3_bat11_estado?: string | null
+          gab3_bat11_fabricante?: string | null
+          gab3_bat11_tipo?: string | null
+          gab3_bat12_capacidade?: string | null
+          gab3_bat12_colada?: string | null
+          gab3_bat12_com_gradil?: string | null
+          gab3_bat12_data_fabricacao?: string | null
+          gab3_bat12_estado?: string | null
+          gab3_bat12_fabricante?: string | null
+          gab3_bat12_tipo?: string | null
           gab3_bat2_capacidade?: string | null
           gab3_bat2_colada?: string | null
           gab3_bat2_com_gradil?: string | null
@@ -1957,6 +2650,27 @@ export type Database = {
           gab3_bat6_estado?: string | null
           gab3_bat6_fabricante?: string | null
           gab3_bat6_tipo?: string | null
+          gab3_bat7_capacidade?: string | null
+          gab3_bat7_colada?: string | null
+          gab3_bat7_com_gradil?: string | null
+          gab3_bat7_data_fabricacao?: string | null
+          gab3_bat7_estado?: string | null
+          gab3_bat7_fabricante?: string | null
+          gab3_bat7_tipo?: string | null
+          gab3_bat8_capacidade?: string | null
+          gab3_bat8_colada?: string | null
+          gab3_bat8_com_gradil?: string | null
+          gab3_bat8_data_fabricacao?: string | null
+          gab3_bat8_estado?: string | null
+          gab3_bat8_fabricante?: string | null
+          gab3_bat8_tipo?: string | null
+          gab3_bat9_capacidade?: string | null
+          gab3_bat9_colada?: string | null
+          gab3_bat9_com_gradil?: string | null
+          gab3_bat9_data_fabricacao?: string | null
+          gab3_bat9_estado?: string | null
+          gab3_bat9_fabricante?: string | null
+          gab3_bat9_tipo?: string | null
           gab3_clima_foto_ar1?: string | null
           gab3_clima_foto_ar2?: string | null
           gab3_clima_foto_ar3?: string | null
@@ -2002,6 +2716,27 @@ export type Database = {
           gab4_bat1_estado?: string | null
           gab4_bat1_fabricante?: string | null
           gab4_bat1_tipo?: string | null
+          gab4_bat10_capacidade?: string | null
+          gab4_bat10_colada?: string | null
+          gab4_bat10_com_gradil?: string | null
+          gab4_bat10_data_fabricacao?: string | null
+          gab4_bat10_estado?: string | null
+          gab4_bat10_fabricante?: string | null
+          gab4_bat10_tipo?: string | null
+          gab4_bat11_capacidade?: string | null
+          gab4_bat11_colada?: string | null
+          gab4_bat11_com_gradil?: string | null
+          gab4_bat11_data_fabricacao?: string | null
+          gab4_bat11_estado?: string | null
+          gab4_bat11_fabricante?: string | null
+          gab4_bat11_tipo?: string | null
+          gab4_bat12_capacidade?: string | null
+          gab4_bat12_colada?: string | null
+          gab4_bat12_com_gradil?: string | null
+          gab4_bat12_data_fabricacao?: string | null
+          gab4_bat12_estado?: string | null
+          gab4_bat12_fabricante?: string | null
+          gab4_bat12_tipo?: string | null
           gab4_bat2_capacidade?: string | null
           gab4_bat2_colada?: string | null
           gab4_bat2_com_gradil?: string | null
@@ -2037,6 +2772,27 @@ export type Database = {
           gab4_bat6_estado?: string | null
           gab4_bat6_fabricante?: string | null
           gab4_bat6_tipo?: string | null
+          gab4_bat7_capacidade?: string | null
+          gab4_bat7_colada?: string | null
+          gab4_bat7_com_gradil?: string | null
+          gab4_bat7_data_fabricacao?: string | null
+          gab4_bat7_estado?: string | null
+          gab4_bat7_fabricante?: string | null
+          gab4_bat7_tipo?: string | null
+          gab4_bat8_capacidade?: string | null
+          gab4_bat8_colada?: string | null
+          gab4_bat8_com_gradil?: string | null
+          gab4_bat8_data_fabricacao?: string | null
+          gab4_bat8_estado?: string | null
+          gab4_bat8_fabricante?: string | null
+          gab4_bat8_tipo?: string | null
+          gab4_bat9_capacidade?: string | null
+          gab4_bat9_colada?: string | null
+          gab4_bat9_com_gradil?: string | null
+          gab4_bat9_data_fabricacao?: string | null
+          gab4_bat9_estado?: string | null
+          gab4_bat9_fabricante?: string | null
+          gab4_bat9_tipo?: string | null
           gab4_clima_foto_ar1?: string | null
           gab4_clima_foto_ar2?: string | null
           gab4_clima_foto_ar3?: string | null
@@ -2082,6 +2838,27 @@ export type Database = {
           gab5_bat1_estado?: string | null
           gab5_bat1_fabricante?: string | null
           gab5_bat1_tipo?: string | null
+          gab5_bat10_capacidade?: string | null
+          gab5_bat10_colada?: string | null
+          gab5_bat10_com_gradil?: string | null
+          gab5_bat10_data_fabricacao?: string | null
+          gab5_bat10_estado?: string | null
+          gab5_bat10_fabricante?: string | null
+          gab5_bat10_tipo?: string | null
+          gab5_bat11_capacidade?: string | null
+          gab5_bat11_colada?: string | null
+          gab5_bat11_com_gradil?: string | null
+          gab5_bat11_data_fabricacao?: string | null
+          gab5_bat11_estado?: string | null
+          gab5_bat11_fabricante?: string | null
+          gab5_bat11_tipo?: string | null
+          gab5_bat12_capacidade?: string | null
+          gab5_bat12_colada?: string | null
+          gab5_bat12_com_gradil?: string | null
+          gab5_bat12_data_fabricacao?: string | null
+          gab5_bat12_estado?: string | null
+          gab5_bat12_fabricante?: string | null
+          gab5_bat12_tipo?: string | null
           gab5_bat2_capacidade?: string | null
           gab5_bat2_colada?: string | null
           gab5_bat2_com_gradil?: string | null
@@ -2117,6 +2894,27 @@ export type Database = {
           gab5_bat6_estado?: string | null
           gab5_bat6_fabricante?: string | null
           gab5_bat6_tipo?: string | null
+          gab5_bat7_capacidade?: string | null
+          gab5_bat7_colada?: string | null
+          gab5_bat7_com_gradil?: string | null
+          gab5_bat7_data_fabricacao?: string | null
+          gab5_bat7_estado?: string | null
+          gab5_bat7_fabricante?: string | null
+          gab5_bat7_tipo?: string | null
+          gab5_bat8_capacidade?: string | null
+          gab5_bat8_colada?: string | null
+          gab5_bat8_com_gradil?: string | null
+          gab5_bat8_data_fabricacao?: string | null
+          gab5_bat8_estado?: string | null
+          gab5_bat8_fabricante?: string | null
+          gab5_bat8_tipo?: string | null
+          gab5_bat9_capacidade?: string | null
+          gab5_bat9_colada?: string | null
+          gab5_bat9_com_gradil?: string | null
+          gab5_bat9_data_fabricacao?: string | null
+          gab5_bat9_estado?: string | null
+          gab5_bat9_fabricante?: string | null
+          gab5_bat9_tipo?: string | null
           gab5_clima_foto_ar1?: string | null
           gab5_clima_foto_ar2?: string | null
           gab5_clima_foto_ar3?: string | null
@@ -2162,6 +2960,27 @@ export type Database = {
           gab6_bat1_estado?: string | null
           gab6_bat1_fabricante?: string | null
           gab6_bat1_tipo?: string | null
+          gab6_bat10_capacidade?: string | null
+          gab6_bat10_colada?: string | null
+          gab6_bat10_com_gradil?: string | null
+          gab6_bat10_data_fabricacao?: string | null
+          gab6_bat10_estado?: string | null
+          gab6_bat10_fabricante?: string | null
+          gab6_bat10_tipo?: string | null
+          gab6_bat11_capacidade?: string | null
+          gab6_bat11_colada?: string | null
+          gab6_bat11_com_gradil?: string | null
+          gab6_bat11_data_fabricacao?: string | null
+          gab6_bat11_estado?: string | null
+          gab6_bat11_fabricante?: string | null
+          gab6_bat11_tipo?: string | null
+          gab6_bat12_capacidade?: string | null
+          gab6_bat12_colada?: string | null
+          gab6_bat12_com_gradil?: string | null
+          gab6_bat12_data_fabricacao?: string | null
+          gab6_bat12_estado?: string | null
+          gab6_bat12_fabricante?: string | null
+          gab6_bat12_tipo?: string | null
           gab6_bat2_capacidade?: string | null
           gab6_bat2_colada?: string | null
           gab6_bat2_com_gradil?: string | null
@@ -2197,6 +3016,27 @@ export type Database = {
           gab6_bat6_estado?: string | null
           gab6_bat6_fabricante?: string | null
           gab6_bat6_tipo?: string | null
+          gab6_bat7_capacidade?: string | null
+          gab6_bat7_colada?: string | null
+          gab6_bat7_com_gradil?: string | null
+          gab6_bat7_data_fabricacao?: string | null
+          gab6_bat7_estado?: string | null
+          gab6_bat7_fabricante?: string | null
+          gab6_bat7_tipo?: string | null
+          gab6_bat8_capacidade?: string | null
+          gab6_bat8_colada?: string | null
+          gab6_bat8_com_gradil?: string | null
+          gab6_bat8_data_fabricacao?: string | null
+          gab6_bat8_estado?: string | null
+          gab6_bat8_fabricante?: string | null
+          gab6_bat8_tipo?: string | null
+          gab6_bat9_capacidade?: string | null
+          gab6_bat9_colada?: string | null
+          gab6_bat9_com_gradil?: string | null
+          gab6_bat9_data_fabricacao?: string | null
+          gab6_bat9_estado?: string | null
+          gab6_bat9_fabricante?: string | null
+          gab6_bat9_tipo?: string | null
           gab6_clima_foto_ar1?: string | null
           gab6_clima_foto_ar2?: string | null
           gab6_clima_foto_ar3?: string | null
@@ -2242,6 +3082,27 @@ export type Database = {
           gab7_bat1_estado?: string | null
           gab7_bat1_fabricante?: string | null
           gab7_bat1_tipo?: string | null
+          gab7_bat10_capacidade?: string | null
+          gab7_bat10_colada?: string | null
+          gab7_bat10_com_gradil?: string | null
+          gab7_bat10_data_fabricacao?: string | null
+          gab7_bat10_estado?: string | null
+          gab7_bat10_fabricante?: string | null
+          gab7_bat10_tipo?: string | null
+          gab7_bat11_capacidade?: string | null
+          gab7_bat11_colada?: string | null
+          gab7_bat11_com_gradil?: string | null
+          gab7_bat11_data_fabricacao?: string | null
+          gab7_bat11_estado?: string | null
+          gab7_bat11_fabricante?: string | null
+          gab7_bat11_tipo?: string | null
+          gab7_bat12_capacidade?: string | null
+          gab7_bat12_colada?: string | null
+          gab7_bat12_com_gradil?: string | null
+          gab7_bat12_data_fabricacao?: string | null
+          gab7_bat12_estado?: string | null
+          gab7_bat12_fabricante?: string | null
+          gab7_bat12_tipo?: string | null
           gab7_bat2_capacidade?: string | null
           gab7_bat2_colada?: string | null
           gab7_bat2_com_gradil?: string | null
@@ -2277,6 +3138,27 @@ export type Database = {
           gab7_bat6_estado?: string | null
           gab7_bat6_fabricante?: string | null
           gab7_bat6_tipo?: string | null
+          gab7_bat7_capacidade?: string | null
+          gab7_bat7_colada?: string | null
+          gab7_bat7_com_gradil?: string | null
+          gab7_bat7_data_fabricacao?: string | null
+          gab7_bat7_estado?: string | null
+          gab7_bat7_fabricante?: string | null
+          gab7_bat7_tipo?: string | null
+          gab7_bat8_capacidade?: string | null
+          gab7_bat8_colada?: string | null
+          gab7_bat8_com_gradil?: string | null
+          gab7_bat8_data_fabricacao?: string | null
+          gab7_bat8_estado?: string | null
+          gab7_bat8_fabricante?: string | null
+          gab7_bat8_tipo?: string | null
+          gab7_bat9_capacidade?: string | null
+          gab7_bat9_colada?: string | null
+          gab7_bat9_com_gradil?: string | null
+          gab7_bat9_data_fabricacao?: string | null
+          gab7_bat9_estado?: string | null
+          gab7_bat9_fabricante?: string | null
+          gab7_bat9_tipo?: string | null
           gab7_clima_foto_ar1?: string | null
           gab7_clima_foto_ar2?: string | null
           gab7_clima_foto_ar3?: string | null
@@ -2594,6 +3476,27 @@ export type Database = {
           gab1_bat1_estado: string | null
           gab1_bat1_fabricante: string | null
           gab1_bat1_tipo: string | null
+          gab1_bat10_capacidade: string | null
+          gab1_bat10_colada: string | null
+          gab1_bat10_com_gradil: string | null
+          gab1_bat10_data_fabricacao: string | null
+          gab1_bat10_estado: string | null
+          gab1_bat10_fabricante: string | null
+          gab1_bat10_tipo: string | null
+          gab1_bat11_capacidade: string | null
+          gab1_bat11_colada: string | null
+          gab1_bat11_com_gradil: string | null
+          gab1_bat11_data_fabricacao: string | null
+          gab1_bat11_estado: string | null
+          gab1_bat11_fabricante: string | null
+          gab1_bat11_tipo: string | null
+          gab1_bat12_capacidade: string | null
+          gab1_bat12_colada: string | null
+          gab1_bat12_com_gradil: string | null
+          gab1_bat12_data_fabricacao: string | null
+          gab1_bat12_estado: string | null
+          gab1_bat12_fabricante: string | null
+          gab1_bat12_tipo: string | null
           gab1_bat2_capacidade: string | null
           gab1_bat2_colada: string | null
           gab1_bat2_com_gradil: string | null
@@ -2629,6 +3532,27 @@ export type Database = {
           gab1_bat6_estado: string | null
           gab1_bat6_fabricante: string | null
           gab1_bat6_tipo: string | null
+          gab1_bat7_capacidade: string | null
+          gab1_bat7_colada: string | null
+          gab1_bat7_com_gradil: string | null
+          gab1_bat7_data_fabricacao: string | null
+          gab1_bat7_estado: string | null
+          gab1_bat7_fabricante: string | null
+          gab1_bat7_tipo: string | null
+          gab1_bat8_capacidade: string | null
+          gab1_bat8_colada: string | null
+          gab1_bat8_com_gradil: string | null
+          gab1_bat8_data_fabricacao: string | null
+          gab1_bat8_estado: string | null
+          gab1_bat8_fabricante: string | null
+          gab1_bat8_tipo: string | null
+          gab1_bat9_capacidade: string | null
+          gab1_bat9_colada: string | null
+          gab1_bat9_com_gradil: string | null
+          gab1_bat9_data_fabricacao: string | null
+          gab1_bat9_estado: string | null
+          gab1_bat9_fabricante: string | null
+          gab1_bat9_tipo: string | null
           gab1_clima_foto_ar1: string | null
           gab1_clima_foto_ar2: string | null
           gab1_clima_foto_ar3: string | null
@@ -2674,6 +3598,27 @@ export type Database = {
           gab2_bat1_estado: string | null
           gab2_bat1_fabricante: string | null
           gab2_bat1_tipo: string | null
+          gab2_bat10_capacidade: string | null
+          gab2_bat10_colada: string | null
+          gab2_bat10_com_gradil: string | null
+          gab2_bat10_data_fabricacao: string | null
+          gab2_bat10_estado: string | null
+          gab2_bat10_fabricante: string | null
+          gab2_bat10_tipo: string | null
+          gab2_bat11_capacidade: string | null
+          gab2_bat11_colada: string | null
+          gab2_bat11_com_gradil: string | null
+          gab2_bat11_data_fabricacao: string | null
+          gab2_bat11_estado: string | null
+          gab2_bat11_fabricante: string | null
+          gab2_bat11_tipo: string | null
+          gab2_bat12_capacidade: string | null
+          gab2_bat12_colada: string | null
+          gab2_bat12_com_gradil: string | null
+          gab2_bat12_data_fabricacao: string | null
+          gab2_bat12_estado: string | null
+          gab2_bat12_fabricante: string | null
+          gab2_bat12_tipo: string | null
           gab2_bat2_capacidade: string | null
           gab2_bat2_colada: string | null
           gab2_bat2_com_gradil: string | null
@@ -2709,6 +3654,27 @@ export type Database = {
           gab2_bat6_estado: string | null
           gab2_bat6_fabricante: string | null
           gab2_bat6_tipo: string | null
+          gab2_bat7_capacidade: string | null
+          gab2_bat7_colada: string | null
+          gab2_bat7_com_gradil: string | null
+          gab2_bat7_data_fabricacao: string | null
+          gab2_bat7_estado: string | null
+          gab2_bat7_fabricante: string | null
+          gab2_bat7_tipo: string | null
+          gab2_bat8_capacidade: string | null
+          gab2_bat8_colada: string | null
+          gab2_bat8_com_gradil: string | null
+          gab2_bat8_data_fabricacao: string | null
+          gab2_bat8_estado: string | null
+          gab2_bat8_fabricante: string | null
+          gab2_bat8_tipo: string | null
+          gab2_bat9_capacidade: string | null
+          gab2_bat9_colada: string | null
+          gab2_bat9_com_gradil: string | null
+          gab2_bat9_data_fabricacao: string | null
+          gab2_bat9_estado: string | null
+          gab2_bat9_fabricante: string | null
+          gab2_bat9_tipo: string | null
           gab2_clima_foto_ar1: string | null
           gab2_clima_foto_ar2: string | null
           gab2_clima_foto_ar3: string | null
@@ -2754,6 +3720,27 @@ export type Database = {
           gab3_bat1_estado: string | null
           gab3_bat1_fabricante: string | null
           gab3_bat1_tipo: string | null
+          gab3_bat10_capacidade: string | null
+          gab3_bat10_colada: string | null
+          gab3_bat10_com_gradil: string | null
+          gab3_bat10_data_fabricacao: string | null
+          gab3_bat10_estado: string | null
+          gab3_bat10_fabricante: string | null
+          gab3_bat10_tipo: string | null
+          gab3_bat11_capacidade: string | null
+          gab3_bat11_colada: string | null
+          gab3_bat11_com_gradil: string | null
+          gab3_bat11_data_fabricacao: string | null
+          gab3_bat11_estado: string | null
+          gab3_bat11_fabricante: string | null
+          gab3_bat11_tipo: string | null
+          gab3_bat12_capacidade: string | null
+          gab3_bat12_colada: string | null
+          gab3_bat12_com_gradil: string | null
+          gab3_bat12_data_fabricacao: string | null
+          gab3_bat12_estado: string | null
+          gab3_bat12_fabricante: string | null
+          gab3_bat12_tipo: string | null
           gab3_bat2_capacidade: string | null
           gab3_bat2_colada: string | null
           gab3_bat2_com_gradil: string | null
@@ -2789,6 +3776,27 @@ export type Database = {
           gab3_bat6_estado: string | null
           gab3_bat6_fabricante: string | null
           gab3_bat6_tipo: string | null
+          gab3_bat7_capacidade: string | null
+          gab3_bat7_colada: string | null
+          gab3_bat7_com_gradil: string | null
+          gab3_bat7_data_fabricacao: string | null
+          gab3_bat7_estado: string | null
+          gab3_bat7_fabricante: string | null
+          gab3_bat7_tipo: string | null
+          gab3_bat8_capacidade: string | null
+          gab3_bat8_colada: string | null
+          gab3_bat8_com_gradil: string | null
+          gab3_bat8_data_fabricacao: string | null
+          gab3_bat8_estado: string | null
+          gab3_bat8_fabricante: string | null
+          gab3_bat8_tipo: string | null
+          gab3_bat9_capacidade: string | null
+          gab3_bat9_colada: string | null
+          gab3_bat9_com_gradil: string | null
+          gab3_bat9_data_fabricacao: string | null
+          gab3_bat9_estado: string | null
+          gab3_bat9_fabricante: string | null
+          gab3_bat9_tipo: string | null
           gab3_clima_foto_ar1: string | null
           gab3_clima_foto_ar2: string | null
           gab3_clima_foto_ar3: string | null
@@ -2834,6 +3842,27 @@ export type Database = {
           gab4_bat1_estado: string | null
           gab4_bat1_fabricante: string | null
           gab4_bat1_tipo: string | null
+          gab4_bat10_capacidade: string | null
+          gab4_bat10_colada: string | null
+          gab4_bat10_com_gradil: string | null
+          gab4_bat10_data_fabricacao: string | null
+          gab4_bat10_estado: string | null
+          gab4_bat10_fabricante: string | null
+          gab4_bat10_tipo: string | null
+          gab4_bat11_capacidade: string | null
+          gab4_bat11_colada: string | null
+          gab4_bat11_com_gradil: string | null
+          gab4_bat11_data_fabricacao: string | null
+          gab4_bat11_estado: string | null
+          gab4_bat11_fabricante: string | null
+          gab4_bat11_tipo: string | null
+          gab4_bat12_capacidade: string | null
+          gab4_bat12_colada: string | null
+          gab4_bat12_com_gradil: string | null
+          gab4_bat12_data_fabricacao: string | null
+          gab4_bat12_estado: string | null
+          gab4_bat12_fabricante: string | null
+          gab4_bat12_tipo: string | null
           gab4_bat2_capacidade: string | null
           gab4_bat2_colada: string | null
           gab4_bat2_com_gradil: string | null
@@ -2869,6 +3898,27 @@ export type Database = {
           gab4_bat6_estado: string | null
           gab4_bat6_fabricante: string | null
           gab4_bat6_tipo: string | null
+          gab4_bat7_capacidade: string | null
+          gab4_bat7_colada: string | null
+          gab4_bat7_com_gradil: string | null
+          gab4_bat7_data_fabricacao: string | null
+          gab4_bat7_estado: string | null
+          gab4_bat7_fabricante: string | null
+          gab4_bat7_tipo: string | null
+          gab4_bat8_capacidade: string | null
+          gab4_bat8_colada: string | null
+          gab4_bat8_com_gradil: string | null
+          gab4_bat8_data_fabricacao: string | null
+          gab4_bat8_estado: string | null
+          gab4_bat8_fabricante: string | null
+          gab4_bat8_tipo: string | null
+          gab4_bat9_capacidade: string | null
+          gab4_bat9_colada: string | null
+          gab4_bat9_com_gradil: string | null
+          gab4_bat9_data_fabricacao: string | null
+          gab4_bat9_estado: string | null
+          gab4_bat9_fabricante: string | null
+          gab4_bat9_tipo: string | null
           gab4_clima_foto_ar1: string | null
           gab4_clima_foto_ar2: string | null
           gab4_clima_foto_ar3: string | null
@@ -2914,6 +3964,27 @@ export type Database = {
           gab5_bat1_estado: string | null
           gab5_bat1_fabricante: string | null
           gab5_bat1_tipo: string | null
+          gab5_bat10_capacidade: string | null
+          gab5_bat10_colada: string | null
+          gab5_bat10_com_gradil: string | null
+          gab5_bat10_data_fabricacao: string | null
+          gab5_bat10_estado: string | null
+          gab5_bat10_fabricante: string | null
+          gab5_bat10_tipo: string | null
+          gab5_bat11_capacidade: string | null
+          gab5_bat11_colada: string | null
+          gab5_bat11_com_gradil: string | null
+          gab5_bat11_data_fabricacao: string | null
+          gab5_bat11_estado: string | null
+          gab5_bat11_fabricante: string | null
+          gab5_bat11_tipo: string | null
+          gab5_bat12_capacidade: string | null
+          gab5_bat12_colada: string | null
+          gab5_bat12_com_gradil: string | null
+          gab5_bat12_data_fabricacao: string | null
+          gab5_bat12_estado: string | null
+          gab5_bat12_fabricante: string | null
+          gab5_bat12_tipo: string | null
           gab5_bat2_capacidade: string | null
           gab5_bat2_colada: string | null
           gab5_bat2_com_gradil: string | null
@@ -2949,6 +4020,27 @@ export type Database = {
           gab5_bat6_estado: string | null
           gab5_bat6_fabricante: string | null
           gab5_bat6_tipo: string | null
+          gab5_bat7_capacidade: string | null
+          gab5_bat7_colada: string | null
+          gab5_bat7_com_gradil: string | null
+          gab5_bat7_data_fabricacao: string | null
+          gab5_bat7_estado: string | null
+          gab5_bat7_fabricante: string | null
+          gab5_bat7_tipo: string | null
+          gab5_bat8_capacidade: string | null
+          gab5_bat8_colada: string | null
+          gab5_bat8_com_gradil: string | null
+          gab5_bat8_data_fabricacao: string | null
+          gab5_bat8_estado: string | null
+          gab5_bat8_fabricante: string | null
+          gab5_bat8_tipo: string | null
+          gab5_bat9_capacidade: string | null
+          gab5_bat9_colada: string | null
+          gab5_bat9_com_gradil: string | null
+          gab5_bat9_data_fabricacao: string | null
+          gab5_bat9_estado: string | null
+          gab5_bat9_fabricante: string | null
+          gab5_bat9_tipo: string | null
           gab5_clima_foto_ar1: string | null
           gab5_clima_foto_ar2: string | null
           gab5_clima_foto_ar3: string | null
@@ -2994,6 +4086,27 @@ export type Database = {
           gab6_bat1_estado: string | null
           gab6_bat1_fabricante: string | null
           gab6_bat1_tipo: string | null
+          gab6_bat10_capacidade: string | null
+          gab6_bat10_colada: string | null
+          gab6_bat10_com_gradil: string | null
+          gab6_bat10_data_fabricacao: string | null
+          gab6_bat10_estado: string | null
+          gab6_bat10_fabricante: string | null
+          gab6_bat10_tipo: string | null
+          gab6_bat11_capacidade: string | null
+          gab6_bat11_colada: string | null
+          gab6_bat11_com_gradil: string | null
+          gab6_bat11_data_fabricacao: string | null
+          gab6_bat11_estado: string | null
+          gab6_bat11_fabricante: string | null
+          gab6_bat11_tipo: string | null
+          gab6_bat12_capacidade: string | null
+          gab6_bat12_colada: string | null
+          gab6_bat12_com_gradil: string | null
+          gab6_bat12_data_fabricacao: string | null
+          gab6_bat12_estado: string | null
+          gab6_bat12_fabricante: string | null
+          gab6_bat12_tipo: string | null
           gab6_bat2_capacidade: string | null
           gab6_bat2_colada: string | null
           gab6_bat2_com_gradil: string | null
@@ -3029,6 +4142,27 @@ export type Database = {
           gab6_bat6_estado: string | null
           gab6_bat6_fabricante: string | null
           gab6_bat6_tipo: string | null
+          gab6_bat7_capacidade: string | null
+          gab6_bat7_colada: string | null
+          gab6_bat7_com_gradil: string | null
+          gab6_bat7_data_fabricacao: string | null
+          gab6_bat7_estado: string | null
+          gab6_bat7_fabricante: string | null
+          gab6_bat7_tipo: string | null
+          gab6_bat8_capacidade: string | null
+          gab6_bat8_colada: string | null
+          gab6_bat8_com_gradil: string | null
+          gab6_bat8_data_fabricacao: string | null
+          gab6_bat8_estado: string | null
+          gab6_bat8_fabricante: string | null
+          gab6_bat8_tipo: string | null
+          gab6_bat9_capacidade: string | null
+          gab6_bat9_colada: string | null
+          gab6_bat9_com_gradil: string | null
+          gab6_bat9_data_fabricacao: string | null
+          gab6_bat9_estado: string | null
+          gab6_bat9_fabricante: string | null
+          gab6_bat9_tipo: string | null
           gab6_clima_foto_ar1: string | null
           gab6_clima_foto_ar2: string | null
           gab6_clima_foto_ar3: string | null
@@ -3074,6 +4208,27 @@ export type Database = {
           gab7_bat1_estado: string | null
           gab7_bat1_fabricante: string | null
           gab7_bat1_tipo: string | null
+          gab7_bat10_capacidade: string | null
+          gab7_bat10_colada: string | null
+          gab7_bat10_com_gradil: string | null
+          gab7_bat10_data_fabricacao: string | null
+          gab7_bat10_estado: string | null
+          gab7_bat10_fabricante: string | null
+          gab7_bat10_tipo: string | null
+          gab7_bat11_capacidade: string | null
+          gab7_bat11_colada: string | null
+          gab7_bat11_com_gradil: string | null
+          gab7_bat11_data_fabricacao: string | null
+          gab7_bat11_estado: string | null
+          gab7_bat11_fabricante: string | null
+          gab7_bat11_tipo: string | null
+          gab7_bat12_capacidade: string | null
+          gab7_bat12_colada: string | null
+          gab7_bat12_com_gradil: string | null
+          gab7_bat12_data_fabricacao: string | null
+          gab7_bat12_estado: string | null
+          gab7_bat12_fabricante: string | null
+          gab7_bat12_tipo: string | null
           gab7_bat2_capacidade: string | null
           gab7_bat2_colada: string | null
           gab7_bat2_com_gradil: string | null
@@ -3109,6 +4264,27 @@ export type Database = {
           gab7_bat6_estado: string | null
           gab7_bat6_fabricante: string | null
           gab7_bat6_tipo: string | null
+          gab7_bat7_capacidade: string | null
+          gab7_bat7_colada: string | null
+          gab7_bat7_com_gradil: string | null
+          gab7_bat7_data_fabricacao: string | null
+          gab7_bat7_estado: string | null
+          gab7_bat7_fabricante: string | null
+          gab7_bat7_tipo: string | null
+          gab7_bat8_capacidade: string | null
+          gab7_bat8_colada: string | null
+          gab7_bat8_com_gradil: string | null
+          gab7_bat8_data_fabricacao: string | null
+          gab7_bat8_estado: string | null
+          gab7_bat8_fabricante: string | null
+          gab7_bat8_tipo: string | null
+          gab7_bat9_capacidade: string | null
+          gab7_bat9_colada: string | null
+          gab7_bat9_com_gradil: string | null
+          gab7_bat9_data_fabricacao: string | null
+          gab7_bat9_estado: string | null
+          gab7_bat9_fabricante: string | null
+          gab7_bat9_tipo: string | null
           gab7_clima_foto_ar1: string | null
           gab7_clima_foto_ar2: string | null
           gab7_clima_foto_ar3: string | null

@@ -251,7 +251,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     // Note: Database only has one photo per gabinete (gabX_bat_foto), not per battery bank
     const gabBatFoto = report[`${prefix}_bat_foto`] || null;
     const bancos = [];
-    for (let j = 0; j < 6; j++) {
+    for (let j = 0; j < 12; j++) {
       const tipo = report[`${prefix}_bat${j + 1}_tipo`];
       if (tipo) {
         const estadoRaw = report[`${prefix}_bat${j + 1}_estado`] || 'OK';

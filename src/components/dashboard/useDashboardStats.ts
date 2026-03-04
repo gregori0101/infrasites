@@ -64,7 +64,7 @@ function calculateGabineteAutonomy(report: ReportRow, gabineteNum: number): numb
   let totalCapacityAh = 0;
   const prefix = `gab${gabineteNum}`;
   
-  for (let b = 1; b <= 6; b++) {
+  for (let b = 1; b <= 12; b++) {
     const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
     const tipo = report[`${prefix}_bat${b}_tipo`] as string;
     
@@ -515,9 +515,9 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         // Temporary storage for batteries in this gabinete (to update autonomyRisk later)
         const gabBatteries: BatteryInfo[] = [];
         
-        // Batteries (6 per gabinete) - only count for valid gabinetes (same rule as climatização)
+        // Batteries (12 per gabinete) - only count for valid gabinetes (same rule as climatização)
         if (isValidGabinete) {
-          for (let b = 1; b <= 6; b++) {
+          for (let b = 1; b <= 12; b++) {
             const tipo = report[`${prefix}_bat${b}_tipo`] as string;
             const fabricante = report[`${prefix}_bat${b}_fabricante`] as string;
             const capacidade = report[`${prefix}_bat${b}_capacidade`] as string;
