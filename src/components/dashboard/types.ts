@@ -32,6 +32,7 @@ export interface BatteryInfo {
   colada: string;
   comGradil: string;
   reportId: string; // Reference to fetch photo on demand
+  tecnologiasAcesso: string[]; // Access technologies from the gabinete
 }
 
 export interface ACInfo {
@@ -229,6 +230,9 @@ export interface PanelStats {
     total: number;
     byUf: { uf: string; count: number }[];
   };
+
+  // Baterias por tecnologia de acesso
+  bateriasByTecAcesso: { tech: string; total: number; chumbo: number; litio: number }[];
 
   // Energia Panel (expanded)
   energiaTransformadorOk: number;
