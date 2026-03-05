@@ -1,57 +1,39 @@
 
 
-## Aumentar limite de baterias por gabinete de 6 para 12
+## Substituir visualização por tecnologia: Chumbo/Lítio → OK/NOK (Obsolescência e Autonomia)
 
-O limite atual de 6 bancos de bateria por gabinete e imposto tanto pelo banco de dados (colunas fixas) quanto pelo codigo front-end. Para permitir mais de 7 bancos, proponho aumentar para **12 bancos por gabinete**.
+### O que muda
 
----
+**Remover**: Seção atual "Baterias por Tecnologia de Acesso" com cards de totais Chumbo/Lítio e gráfico "Distribuição por Tecnologia e Tipo" (linhas 282-363 do BateriaPanel).
 
-### 1. Migracao de banco de dados
+**Adicionar no lugar**: Nova seção "Indicadores por Tecnologia de Acesso" com dois gráficos de barras empilhadas:
+1. **Obsolescência por Tecnologia** — barras OK (verde) e NOK (vermelho) por 2G/3G/4G/5G
+2. **Autonomia por Tecnologia** — barras OK (verde) e NOK (vermelho) por 2G/3G/4G/5G
 
-Para cada gabinete (1-7), adicionar colunas para bancos 7-12:
-- `gabX_bat7_tipo`, `gabX_bat7_fabricante`, `gabX_bat7_capacidade`, `gabX_bat7_data_fabricacao`, `gabX_bat7_estado`, `gabX_bat7_colada`, `gabX_bat7_com_gradil`
-- Repetido para bat8, bat9, bat10, bat11, bat12
-- Total: 7 gabinetes x 6 novos bancos x 7 colunas = **294 novas colunas** (todas text, nullable)
+OK/NOK segue a lógica existente:
+- Obsolescência: OK = ok + medio, NOK = alto
+- Autonomia: OK = ok + medio, NOK = alto + critico
 
-### 2. Front-end - Formulario
+### Arquivos alterados
 
-**`src/components/steps/Step4Baterias.tsx`**
-- Alterar limite de 6 para 12 em `addBanco`, `disabled`, e contador visual
-
-### 3. Persistencia
-
-**`src/lib/reportDatabase.ts`**
-- Loop `for (let j = 0; j < 6` → `j < 12`
-- Adicionar colunas bat7-bat12 ao `buildDashboardColumns()`
-
-**`src/lib/reportToChecklist.ts`**
-- Loop `for (let j = 0; j < 6` → `j < 12`
-
-**`src/lib/generateExcel.ts`**
-- Loop `for (let j = 0; j < 6` → `j < 12`
-
-### 4. Dashboard
-
-**`src/components/dashboard/useDashboardStats.ts`**
-- Ambos os loops `b <= 6` → `b <= 12`
-
-**`src/components/dashboard/SiteDetailModal.tsx`**
-- Loop `b <= 6` → `b <= 12`
-- `Array.from({ length: 6 }` → `{ length: 12 }`
-
-**`src/components/dashboard/BatteryDetailModal.tsx`**
-- Verificar e ajustar loops se existirem
-
-### Resumo
-
-| Arquivo | Acao |
+| Arquivo | Alteração |
 |---|---|
-| Migracao SQL | 294 colunas novas (bat7-bat12 x 7 gabs) |
-| `Step4Baterias.tsx` | Limite 6→12 |
-| `reportDatabase.ts` | Loop 6→12 + colunas dashboard |
-| `reportToChecklist.ts` | Loop 6→12 |
-| `generateExcel.ts` | Loop 6→12 |
-| `useDashboardStats.ts` | Loops 6→12 |
-| `SiteDetailModal.tsx` | Loops 6→12 |
-| `BatteryDetailModal.tsx` | Verificar/ajustar |
+| `types.ts` | Alterar tipo `bateriasByTecAcesso` para incluir `ok` e `nok` para obsolescência e autonomia |
+| `useDashboardStats.ts` | Computar OK/NOK por tecnologia no loop `tecAcessoMap` |
+| `BateriaPanel.tsx` | Substituir seção de cards+gráfico por dois BarCharts OK vs NOK |
+
+### Detalhes técnicos
+
+**Novo tipo em `types.ts`**:
+```typescript
+bateriasByTecAcesso: { 
+  tech: string; total: number; chumbo: number; litio: number;
+  obsolescenciaOk: number; obsolescenciaNok: number;
+  autonomiaOk: number; autonomiaNok: number;
+}[];
+```
+
+**`useDashboardStats.ts`**: No loop `tecAcessoMap`, para cada bateria por tecnologia, classificar obsolescência (ok+medio vs alto) e autonomia (ok+medio vs alto+critico) usando os campos `obsolescenciaTipo` e `autonomyRisk` já existentes em `BatteryInfo`.
+
+**`BateriaPanel.tsx`**: Substituir cards e gráfico Chumbo/Lítio por dois `BarChart` empilhados lado a lado (ou empilhados em mobile), cada um mostrando barras OK (verde) e NOK (vermelho) agrupadas por tecnologia.
 
