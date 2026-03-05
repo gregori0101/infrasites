@@ -232,7 +232,7 @@ export interface PanelStats {
   };
 
   // Baterias por tecnologia de acesso
-  bateriasByTecAcesso: { tech: string; total: number; chumbo: number; litio: number }[];
+  bateriasByTecAcesso: { tech: string; total: number; chumbo: number; litio: number; obsolescenciaOk: number; obsolescenciaNok: number; autonomiaOk: number; autonomiaNok: number }[];
 
   // Energia Panel (expanded)
   energiaTransformadorOk: number;
