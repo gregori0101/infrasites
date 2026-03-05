@@ -279,50 +279,21 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
         </div>
       </div>
 
-      {/* SEÇÃO: Baterias por Tecnologia de Acesso */}
+      {/* SEÇÃO: Indicadores por Tecnologia de Acesso */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-1.5 h-7 bg-blue-500 rounded-full" />
           <div>
-            <h2 className="font-bold text-lg tracking-tight">Baterias por Tecnologia de Acesso</h2>
-            <p className="text-xs text-muted-foreground">Distribuição por 2G, 3G, 4G, 5G</p>
+            <h2 className="font-bold text-lg tracking-tight">Indicadores por Tecnologia de Acesso</h2>
+            <p className="text-xs text-muted-foreground">Obsolescência e Autonomia OK vs NOK por 2G, 3G, 4G, 5G</p>
           </div>
         </div>
 
         {stats.bateriasByTecAcesso.length > 0 ? (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {stats.bateriasByTecAcesso.map(({ tech, total, chumbo, litio }) => (
-                <Card key={`tec-${tech}`} className="hover:shadow-md transition-all">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold">{tech}</span>
-                      <Radio className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-2xl font-bold">{total}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Battery className="w-3 h-3 text-slate-500" />
-                        {chumbo}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-emerald-500" />
-                        {litio}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {stats.totalBatteries > 0
-                        ? `${Math.round((total / stats.totalBatteries) * 100)}%`
-                        : '0%'}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Distribuição por Tecnologia e Tipo</CardTitle>
+                <CardTitle className="text-sm font-medium">Obsolescência por Tecnologia</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
@@ -333,14 +304,35 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                       <YAxis className="text-xs" />
                       <RechartsTooltip />
                       <Legend />
-                      <Bar dataKey="chumbo" name="Chumbo" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="litio" name="Lítio" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="obsolescenciaOk" name="OK" stackId="obs" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="obsolescenciaNok" name="NOK" stackId="obs" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
-          </>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Autonomia por Tecnologia</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats.bateriasByTecAcesso} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis dataKey="tech" className="text-xs" />
+                      <YAxis className="text-xs" />
+                      <RechartsTooltip />
+                      <Legend />
+                      <Bar dataKey="autonomiaOk" name="OK" stackId="aut" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="autonomiaNok" name="NOK" stackId="aut" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
@@ -355,7 +347,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                Cada bateria é associada às <strong className="text-foreground">tecnologias de acesso</strong> do gabinete onde está instalada. Um gabinete com múltiplas tecnologias (ex: 2G + 4G) contribui para ambas as contagens.
+                <strong className="text-foreground">OK</strong>: Obsolescência (ok + médio) / Autonomia (ok + médio). <strong className="text-foreground">NOK</strong>: Obsolescência (alto) / Autonomia (alto + crítico). Gabinetes com múltiplas tecnologias contribuem para todas.
               </p>
             </div>
           </CardContent>

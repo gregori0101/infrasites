@@ -961,23 +961,23 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
     };
 
     // Build batteries by access technology
-    const tecAcessoMap: Record<string, { total: number; chumbo: number; litio: number }> = {};
+    const tecAcessoMap: Record<string, { total: number; chumbo: number; litio: number; obsolescenciaOk: number; obsolescenciaNok: number; autonomiaOk: number; autonomiaNok: number }> = {};
+    const initTec = () => ({ total: 0, chumbo: 0, litio: 0, obsolescenciaOk: 0, obsolescenciaNok: 0, autonomiaOk: 0, autonomiaNok: 0 });
     batteryInfoList.forEach(bat => {
-      const techs = bat.tecnologiasAcesso;
-      if (techs.length === 0) {
-        const key = "Sem Info";
-        if (!tecAcessoMap[key]) tecAcessoMap[key] = { total: 0, chumbo: 0, litio: 0 };
-        tecAcessoMap[key].total++;
-        if (bat.tipoClassificado === "chumbo") tecAcessoMap[key].chumbo++;
-        else if (bat.tipoClassificado === "litio") tecAcessoMap[key].litio++;
-      } else {
-        techs.forEach(tech => {
-          if (!tecAcessoMap[tech]) tecAcessoMap[tech] = { total: 0, chumbo: 0, litio: 0 };
-          tecAcessoMap[tech].total++;
-          if (bat.tipoClassificado === "chumbo") tecAcessoMap[tech].chumbo++;
-          else if (bat.tipoClassificado === "litio") tecAcessoMap[tech].litio++;
-        });
-      }
+      const techs = bat.tecnologiasAcesso.length > 0 ? bat.tecnologiasAcesso : ["Sem Info"];
+      techs.forEach(tech => {
+        if (!tecAcessoMap[tech]) tecAcessoMap[tech] = initTec();
+        const entry = tecAcessoMap[tech];
+        entry.total++;
+        if (bat.tipoClassificado === "chumbo") entry.chumbo++;
+        else if (bat.tipoClassificado === "litio") entry.litio++;
+        // Obsolescência: ok+medio = OK, alto = NOK
+        if (bat.obsolescenciaTipo === "alto") entry.obsolescenciaNok++;
+        else entry.obsolescenciaOk++;
+        // Autonomia: ok+medio = OK, alto+critico = NOK
+        if (bat.autonomyRisk === "alto" || bat.autonomyRisk === "critico") entry.autonomiaNok++;
+        else entry.autonomiaOk++;
+      });
     });
     stats.bateriasByTecAcesso = Object.entries(tecAcessoMap)
       .map(([tech, data]) => ({ tech, ...data }))
