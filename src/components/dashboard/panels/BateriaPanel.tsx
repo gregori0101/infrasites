@@ -13,7 +13,8 @@ interface Props {
     type: "all" | "ok" | "nok" | "obsolete-warning" | "obsolete-critical" | 
     "autonomy-ok" | "autonomy-medio" | "autonomy-alto" | "autonomy-critico" |
     "chumbo-all" | "litio-all" | "chumbo-uf" | "litio-uf" |
-    "troca-all" | "troca-uf" | "obsolete-ok" | "obsolete-medio" | "obsolete-alto",
+    "troca-all" | "troca-uf" | "obsolete-ok" | "obsolete-medio" | "obsolete-alto" |
+    "tech-obs-ok" | "tech-obs-nok" | "tech-aut-ok" | "tech-aut-nok",
     uf?: string
   ) => void;
 }
@@ -298,14 +299,14 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.bateriasByTecAcesso} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <BarChart data={stats.bateriasByTecAcesso} margin={{ top: 5, right: 20, left: 0, bottom: 5 }} className="cursor-pointer">
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                       <XAxis dataKey="tech" className="text-xs" />
                       <YAxis className="text-xs" />
                       <RechartsTooltip />
                       <Legend />
-                      <Bar dataKey="obsolescenciaOk" name="OK" stackId="obs" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="obsolescenciaNok" name="NOK" stackId="obs" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="obsolescenciaOk" name="OK" stackId="obs" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} onClick={(data) => onDrillDown("tech-obs-ok", data.tech)} />
+                      <Bar dataKey="obsolescenciaNok" name="NOK" stackId="obs" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} onClick={(data) => onDrillDown("tech-obs-nok", data.tech)} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -319,14 +320,14 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.bateriasByTecAcesso} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <BarChart data={stats.bateriasByTecAcesso} margin={{ top: 5, right: 20, left: 0, bottom: 5 }} className="cursor-pointer">
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                       <XAxis dataKey="tech" className="text-xs" />
                       <YAxis className="text-xs" />
                       <RechartsTooltip />
                       <Legend />
-                      <Bar dataKey="autonomiaOk" name="OK" stackId="aut" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="autonomiaNok" name="NOK" stackId="aut" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="autonomiaOk" name="OK" stackId="aut" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} onClick={(data) => onDrillDown("tech-aut-ok", data.tech)} />
+                      <Bar dataKey="autonomiaNok" name="NOK" stackId="aut" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} onClick={(data) => onDrillDown("tech-aut-nok", data.tech)} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
