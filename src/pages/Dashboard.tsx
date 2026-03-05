@@ -960,6 +960,11 @@ export default function Dashboard() {
                     else if (type === "obsolete-ok") openDrillDown("gabinetes", "Obsolescência OK", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "ok"), { allowSiteView: true, obsolescenciaFilter: "ok" });
                     else if (type === "obsolete-medio") openDrillDown("gabinetes", "Médio Risco Obsolescência", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "medio"), { allowSiteView: true, obsolescenciaFilter: "medio" });
                     else if (type === "obsolete-alto") openDrillDown("gabinetes", "Alto Risco Obsolescência", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "alto"), { allowSiteView: true, obsolescenciaFilter: "alto" });
+                    // Technology-based drill-downs
+                    else if (type === "tech-obs-ok" && uf) openDrillDown("batteries", `Obsolescência OK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && (bat.obsolescenciaTipo === "ok" || bat.obsolescenciaTipo === "medio")));
+                    else if (type === "tech-obs-nok" && uf) openDrillDown("batteries", `Obsolescência NOK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && bat.obsolescenciaTipo === "alto"));
+                    else if (type === "tech-aut-ok" && uf) openDrillDown("batteries", `Autonomia OK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && (bat.autonomyRisk === "ok" || bat.autonomyRisk === "medio")));
+                    else if (type === "tech-aut-nok" && uf) openDrillDown("batteries", `Autonomia NOK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && (bat.autonomyRisk === "alto" || bat.autonomyRisk === "critico")));
                   }}
                 />
               )}
