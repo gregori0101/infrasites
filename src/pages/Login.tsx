@@ -241,22 +241,6 @@ export default function Login() {
                   {isLogin ? 'Entrar' : 'Cadastrar'}
                 </Button>
 
-                {isLogin && (
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
-                      onClick={() => {
-                        setViewMode('forgot-password');
-                        setError('');
-                        setSuccess('');
-                      }}
-                    >
-                      Esqueceu a senha?
-                    </button>
-                  </div>
-                )}
-
                 <div className="text-center">
                   <button
                     type="button"
