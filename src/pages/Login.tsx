@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
-import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2, KeyRound, ArrowLeft } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,7 @@ import { Helmet } from 'react-helmet';
 
 type Operadora = 'VIVO' | 'TEL';
 
-type ViewMode = 'login' | 'signup' | 'forgot-password';
+type ViewMode = 'login' | 'signup';
 
 export default function Login() {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
@@ -31,53 +31,6 @@ export default function Login() {
   const { signIn, signUp, refreshRole } = useAuth();
 
   const isLogin = viewMode === 'login';
-  const isForgotPassword = viewMode === 'forgot-password';
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setIsLoading(true);
-
-    if (!email.trim()) {
-      setError('Por favor, informe seu email');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setError('A nova senha deve ter pelo menos 6 caracteres');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('public-reset-password', {
-        body: { email, newPassword: password },
-      });
-
-      if (fnError) {
-        setError('Erro ao redefinir senha');
-      } else if (data?.error) {
-        setError(data.error);
-      } else {
-        setSuccess('Senha redefinida com sucesso! Faça login com a nova senha.');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-      }
-    } catch (err) {
-      setError('Erro ao processar sua solicitação');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,12 +119,10 @@ export default function Login() {
   };
 
   const getTitle = () => {
-    if (isForgotPassword) return 'Recuperar Senha';
     return isLogin ? 'Entrar no Sistema' : 'Criar Conta';
   };
 
   const getDescription = () => {
-    if (isForgotPassword) return 'Informe seu email e escolha uma nova senha';
     return isLogin
       ? 'Acesse o sistema de checklist de sites'
       : 'Cadastre-se para acessar o sistema (requer aprovação)';
@@ -180,7 +131,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>{isForgotPassword ? 'Recuperar Senha' : isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
+        <title>{isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -192,87 +143,7 @@ export default function Login() {
             <CardDescription>{getDescription()}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isForgotPassword ? (
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">Nova Senha</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmNewPassword">Confirmar Nova Senha</Label>
-                  <Input
-                    id="confirmNewPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                {success && (
-                  <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                    <span>{success}</span>
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <KeyRound className="w-4 h-4 mr-2" />
-                  )}
-                  Redefinir Senha
-                </Button>
-
-                <div className="text-center">
-                  <button
-                    type="button"
-                    className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline flex items-center justify-center gap-1 mx-auto"
-                    onClick={() => {
-                      setViewMode('login');
-                      setError('');
-                      setSuccess('');
-                      setPassword('');
-                      setConfirmPassword('');
-                    }}
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    Voltar ao login
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -370,22 +241,6 @@ export default function Login() {
                   {isLogin ? 'Entrar' : 'Cadastrar'}
                 </Button>
 
-                {isLogin && (
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
-                      onClick={() => {
-                        setViewMode('forgot-password');
-                        setError('');
-                        setSuccess('');
-                      }}
-                    >
-                      Esqueceu a senha?
-                    </button>
-                  </div>
-                )}
-
                 <div className="text-center">
                   <button
                     type="button"
@@ -401,8 +256,7 @@ export default function Login() {
                       : 'Já tem conta? Faça login'}
                   </button>
                 </div>
-              </form>
-            )}
+            </form>
           </CardContent>
         </Card>
       </div>
