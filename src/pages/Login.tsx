@@ -256,8 +256,7 @@ export default function Login() {
                       : 'Já tem conta? Faça login'}
                   </button>
                 </div>
-              </form>
-            )}
+            </form>
           </CardContent>
         </Card>
       </div>
