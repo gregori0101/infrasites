@@ -31,53 +31,6 @@ export default function Login() {
   const { signIn, signUp, refreshRole } = useAuth();
 
   const isLogin = viewMode === 'login';
-  const isForgotPassword = viewMode === 'forgot-password';
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setIsLoading(true);
-
-    if (!email.trim()) {
-      setError('Por favor, informe seu email');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setError('A nova senha deve ter pelo menos 6 caracteres');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('public-reset-password', {
-        body: { email, newPassword: password },
-      });
-
-      if (fnError) {
-        setError('Erro ao redefinir senha');
-      } else if (data?.error) {
-        setError(data.error);
-      } else {
-        setSuccess('Senha redefinida com sucesso! Faça login com a nova senha.');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-      }
-    } catch (err) {
-      setError('Erro ao processar sua solicitação');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
