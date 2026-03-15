@@ -131,7 +131,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>{isForgotPassword ? 'Recuperar Senha' : isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
+        <title>{isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
