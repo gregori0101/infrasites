@@ -119,12 +119,10 @@ export default function Login() {
   };
 
   const getTitle = () => {
-    if (isForgotPassword) return 'Recuperar Senha';
     return isLogin ? 'Entrar no Sistema' : 'Criar Conta';
   };
 
   const getDescription = () => {
-    if (isForgotPassword) return 'Informe seu email e escolha uma nova senha';
     return isLogin
       ? 'Acesse o sistema de checklist de sites'
       : 'Cadastre-se para acessar o sistema (requer aprovação)';
