@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { VivoLogo } from '@/components/ui/vivo-logo';
-import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2, KeyRound, ArrowLeft } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
