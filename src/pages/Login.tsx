@@ -15,7 +15,7 @@ import { Helmet } from 'react-helmet';
 
 type Operadora = 'VIVO' | 'TEL';
 
-type ViewMode = 'login' | 'signup' | 'forgot-password';
+type ViewMode = 'login' | 'signup';
 
 export default function Login() {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
