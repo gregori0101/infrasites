@@ -874,11 +874,14 @@ export async function fetchReportPhotos(id: string): Promise<Partial<ReportRow> 
 
 /**
  * Fetch full report with photos (use sparingly - only for exports)
+ * Uses explicit column list instead of SELECT * for performance
  */
 export async function fetchFullReportById(id: string): Promise<ReportRow | null> {
+  const columns = buildDetailColumns() + ',' + buildPhotoColumns();
+
   const { data, error } = await supabase
     .from('reports')
-    .select('*')
+    .select(columns)
     .eq('id', id)
     .maybeSingle();
 
@@ -887,7 +890,7 @@ export async function fetchFullReportById(id: string): Promise<ReportRow | null>
     throw new Error(`Erro ao buscar relatório completo: ${error.message}`);
   }
 
-  return data as ReportRow | null;
+  return data as unknown as ReportRow | null;
 }
 
 /**
