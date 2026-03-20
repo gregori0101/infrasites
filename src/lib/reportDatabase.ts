@@ -890,7 +890,7 @@ export async function fetchFullReportById(id: string): Promise<ReportRow | null>
     throw new Error(`Erro ao buscar relatório completo: ${error.message}`);
   }
 
-  return data as ReportRow | null;
+  return data as unknown as ReportRow | null;
 }
 
 /**
