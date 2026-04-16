@@ -14,7 +14,7 @@ interface Props {
     "autonomy-ok" | "autonomy-medio" | "autonomy-alto" | "autonomy-critico" |
     "chumbo-all" | "litio-all" | "chumbo-uf" | "litio-uf" |
     "troca-all" | "troca-uf" | "obsolete-ok" | "obsolete-medio" | "obsolete-alto" |
-    "tech-obs-ok" | "tech-obs-nok" | "tech-aut-ok" | "tech-aut-nok",
+    "tech-obs-ok" | "tech-obs-nok" | "tech-aut-ok" | "tech-aut-nok" | "sem-banco",
     uf?: string
   ) => void;
 }
@@ -870,7 +870,7 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
                   
                   <Card 
                     className="border-muted cursor-pointer hover:shadow-md hover:border-primary/50 active:scale-[0.98] transition-all"
-                    onClick={() => onDrillDown("all")}
+                    onClick={() => onDrillDown("sem-banco")}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
