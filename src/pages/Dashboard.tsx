@@ -83,7 +83,7 @@ export default function Dashboard() {
   // Extra state for dual-view (autonomy/obsolescence)
   const [modalAllowSiteView, setModalAllowSiteView] = useState(false);
   const [modalAutonomyFilter, setModalAutonomyFilter] = useState<"ok" | "medio" | "alto" | "critico" | undefined>(undefined);
-  const [modalObsolescenciaFilter, setModalObsolescenciaFilter] = useState<"ok" | "medio" | "alto" | undefined>(undefined);
+  const [modalObsolescenciaFilter, setModalObsolescenciaFilter] = useState<"ok" | "medio" | "alto" | "sem_banco" | undefined>(undefined);
 
   // Site detail modal state
   const [detailModalOpen, setDetailModalOpen] = useState(false);
