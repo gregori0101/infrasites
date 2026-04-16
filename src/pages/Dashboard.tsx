@@ -83,7 +83,7 @@ export default function Dashboard() {
   // Extra state for dual-view (autonomy/obsolescence)
   const [modalAllowSiteView, setModalAllowSiteView] = useState(false);
   const [modalAutonomyFilter, setModalAutonomyFilter] = useState<"ok" | "medio" | "alto" | "critico" | undefined>(undefined);
-  const [modalObsolescenciaFilter, setModalObsolescenciaFilter] = useState<"ok" | "medio" | "alto" | undefined>(undefined);
+  const [modalObsolescenciaFilter, setModalObsolescenciaFilter] = useState<"ok" | "medio" | "alto" | "sem_banco" | undefined>(undefined);
 
   // Site detail modal state
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -294,7 +294,7 @@ export default function Dashboard() {
     options?: {
       allowSiteView?: boolean;
       autonomyFilter?: "ok" | "medio" | "alto" | "critico";
-      obsolescenciaFilter?: "ok" | "medio" | "alto";
+      obsolescenciaFilter?: "ok" | "medio" | "alto" | "sem_banco";
     }
   ) => {
     setModalType(type);
@@ -965,7 +965,7 @@ export default function Dashboard() {
                     else if (type === "tech-obs-nok" && uf) openDrillDown("batteries", `Obsolescência NOK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && bat.obsolescenciaTipo === "alto"));
                     else if (type === "tech-aut-ok" && uf) openDrillDown("batteries", `Autonomia OK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && (bat.autonomyRisk === "ok" || bat.autonomyRisk === "medio")));
                     else if (type === "tech-aut-nok" && uf) openDrillDown("batteries", `Autonomia NOK - ${uf}`, (b) => b.filter((bat: any) => bat.tecnologiasAcesso?.includes(uf) && (bat.autonomyRisk === "alto" || bat.autonomyRisk === "critico")));
-                    else if (type === "sem-banco") openDrillDown("gabinetes", "Gabinetes Sem Banco de Bateria", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "sem_banco"), { allowSiteView: true, obsolescenciaFilter: "ok" });
+                    else if (type === "sem-banco") openDrillDown("gabinetes", "Gabinetes Sem Banco de Bateria", (g) => g.filter((gab: any) => gab.obsolescenciaRisk === "sem_banco"), { allowSiteView: true, obsolescenciaFilter: "sem_banco" });
                   }}
                 />
               )}

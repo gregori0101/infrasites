@@ -52,7 +52,7 @@ interface Props {
   // For dual-view modals (autonomy/obsolescence)
   allowSiteView?: boolean;
   autonomyFilter?: "ok" | "medio" | "alto" | "critico";
-  obsolescenciaFilter?: "ok" | "medio" | "alto";
+  obsolescenciaFilter?: "ok" | "medio" | "alto" | "sem_banco";
 }
 
 const PAGE_SIZE = 10;
