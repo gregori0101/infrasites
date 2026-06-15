@@ -111,14 +111,22 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
   const handleSiglaChange = (value: string) => {
     const formatted = value.toUpperCase().trim();
     updateData('siglaSite', formatted);
-    
-    // When site code is filled, check for previous reports
-    if (formatted && formatted !== hasShownDialogForSite) {
-      checkForPreviousReport(formatted);
-    } else if (!formatted) {
-      clearPreviousReport();
-    }
   };
+
+  React.useEffect(() => {
+    const siteCode = data.siglaSite.trim();
+    if (!siteCode) {
+      clearPreviousReport();
+      return;
+    }
+    if (siteCode === hasShownDialogForSite) return;
+
+    const timeoutId = window.setTimeout(() => {
+      checkForPreviousReport(siteCode);
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [data.siglaSite, hasShownDialogForSite, checkForPreviousReport, clearPreviousReport]);
 
   // Show dialog when previous report is found
   React.useEffect(() => {
