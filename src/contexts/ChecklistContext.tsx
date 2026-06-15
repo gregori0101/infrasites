@@ -494,7 +494,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
 
     // ========== Step 1: Dados do Site (10%) ==========
     const siteFields = [
-      data.siglaSite.length === 5,
+      data.siglaSite.trim().length > 0,
       !!data.uf,
       data.qtdGabinetes > 0,
       !!data.fotoPanoramica,
