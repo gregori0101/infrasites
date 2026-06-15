@@ -19,8 +19,9 @@ export function usePreviousReport(): UsePreviousReportResult {
   const [lastInspectionDate, setLastInspectionDate] = useState<string | null>(null);
 
   const checkForPreviousReport = useCallback(async (siteCode: string) => {
-    // Only search when site code is complete (5 characters)
-    if (siteCode.length !== 5) {
+    const normalizedSiteCode = siteCode.trim();
+
+    if (!normalizedSiteCode) {
       setPreviousReport(null);
       setPreviousChecklistData(null);
       setLastInspectionDate(null);
@@ -30,7 +31,7 @@ export function usePreviousReport(): UsePreviousReportResult {
     setIsLoading(true);
     try {
       // Use the version that includes all photo columns
-      const report = await fetchLatestReportWithPhotosBySiteCode(siteCode);
+      const report = await fetchLatestReportWithPhotosBySiteCode(normalizedSiteCode);
       
       if (report) {
         setPreviousReport(report);

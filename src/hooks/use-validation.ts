@@ -27,8 +27,8 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
 
     switch (currentStep) {
       case 0: // Step1DadosSite
-        if (!data.siglaSite || data.siglaSite.length !== 5) {
-          errors.push({ field: 'siglaSite', message: 'Sigla deve ter exatamente 5 caracteres' });
+        if (!data.siglaSite?.trim()) {
+          errors.push({ field: 'siglaSite', message: 'Informe a sigla do site' });
         }
         if (!data.uf) {
           errors.push({ field: 'uf', message: 'Selecione a UF' });
