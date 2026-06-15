@@ -78,10 +78,6 @@ export function parseSpreadsheet(file: File): Promise<ParseResult> {
             continue;
           }
 
-          if (site_code.length !== 5) {
-            errors.push(`Linha ${i + 1}: SITE "${site_code}" deve ter 5 caracteres`);
-            continue;
-          }
 
           if (!VALID_UFS.includes(uf)) {
             errors.push(`Linha ${i + 1}: UF "${uf}" inválida. Use: ${VALID_UFS.join(', ')}`);
