@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      selfDestroying: true,
       devOptions: {
         enabled: false, // Disable SW in dev to prevent reload during photo capture
       },
