@@ -13,6 +13,7 @@ export interface ParseResult {
 }
 
 const VALID_UFS = ['PA', 'AM', 'MA', 'RR', 'AP'];
+const VALID_SITE_CODE_PATTERN = /^[A-Z0-9_-]+$/;
 
 export function parseSpreadsheet(file: File): Promise<ParseResult> {
   return new Promise((resolve, reject) => {
@@ -78,6 +79,11 @@ export function parseSpreadsheet(file: File): Promise<ParseResult> {
             continue;
           }
 
+          if (!VALID_SITE_CODE_PATTERN.test(site_code)) {
+            errors.push(`Linha ${i + 1}: SITE "${site_code}" inválido. Use apenas letras, números, _ ou -`);
+            continue;
+          }
+
 
           if (!VALID_UFS.includes(uf)) {
             errors.push(`Linha ${i + 1}: UF "${uf}" inválida. Use: ${VALID_UFS.join(', ')}`);
@@ -112,6 +118,7 @@ export function generateTemplateSpreadsheet(): Blob {
   const data = [
     ['SITE', 'UF', 'TIPO', 'MUNICIPIO'],
     ['PACRE', 'PA', 'Indoor', 'Belém'],
+    ['MNS_G1I01', 'AM', 'Outdoor', 'Manaus'],
     ['AMBEL', 'AM', 'Outdoor', 'Manaus'],
     ['MAPRO', 'MA', 'Rooftop', 'São Luís'],
   ];
