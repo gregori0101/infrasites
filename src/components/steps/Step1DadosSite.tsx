@@ -109,20 +109,20 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
   };
 
   const handleSiglaChange = (value: string) => {
-    const formatted = value.toUpperCase().slice(0, 5);
+    const formatted = value.toUpperCase().trim();
     updateData('siglaSite', formatted);
     
-    // When site code is complete, check for previous reports
-    if (formatted.length === 5 && formatted !== hasShownDialogForSite) {
+    // When site code is filled, check for previous reports
+    if (formatted && formatted !== hasShownDialogForSite) {
       checkForPreviousReport(formatted);
-    } else if (formatted.length < 5) {
+    } else if (!formatted) {
       clearPreviousReport();
     }
   };
 
   // Show dialog when previous report is found
   React.useEffect(() => {
-    if (previousChecklistData && data.siglaSite.length === 5 && hasShownDialogForSite !== data.siglaSite) {
+    if (previousChecklistData && data.siglaSite.trim() && hasShownDialogForSite !== data.siglaSite) {
       setShowPrefillDialog(true);
       setHasShownDialogForSite(data.siglaSite);
     }
@@ -143,7 +143,7 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
     clearPreviousReport();
   };
 
-  const isSiglaValid = data.siglaSite.length === 5;
+  const isSiglaValid = data.siglaSite.trim().length > 0;
   const siglaError = showErrors && getFieldError(validationErrors, 'siglaSite');
   const ufError = showErrors && getFieldError(validationErrors, 'uf');
   const fotoError = showErrors && getFieldError(validationErrors, 'fotoPanoramica');
@@ -161,8 +161,7 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
                 id="sigla"
                 value={data.siglaSite}
                 onChange={(e) => handleSiglaChange(e.target.value)}
-                placeholder="Ex: PACRE"
-                maxLength={5}
+                placeholder="Ex: MNS_G1I01"
                 className={cn(
                   "uppercase font-mono text-lg tracking-wider pr-16",
                   data.siglaSite.length > 0 && !isSiglaValid 
@@ -185,12 +184,12 @@ export function Step1DadosSite({ showErrors = false, validationErrors = [] }: St
                   "text-xs font-medium",
                   isSiglaValid ? 'text-success' : 'text-muted-foreground'
                 )}>
-                  {data.siglaSite.length}/5
+                  {data.siglaSite.length}
                 </span>
               </div>
             </div>
             {data.siglaSite.length > 0 && !isSiglaValid && (
-              <p className="text-xs text-destructive">A sigla deve ter exatamente 5 caracteres</p>
+              <p className="text-xs text-destructive">Informe a sigla do site</p>
             )}
             {previousChecklistData && isSiglaValid && !isCheckingPrevious && (
               <p className="text-xs text-primary flex items-center gap-1">
