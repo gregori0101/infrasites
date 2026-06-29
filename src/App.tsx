@@ -29,6 +29,7 @@ const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
+const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Fiber Guardian pages
@@ -186,6 +187,11 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
+                  <Route path="/monitoramento" element={
+                    <ProtectedRoute>
+                      <PainelMonitoramento />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/instalar" element={<Install />} />
 
                   {/* Auditoria TA (Fiber Guardian) routes */}
