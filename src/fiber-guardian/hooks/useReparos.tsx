@@ -245,16 +245,20 @@ export function useReparos() {
             continue;
           }
 
-          const { data: urlData } = supabase.storage
+          const { data: urlData, error: signErr } = await supabase.storage
             .from('fotos-reparos')
-            .getPublicUrl(filePath);
+            .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
+          if (signErr || !urlData?.signedUrl) {
+            console.error('Sign URL error:', signErr);
+            continue;
+          }
 
           await supabase.from('fotos_reparo').insert({
             id: fotoId,
             reparo_id: reparoId,
             tipo_foto: tipo,
             titulo: file.name,
-            caminho_arquivo: urlData.publicUrl,
+            caminho_arquivo: urlData.signedUrl,
             ordem,
           });
         }
@@ -346,7 +350,9 @@ export function useReparos() {
 
         if (fotos) {
           for (const foto of fotos) {
-            const path = foto.caminho_arquivo.split('/fotos-reparos/')[1];
+            // Path may be embedded in a signed or legacy public URL
+            const m = foto.caminho_arquivo.match(/\/fotos-reparos\/([^?]+)/);
+            const path = m ? decodeURIComponent(m[1]) : null;
             if (path) {
               await supabase.storage.from('fotos-reparos').remove([path]);
             }
