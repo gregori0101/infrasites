@@ -231,9 +231,11 @@ function buildPhotoColumns(): string {
  */
 export async function fetchLatestReportBySiteCode(siteCode: string): Promise<ReportRow | null> {
   try {
+    const { validateSiteCode } = await import('./validation');
+    validateSiteCode(siteCode);
     // All columns needed for pre-fill (excluding photos)
     const columns = buildDashboardColumns() + ',operadora';
-    
+
     const { data, error } = await supabase
       .from('reports')
       .select(columns)
@@ -633,6 +635,10 @@ export async function fetchReportsSummary(filters?: {
   endDate?: string;
   operadora?: string; // 'VIVO', 'TEL', or 'all'
 }): Promise<ReportRow[]> {
+  // Validate filters early to avoid malformed queries
+  const { validateReportFilters } = await import('./validation');
+  validateReportFilters(filters);
+
   const pageSize = 1000;
   let page = 0;
   let all: ReportRow[] = [];

@@ -49,6 +49,8 @@ export async function fetchAssignments(): Promise<SiteAssignment[]> {
 }
 
 export async function fetchTechnicianAssignments(technicianId: string): Promise<SiteAssignment[]> {
+  const { validateUuid } = await import('./validation');
+  validateUuid(technicianId, 'ID do técnico');
   const { data, error } = await supabase
     .from('site_assignments')
     .select(`

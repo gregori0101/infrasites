@@ -59,15 +59,10 @@ export function useSidebarCounts() {
 
   useEffect(() => {
     fetchCounts();
-
-    const channel = supabase
-      .channel('fg-sidebar-counts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reparos' }, () => fetchCounts())
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Polling instead of realtime subscription: the `reparos` table is no
+    // longer published to Supabase Realtime to prevent broad channel access.
+    const interval = setInterval(fetchCounts, 60_000);
+    return () => clearInterval(interval);
   }, [fetchCounts]);
 
   return counts;

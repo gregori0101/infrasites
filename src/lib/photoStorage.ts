@@ -117,16 +117,20 @@ export async function uploadPhoto(
       });
 
     if (!error) {
-      // Success - get public URL
-      const { data: urlData } = supabase.storage
+      // Success - bucket is private; create a long-lived signed URL
+      const { data: signedData, error: signErr } = await supabase.storage
         .from(BUCKET_NAME)
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 60 * 60 * 24 * 365 * 10); // 10 years
 
       // Clear reference to help GC
       processedData = '';
-      
+
+      if (signErr || !signedData?.signedUrl) {
+        console.error(`[Photo] Sign URL failed for ${category}:`, signErr);
+        throw new Error(`Falha ao gerar URL da foto (${category})`);
+      }
       console.log(`[Photo] Uploaded successfully: ${category} -> ${fileName}`);
-      return urlData.publicUrl;
+      return signedData.signedUrl;
     }
 
     lastError = error;

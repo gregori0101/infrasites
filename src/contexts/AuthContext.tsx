@@ -28,7 +28,7 @@ interface AuthContextType {
   isGestor: boolean;
   isTecnico: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
+  signUp: (email: string, password: string, options?: { data?: Record<string, unknown> }) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
@@ -113,12 +113,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    options?: { data?: Record<string, unknown> },
+  ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
+        data: options?.data,
       },
     });
     return { error: error as Error | null, data: data ? { user: data.user } : null };

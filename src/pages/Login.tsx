@@ -85,7 +85,15 @@ export default function Login() {
           }
         }
       } else {
-        const { error, data: signUpData } = await signUp(email, password);
+        // Pass operadora & LGPD consent via signup metadata so the DB trigger
+        // (handle_new_user) persists them atomically — avoids client-side
+        // user_roles update which is blocked by RLS.
+        const { error, data: signUpData } = await signUp(email, password, {
+          data: {
+            operadora,
+            lgpd_consent: true,
+          },
+        });
         if (error) {
           if (error.message.includes('User already registered')) {
             setError('Este email já está cadastrado');
@@ -93,16 +101,6 @@ export default function Login() {
             setError(error.message);
           }
         } else if (signUpData?.user) {
-          // Update user_roles with operadora and LGPD consent after signup
-          await supabase
-            .from('user_roles')
-            .update({ 
-              operadora,
-              lgpd_consent: true,
-              lgpd_consent_at: new Date().toISOString(),
-            })
-            .eq('user_id', signUpData.user.id);
-          
           setSuccess('Cadastro realizado! Aguarde a aprovação de um gestor para acessar o sistema.');
           setEmail('');
           setPassword('');

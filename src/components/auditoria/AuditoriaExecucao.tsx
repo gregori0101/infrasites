@@ -123,9 +123,12 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
       const path = `audit/${order.id}/${item.id}_${timestamp}.${ext}`;
       const { error: uploadError } = await supabase.storage.from('report-photos').upload(path, file, { upsert: true });
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from('report-photos').getPublicUrl(path);
+      const { data: signedData, error: signErr } = await supabase.storage
+        .from('report-photos')
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signedData?.signedUrl) throw signErr ?? new Error('Falha ao gerar URL');
       const currentPhotos = parsePhotos(item.foto_url);
-      const newPhotos = [...currentPhotos, urlData.publicUrl];
+      const newPhotos = [...currentPhotos, signedData.signedUrl];
       const newFotoUrl = photosToString(newPhotos);
       await updateAuditItem(item.id, { foto_url: newFotoUrl ?? undefined });
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, foto_url: newFotoUrl } : i));
