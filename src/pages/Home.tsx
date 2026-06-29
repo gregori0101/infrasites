@@ -95,6 +95,24 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Painel de Monitoramento */}
+              <Card
+                className="cursor-pointer border-2 border-transparent hover:border-primary/50 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                onClick={() => navigate("/monitoramento")}
+              >
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="flex-shrink-0 h-14 w-14 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <Radar className="h-7 w-7 text-purple-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-semibold text-lg text-foreground">Painel de Monitoramento</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Monitoramento da rede Norte — ERBs, backbone, riscos e indisponibilidades
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </main>
