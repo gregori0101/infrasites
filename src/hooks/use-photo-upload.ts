@@ -166,10 +166,15 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
         setUploadProgress(90);
 
-        // Get public URL
-        const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
+        // Bucket is private — create long-lived signed URL
+        const { data: signedData, error: signErr } = await supabase.storage
+          .from(BUCKET_NAME)
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365 * 10);
 
-        const publicUrl = urlData.publicUrl;
+        if (signErr || !signedData?.signedUrl) {
+          throw new Error(`Falha ao gerar URL assinada: ${signErr?.message ?? 'desconhecido'}`);
+        }
+        const publicUrl = signedData.signedUrl;
 
         setUploadProgress(100);
         console.log(`[PhotoUpload] Success: ${fileName}`);
@@ -269,10 +274,14 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
         setUploadProgress(90);
 
-        // Get public URL
-        const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
-
-        const publicUrl = urlData.publicUrl;
+        // Bucket is private — create long-lived signed URL
+        const { data: signedData, error: signErr } = await supabase.storage
+          .from(BUCKET_NAME)
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365 * 10);
+        if (signErr || !signedData?.signedUrl) {
+          throw new Error(`Falha ao gerar URL assinada: ${signErr?.message ?? 'desconhecido'}`);
+        }
+        const publicUrl = signedData.signedUrl;
 
         setUploadProgress(100);
         console.log(`[PhotoUpload] Success: ${fileName}`);
