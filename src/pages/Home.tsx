@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable } from "lucide-react";
+import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar } from "lucide-react";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 
