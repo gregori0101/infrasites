@@ -187,6 +187,11 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
+                  <Route path="/monitoramento" element={
+                    <ProtectedRoute>
+                      <PainelMonitoramento />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/instalar" element={<Install />} />
 
                   {/* Auditoria TA (Fiber Guardian) routes */}
