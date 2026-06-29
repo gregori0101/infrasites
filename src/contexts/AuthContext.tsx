@@ -28,7 +28,7 @@ interface AuthContextType {
   isGestor: boolean;
   isTecnico: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
+  signUp: (email: string, password: string, options?: { data?: Record<string, unknown> }) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
