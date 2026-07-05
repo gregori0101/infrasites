@@ -13,6 +13,7 @@ import { RevisaoDialog } from '@/fiber-guardian/components/revisao/RevisaoDialog
 import { EditarReparoDialog } from '@/fiber-guardian/components/admin/EditarReparoDialog';
 import { getConclusaoLabel } from '@/fiber-guardian/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SignedImage } from '@/components/ui/signed-image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, CheckCircle, RotateCcw, Pencil, Trash2, Loader2, AlertTriangle, Send, MessageSquare, FileDown } from 'lucide-react';
