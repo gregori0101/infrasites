@@ -172,7 +172,7 @@ export default function ReparoDetalhes() {
               <div className="grid grid-cols-3 gap-2">
                 {reparo.fotos_reparo.map(foto => (
                   <a key={foto.id} href={foto.caminho_arquivo} target="_blank" rel="noopener noreferrer">
-                    <img src={foto.caminho_arquivo} alt={foto.titulo || foto.tipo_foto} className="w-full aspect-square object-cover rounded-lg" />
+                    <SignedImage src={foto.caminho_arquivo} alt={foto.titulo || foto.tipo_foto} className="w-full aspect-square object-cover rounded-lg" />
                   </a>
                 ))}
               </div>
