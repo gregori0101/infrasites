@@ -264,7 +264,7 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
                     : "border-transparent opacity-60 hover:opacity-100"
                 )}
               >
-                <img
+                <ResolvedImg
                   src={img.url}
                   alt={img.label}
                   className="w-full h-full object-cover"
