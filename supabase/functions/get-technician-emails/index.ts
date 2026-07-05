@@ -22,24 +22,21 @@ Deno.serve(async (req) => {
       }
     })
 
-    // Verify the requesting user is authenticated and is a gestor/admin
+    // Verify the requesting user is authenticated and is approved.
+    // If the session has expired or been revoked (e.g. request fired during logout),
+    // respond 200 with an empty list so the client doesn't surface a runtime error.
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    const emptyOk = () => new Response(JSON.stringify({ technicians: [] }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+
+    if (!authHeader) return emptyOk()
 
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
-    
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+
+    if (authError || !user) return emptyOk()
 
     // Check if user is approved (any role can read technician list for ranking/auditoria)
     const { data: userRole } = await supabaseAdmin
@@ -48,12 +45,7 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .single()
 
-    if (!userRole?.approved) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    if (!userRole?.approved) return emptyOk()
 
     // Get all approved technicians with area_atuacao
     const { data: technicians, error: techError } = await supabaseAdmin
