@@ -13,6 +13,7 @@ import { RevisaoDialog } from '@/fiber-guardian/components/revisao/RevisaoDialog
 import { EditarReparoDialog } from '@/fiber-guardian/components/admin/EditarReparoDialog';
 import { getConclusaoLabel } from '@/fiber-guardian/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SignedImage } from '@/components/ui/signed-image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, CheckCircle, RotateCcw, Pencil, Trash2, Loader2, AlertTriangle, Send, MessageSquare, FileDown } from 'lucide-react';
@@ -171,7 +172,7 @@ export default function ReparoDetalhes() {
               <div className="grid grid-cols-3 gap-2">
                 {reparo.fotos_reparo.map(foto => (
                   <a key={foto.id} href={foto.caminho_arquivo} target="_blank" rel="noopener noreferrer">
-                    <img src={foto.caminho_arquivo} alt={foto.titulo || foto.tipo_foto} className="w-full aspect-square object-cover rounded-lg" />
+                    <SignedImage src={foto.caminho_arquivo} alt={foto.titulo || foto.tipo_foto} className="w-full aspect-square object-cover rounded-lg" />
                   </a>
                 ))}
               </div>

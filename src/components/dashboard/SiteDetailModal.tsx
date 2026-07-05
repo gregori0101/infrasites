@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lightbox } from "@/components/ui/lightbox";
+import { SignedImage } from "@/components/ui/signed-image";
 import { fetchFullReportById, ReportRow, updateReportField } from "@/lib/reportDatabase";
 import { reportToChecklist } from "@/lib/reportToChecklist";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
@@ -100,7 +101,7 @@ function PhotoViewer({ url, label, compact = false, onClick }: PhotoViewerProps)
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       )}
-      <img
+      <SignedImage
         src={url}
         alt={label}
         className={cn(
