@@ -37,7 +37,7 @@ export function RespostaTecnicoCard({ revisao, fotosCorrecao }: RespostaTecnicoC
               {fotosCorrecao.map((foto) => (
                 <a key={foto.id} href={foto.caminho_arquivo} target="_blank" rel="noopener noreferrer"
                   className="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-90 transition-opacity ring-2 ring-primary/20">
-                  <img src={foto.caminho_arquivo} alt={foto.titulo || 'Foto da correção'} className="w-full h-full object-cover" />
+                  <SignedImage src={foto.caminho_arquivo} alt={foto.titulo || 'Foto da correção'} className="w-full h-full object-cover" />
                 </a>
               ))}
             </div>
