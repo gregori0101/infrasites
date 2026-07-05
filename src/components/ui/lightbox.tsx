@@ -222,7 +222,7 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
         )}
 
         {/* Image */}
-        <img
+        <ResolvedImg
           src={currentImage.url}
           alt={currentImage.label}
           className={cn(
