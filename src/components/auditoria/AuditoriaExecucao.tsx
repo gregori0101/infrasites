@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { differenceInDays, isBefore } from "date-fns";
 import { toast } from "sonner";
 import { Lightbox } from "@/components/ui/lightbox";
+import { SignedImage } from "@/components/ui/signed-image";
 
 function parsePhotos(fotoUrl: string | null): string[] {
   if (!fotoUrl) return [];
