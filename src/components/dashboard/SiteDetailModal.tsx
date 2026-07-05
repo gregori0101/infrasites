@@ -101,7 +101,7 @@ function PhotoViewer({ url, label, compact = false, onClick }: PhotoViewerProps)
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       )}
-      <img
+      <SignedImage
         src={url}
         alt={label}
         className={cn(
