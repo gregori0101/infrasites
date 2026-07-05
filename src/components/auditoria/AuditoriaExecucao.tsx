@@ -272,7 +272,7 @@ export default function AuditoriaExecucao({ order, onBack }: Props) {
                           <div className="flex gap-2 flex-wrap">
                             {photos.map((photo, pIdx) => (
                               <div key={pIdx} className="relative group w-16 h-16">
-                                <img src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-full rounded object-cover border cursor-pointer" onClick={() => openLightbox(photos, pIdx, item.descricao)} />
+                                <SignedImage src={photo} alt={`Evidência ${pIdx + 1}`} className="w-full h-full rounded object-cover border cursor-pointer" onClick={() => openLightbox(photos, pIdx, item.descricao)} />
                                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all rounded flex items-center justify-center opacity-0 group-hover:opacity-100">
                                   <button className="bg-destructive/80 text-destructive-foreground rounded-full p-1" onClick={() => handleRemovePhoto(item, pIdx)}>
                                     <Trash2 className="h-3 w-3" />
