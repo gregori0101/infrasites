@@ -4,6 +4,12 @@ import { DismissableLayerBranch } from "@radix-ui/react-dismissable-layer";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useResolvedImageUrl } from "@/components/ui/signed-image";
+
+function ResolvedImg({ src, ...rest }: React.ImgHTMLAttributes<HTMLImageElement> & { src: string }) {
+  const resolved = useResolvedImageUrl(src);
+  return <img {...rest} src={resolved ?? src} />;
+}
 
 interface LightboxImage {
   url: string;
