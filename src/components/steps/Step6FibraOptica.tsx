@@ -1,3 +1,4 @@
+import { SignedImage } from "@/components/ui/signed-image";
 import * as React from "react";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { FormCard } from "@/components/ui/form-card";
@@ -193,7 +194,7 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
                   <div className="grid grid-cols-2 gap-2">
                     {abordagem.fotos.map((photo, photoIndex) => (
                       <div key={photoIndex} className="relative group">
-                        <img src={photo} alt={`Foto ${photoIndex + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                        <SignedImage src={photo} alt={`Foto ${photoIndex + 1}`} className="w-full h-24 object-cover rounded-lg" />
                         <Button
                           size="icon"
                           variant="destructive"
@@ -239,7 +240,7 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
               <div className="grid grid-cols-2 gap-2">
                 {fibraOptica.fotosCaixasPassagem.map((photo, index) => (
                   <div key={index} className="relative group">
-                    <img src={photo} alt={`Caixa ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <SignedImage src={photo} alt={`Caixa ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                     <Button
                       size="icon"
                       variant="destructive"
@@ -283,7 +284,7 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
               <div className="grid grid-cols-2 gap-2">
                 {fibraOptica.fotosCaixasSubterraneas.map((photo, index) => (
                   <div key={index} className="relative group">
-                    <img src={photo} alt={`Caixa Sub ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <SignedImage src={photo} alt={`Caixa Sub ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                     <Button
                       size="icon"
                       variant="destructive"
@@ -327,7 +328,7 @@ export function Step6FibraOptica({ showErrors, validationErrors = [] }: Step6Pro
               <div className="grid grid-cols-2 gap-2">
                 {fibraOptica.fotosSubidasLaterais.map((photo, index) => (
                   <div key={index} className="relative group">
-                    <img src={photo} alt={`Subida ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <SignedImage src={photo} alt={`Subida ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                     <Button
                       size="icon"
                       variant="destructive"

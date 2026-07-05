@@ -1,3 +1,4 @@
+import { SignedImage } from "@/components/ui/signed-image";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Plus, X, Camera, ZoomIn, Loader2, CheckCircle } from "lucide-react";
@@ -225,7 +226,7 @@ export function PhotoCaptureWithExtras({
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl p-0 overflow-hidden">
-                    <img src={value} alt={label} className="w-full h-auto" />
+                    <SignedImage src={value} alt={label} className="w-full h-auto" />
                   </DialogContent>
                 </Dialog>
                 <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={handleRemoveMain}>
@@ -265,7 +266,7 @@ export function PhotoCaptureWithExtras({
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl p-0 overflow-hidden">
-                          <img src={photo} alt={`${label} extra ${index + 1}`} className="w-full h-auto" />
+                          <SignedImage src={photo} alt={`${label} extra ${index + 1}`} className="w-full h-auto" />
                         </DialogContent>
                       </Dialog>
                       <Button 
