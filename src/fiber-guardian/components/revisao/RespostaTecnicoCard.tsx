@@ -3,6 +3,7 @@ import { RevisaoReparo, FotoReparo } from '@/fiber-guardian/types/database';
 import { User, Camera, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SignedImage } from '@/components/ui/signed-image';
 
 interface RespostaTecnicoCardProps {
   revisao: RevisaoReparo;
