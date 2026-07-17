@@ -313,7 +313,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   const skipBaterias = skipped.baterias;
   const skipClimatizacao = skipped.climatizacao;
 
-  const tipoIaMap: Record<string, string> = {};
+  const tipoIaMap: Record<string, { tipo: string; confianca: number | null }> = {};
 
   
   // For each gabinete (1-7)
@@ -363,7 +363,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
               row[`${prefix}_bat_foto`] = banco.fotoBanco;
             }
             if (banco.tipoIA) {
-              tipoIaMap[`gab${i}_banco${j}`] = banco.tipoIA;
+              tipoIaMap[`gab${i}_banco${j}`] = {
+                tipo: banco.tipoIA,
+                confianca: banco.confiancaIA ?? null,
+              };
             }
           }
         }
