@@ -99,6 +99,8 @@ export interface SiteInfo {
   acIssues: number;
   climatizacaoIssues: number;
   zeladoriaOk: boolean;
+  esteiramentoHorizontalOk?: boolean | null;
+  esteiramentoVerticalOk?: boolean | null;
   autonomyRisk?: "ok" | "medio" | "alto" | "critico";
   obsolescenciaRisk?: "ok" | "medio" | "alto" | "sem_banco";
 }
@@ -176,6 +178,12 @@ export interface PanelStats {
   zeladoriaOk: number;
   zeladoriaTotal: number;
   aterramentoOk: number;
+  esteiramentoHorizontalOk: number;
+  esteiramentoHorizontalNok: number;
+  esteiramentoHorizontalTotal: number;
+  esteiramentoVerticalOk: number;
+  esteiramentoVerticalNok: number;
+  esteiramentoVerticalTotal: number;
   climatizacaoStatus: { name: string; value: number; color: string }[];
   
   // Battery Panel

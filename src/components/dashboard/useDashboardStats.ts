@@ -172,6 +172,12 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       zeladoriaOk: 0,
       zeladoriaTotal: filtered.length,
       aterramentoOk: 0,
+      esteiramentoHorizontalOk: 0,
+      esteiramentoHorizontalNok: 0,
+      esteiramentoHorizontalTotal: 0,
+      esteiramentoVerticalOk: 0,
+      esteiramentoVerticalNok: 0,
+      esteiramentoVerticalTotal: 0,
       climatizacaoStatus: [],
       totalBatteries: 0,
       batteriesOk: 0,
@@ -418,6 +424,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
       if (report.torre_aterramento === "OK") {
         stats.aterramentoOk++;
       }
+
+      // Esteiramento Horizontal
+      const estH = report.torre_esteiramento_horizontal as string | null;
+      if (estH === "OK") { stats.esteiramentoHorizontalOk++; stats.esteiramentoHorizontalTotal++; }
+      else if (estH === "NOK") { stats.esteiramentoHorizontalNok++; stats.esteiramentoHorizontalTotal++; }
+
+      // Esteiramento Vertical
+      const estV = report.torre_esteiramento_vertical as string | null;
+      if (estV === "OK") { stats.esteiramentoVerticalOk++; stats.esteiramentoVerticalTotal++; }
+      else if (estV === "NOK") { stats.esteiramentoVerticalNok++; stats.esteiramentoVerticalTotal++; }
 
       // Process gabinetes
       for (let g = 1; g <= 7; g++) {
@@ -796,6 +812,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         acIssues,
         climatizacaoIssues,
         zeladoriaOk: zeladoriaIsOk,
+        esteiramentoHorizontalOk: report.torre_esteiramento_horizontal === "OK" ? true : report.torre_esteiramento_horizontal === "NOK" ? false : null,
+        esteiramentoVerticalOk: report.torre_esteiramento_vertical === "OK" ? true : report.torre_esteiramento_vertical === "NOK" ? false : null,
         autonomyRisk: siteAutonomyRisk,
         obsolescenciaRisk: siteObsolRisk,
       });
