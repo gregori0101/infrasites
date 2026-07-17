@@ -192,7 +192,7 @@ export interface GMGData {
 export interface TorreData {
   ninhos: boolean;
   fotoNinhos?: string | null;
-  fibrasProtegidas: boolean;
+  fibrasProtegidas: StatusFuncionamento;
   fotoFibrasProtegidas?: string | null;
   aterramento: StatusFuncionamento;
   fotoAterramento?: string | null;
