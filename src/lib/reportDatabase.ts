@@ -184,6 +184,8 @@ function buildPhotoColumns(): string {
     'torre_foto_fibras_protegidas',
     'torre_foto_aterramento',
     'torre_foto_zeladoria',
+    'torre_foto_esteiramento_horizontal',
+    'torre_foto_esteiramento_vertical',
     'gmg_foto_painel',
     // Fiber optic photos
     'fibra_abord1_foto',
