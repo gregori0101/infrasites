@@ -4352,19 +4352,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_user_role: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_role"]
-      }
-      log_activity: {
-        Args: {
-          _action: string
-          _details?: Json
-          _target_id?: string
-          _target_type: string
-        }
-        Returns: undefined
-      }
     }
     Enums: {
       app_role: "gestor" | "tecnico" | "administrador"
