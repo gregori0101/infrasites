@@ -189,26 +189,39 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
 
         <FormCard title="Torre" icon={<Radio className="w-4 h-4" />}>
           <div className="space-y-4">
-            <ToggleSwitch
-              label="Fibras Protegidas"
-              description="Proteção contra caturritas"
-              value={data.torre.fibrasProtegidas}
-              onChange={(value) => updateTorre({ fibrasProtegidas: value })}
+            <div className="space-y-2">
+              <Label>Fibras Protegidas</Label>
+              <p className="text-xs text-muted-foreground">Proteção contra caturritas</p>
+              <div className="flex gap-2">
+                {INFRA_STATUS_OPTIONS.map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => updateTorre({ fibrasProtegidas: status })}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                      torre.fibrasProtegidas === status
+                        ? status === 'OK'
+                          ? 'bg-success text-success-foreground border-success'
+                          : 'bg-destructive text-destructive-foreground border-destructive'
+                        : 'bg-card border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <PhotoCaptureWithExtras
+              label="Foto das Fibras Protegidas"
+              value={data.torre.fotoFibrasProtegidas || null}
+              onChange={(value) => updateTorre({ fotoFibrasProtegidas: value })}
+              extraPhotos={getFotosExtras('torre_fibras_protegidas')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('torre_fibras_protegidas', photos)}
+              siteCode={data.siglaSite}
+              category="torre_fibras_protegidas"
             />
 
-            {data.torre.fibrasProtegidas && (
-              <div className="pt-2 animate-slide-up">
-                <PhotoCaptureWithExtras
-                  label="Foto das Fibras Protegidas"
-                  value={data.torre.fotoFibrasProtegidas || null}
-                  onChange={(value) => updateTorre({ fotoFibrasProtegidas: value })}
-                  extraPhotos={getFotosExtras('torre_fibras_protegidas')}
-                  onExtraPhotosChange={(photos) => updateFotosExtras('torre_fibras_protegidas', photos)}
-                  siteCode={data.siglaSite}
-                  category="torre_fibras_protegidas"
-                />
-              </div>
-            )}
           </div>
         </FormCard>
 
