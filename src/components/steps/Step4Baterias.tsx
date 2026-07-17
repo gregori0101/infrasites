@@ -335,6 +335,38 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   siteCode={data.siglaSite}
                   category={`gab${currentGabinete + 1}_bateria_banco${index + 1}`}
                 />
+
+                <div className="flex items-center justify-between gap-2 rounded-md border bg-card p-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium">Tipo (IA):</span>
+                    {banco.tipoIA ? (
+                      <Badge className="bg-primary text-primary-foreground">{banco.tipoIA}</Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Não analisado</span>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!banco.fotoBanco || analyzingIndex === index}
+                    onClick={() => analyzeBanco(index, banco)}
+                    className="gap-1 h-8"
+                  >
+                    {analyzingIndex === index ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Analisando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Analisar com IA
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             ))}
 
