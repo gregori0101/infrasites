@@ -312,6 +312,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   const skipFCC = skipped.fcc;
   const skipBaterias = skipped.baterias;
   const skipClimatizacao = skipped.climatizacao;
+
+  const tipoIaMap: Record<string, string> = {};
+
   
   // For each gabinete (1-7)
   for (let i = 0; i < 7; i++) {
