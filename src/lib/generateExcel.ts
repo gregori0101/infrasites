@@ -255,6 +255,10 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
     row['Torre_Foto_Aterramento'] = getPhotoValue(data.torre.fotoAterramento);
     row['Torre_Zeladoria'] = data.torre.zeladoria;
     row['Torre_Foto_Zeladoria'] = getPhotoValue(data.torre.fotoZeladoria);
+    row['Torre_Esteiramento_Horizontal'] = data.torre.esteiramentoHorizontal || '';
+    row['Torre_Foto_Esteiramento_Horizontal'] = getPhotoValue(data.torre.fotoEsteiramentoHorizontal);
+    row['Torre_Esteiramento_Vertical'] = data.torre.esteiramentoVertical || '';
+    row['Torre_Foto_Esteiramento_Vertical'] = getPhotoValue(data.torre.fotoEsteiramentoVertical);
   } else {
     row['GMG_Torre_Secao'] = 'N/A';
   }
