@@ -178,6 +178,12 @@ export interface PanelStats {
   zeladoriaOk: number;
   zeladoriaTotal: number;
   aterramentoOk: number;
+  esteiramentoHorizontalOk: number;
+  esteiramentoHorizontalNok: number;
+  esteiramentoHorizontalTotal: number;
+  esteiramentoVerticalOk: number;
+  esteiramentoVerticalNok: number;
+  esteiramentoVerticalTotal: number;
   climatizacaoStatus: { name: string; value: number; color: string }[];
   
   // Battery Panel
