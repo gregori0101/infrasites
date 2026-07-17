@@ -359,6 +359,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
             if (j === 0 && banco.fotoBanco) {
               row[`${prefix}_bat_foto`] = banco.fotoBanco;
             }
+            if (banco.tipoIA) {
+              tipoIaMap[`gab${i}_banco${j}`] = banco.tipoIA;
+            }
           }
         }
         row[`${prefix}_bancos_interligados`] = gab.baterias.bancosInterligados === true ? 'SIM' : gab.baterias.bancosInterligados === false ? 'NÃO' : null;
