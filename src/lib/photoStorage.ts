@@ -522,6 +522,18 @@ export async function uploadAllPhotos(
         'torre_zeladoria'
       );
     }
+    if (data.torre.fotoEsteiramentoHorizontal) {
+      updatedData.torre.fotoEsteiramentoHorizontal = await uploadSinglePhoto(
+        data.torre.fotoEsteiramentoHorizontal,
+        'torre_esteiramento_horizontal'
+      );
+    }
+    if (data.torre.fotoEsteiramentoVertical) {
+      updatedData.torre.fotoEsteiramentoVertical = await uploadSinglePhoto(
+        data.torre.fotoEsteiramentoVertical,
+        'torre_esteiramento_vertical'
+      );
+    }
   }
 
   // Upload GMG photos

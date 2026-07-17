@@ -92,6 +92,8 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       fotoFibrasProtegidas: null,
       fotoAterramento: null,
       fotoZeladoria: null,
+      fotoEsteiramentoHorizontal: null,
+      fotoEsteiramentoVertical: null,
     },
   };
 }
@@ -391,6 +393,10 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
       fotoAterramento: (report as any).torre_foto_aterramento ?? null,
       zeladoria: (report.torre_housekeeping || 'OK') as any,
       fotoZeladoria: (report as any).torre_foto_zeladoria ?? null,
+      esteiramentoHorizontal: ((report as any).torre_esteiramento_horizontal || undefined) as any,
+      fotoEsteiramentoHorizontal: (report as any).torre_foto_esteiramento_horizontal ?? null,
+      esteiramentoVertical: ((report as any).torre_esteiramento_vertical || undefined) as any,
+      fotoEsteiramentoVertical: (report as any).torre_foto_esteiramento_vertical ?? null,
     },
     observacoes: report.observacoes || '',
     fotosObservacao: parseFotosObservacao(report.observacao_foto_url),

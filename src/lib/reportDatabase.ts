@@ -61,6 +61,8 @@ function buildDashboardColumns(): string {
     'torre_aterramento',
     'torre_housekeeping',
     'torre_ninhos',
+    'torre_esteiramento_horizontal',
+    'torre_esteiramento_vertical',
     'observacoes',
     // JSONB (leve) - necessário para exibir/gerar PDF com fotos extras
     'fotos_extras',
@@ -182,6 +184,8 @@ function buildPhotoColumns(): string {
     'torre_foto_fibras_protegidas',
     'torre_foto_aterramento',
     'torre_foto_zeladoria',
+    'torre_foto_esteiramento_horizontal',
+    'torre_foto_esteiramento_vertical',
     'gmg_foto_painel',
     // Fiber optic photos
     'fibra_abord1_foto',
@@ -416,6 +420,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.torre_foto_aterramento = data.torre?.fotoAterramento || null;
     row.torre_housekeeping = data.torre?.zeladoria || null;
     row.torre_foto_zeladoria = data.torre?.fotoZeladoria || null;
+    row.torre_esteiramento_horizontal = data.torre?.esteiramentoHorizontal || null;
+    row.torre_foto_esteiramento_horizontal = data.torre?.fotoEsteiramentoHorizontal || null;
+    row.torre_esteiramento_vertical = data.torre?.esteiramentoVertical || null;
+    row.torre_foto_esteiramento_vertical = data.torre?.fotoEsteiramentoVertical || null;
   }
 
   // Energia data - skip if energia section marked NA

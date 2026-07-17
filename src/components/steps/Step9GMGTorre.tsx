@@ -277,6 +277,70 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
               siteCode={data.siglaSite}
               category="torre_zeladoria"
             />
+
+            <div className="space-y-2">
+              <Label>Esteiramento Horizontal</Label>
+              <div className="flex gap-2">
+                {INFRA_STATUS_OPTIONS.map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => updateTorre({ esteiramentoHorizontal: status })}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                      torre.esteiramentoHorizontal === status
+                        ? status === 'OK'
+                          ? 'bg-success text-success-foreground border-success'
+                          : 'bg-destructive text-destructive-foreground border-destructive'
+                        : 'bg-card border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <PhotoCaptureWithExtras
+              label="Foto do Esteiramento Horizontal"
+              value={data.torre.fotoEsteiramentoHorizontal || null}
+              onChange={(value) => updateTorre({ fotoEsteiramentoHorizontal: value })}
+              extraPhotos={getFotosExtras('torre_esteiramento_horizontal')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('torre_esteiramento_horizontal', photos)}
+              siteCode={data.siglaSite}
+              category="torre_esteiramento_horizontal"
+            />
+
+            <div className="space-y-2">
+              <Label>Esteiramento Vertical</Label>
+              <div className="flex gap-2">
+                {INFRA_STATUS_OPTIONS.map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => updateTorre({ esteiramentoVertical: status })}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md border transition-all ${
+                      torre.esteiramentoVertical === status
+                        ? status === 'OK'
+                          ? 'bg-success text-success-foreground border-success'
+                          : 'bg-destructive text-destructive-foreground border-destructive'
+                        : 'bg-card border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <PhotoCaptureWithExtras
+              label="Foto do Esteiramento Vertical"
+              value={data.torre.fotoEsteiramentoVertical || null}
+              onChange={(value) => updateTorre({ fotoEsteiramentoVertical: value })}
+              extraPhotos={getFotosExtras('torre_esteiramento_vertical')}
+              onExtraPhotosChange={(photos) => updateFotosExtras('torre_esteiramento_vertical', photos)}
+              siteCode={data.siglaSite}
+              category="torre_esteiramento_vertical"
+            />
           </div>
         </FormCard>
       </div>

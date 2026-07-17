@@ -837,6 +837,20 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     if (data.torre.fotoZeladoria) {
       torrePhotos.push({ photo: data.torre.fotoZeladoria, label: 'Foto da Zeladoria' });
     }
+
+    if (data.torre.esteiramentoHorizontal) {
+      addFieldRow('Esteiramento Horizontal', data.torre.esteiramentoHorizontal, data.torre.esteiramentoHorizontal === 'OK' ? 'ok' : 'error');
+      if (data.torre.fotoEsteiramentoHorizontal) {
+        torrePhotos.push({ photo: data.torre.fotoEsteiramentoHorizontal, label: 'Foto do Esteiramento Horizontal' });
+      }
+    }
+
+    if (data.torre.esteiramentoVertical) {
+      addFieldRow('Esteiramento Vertical', data.torre.esteiramentoVertical, data.torre.esteiramentoVertical === 'OK' ? 'ok' : 'error');
+      if (data.torre.fotoEsteiramentoVertical) {
+        torrePhotos.push({ photo: data.torre.fotoEsteiramentoVertical, label: 'Foto do Esteiramento Vertical' });
+      }
+    }
     
     // Add extras for torre section
     const torreExtras = getExtrasForField('torre');

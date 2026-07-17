@@ -1297,7 +1297,11 @@ export type Database = {
           state_uf: string | null
           technician_name: string | null
           torre_aterramento: string | null
+          torre_esteiramento_horizontal: string | null
+          torre_esteiramento_vertical: string | null
           torre_foto_aterramento: string | null
+          torre_foto_esteiramento_horizontal: string | null
+          torre_foto_esteiramento_vertical: string | null
           torre_foto_fibras_protegidas: string | null
           torre_foto_ninhos: string | null
           torre_foto_zeladoria: string | null
@@ -2253,7 +2257,11 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_esteiramento_horizontal?: string | null
+          torre_esteiramento_vertical?: string | null
           torre_foto_aterramento?: string | null
+          torre_foto_esteiramento_horizontal?: string | null
+          torre_foto_esteiramento_vertical?: string | null
           torre_foto_fibras_protegidas?: string | null
           torre_foto_ninhos?: string | null
           torre_foto_zeladoria?: string | null
@@ -3209,7 +3217,11 @@ export type Database = {
           state_uf?: string | null
           technician_name?: string | null
           torre_aterramento?: string | null
+          torre_esteiramento_horizontal?: string | null
+          torre_esteiramento_vertical?: string | null
           torre_foto_aterramento?: string | null
+          torre_foto_esteiramento_horizontal?: string | null
+          torre_foto_esteiramento_vertical?: string | null
           torre_foto_fibras_protegidas?: string | null
           torre_foto_ninhos?: string | null
           torre_foto_zeladoria?: string | null
@@ -4335,7 +4347,11 @@ export type Database = {
           state_uf: string | null
           technician_name: string | null
           torre_aterramento: string | null
+          torre_esteiramento_horizontal: string | null
+          torre_esteiramento_vertical: string | null
           torre_foto_aterramento: string | null
+          torre_foto_esteiramento_horizontal: string | null
+          torre_foto_esteiramento_vertical: string | null
           torre_foto_fibras_protegidas: string | null
           torre_foto_ninhos: string | null
           torre_foto_zeladoria: string | null
