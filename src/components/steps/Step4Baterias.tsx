@@ -167,18 +167,39 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
 
         <FormCard title="Configuração" icon={<Battery className="w-4 h-4" />}>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <Label>Bancos de Bateria</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addBanco}
-                disabled={gabinete.baterias.bancos.length >= 12}
-                className="gap-1"
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={analyzeAllBancos}
+                  disabled={bulkAnalyzing || gabinete.baterias.bancos.filter(b => !!b.fotoBanco).length === 0}
+                  className="gap-1"
+                >
+                  {bulkAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analisando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Analisar todos com IA
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addBanco}
+                  disabled={gabinete.baterias.bancos.length >= 12}
+                  className="gap-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar
+                </Button>
+              </div>
             </div>
 
             {gabinete.baterias.bancos.length === 0 && (
