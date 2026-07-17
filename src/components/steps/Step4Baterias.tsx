@@ -405,7 +405,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                 />
 
                 <div className="flex items-center justify-between gap-2 rounded-md border bg-card p-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Sparkles className="w-4 h-4 text-primary" />
                     <span className="text-xs font-medium">Tipo (IA):</span>
                     {banco.tipoIA ? (
@@ -413,12 +413,27 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     ) : (
                       <span className="text-xs text-muted-foreground">Não analisado</span>
                     )}
+                    {bulkStatus[index] === 'pending' && (
+                      <Badge variant="outline" className="text-xs">Aguardando</Badge>
+                    )}
+                    {bulkStatus[index] === 'analyzing' && (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Analisando
+                      </Badge>
+                    )}
+                    {bulkStatus[index] === 'done' && (
+                      <Badge className="bg-success text-success-foreground text-xs">OK</Badge>
+                    )}
+                    {bulkStatus[index] === 'error' && (
+                      <Badge variant="destructive" className="text-xs">Erro</Badge>
+                    )}
                   </div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={!banco.fotoBanco || analyzingIndex === index}
+                    disabled={!banco.fotoBanco || analyzingIndex === index || bulkAnalyzing}
                     onClick={() => analyzeBanco(index, banco)}
                     className="gap-1 h-8"
                   >
