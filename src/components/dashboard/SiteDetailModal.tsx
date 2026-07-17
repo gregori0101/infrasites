@@ -274,11 +274,12 @@ function PhotoGrid({ photos, allPhotos }: {
   );
 }
 
-export function SiteDetailModal({ open, onClose, reportId }: Props) {
+export function SiteDetailModal({ open, onClose, reportId, onDataChanged }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<ReportRow | null>(null);
   const [activeTab, setActiveTab] = useState("geral");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const { isAdmin, isGestor, user } = useAuth();
   const { loadReportForEditing } = useChecklist();
   const navigate = useNavigate();
@@ -300,6 +301,15 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     if (report) {
       setReport({ ...report, [fieldName]: newValue });
     }
+    setHasChanges(true);
+  };
+
+  const handleClose = () => {
+    if (hasChanges && onDataChanged) {
+      onDataChanged();
+    }
+    setHasChanges(false);
+    onClose();
   };
 
   const handleEditReport = async () => {
