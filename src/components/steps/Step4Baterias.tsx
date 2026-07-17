@@ -47,8 +47,20 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
   const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
   const { toast } = useToast();
   const [analyzingIndex, setAnalyzingIndex] = React.useState<number | null>(null);
+  const [bulkAnalyzing, setBulkAnalyzing] = React.useState(false);
+  const [bulkStatus, setBulkStatus] = React.useState<Record<number, 'pending' | 'analyzing' | 'done' | 'error'>>({});
 
   if (!gabinete) return null;
+
+  const classifyPhoto = async (imageUrl: string) => {
+    const { data: result, error } = await supabase.functions.invoke('classify-battery', {
+      body: { imageUrl },
+    });
+    if (error) throw error;
+    const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
+    if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+    return { tipo, confianca: result?.confianca as number | null };
+  };
 
   const analyzeBanco = async (index: number, banco: BancoBateria) => {
     if (!banco.fotoBanco) {
@@ -57,14 +69,9 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
     }
     setAnalyzingIndex(index);
     try {
-      const { data: result, error } = await supabase.functions.invoke('classify-battery', {
-        body: { imageUrl: banco.fotoBanco },
-      });
-      if (error) throw error;
-      const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
-      if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+      const { tipo, confianca } = await classifyPhoto(banco.fotoBanco);
       updateBanco(index, { tipoIA: tipo });
-      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${result?.confianca ? ` (${Math.round(result.confianca * 100)}%)` : ''}.` });
+      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${confianca ? ` (${Math.round(confianca * 100)}%)` : ''}.` });
     } catch (e: any) {
       console.error('[classify-battery]', e);
       toast({ title: "Falha na análise", description: e?.message || "Não foi possível analisar a foto.", variant: "destructive" });
@@ -72,6 +79,46 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
       setAnalyzingIndex(null);
     }
   };
+
+  const analyzeAllBancos = async () => {
+    const bancos = gabinete.baterias.bancos;
+    const targets = bancos
+      .map((b, i) => ({ b, i }))
+      .filter(({ b }) => !!b.fotoBanco);
+
+    if (targets.length === 0) {
+      toast({ title: "Sem fotos", description: "Nenhum banco possui foto para análise.", variant: "destructive" });
+      return;
+    }
+
+    setBulkAnalyzing(true);
+    const initial: Record<number, 'pending' | 'analyzing' | 'done' | 'error'> = {};
+    targets.forEach(({ i }) => { initial[i] = 'pending'; });
+    setBulkStatus(initial);
+
+    let ok = 0;
+    let fail = 0;
+    for (const { b, i } of targets) {
+      setBulkStatus((prev) => ({ ...prev, [i]: 'analyzing' }));
+      try {
+        const { tipo } = await classifyPhoto(b.fotoBanco!);
+        updateBanco(i, { tipoIA: tipo });
+        setBulkStatus((prev) => ({ ...prev, [i]: 'done' }));
+        ok++;
+      } catch (e) {
+        console.error('[classify-battery bulk]', i, e);
+        setBulkStatus((prev) => ({ ...prev, [i]: 'error' }));
+        fail++;
+      }
+    }
+    setBulkAnalyzing(false);
+    toast({
+      title: "Análise em lote concluída",
+      description: `${ok} analisadas com sucesso${fail > 0 ? `, ${fail} com erro` : ''}.`,
+      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+    });
+  };
+
 
   const updateBaterias = (updates: Partial<BateriasData>) => {
     updateGabinete(currentGabinete, {
@@ -120,18 +167,39 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
 
         <FormCard title="Configuração" icon={<Battery className="w-4 h-4" />}>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <Label>Bancos de Bateria</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addBanco}
-                disabled={gabinete.baterias.bancos.length >= 12}
-                className="gap-1"
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={analyzeAllBancos}
+                  disabled={bulkAnalyzing || gabinete.baterias.bancos.filter(b => !!b.fotoBanco).length === 0}
+                  className="gap-1"
+                >
+                  {bulkAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analisando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Analisar todos com IA
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addBanco}
+                  disabled={gabinete.baterias.bancos.length >= 12}
+                  className="gap-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar
+                </Button>
+              </div>
             </div>
 
             {gabinete.baterias.bancos.length === 0 && (
@@ -337,7 +405,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                 />
 
                 <div className="flex items-center justify-between gap-2 rounded-md border bg-card p-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Sparkles className="w-4 h-4 text-primary" />
                     <span className="text-xs font-medium">Tipo (IA):</span>
                     {banco.tipoIA ? (
@@ -345,12 +413,27 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     ) : (
                       <span className="text-xs text-muted-foreground">Não analisado</span>
                     )}
+                    {bulkStatus[index] === 'pending' && (
+                      <Badge variant="outline" className="text-xs">Aguardando</Badge>
+                    )}
+                    {bulkStatus[index] === 'analyzing' && (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Analisando
+                      </Badge>
+                    )}
+                    {bulkStatus[index] === 'done' && (
+                      <Badge className="bg-success text-success-foreground text-xs">OK</Badge>
+                    )}
+                    {bulkStatus[index] === 'error' && (
+                      <Badge variant="destructive" className="text-xs">Erro</Badge>
+                    )}
                   </div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={!banco.fotoBanco || analyzingIndex === index}
+                    disabled={!banco.fotoBanco || analyzingIndex === index || bulkAnalyzing}
                     onClick={() => analyzeBanco(index, banco)}
                     className="gap-1 h-8"
                   >
