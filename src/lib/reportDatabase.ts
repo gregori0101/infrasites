@@ -61,6 +61,8 @@ function buildDashboardColumns(): string {
     'torre_aterramento',
     'torre_housekeeping',
     'torre_ninhos',
+    'torre_esteiramento_horizontal',
+    'torre_esteiramento_vertical',
     'observacoes',
     // JSONB (leve) - necessário para exibir/gerar PDF com fotos extras
     'fotos_extras',
