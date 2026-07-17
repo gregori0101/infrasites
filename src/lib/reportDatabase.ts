@@ -416,6 +416,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.torre_foto_aterramento = data.torre?.fotoAterramento || null;
     row.torre_housekeeping = data.torre?.zeladoria || null;
     row.torre_foto_zeladoria = data.torre?.fotoZeladoria || null;
+    row.torre_esteiramento_horizontal = data.torre?.esteiramentoHorizontal || null;
+    row.torre_foto_esteiramento_horizontal = data.torre?.fotoEsteiramentoHorizontal || null;
+    row.torre_esteiramento_vertical = data.torre?.esteiramentoVertical || null;
+    row.torre_foto_esteiramento_vertical = data.torre?.fotoEsteiramentoVertical || null;
   }
 
   // Energia data - skip if energia section marked NA
