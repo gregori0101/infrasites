@@ -119,6 +119,8 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
             row[`${prefix}_Banco${j + 1}_Colada`] = banco.colada || 'NA';
             row[`${prefix}_Banco${j + 1}_ComGradil`] = banco.comGradil || 'NA';
             row[`${prefix}_Banco${j + 1}_Foto`] = getPhotoValue(banco.fotoBanco);
+            row[`${prefix}_Banco${j + 1}_TipoIA`] = banco.tipoIA || '';
+            row[`${prefix}_Banco${j + 1}_ConfiancaIA`] = typeof banco.confiancaIA === 'number' ? `${Math.round(banco.confiancaIA * 100)}%` : '';
           } else {
             row[`${prefix}_Banco${j + 1}_Tipo`] = '';
             row[`${prefix}_Banco${j + 1}_Fabricante`] = '';

@@ -583,6 +583,10 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
           addFieldRow('  Estado', estadoStr, banco.estados?.includes('OK') ? 'ok' : 'error');
           addFieldRow('  Bateria Colada', banco.colada || 'NA', banco.colada === 'SIM' ? 'warning' : banco.colada === 'NÃO' ? 'ok' : undefined);
           addFieldRow('  Bateria com Gradil', banco.comGradil || 'NA', banco.comGradil === 'SIM' ? 'ok' : banco.comGradil === 'NÃO' ? 'error' : undefined);
+          if (banco.tipoIA) {
+            const conf = typeof banco.confiancaIA === 'number' ? ` (${Math.round(banco.confiancaIA * 100)}% confiança)` : '';
+            addFieldRow('  Tipo (IA)', `${banco.tipoIA}${conf}`);
+          }
 
           // Battery photos grid: main photo + extras
           const batteryPhotos: { photo: string | null; label: string }[] = [];
