@@ -1049,7 +1049,9 @@ export default function Dashboard() {
           setSelectedReportId(null);
         }}
         reportId={selectedReportId}
+        onDataChanged={() => refetch()}
       />
+
     </div>
   );
 }
