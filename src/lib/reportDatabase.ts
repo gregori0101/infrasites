@@ -522,6 +522,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     }
   }
 
+  row.baterias_tipo_ia = tipoIaMap;
+
   return row;
 }
 
