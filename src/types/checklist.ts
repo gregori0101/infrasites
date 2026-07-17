@@ -198,6 +198,10 @@ export interface TorreData {
   fotoAterramento?: string | null;
   zeladoria: StatusFuncionamento;
   fotoZeladoria?: string | null;
+  esteiramentoHorizontal?: StatusFuncionamento;
+  fotoEsteiramentoHorizontal?: string | null;
+  esteiramentoVertical?: StatusFuncionamento;
+  fotoEsteiramentoVertical?: string | null;
 }
 
 // Sections that can be marked as "Não se Aplica"
