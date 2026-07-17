@@ -103,14 +103,14 @@ export interface FibraOpticaData {
 }
 
 export interface BancoBateria {
-  tipo: BateriaTipo;
-  fabricante: BateriaFabricante;
+  tipo: BateriaTipo | null;
+  fabricante: BateriaFabricante | null;
   fabricanteOutra?: string;
   capacidadeAh: CapacidadeAh | null;
   dataFabricacao: string;
   estados: BateriaEstado[];
-  colada: BateriaColada;
-  comGradil: BateriaColada;
+  colada: BateriaColada | null;
+  comGradil: BateriaColada | null;
   fotoBanco: string | null;
 }
 
