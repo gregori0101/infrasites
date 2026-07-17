@@ -7,11 +7,14 @@ export async function logActivity(
   details?: Record<string, any>
 ) {
   try {
-    const { error } = await supabase.rpc("log_activity", {
-      _action: action,
-      _target_type: targetType,
-      _target_id: targetId || null,
-      _details: details || {},
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("activity_logs").insert({
+      user_id: user.id,
+      action,
+      target_type: targetType,
+      target_id: targetId || null,
+      details: details || {},
     });
     if (error) {
       console.error("[ActivityLogger] Error logging activity:", error);
