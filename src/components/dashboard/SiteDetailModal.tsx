@@ -46,6 +46,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   reportId: string | null;
+  onDataChanged?: () => void;
 }
 
 interface PhotoViewerProps {
