@@ -22,14 +22,14 @@ const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'ESTOURADA', 'VAZANDO', 'TRI
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
-  tipo: 'LÍTIO',
-  fabricante: 'NA',
+  tipo: null,
+  fabricante: null,
   fabricanteOutra: '',
   capacidadeAh: null,
   dataFabricacao: '',
-  estados: ['OK'],
-  colada: 'NA',
-  comGradil: 'NA',
+  estados: [],
+  colada: null,
+  comGradil: null,
   fotoBanco: null
 };
 
