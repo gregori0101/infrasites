@@ -425,6 +425,16 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         stats.aterramentoOk++;
       }
 
+      // Esteiramento Horizontal
+      const estH = report.torre_esteiramento_horizontal as string | null;
+      if (estH === "OK") { stats.esteiramentoHorizontalOk++; stats.esteiramentoHorizontalTotal++; }
+      else if (estH === "NOK") { stats.esteiramentoHorizontalNok++; stats.esteiramentoHorizontalTotal++; }
+
+      // Esteiramento Vertical
+      const estV = report.torre_esteiramento_vertical as string | null;
+      if (estV === "OK") { stats.esteiramentoVerticalOk++; stats.esteiramentoVerticalTotal++; }
+      else if (estV === "NOK") { stats.esteiramentoVerticalNok++; stats.esteiramentoVerticalTotal++; }
+
       // Process gabinetes
       for (let g = 1; g <= 7; g++) {
         const prefix = `gab${g}`;
