@@ -31,7 +31,7 @@ export function Step9GMGTorre({ showErrors = false, validationErrors = [] }: Ste
 
   // Ensure gmg and torre are always defined
   const gmg = data.gmg ?? { informar: false };
-  const torre = data.torre ?? { ninhos: false, fibrasProtegidas: true, aterramento: 'OK', zeladoria: 'OK' };
+  const torre = data.torre ?? { ninhos: false, fibrasProtegidas: 'OK' as const, aterramento: 'OK' as const, zeladoria: 'OK' as const };
 
   const updateGMG = (updates: Partial<GMGData>) => {
     updateData('gmg', { ...gmg, ...updates });
