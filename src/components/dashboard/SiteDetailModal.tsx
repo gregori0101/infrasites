@@ -407,6 +407,12 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.torre_foto_zeladoria) {
     allPhotos.push({ url: report.torre_foto_zeladoria, label: "Zeladoria", category: "Torre" });
   }
+  if (report?.torre_foto_esteiramento_horizontal) {
+    allPhotos.push({ url: report.torre_foto_esteiramento_horizontal, label: "Esteiramento Horizontal", category: "Torre" });
+  }
+  if (report?.torre_foto_esteiramento_vertical) {
+    allPhotos.push({ url: report.torre_foto_esteiramento_vertical, label: "Esteiramento Vertical", category: "Torre" });
+  }
   if (report?.torre_foto_ninhos) {
     allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
   }
@@ -1117,12 +1123,16 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
                         <EditableInfoRow label="Fibra Protegida" value={report.torre_protecao_fibra} fieldName="torre_protecao_fibra" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                         <EditableInfoRow label="Aterramento" value={report.torre_aterramento} fieldName="torre_aterramento" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                         <EditableInfoRow label="Zeladoria" value={report.torre_housekeeping} fieldName="torre_housekeeping" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Esteiramento Horizontal" value={report.torre_esteiramento_horizontal} fieldName="torre_esteiramento_horizontal" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
+                        <EditableInfoRow label="Esteiramento Vertical" value={report.torre_esteiramento_vertical} fieldName="torre_esteiramento_vertical" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                         <EditableInfoRow label="Ninhos" value={report.torre_ninhos} fieldName="torre_ninhos" reportId={report.id!} canEdit={!!canEditReport} onUpdate={handleFieldUpdate} />
                       </div>
                       <PhotoGrid photos={[
                         { url: report.torre_foto_fibras_protegidas, label: "Fibras Protegidas" },
                         { url: report.torre_foto_aterramento, label: "Aterramento" },
                         { url: report.torre_foto_zeladoria, label: "Zeladoria" },
+                        { url: report.torre_foto_esteiramento_horizontal, label: "Esteiramento Horizontal" },
+                        { url: report.torre_foto_esteiramento_vertical, label: "Esteiramento Vertical" },
                         { url: report.torre_foto_ninhos, label: "Ninhos" },
                       ]} />
                     </CardContent>
