@@ -197,7 +197,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
               <CardContent>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                       <Pie
                         data={stats.climatizacaoChart}
                         cx="50%"
@@ -410,7 +410,7 @@ export function ClimatizacaoPanel({ stats, climatizacao, acs, onDrillDown }: Pro
                   <CardContent>
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
+                        <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                           <Pie
                             data={modelDistribution}
                             cx="50%"

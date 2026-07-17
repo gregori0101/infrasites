@@ -166,7 +166,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
             {stats.protecaoChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie
                       data={stats.protecaoChart}
                       cx="50%"
@@ -211,7 +211,7 @@ export function FibraOpticaPanel({ stats, onDrillDown }: Props) {
             {stats.dgosStatusChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie
                       data={stats.dgosStatusChart}
                       cx="50%"

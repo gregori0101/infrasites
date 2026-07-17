@@ -117,7 +117,7 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
             {stats.energiaStatus.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={stats.energiaStatus} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
@@ -152,7 +152,7 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
             {gmgStatusChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={gmgStatusChart} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
@@ -187,7 +187,7 @@ export function GMGPanel({ stats, onDrillDown }: Props) {
             {stats.gmgCombustivelDistribution.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={stats.gmgCombustivelDistribution} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
