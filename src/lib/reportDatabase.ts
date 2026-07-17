@@ -313,7 +313,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   const skipBaterias = skipped.baterias;
   const skipClimatizacao = skipped.climatizacao;
 
-  const tipoIaMap: Record<string, string> = {};
+  const tipoIaMap: Record<string, { tipo: string; confianca: number | null }> = {};
 
   
   // For each gabinete (1-7)
