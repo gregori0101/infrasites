@@ -536,7 +536,7 @@ export function SiteDetailModal({ open, onClose, reportId, onDataChanged }: Prop
 
   return (
     <LightboxContext.Provider value={{ openLightbox }}>
-      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
