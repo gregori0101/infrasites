@@ -129,25 +129,27 @@ export function OverviewPanel({ stats, sites, onDrillDown }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-6">
-            <div className="h-56">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 24, right: 80, bottom: 24, left: 80 }}>
                   <Pie
                     data={statusChart}
                     cx="50%"
                     cy="50%"
-                    innerRadius={65}
-                    outerRadius={85}
+                    innerRadius={55}
+                    outerRadius={75}
                     paddingAngle={4}
                     dataKey="value"
                     strokeWidth={2}
                     stroke="hsl(var(--card))"
                     label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }}
                   >
                     {statusChart.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
+
                   <Tooltip 
                     contentStyle={{ 
                       borderRadius: '0.75rem', 
