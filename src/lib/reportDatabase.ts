@@ -363,7 +363,10 @@ export function buildReportRow(data: ChecklistData): ReportRow {
               row[`${prefix}_bat_foto`] = banco.fotoBanco;
             }
             if (banco.tipoIA) {
-              tipoIaMap[`gab${i}_banco${j}`] = banco.tipoIA;
+              tipoIaMap[`gab${i}_banco${j}`] = {
+                tipo: banco.tipoIA,
+                confianca: banco.confiancaIA ?? null,
+              };
             }
           }
         }
