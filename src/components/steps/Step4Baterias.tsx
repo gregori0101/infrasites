@@ -47,8 +47,20 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
   const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
   const { toast } = useToast();
   const [analyzingIndex, setAnalyzingIndex] = React.useState<number | null>(null);
+  const [bulkAnalyzing, setBulkAnalyzing] = React.useState(false);
+  const [bulkStatus, setBulkStatus] = React.useState<Record<number, 'pending' | 'analyzing' | 'done' | 'error'>>({});
 
   if (!gabinete) return null;
+
+  const classifyPhoto = async (imageUrl: string) => {
+    const { data: result, error } = await supabase.functions.invoke('classify-battery', {
+      body: { imageUrl },
+    });
+    if (error) throw error;
+    const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
+    if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+    return { tipo, confianca: result?.confianca as number | null };
+  };
 
   const analyzeBanco = async (index: number, banco: BancoBateria) => {
     if (!banco.fotoBanco) {
@@ -57,14 +69,9 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
     }
     setAnalyzingIndex(index);
     try {
-      const { data: result, error } = await supabase.functions.invoke('classify-battery', {
-        body: { imageUrl: banco.fotoBanco },
-      });
-      if (error) throw error;
-      const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
-      if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+      const { tipo, confianca } = await classifyPhoto(banco.fotoBanco);
       updateBanco(index, { tipoIA: tipo });
-      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${result?.confianca ? ` (${Math.round(result.confianca * 100)}%)` : ''}.` });
+      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${confianca ? ` (${Math.round(confianca * 100)}%)` : ''}.` });
     } catch (e: any) {
       console.error('[classify-battery]', e);
       toast({ title: "Falha na análise", description: e?.message || "Não foi possível analisar a foto.", variant: "destructive" });
@@ -72,6 +79,46 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
       setAnalyzingIndex(null);
     }
   };
+
+  const analyzeAllBancos = async () => {
+    const bancos = gabinete.baterias.bancos;
+    const targets = bancos
+      .map((b, i) => ({ b, i }))
+      .filter(({ b }) => !!b.fotoBanco);
+
+    if (targets.length === 0) {
+      toast({ title: "Sem fotos", description: "Nenhum banco possui foto para análise.", variant: "destructive" });
+      return;
+    }
+
+    setBulkAnalyzing(true);
+    const initial: Record<number, 'pending' | 'analyzing' | 'done' | 'error'> = {};
+    targets.forEach(({ i }) => { initial[i] = 'pending'; });
+    setBulkStatus(initial);
+
+    let ok = 0;
+    let fail = 0;
+    for (const { b, i } of targets) {
+      setBulkStatus((prev) => ({ ...prev, [i]: 'analyzing' }));
+      try {
+        const { tipo } = await classifyPhoto(b.fotoBanco!);
+        updateBanco(i, { tipoIA: tipo });
+        setBulkStatus((prev) => ({ ...prev, [i]: 'done' }));
+        ok++;
+      } catch (e) {
+        console.error('[classify-battery bulk]', i, e);
+        setBulkStatus((prev) => ({ ...prev, [i]: 'error' }));
+        fail++;
+      }
+    }
+    setBulkAnalyzing(false);
+    toast({
+      title: "Análise em lote concluída",
+      description: `${ok} analisadas com sucesso${fail > 0 ? `, ${fail} com erro` : ''}.`,
+      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+    });
+  };
+
 
   const updateBaterias = (updates: Partial<BateriasData>) => {
     updateGabinete(currentGabinete, {
