@@ -46,6 +46,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   reportId: string | null;
+  onDataChanged?: () => void;
 }
 
 interface PhotoViewerProps {
@@ -273,11 +274,12 @@ function PhotoGrid({ photos, allPhotos }: {
   );
 }
 
-export function SiteDetailModal({ open, onClose, reportId }: Props) {
+export function SiteDetailModal({ open, onClose, reportId, onDataChanged }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<ReportRow | null>(null);
   const [activeTab, setActiveTab] = useState("geral");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const { isAdmin, isGestor, user } = useAuth();
   const { loadReportForEditing } = useChecklist();
   const navigate = useNavigate();
@@ -299,6 +301,15 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
     if (report) {
       setReport({ ...report, [fieldName]: newValue });
     }
+    setHasChanges(true);
+  };
+
+  const handleClose = () => {
+    if (hasChanges && onDataChanged) {
+      onDataChanged();
+    }
+    setHasChanges(false);
+    onClose();
   };
 
   const handleEditReport = async () => {
@@ -525,7 +536,7 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
 
   return (
     <LightboxContext.Provider value={{ openLightbox }}>
-      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
