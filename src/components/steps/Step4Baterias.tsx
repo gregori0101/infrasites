@@ -101,8 +101,8 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
     for (const { b, i } of targets) {
       setBulkStatus((prev) => ({ ...prev, [i]: 'analyzing' }));
       try {
-        const { tipo } = await classifyPhoto(b.fotoBanco!);
-        updateBanco(i, { tipoIA: tipo });
+        const { tipo, confianca } = await classifyPhoto(b.fotoBanco!);
+        updateBanco(i, { tipoIA: tipo, confiancaIA: confianca ?? null });
         setBulkStatus((prev) => ({ ...prev, [i]: 'done' }));
         ok++;
       } catch (e) {
@@ -409,7 +409,23 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                     <Sparkles className="w-4 h-4 text-primary" />
                     <span className="text-xs font-medium">Tipo (IA):</span>
                     {banco.tipoIA ? (
-                      <Badge className="bg-primary text-primary-foreground">{banco.tipoIA}</Badge>
+                      <>
+                        <Badge className="bg-primary text-primary-foreground">{banco.tipoIA}</Badge>
+                        {typeof banco.confiancaIA === 'number' && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              banco.confiancaIA >= 0.8
+                                ? 'text-xs border-green-500 text-green-700'
+                                : banco.confiancaIA >= 0.5
+                                ? 'text-xs border-yellow-500 text-yellow-700'
+                                : 'text-xs border-red-500 text-red-700'
+                            }
+                          >
+                            {Math.round(banco.confiancaIA * 100)}% confiança
+                          </Badge>
+                        )}
+                      </>
                     ) : (
                       <span className="text-xs text-muted-foreground">Não analisado</span>
                     )}
