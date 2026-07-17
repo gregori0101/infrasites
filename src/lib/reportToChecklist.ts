@@ -387,7 +387,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     torre: {
       ninhos: (report as any).torre_ninhos === 'SIM',
       fotoNinhos: (report as any).torre_foto_ninhos ?? null,
-      fibrasProtegidas: report.torre_protecao_fibra === 'SIM',
+      fibrasProtegidas: (report.torre_protecao_fibra === 'NOK' || report.torre_protecao_fibra === 'NÃO') ? 'NOK' : 'OK',
       fotoFibrasProtegidas: report.torre_foto_fibras_protegidas || null,
       aterramento: (report.torre_aterramento || 'OK') as any,
       fotoAterramento: (report as any).torre_foto_aterramento ?? null,
