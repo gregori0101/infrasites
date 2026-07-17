@@ -45,8 +45,33 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
+  const { toast } = useToast();
+  const [analyzingIndex, setAnalyzingIndex] = React.useState<number | null>(null);
 
   if (!gabinete) return null;
+
+  const analyzeBanco = async (index: number, banco: BancoBateria) => {
+    if (!banco.fotoBanco) {
+      toast({ title: "Foto necessária", description: "Capture a foto do banco antes de analisar.", variant: "destructive" });
+      return;
+    }
+    setAnalyzingIndex(index);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('classify-battery', {
+        body: { imageUrl: banco.fotoBanco },
+      });
+      if (error) throw error;
+      const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
+      if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+      updateBanco(index, { tipoIA: tipo });
+      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${result?.confianca ? ` (${Math.round(result.confianca * 100)}%)` : ''}.` });
+    } catch (e: any) {
+      console.error('[classify-battery]', e);
+      toast({ title: "Falha na análise", description: e?.message || "Não foi possível analisar a foto.", variant: "destructive" });
+    } finally {
+      setAnalyzingIndex(null);
+    }
+  };
 
   const updateBaterias = (updates: Partial<BateriasData>) => {
     updateGabinete(currentGabinete, {
