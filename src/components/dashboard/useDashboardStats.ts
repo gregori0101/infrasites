@@ -812,6 +812,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
         acIssues,
         climatizacaoIssues,
         zeladoriaOk: zeladoriaIsOk,
+        esteiramentoHorizontalOk: report.torre_esteiramento_horizontal === "OK" ? true : report.torre_esteiramento_horizontal === "NOK" ? false : null,
+        esteiramentoVerticalOk: report.torre_esteiramento_vertical === "OK" ? true : report.torre_esteiramento_vertical === "NOK" ? false : null,
         autonomyRisk: siteAutonomyRisk,
         obsolescenciaRisk: siteObsolRisk,
       });
