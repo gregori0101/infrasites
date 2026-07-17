@@ -99,6 +99,8 @@ export interface SiteInfo {
   acIssues: number;
   climatizacaoIssues: number;
   zeladoriaOk: boolean;
+  esteiramentoHorizontalOk?: boolean | null;
+  esteiramentoVerticalOk?: boolean | null;
   autonomyRisk?: "ok" | "medio" | "alto" | "critico";
   obsolescenciaRisk?: "ok" | "medio" | "alto" | "sem_banco";
 }
