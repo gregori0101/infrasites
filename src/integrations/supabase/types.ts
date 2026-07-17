@@ -353,6 +353,7 @@ export type Database = {
       reports: {
         Row: {
           assinatura_digital: string | null
+          baterias_tipo_ia: Json | null
           created_at: string
           created_date: string
           created_time: string
@@ -1313,6 +1314,7 @@ export type Database = {
         }
         Insert: {
           assinatura_digital?: string | null
+          baterias_tipo_ia?: Json | null
           created_at?: string
           created_date: string
           created_time: string
@@ -2273,6 +2275,7 @@ export type Database = {
         }
         Update: {
           assinatura_digital?: string | null
+          baterias_tipo_ia?: Json | null
           created_at?: string
           created_date?: string
           created_time?: string
@@ -3403,6 +3406,7 @@ export type Database = {
         Args: { p_site_code: string }
         Returns: {
           assinatura_digital: string | null
+          baterias_tipo_ia: Json | null
           created_at: string
           created_date: string
           created_time: string
