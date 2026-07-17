@@ -407,6 +407,12 @@ export function SiteDetailModal({ open, onClose, reportId }: Props) {
   if (report?.torre_foto_zeladoria) {
     allPhotos.push({ url: report.torre_foto_zeladoria, label: "Zeladoria", category: "Torre" });
   }
+  if (report?.torre_foto_esteiramento_horizontal) {
+    allPhotos.push({ url: report.torre_foto_esteiramento_horizontal, label: "Esteiramento Horizontal", category: "Torre" });
+  }
+  if (report?.torre_foto_esteiramento_vertical) {
+    allPhotos.push({ url: report.torre_foto_esteiramento_vertical, label: "Esteiramento Vertical", category: "Torre" });
+  }
   if (report?.torre_foto_ninhos) {
     allPhotos.push({ url: report.torre_foto_ninhos, label: "Ninhos", category: "Torre" });
   }
