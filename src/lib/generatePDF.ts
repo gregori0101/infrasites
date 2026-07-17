@@ -823,7 +823,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     
     // Torre photos with extras
     const torrePhotos: { photo: string | null; label: string }[] = [];
-    addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas ? 'ok' : 'error');
+    addFieldRow('Fibras Protegidas', data.torre.fibrasProtegidas, data.torre.fibrasProtegidas === 'OK' ? 'ok' : 'error');
     if (data.torre.fotoFibrasProtegidas) {
       torrePhotos.push({ photo: data.torre.fotoFibrasProtegidas, label: 'Foto das Fibras Protegidas' });
     }
