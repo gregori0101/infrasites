@@ -104,6 +104,7 @@ export interface FibraOpticaData {
 
 export interface BancoBateria {
   tipo: BateriaTipo | null;
+  tipoIA?: 'LÍTIO' | 'POLÍMERO' | null;
   fabricante: BateriaFabricante | null;
   fabricanteOutra?: string;
   capacidadeAh: CapacidadeAh | null;

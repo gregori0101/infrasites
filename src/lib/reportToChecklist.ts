@@ -253,6 +253,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
     // Note: Database only has one photo per gabinete (gabX_bat_foto), not per battery bank
     const gabBatFoto = report[`${prefix}_bat_foto`] || null;
     const bancos = [];
+    const tipoIaMap = (report.baterias_tipo_ia || {}) as Record<string, string>;
     for (let j = 0; j < 12; j++) {
       const tipo = report[`${prefix}_bat${j + 1}_tipo`];
       if (tipo) {
@@ -260,8 +261,10 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         const estados = estadoRaw.includes(',') 
           ? estadoRaw.split(',').map((e: string) => e.trim()) 
           : [estadoRaw];
+        const tipoIA = tipoIaMap[`gab${i}_banco${j}`] as 'LÍTIO' | 'POLÍMERO' | undefined;
         bancos.push({
           tipo: tipo as any,
+          tipoIA: tipoIA || null,
           fabricante: (report[`${prefix}_bat${j + 1}_fabricante`] || 'NA') as any,
           capacidadeAh: parseInt(report[`${prefix}_bat${j + 1}_capacidade`]) || null,
           dataFabricacao: report[`${prefix}_bat${j + 1}_data_fabricacao`] || '',

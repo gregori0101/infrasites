@@ -7,10 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Battery, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Battery, Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BateriaColada, BancoBateria, BateriasData } from "@/types/checklist";
 import { ValidationError } from "@/hooks/use-validation";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO', 'MONOBLOCO'];
 const BATERIA_FABRICANTES: BateriaFabricante[] = [
@@ -42,8 +45,33 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
   const { data, currentGabinete, updateGabinete, updateSecaoNaoAplicavel, updateFotosExtras, getFotosExtras } = useChecklist();
   const gabinete = data.gabinetes?.[currentGabinete];
   const isSkipped = data.secoesNaoAplicaveis?.baterias ?? false;
+  const { toast } = useToast();
+  const [analyzingIndex, setAnalyzingIndex] = React.useState<number | null>(null);
 
   if (!gabinete) return null;
+
+  const analyzeBanco = async (index: number, banco: BancoBateria) => {
+    if (!banco.fotoBanco) {
+      toast({ title: "Foto necessária", description: "Capture a foto do banco antes de analisar.", variant: "destructive" });
+      return;
+    }
+    setAnalyzingIndex(index);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('classify-battery', {
+        body: { imageUrl: banco.fotoBanco },
+      });
+      if (error) throw error;
+      const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
+      if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+      updateBanco(index, { tipoIA: tipo });
+      toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${result?.confianca ? ` (${Math.round(result.confianca * 100)}%)` : ''}.` });
+    } catch (e: any) {
+      console.error('[classify-battery]', e);
+      toast({ title: "Falha na análise", description: e?.message || "Não foi possível analisar a foto.", variant: "destructive" });
+    } finally {
+      setAnalyzingIndex(null);
+    }
+  };
 
   const updateBaterias = (updates: Partial<BateriasData>) => {
     updateGabinete(currentGabinete, {
@@ -307,6 +335,38 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   siteCode={data.siglaSite}
                   category={`gab${currentGabinete + 1}_bateria_banco${index + 1}`}
                 />
+
+                <div className="flex items-center justify-between gap-2 rounded-md border bg-card p-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium">Tipo (IA):</span>
+                    {banco.tipoIA ? (
+                      <Badge className="bg-primary text-primary-foreground">{banco.tipoIA}</Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Não analisado</span>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!banco.fotoBanco || analyzingIndex === index}
+                    onClick={() => analyzeBanco(index, banco)}
+                    className="gap-1 h-8"
+                  >
+                    {analyzingIndex === index ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Analisando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Analisar com IA
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             ))}
 

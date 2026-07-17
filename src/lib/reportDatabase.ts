@@ -312,6 +312,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   const skipFCC = skipped.fcc;
   const skipBaterias = skipped.baterias;
   const skipClimatizacao = skipped.climatizacao;
+
+  const tipoIaMap: Record<string, string> = {};
+
   
   // For each gabinete (1-7)
   for (let i = 0; i < 7; i++) {
@@ -358,6 +361,9 @@ export function buildReportRow(data: ChecklistData): ReportRow {
             row[`${prefix}_bat${j + 1}_com_gradil`] = banco.comGradil || null;
             if (j === 0 && banco.fotoBanco) {
               row[`${prefix}_bat_foto`] = banco.fotoBanco;
+            }
+            if (banco.tipoIA) {
+              tipoIaMap[`gab${i}_banco${j}`] = banco.tipoIA;
             }
           }
         }
@@ -515,6 +521,8 @@ export function buildReportRow(data: ChecklistData): ReportRow {
       row.fotos_extras = validExtras;
     }
   }
+
+  row.baterias_tipo_ia = tipoIaMap;
 
   return row;
 }

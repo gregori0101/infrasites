@@ -1,0 +1,1 @@
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS baterias_tipo_ia jsonb DEFAULT '{}'::jsonb;
