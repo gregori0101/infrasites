@@ -369,7 +369,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   },
   torre: {
     ninhos: false,
-    fibrasProtegidas: true,
+    fibrasProtegidas: 'OK',
     aterramento: 'OK',
     zeladoria: 'OK',
   },
