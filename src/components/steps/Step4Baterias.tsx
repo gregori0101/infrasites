@@ -7,10 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Battery, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Battery, Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { BateriaTipo, BateriaFabricante, CapacidadeAh, BateriaEstado, BateriaColada, BancoBateria, BateriasData } from "@/types/checklist";
 import { ValidationError } from "@/hooks/use-validation";
 import { SectionSkipToggle } from "@/components/ui/section-skip-toggle";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const BATERIA_TIPOS: BateriaTipo[] = ['LÍTIO', 'POLÍMERO', 'MONOBLOCO'];
 const BATERIA_FABRICANTES: BateriaFabricante[] = [
