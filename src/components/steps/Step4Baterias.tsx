@@ -152,11 +152,11 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   <div className="space-y-1.5">
                     <Label className="text-xs">Fabricante</Label>
                     <Select
-                      value={banco.fabricante}
+                      value={banco.fabricante || ''}
                       onValueChange={(value: BateriaFabricante) => updateBanco(index, { fabricante: value, fabricanteOutra: value === 'OUTRA' ? banco.fabricanteOutra : '' })}
                     >
                       <SelectTrigger className="h-9">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
                         {BATERIA_FABRICANTES.map((f) => (
