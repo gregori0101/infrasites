@@ -70,7 +70,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
     setAnalyzingIndex(index);
     try {
       const { tipo, confianca } = await classifyPhoto(banco.fotoBanco);
-      updateBanco(index, { tipoIA: tipo });
+      updateBanco(index, { tipoIA: tipo, confiancaIA: confianca ?? null });
       toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${confianca ? ` (${Math.round(confianca * 100)}%)` : ''}.` });
     } catch (e: any) {
       console.error('[classify-battery]', e);
