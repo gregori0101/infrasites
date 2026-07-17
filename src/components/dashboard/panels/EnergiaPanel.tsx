@@ -125,7 +125,7 @@ export function EnergiaPanel({ stats, onDrillDown }: Props) {
             {transformadorChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={transformadorChart} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
@@ -195,7 +195,7 @@ export function EnergiaPanel({ stats, onDrillDown }: Props) {
             {protecaoChart.length > 0 ? (
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={protecaoChart} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ value }) => `${value}`}>
@@ -268,7 +268,7 @@ export function EnergiaPanel({ stats, onDrillDown }: Props) {
             {stats.energiaTipoQuadroDistribution.length > 0 ? (
               <div className="h-52">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                     <Pie data={stats.energiaTipoQuadroDistribution} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value"
                       strokeWidth={2} stroke="hsl(var(--card))"
                       label={({ name, value }) => `${name}: ${value}`}>
