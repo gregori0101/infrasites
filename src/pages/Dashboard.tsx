@@ -925,6 +925,10 @@ export default function Dashboard() {
                     else if (type === "zeladoria_nok") openDrillDown("sites", "Zeladoria NOK", (s) => s.filter((site: any) => !site.zeladoriaOk));
                     else if (type === "aterramento") openDrillDown("sites", "Aterramento OK", (s) => s);
                     else if (type === "aterramento_nok") openDrillDown("sites", "Aterramento NOK", (s) => s);
+                    else if (type === "esteiramento_h_ok") openDrillDown("sites", "Esteiramento Horizontal OK", (s) => s.filter((site: any) => site.esteiramentoHorizontalOk === true));
+                    else if (type === "esteiramento_h_nok") openDrillDown("sites", "Esteiramento Horizontal NOK", (s) => s.filter((site: any) => site.esteiramentoHorizontalOk === false));
+                    else if (type === "esteiramento_v_ok") openDrillDown("sites", "Esteiramento Vertical OK", (s) => s.filter((site: any) => site.esteiramentoVerticalOk === true));
+                    else if (type === "esteiramento_v_nok") openDrillDown("sites", "Esteiramento Vertical NOK", (s) => s.filter((site: any) => site.esteiramentoVerticalOk === false));
                   }}
                 />
               )}
