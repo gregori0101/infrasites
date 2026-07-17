@@ -135,11 +135,11 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   <div className="space-y-1.5">
                     <Label className="text-xs">Tipo</Label>
                     <Select
-                      value={banco.tipo}
+                      value={banco.tipo || ''}
                       onValueChange={(value: BateriaTipo) => updateBanco(index, { tipo: value })}
                     >
                       <SelectTrigger className="h-9">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
                         {BATERIA_TIPOS.map((t) => (
