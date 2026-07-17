@@ -92,6 +92,8 @@ function stripPhotosFromChecklist(data: ChecklistData): ChecklistData {
       fotoFibrasProtegidas: null,
       fotoAterramento: null,
       fotoZeladoria: null,
+      fotoEsteiramentoHorizontal: null,
+      fotoEsteiramentoVertical: null,
     },
   };
 }
