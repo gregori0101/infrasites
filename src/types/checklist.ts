@@ -192,7 +192,7 @@ export interface GMGData {
 export interface TorreData {
   ninhos: boolean;
   fotoNinhos?: string | null;
-  fibrasProtegidas: boolean;
+  fibrasProtegidas: StatusFuncionamento;
   fotoFibrasProtegidas?: string | null;
   aterramento: StatusFuncionamento;
   fotoAterramento?: string | null;
@@ -369,7 +369,7 @@ export const INITIAL_CHECKLIST: Omit<ChecklistData, 'id' | 'createdAt' | 'update
   },
   torre: {
     ninhos: false,
-    fibrasProtegidas: true,
+    fibrasProtegidas: 'OK',
     aterramento: 'OK',
     zeladoria: 'OK',
   },

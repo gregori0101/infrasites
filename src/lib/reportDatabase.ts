@@ -412,7 +412,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
     row.gmg_foto_alarme = data.gmg?.fotoAlarme || null;
     row.gmg_ultimo_teste = data.gmg?.ultimoTeste || null;
     row.gmg_foto_painel = data.gmg?.fotoGMG || null;
-    row.torre_protecao_fibra = data.torre?.fibrasProtegidas === true ? 'SIM' : data.torre?.fibrasProtegidas === false ? 'NÃO' : null;
+    row.torre_protecao_fibra = data.torre?.fibrasProtegidas === 'OK' ? 'OK' : data.torre?.fibrasProtegidas === 'NOK' ? 'NOK' : null;
     row.torre_foto_fibras_protegidas = data.torre?.fotoFibrasProtegidas || null;
     row.torre_ninhos = data.torre?.ninhos === true ? 'SIM' : data.torre?.ninhos === false ? 'NÃO' : null;
     row.torre_foto_ninhos = data.torre?.fotoNinhos || null;
