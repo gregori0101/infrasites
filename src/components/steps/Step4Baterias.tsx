@@ -22,14 +22,14 @@ const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'ESTOURADA', 'VAZANDO', 'TRI
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
 const EMPTY_BANCO: BancoBateria = {
-  tipo: 'LÍTIO',
-  fabricante: 'NA',
+  tipo: null,
+  fabricante: null,
   fabricanteOutra: '',
   capacidadeAh: null,
   dataFabricacao: '',
-  estados: ['OK'],
-  colada: 'NA',
-  comGradil: 'NA',
+  estados: [],
+  colada: null,
+  comGradil: null,
   fotoBanco: null
 };
 
@@ -135,11 +135,11 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   <div className="space-y-1.5">
                     <Label className="text-xs">Tipo</Label>
                     <Select
-                      value={banco.tipo}
+                      value={banco.tipo || ''}
                       onValueChange={(value: BateriaTipo) => updateBanco(index, { tipo: value })}
                     >
                       <SelectTrigger className="h-9">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
                         {BATERIA_TIPOS.map((t) => (
@@ -152,11 +152,11 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
                   <div className="space-y-1.5">
                     <Label className="text-xs">Fabricante</Label>
                     <Select
-                      value={banco.fabricante}
+                      value={banco.fabricante || ''}
                       onValueChange={(value: BateriaFabricante) => updateBanco(index, { fabricante: value, fabricanteOutra: value === 'OUTRA' ? banco.fabricanteOutra : '' })}
                     >
                       <SelectTrigger className="h-9">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
                         {BATERIA_FABRICANTES.map((f) => (
