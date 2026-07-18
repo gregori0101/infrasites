@@ -1,14 +1,19 @@
 import React, { useState, useMemo } from "react";
-import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio } from "lucide-react";
+import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio, Sparkles, Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchBatteryPhoto } from "@/lib/reportDatabase";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   stats: PanelStats;
   batteries: BatteryInfo[];
+  onRefetch?: () => void;
   onDrillDown: (
     type: "all" | "ok" | "nok" | "obsolete-warning" | "obsolete-critical" | 
     "autonomy-ok" | "autonomy-medio" | "autonomy-alto" | "autonomy-critico" |
