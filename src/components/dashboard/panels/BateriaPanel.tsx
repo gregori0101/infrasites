@@ -1,14 +1,19 @@
 import React, { useState, useMemo } from "react";
-import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio } from "lucide-react";
+import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio, Sparkles, Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchBatteryPhoto } from "@/lib/reportDatabase";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   stats: PanelStats;
   batteries: BatteryInfo[];
+  onRefetch?: () => void;
   onDrillDown: (
     type: "all" | "ok" | "nok" | "obsolete-warning" | "obsolete-critical" | 
     "autonomy-ok" | "autonomy-medio" | "autonomy-alto" | "autonomy-critico" |
@@ -19,8 +24,98 @@ interface Props {
   ) => void;
 }
 
-export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
+export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
+  const { toast } = useToast();
+  const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+
+  const pendingAnalysisCount = useMemo(
+    () => batteries.filter((b) => !b.tipoIA && b.reportId).length,
+    [batteries]
+  );
+
+  const analyzeAllBatteries = async () => {
+    const pending = batteries.filter((b) => !b.tipoIA && b.reportId);
+    if (pending.length === 0) {
+      toast({ title: "Tudo analisado", description: "Não há baterias pendentes de análise." });
+      return;
+    }
+
+    setBulkAnalyzing(true);
+    setBulkProgress({ done: 0, total: pending.length });
+
+    // Group by reportId+gabinete to fetch each photo once
+    const groups = new Map<string, { reportId: string; gabinete: number; bancos: number[] }>();
+    for (const b of pending) {
+      const k = `${b.reportId}::${b.gabinete}`;
+      if (!groups.has(k)) groups.set(k, { reportId: b.reportId, gabinete: b.gabinete, bancos: [] });
+      groups.get(k)!.bancos.push(b.banco);
+    }
+
+    // Cache existing baterias_tipo_ia per report to merge safely
+    const reportMaps = new Map<string, Record<string, any>>();
+    let ok = 0, fail = 0, done = 0;
+
+    for (const [, grp] of groups) {
+      try {
+        const photoUrl = await fetchBatteryPhoto(grp.reportId, grp.gabinete);
+        if (!photoUrl) {
+          fail += grp.bancos.length;
+          done += grp.bancos.length;
+          setBulkProgress({ done, total: pending.length });
+          continue;
+        }
+
+        const { data: result, error } = await supabase.functions.invoke("classify-battery", {
+          body: { imageUrl: photoUrl },
+        });
+        if (error) throw error;
+        const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | undefined;
+        if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") throw new Error("Resposta inválida");
+        const confianca = (result?.confianca as number | null) ?? null;
+
+        // Load current map (once per report)
+        if (!reportMaps.has(grp.reportId)) {
+          const { data: rep } = await supabase
+            .from("reports")
+            .select("baterias_tipo_ia")
+            .eq("id", grp.reportId)
+            .maybeSingle();
+          reportMaps.set(grp.reportId, (rep?.baterias_tipo_ia as Record<string, any>) || {});
+        }
+        const map = reportMaps.get(grp.reportId)!;
+        for (const banco of grp.bancos) {
+          map[`gab${grp.gabinete - 1}_banco${banco - 1}`] = { tipo, confianca };
+        }
+        ok += grp.bancos.length;
+      } catch (e) {
+        console.error("[bulk classify-battery]", e);
+        fail += grp.bancos.length;
+      } finally {
+        done += grp.bancos.length;
+        setBulkProgress({ done, total: pending.length });
+      }
+    }
+
+    // Persist merged maps per report
+    for (const [reportId, map] of reportMaps) {
+      const { error } = await supabase
+        .from("reports")
+        .update({ baterias_tipo_ia: map })
+        .eq("id", reportId);
+      if (error) console.error("[bulk classify-battery] update", reportId, error);
+    }
+
+    setBulkAnalyzing(false);
+    toast({
+      title: "Análise em lote concluída",
+      description: `${ok} analisadas${fail > 0 ? `, ${fail} com erro` : ""}.`,
+      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+    });
+    onRefetch?.();
+  };
+
   
   // Get correct values based on view mode - unified (no GMG separation)
   const totalAutonomy = viewMode === "gabinete" 
@@ -128,6 +223,38 @@ export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Análise IA em Lote */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-semibold text-sm">Classificação por IA (Lítio × Polímero)</p>
+              <p className="text-xs text-muted-foreground">
+                {pendingAnalysisCount > 0
+                  ? `${pendingAnalysisCount} bateria(s) ainda não analisadas por IA.`
+                  : "Todas as baterias com foto já foram analisadas."}
+              </p>
+              {bulkAnalyzing && (
+                <p className="text-xs text-primary mt-1">
+                  Analisando {bulkProgress.done} / {bulkProgress.total}...
+                </p>
+              )}
+            </div>
+          </div>
+          <Button
+            onClick={analyzeAllBatteries}
+            disabled={bulkAnalyzing || pendingAnalysisCount === 0}
+            size="sm"
+            className="gap-2 shrink-0"
+          >
+            {bulkAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {bulkAnalyzing ? "Analisando..." : "Analisar todas com IA"}
+          </Button>
+        </CardContent>
+      </Card>
+
+
       {/* CARD DESTAQUE: Total de Baterias Cadastradas */}
       <Card 
         className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 cursor-pointer hover:shadow-lg active:scale-[0.99] transition-all"

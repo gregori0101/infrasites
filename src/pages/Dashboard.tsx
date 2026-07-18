@@ -937,6 +937,7 @@ export default function Dashboard() {
                 <BateriaPanel
                   stats={stats}
                   batteries={batteries}
+                  onRefetch={() => refetch()}
                   onDrillDown={(type, uf) => {
                     // Basic types
                     if (type === "all") openDrillDown("batteries", "Todas as Baterias", (b) => b);
