@@ -71,12 +71,12 @@ Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","conf
     try {
       parsed = typeof content === "string" ? JSON.parse(content) : content;
     } catch {
-      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
+      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO|INDETERMINADO)/i);
       parsed = m ? { tipo: m[1].toUpperCase() } : {};
     }
 
     let tipo = (parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
-    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
+    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
 
     return new Response(
       JSON.stringify({ tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
