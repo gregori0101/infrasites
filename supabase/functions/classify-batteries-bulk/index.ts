@@ -54,7 +54,7 @@ async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo:
   let tipo = String(parsed.tipo || "").toUpperCase()
     .replace("LITIO", "LÍTIO")
     .replace("POLIMERO", "POLÍMERO");
-  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
+  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
   return { tipo, confianca: parsed.confianca ?? null };
 }
 
