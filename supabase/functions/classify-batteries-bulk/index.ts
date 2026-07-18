@@ -125,7 +125,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ processed, updated, skipped, failed, details: details.slice(0, 10), nextOffset: offsetReports + (reports?.length ?? 0) }), {
+    const hitLimit = processed >= limit;
+    const advanced = hitLimit ? 0 : (reports?.length ?? 0);
+    const done = (reports?.length ?? 0) < pageSize && !hitLimit;
+    return new Response(JSON.stringify({ processed, updated, skipped, failed, hitLimit, done, details: details.slice(0, 10), nextOffset: offsetReports + advanced }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
