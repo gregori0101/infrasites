@@ -604,6 +604,11 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               const gabTecAcesso = (report[`${prefix}_tecnologias_acesso`] as string) || "";
               const tecAcessoArr = gabTecAcesso ? gabTecAcesso.split(',').map(t => t.trim()).filter(Boolean) : [];
               
+              const tipoIaMap = (report.baterias_tipo_ia || {}) as Record<string, any>;
+              const iaEntry = tipoIaMap[`gab${g - 1}_banco${b - 1}`];
+              const tipoIA = (typeof iaEntry === 'string' ? iaEntry : iaEntry?.tipo) as "LÍTIO" | "POLÍMERO" | undefined;
+              const confiancaIA = typeof iaEntry === 'object' && iaEntry ? (iaEntry.confianca ?? null) : null;
+
               const batteryInfo: BatteryInfo = {
                 siteCode: report.site_code,
                 uf,
@@ -624,6 +629,8 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
                 comGradil: comGradil || "N/A",
                 reportId: report.id || "",
                 tecnologiasAcesso: tecAcessoArr,
+                tipoIA: tipoIA || null,
+                confiancaIA,
               };
               
               gabBatteries.push(batteryInfo);

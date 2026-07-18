@@ -33,6 +33,8 @@ export interface BatteryInfo {
   comGradil: string;
   reportId: string; // Reference to fetch photo on demand
   tecnologiasAcesso: string[]; // Access technologies from the gabinete
+  tipoIA?: "LÍTIO" | "POLÍMERO" | null; // AI-classified battery type
+  confiancaIA?: number | null; // AI confidence (0-1)
 }
 
 export interface ACInfo {
