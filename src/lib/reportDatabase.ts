@@ -114,6 +114,8 @@ function buildDashboardColumns(): string {
     'geo_capturado_em',
     // Operadora
     'operadora',
+    // AI battery classification (jsonb map: { "gab{i}_banco{j}": { tipo, confianca } })
+    'baterias_tipo_ia',
   ];
 
   // Add gabinete columns (no photos)
