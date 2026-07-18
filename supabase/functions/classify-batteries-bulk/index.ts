@@ -49,8 +49,10 @@ async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo:
   const content = data?.choices?.[0]?.message?.content ?? "{}";
   let parsed: any = {};
   try { parsed = typeof content === "string" ? JSON.parse(content) : content; } catch { /* ignore */ }
-  let tipo = String(parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
-  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") tipo = "LÍTIO";
+  let tipo = String(parsed.tipo || "").toUpperCase()
+    .replace("LITIO", "LÍTIO")
+    .replace("POLIMERO", "POLÍMERO");
+  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
   return { tipo, confianca: parsed.confianca ?? null };
 }
 
