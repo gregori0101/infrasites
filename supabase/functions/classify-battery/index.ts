@@ -47,7 +47,7 @@ Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","conf
           {
             role: "user",
             content: [
-              { type: "text", text: "Classifique esta bateria: LÍTIO ou POLÍMERO?" },
+              { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
               { type: "image_url", image_url: { url: imageUrl } },
             ],
           },
