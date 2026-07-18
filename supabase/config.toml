@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.classify-batteries-bulk]
 verify_jwt = false
+
+[functions.fix-photo-urls]
+verify_jwt = false
