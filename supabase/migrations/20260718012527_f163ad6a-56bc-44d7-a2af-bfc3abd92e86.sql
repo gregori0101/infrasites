@@ -1,0 +1,1 @@
+UPDATE public.reports SET baterias_tipo_ia = NULL WHERE baterias_tipo_ia IS NOT NULL;

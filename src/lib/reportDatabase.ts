@@ -1133,7 +1133,9 @@ export async function fetchBatteryPhoto(reportId: string, gabineteNum: number): 
     
     // Access the photo column dynamically
     const photoUrl = (data as unknown as Record<string, string | null>)[photoColumn];
-    return photoUrl || null;
+    if (!photoUrl) return null;
+    const { resolveStorageUrl } = await import('./storageUrl');
+    return await resolveStorageUrl(photoUrl);
   } catch (err) {
     console.error('Exception fetching battery photo:', err);
     return null;

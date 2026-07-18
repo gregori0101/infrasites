@@ -27,10 +27,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const systemPrompt = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique a bateria como uma de duas opções:
-- "LÍTIO" — baterias de íon-lítio (LiFePO4/LFP, NMC) tipicamente em módulos retangulares metálicos ou plásticos com display/LED, marcas como Huawei ESM, Freedom, Shoto, ZTE modernos.
-- "POLÍMERO" — baterias de polímero de lítio (LiPo), tipicamente em pouches/sacolas planas seladas.
-Retorne APENAS um JSON: {"tipo":"LÍTIO"|"POLÍMERO","confianca":0-1,"justificativa":"breve"}. Se não conseguir identificar com clareza, escolha a opção mais provável e coloque confianca baixa.`;
+    const systemPrompt = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique a bateria em UMA de três opções:
+- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), caixas plásticas retangulares grandes com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa).
+- "LÍTIO" — baterias de íon-lítio (LiFePO4/LFP, NMC), módulos padronizados com display/LED/BMS (Huawei ESM, Shoto, Narada Li, Pylontech).
+- "POLÍMERO" — polímero de lítio (LiPo), pouches planos selados.
+Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusados aparentes no topo. Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO","confianca":0-1,"justificativa":"breve"}.`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -69,12 +70,12 @@ Retorne APENAS um JSON: {"tipo":"LÍTIO"|"POLÍMERO","confianca":0-1,"justificat
     try {
       parsed = typeof content === "string" ? JSON.parse(content) : content;
     } catch {
-      const m = String(content).match(/(LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
+      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
       parsed = m ? { tipo: m[1].toUpperCase() } : {};
     }
 
     let tipo = (parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
-    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") tipo = "LÍTIO";
+    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
 
     return new Response(
       JSON.stringify({ tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
