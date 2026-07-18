@@ -63,16 +63,17 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     const body = await req.json().catch(() => ({}));
-    const limit: number = Math.min(Number(body.limit ?? 100), 400);
+    const limit: number = Math.min(Number(body.limit ?? 40), 400);
     const offsetReports: number = Number(body.offset ?? 0);
+    const pageSize: number = Math.min(Number(body.pageSize ?? 60), 500);
 
-    // Fetch reports that have any battery photo + at least one battery tipo set.
+    // Fetch a page of reports; we return nextOffset = offset + pageSize so caller advances even when nothing pending.
     const photoCols = [1,2,3,4,5,6,7].flatMap(i => [`gab${i}_bat_foto`, ...[1,2,3,4,5,6,7,8,9,10,11,12].map(j=>`gab${i}_bat${j}_tipo`)]);
     const { data: reports, error } = await supabase
       .from("reports")
       .select(["id", "baterias_tipo_ia", ...photoCols].join(","))
       .order("created_at", { ascending: false })
-      .range(offsetReports, offsetReports + 500);
+      .range(offsetReports, offsetReports + pageSize - 1);
     if (error) throw error;
 
     let processed = 0, updated = 0, skipped = 0, failed = 0;
