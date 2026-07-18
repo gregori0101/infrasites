@@ -606,7 +606,7 @@ export function useDashboardStats(reports: ReportRow[], filters: DashboardFilter
               
               const tipoIaMap = (report.baterias_tipo_ia || {}) as Record<string, any>;
               const iaEntry = tipoIaMap[`gab${g - 1}_banco${b - 1}`];
-              const tipoIA = (typeof iaEntry === 'string' ? iaEntry : iaEntry?.tipo) as "LÍTIO" | "POLÍMERO" | undefined;
+              const tipoIA = (typeof iaEntry === 'string' ? iaEntry : iaEntry?.tipo) as "LÍTIO" | "POLÍMERO" | "CHUMBO" | "INDETERMINADO" | undefined;
               const confiancaIA = typeof iaEntry === 'object' && iaEntry ? (iaEntry.confianca ?? null) : null;
 
               const batteryInfo: BatteryInfo = {
