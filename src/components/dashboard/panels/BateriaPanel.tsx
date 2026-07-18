@@ -223,6 +223,38 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
 
   return (
     <div className="space-y-6">
+      {/* Análise IA em Lote */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-semibold text-sm">Classificação por IA (Lítio × Polímero)</p>
+              <p className="text-xs text-muted-foreground">
+                {pendingAnalysisCount > 0
+                  ? `${pendingAnalysisCount} bateria(s) ainda não analisadas por IA.`
+                  : "Todas as baterias com foto já foram analisadas."}
+              </p>
+              {bulkAnalyzing && (
+                <p className="text-xs text-primary mt-1">
+                  Analisando {bulkProgress.done} / {bulkProgress.total}...
+                </p>
+              )}
+            </div>
+          </div>
+          <Button
+            onClick={analyzeAllBatteries}
+            disabled={bulkAnalyzing || pendingAnalysisCount === 0}
+            size="sm"
+            className="gap-2 shrink-0"
+          >
+            {bulkAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {bulkAnalyzing ? "Analisando..." : "Analisar todas com IA"}
+          </Button>
+        </CardContent>
+      </Card>
+
+
       {/* CARD DESTAQUE: Total de Baterias Cadastradas */}
       <Card 
         className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 cursor-pointer hover:shadow-lg active:scale-[0.99] transition-all"
