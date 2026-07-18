@@ -70,12 +70,12 @@ Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusado
     try {
       parsed = typeof content === "string" ? JSON.parse(content) : content;
     } catch {
-      const m = String(content).match(/(LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
+      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
       parsed = m ? { tipo: m[1].toUpperCase() } : {};
     }
 
     let tipo = (parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
-    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") tipo = "LÍTIO";
+    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
 
     return new Response(
       JSON.stringify({ tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
