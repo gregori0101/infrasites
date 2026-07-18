@@ -24,8 +24,98 @@ interface Props {
   ) => void;
 }
 
-export function BateriaPanel({ stats, batteries, onDrillDown }: Props) {
+export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
+  const { toast } = useToast();
+  const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+
+  const pendingAnalysisCount = useMemo(
+    () => batteries.filter((b) => !b.tipoIA && b.reportId).length,
+    [batteries]
+  );
+
+  const analyzeAllBatteries = async () => {
+    const pending = batteries.filter((b) => !b.tipoIA && b.reportId);
+    if (pending.length === 0) {
+      toast({ title: "Tudo analisado", description: "Não há baterias pendentes de análise." });
+      return;
+    }
+
+    setBulkAnalyzing(true);
+    setBulkProgress({ done: 0, total: pending.length });
+
+    // Group by reportId+gabinete to fetch each photo once
+    const groups = new Map<string, { reportId: string; gabinete: number; bancos: number[] }>();
+    for (const b of pending) {
+      const k = `${b.reportId}::${b.gabinete}`;
+      if (!groups.has(k)) groups.set(k, { reportId: b.reportId, gabinete: b.gabinete, bancos: [] });
+      groups.get(k)!.bancos.push(b.banco);
+    }
+
+    // Cache existing baterias_tipo_ia per report to merge safely
+    const reportMaps = new Map<string, Record<string, any>>();
+    let ok = 0, fail = 0, done = 0;
+
+    for (const [, grp] of groups) {
+      try {
+        const photoUrl = await fetchBatteryPhoto(grp.reportId, grp.gabinete);
+        if (!photoUrl) {
+          fail += grp.bancos.length;
+          done += grp.bancos.length;
+          setBulkProgress({ done, total: pending.length });
+          continue;
+        }
+
+        const { data: result, error } = await supabase.functions.invoke("classify-battery", {
+          body: { imageUrl: photoUrl },
+        });
+        if (error) throw error;
+        const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | undefined;
+        if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") throw new Error("Resposta inválida");
+        const confianca = (result?.confianca as number | null) ?? null;
+
+        // Load current map (once per report)
+        if (!reportMaps.has(grp.reportId)) {
+          const { data: rep } = await supabase
+            .from("reports")
+            .select("baterias_tipo_ia")
+            .eq("id", grp.reportId)
+            .maybeSingle();
+          reportMaps.set(grp.reportId, (rep?.baterias_tipo_ia as Record<string, any>) || {});
+        }
+        const map = reportMaps.get(grp.reportId)!;
+        for (const banco of grp.bancos) {
+          map[`gab${grp.gabinete - 1}_banco${banco - 1}`] = { tipo, confianca };
+        }
+        ok += grp.bancos.length;
+      } catch (e) {
+        console.error("[bulk classify-battery]", e);
+        fail += grp.bancos.length;
+      } finally {
+        done += grp.bancos.length;
+        setBulkProgress({ done, total: pending.length });
+      }
+    }
+
+    // Persist merged maps per report
+    for (const [reportId, map] of reportMaps) {
+      const { error } = await supabase
+        .from("reports")
+        .update({ baterias_tipo_ia: map })
+        .eq("id", reportId);
+      if (error) console.error("[bulk classify-battery] update", reportId, error);
+    }
+
+    setBulkAnalyzing(false);
+    toast({
+      title: "Análise em lote concluída",
+      description: `${ok} analisadas${fail > 0 ? `, ${fail} com erro` : ""}.`,
+      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+    });
+    onRefetch?.();
+  };
+
   
   // Get correct values based on view mode - unified (no GMG separation)
   const totalAutonomy = viewMode === "gabinete" 
