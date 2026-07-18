@@ -8,11 +8,13 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique a bateria em UMA de três opções:
-- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), tipicamente caixas plásticas retangulares grandes (geralmente pretas, cinzas ou azuis), com terminais parafusados no topo, marcas como Moura, GetPower, Freedom (linha chumbo), Heliar, Unipower, Csb, Yuasa. São pesadas e volumosas.
-- "LÍTIO" — baterias de íon-lítio (LiFePO4/LFP, NMC) em módulos retangulares metálicos ou plásticos padronizados, geralmente com display/LED, BMS visível, marcas como Huawei ESM, Shoto, Narada Li, Pylontech, ZTE modernos.
-- "POLÍMERO" — baterias de polímero de lítio (LiPo), em pouches/sacolas planas seladas (formato incomum em telecom).
-Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusados aparentes no topo e formato de caixa grande. Retorne APENAS um JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO","confianca":0-1,"justificativa":"breve"}.`;
+const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique em UMA de quatro opções:
+- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), caixas plásticas retangulares grandes (pretas, cinzas ou azuis) com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa). Pesadas e volumosas.
+- "LÍTIO" — baterias íon-lítio (LiFePO4/LFP, NMC) em módulos metálicos/plásticos padronizados com display/LED/BMS visível (Huawei ESM, Shoto, Narada Li, Pylontech, ZTE).
+- "POLÍMERO" — polímero de lítio (LiPo), pouches/sacolas planas seladas (incomum em telecom).
+- "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver nenhuma bateria visível na foto (gabinete vazio, só cabos/disjuntores/retificadores, foto de outro equipamento, foto ruim/escura ou fora de foco). NÃO chute um tipo se não conseguir ver a bateria.
+Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
+
 
 function extractPath(url: string): { bucket: string; path: string } | null {
   // Matches .../storage/v1/object/(public|sign)/<bucket>/<path...>
@@ -32,7 +34,7 @@ async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo:
         {
           role: "user",
           content: [
-            { type: "text", text: "Classifique esta bateria: LÍTIO ou POLÍMERO?" },
+            { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
             { type: "image_url", image_url: { url: signedUrl } },
           ],
         },
@@ -52,7 +54,7 @@ async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo:
   let tipo = String(parsed.tipo || "").toUpperCase()
     .replace("LITIO", "LÍTIO")
     .replace("POLIMERO", "POLÍMERO");
-  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
+  if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
   return { tipo, confianca: parsed.confianca ?? null };
 }
 

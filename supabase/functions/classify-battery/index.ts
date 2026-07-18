@@ -27,11 +27,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const systemPrompt = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique a bateria em UMA de três opções:
-- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), caixas plásticas retangulares grandes com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa).
-- "LÍTIO" — baterias de íon-lítio (LiFePO4/LFP, NMC), módulos padronizados com display/LED/BMS (Huawei ESM, Shoto, Narada Li, Pylontech).
+    const systemPrompt = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique em UMA de quatro opções:
+- "CHUMBO" — chumbo-ácido (VRLA/AGM/GEL), caixas plásticas grandes com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa).
+- "LÍTIO" — íon-lítio (LiFePO4/LFP, NMC), módulos padronizados com display/LED/BMS (Huawei ESM, Shoto, Narada Li, Pylontech).
 - "POLÍMERO" — polímero de lítio (LiPo), pouches planos selados.
-Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusados aparentes no topo. Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO","confianca":0-1,"justificativa":"breve"}.`;
+- "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível (gabinete vazio, só cabos/disjuntores, foto de outro equipamento, foto ruim). NÃO chute.
+Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -46,7 +47,7 @@ Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusado
           {
             role: "user",
             content: [
-              { type: "text", text: "Classifique esta bateria: LÍTIO ou POLÍMERO?" },
+              { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
               { type: "image_url", image_url: { url: imageUrl } },
             ],
           },
@@ -70,12 +71,12 @@ Na dúvida entre chumbo e lítio, priorize CHUMBO se houver terminais parafusado
     try {
       parsed = typeof content === "string" ? JSON.parse(content) : content;
     } catch {
-      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO)/i);
+      const m = String(content).match(/(CHUMBO|LÍTIO|POLÍMERO|LITIO|POLIMERO|INDETERMINADO)/i);
       parsed = m ? { tipo: m[1].toUpperCase() } : {};
     }
 
     let tipo = (parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
-    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO") tipo = "CHUMBO";
+    if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
 
     return new Response(
       JSON.stringify({ tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
