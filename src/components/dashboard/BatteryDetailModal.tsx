@@ -178,6 +178,29 @@ export function BatteryDetailModal({ open, onClose, battery }: Props) {
                 <span className="text-muted-foreground">Idade:</span>
                 <span className="ml-2 font-medium">{battery.idade > 0 ? `${battery.idade} anos` : "N/A"}</span>
               </div>
+              <div className="col-span-2 flex items-center gap-2 flex-wrap">
+                <span className="text-muted-foreground">Tipo (IA):</span>
+                {battery.tipoIA ? (
+                  <>
+                    <Badge variant="outline" className="border-primary text-primary">{battery.tipoIA}</Badge>
+                    {typeof battery.confiancaIA === "number" && (
+                      <Badge
+                        className={
+                          battery.confiancaIA >= 0.8
+                            ? "bg-success text-success-foreground"
+                            : battery.confiancaIA >= 0.5
+                            ? "bg-warning text-warning-foreground"
+                            : "bg-destructive text-destructive-foreground"
+                        }
+                      >
+                        {Math.round(battery.confiancaIA * 100)}%
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">Não analisado</Badge>
+                )}
+              </div>
             </div>
           </div>
 
