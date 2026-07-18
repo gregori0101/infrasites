@@ -182,8 +182,14 @@ export function BatteryDetailModal({ open, onClose, battery }: Props) {
                 <span className="text-muted-foreground">Tipo (IA):</span>
                 {battery.tipoIA ? (
                   <>
-                    <Badge variant="outline" className="border-primary text-primary">{battery.tipoIA}</Badge>
-                    {typeof battery.confiancaIA === "number" && (
+                    {battery.tipoIA === "INDETERMINADO" ? (
+                      <Badge variant="outline" className="border-muted-foreground text-muted-foreground">
+                        Sem bateria visível
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-primary text-primary">{battery.tipoIA}</Badge>
+                    )}
+                    {typeof battery.confiancaIA === "number" && battery.tipoIA !== "INDETERMINADO" && (
                       <Badge
                         className={
                           battery.confiancaIA >= 0.8
