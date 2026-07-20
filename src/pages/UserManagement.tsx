@@ -375,10 +375,17 @@ export default function UserManagement() {
 
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
+  const filteredApprovedUsers = useMemo(() => {
+    const q = searchEmail.trim().toLowerCase();
+    if (!q) return approvedUsers;
+    return approvedUsers.filter(u => u.email.toLowerCase().includes(q));
+  }, [approvedUsers, searchEmail]);
 
   // Pagination for approved users
-  const { totalPages, getPageItems, totalItems } = usePagination(approvedUsers, ITEMS_PER_PAGE);
+  const { totalPages, getPageItems, totalItems } = usePagination(filteredApprovedUsers, ITEMS_PER_PAGE);
   const paginatedApprovedUsers = getPageItems(currentPage);
+
+  useEffect(() => { setCurrentPage(1); }, [searchEmail]);
 
   if (!isAdmin) {
     return null;
