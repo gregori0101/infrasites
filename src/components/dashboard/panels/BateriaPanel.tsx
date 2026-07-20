@@ -71,8 +71,8 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
           body: { imageUrl: photoUrl },
         });
         if (error) throw error;
-        const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | undefined;
-        if (tipo !== "LÍTIO" && tipo !== "POLÍMERO") throw new Error("Resposta inválida");
+        const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | "CHUMBO" | "INDETERMINADO" | undefined;
+        if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") throw new Error("Resposta inválida");
         const confianca = (result?.confianca as number | null) ?? null;
 
         // Load current map (once per report)
