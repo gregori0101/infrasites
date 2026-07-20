@@ -58,17 +58,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin
-    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { _user_id: requesterUserId });
-    if (!isAdmin) {
+    // Use service role to check admin & access auth.users
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check if user is admin via direct query (is_admin is in private schema, not RPC-exposed)
+    const { data: roleRow, error: roleErr } = await supabaseAdmin
+      .from('user_roles')
+      .select('role, approved')
+      .eq('user_id', requesterUserId)
+      .eq('role', 'administrador')
+      .eq('approved', true)
+      .maybeSingle();
+
+    if (roleErr || !roleRow) {
+      console.error('Admin check failed', { requesterUserId, roleErr });
       return new Response(
         JSON.stringify({ error: 'Admin access required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Use service role to access auth.users
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get all user IDs from request body
     const { userIds } = await req.json();

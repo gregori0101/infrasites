@@ -83,6 +83,7 @@ export default function UserManagement() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchEmail, setSearchEmail] = useState('');
   const ITEMS_PER_PAGE = 10;
 
   const fetchUsers = async () => {
@@ -374,10 +375,17 @@ export default function UserManagement() {
 
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
+  const filteredApprovedUsers = useMemo(() => {
+    const q = searchEmail.trim().toLowerCase();
+    if (!q) return approvedUsers;
+    return approvedUsers.filter(u => u.email.toLowerCase().includes(q));
+  }, [approvedUsers, searchEmail]);
 
   // Pagination for approved users
-  const { totalPages, getPageItems, totalItems } = usePagination(approvedUsers, ITEMS_PER_PAGE);
+  const { totalPages, getPageItems, totalItems } = usePagination(filteredApprovedUsers, ITEMS_PER_PAGE);
   const paginatedApprovedUsers = getPageItems(currentPage);
+
+  useEffect(() => { setCurrentPage(1); }, [searchEmail]);
 
   if (!isAdmin) {
     return null;
@@ -506,13 +514,22 @@ export default function UserManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="relative mb-4">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por email..."
+                  className="pl-9"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                />
+              </div>
               {isLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : approvedUsers.length === 0 ? (
+              ) : filteredApprovedUsers.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhum usuário aprovado ainda
+                  {searchEmail ? 'Nenhum usuário encontrado com este email' : 'Nenhum usuário aprovado ainda'}
                 </p>
               ) : (
                 <>
