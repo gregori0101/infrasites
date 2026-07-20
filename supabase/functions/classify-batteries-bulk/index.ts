@@ -26,7 +26,7 @@ function extractPath(url: string): { bucket: string; path: string } | null {
 async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo: string; confianca: number | null } | null> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "google/gemini-3-flash-preview",
       messages: [

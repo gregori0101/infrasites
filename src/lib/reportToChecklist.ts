@@ -262,7 +262,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
           ? estadoRaw.split(',').map((e: string) => e.trim()) 
           : [estadoRaw];
         const iaEntry = tipoIaMap[`gab${i}_banco${j}`];
-        const tipoIA = (typeof iaEntry === 'string' ? iaEntry : iaEntry?.tipo) as 'LÍTIO' | 'POLÍMERO' | undefined;
+        const tipoIA = (typeof iaEntry === 'string' ? iaEntry : iaEntry?.tipo) as 'LÍTIO' | 'POLÍMERO' | 'CHUMBO' | 'INDETERMINADO' | undefined;
         const confiancaIA = typeof iaEntry === 'object' && iaEntry ? (iaEntry.confianca ?? null) : null;
         bancos.push({
           tipo: tipo as any,
