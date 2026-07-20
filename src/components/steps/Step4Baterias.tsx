@@ -57,8 +57,8 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
       body: { imageUrl },
     });
     if (error) throw error;
-    const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | undefined;
-    if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO') throw new Error('Resposta inválida');
+    const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | 'CHUMBO' | 'INDETERMINADO' | undefined;
+    if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO' && tipo !== 'CHUMBO' && tipo !== 'INDETERMINADO') throw new Error('Resposta inválida');
     return { tipo, confianca: result?.confianca as number | null };
   };
 
