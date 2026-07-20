@@ -83,6 +83,7 @@ export default function UserManagement() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchEmail, setSearchEmail] = useState('');
   const ITEMS_PER_PAGE = 10;
 
   const fetchUsers = async () => {
