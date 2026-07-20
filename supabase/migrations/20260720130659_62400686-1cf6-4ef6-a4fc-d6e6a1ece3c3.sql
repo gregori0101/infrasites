@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_latest_report_for_prefill(text) FROM PUBLIC, authenticated, anon;
