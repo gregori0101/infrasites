@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
     const limit: number = Math.min(Number(body.limit ?? 40), 400);
     const offsetReports: number = Number(body.offset ?? 0);
     const pageSize: number = Math.min(Number(body.pageSize ?? 60), 500);
+    const force: boolean = body.force === true;
 
     // Fetch a page of reports; we return nextOffset = offset + pageSize so caller advances even when nothing pending.
     const photoCols = [1,2,3,4,5,6,7].flatMap(i => [`gab${i}_bat_foto`, ...[1,2,3,4,5,6,7,8,9,10,11,12].map(j=>`gab${i}_bat${j}_tipo`)]);
@@ -98,7 +99,7 @@ Deno.serve(async (req) => {
         for (let j = 1; j <= 12; j++) {
           if (r[`gab${i}_bat${j}_tipo`] == null) continue;
           const key = `gab${i - 1}_banco${j - 1}`;
-          if (existing[key]) continue;
+          if (!force && existing[key]) continue;
           pendingBanks.push(j);
         }
         if (pendingBanks.length === 0) continue;
