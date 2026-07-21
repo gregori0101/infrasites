@@ -1,4 +1,4 @@
-// Classify a battery photo using Google Gemini API directly (bypasses Lovable AI credits)
+// Classify a battery photo using Lovable AI Gateway (Gemini Flash)
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -12,23 +12,13 @@ const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias e
 - "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível (gabinete vazio, só cabos/disjuntores, foto de outro equipamento, foto ruim). NÃO chute.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
-async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string }> {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
-  const mimeType = resp.headers.get("content-type")?.split(";")[0] || "image/jpeg";
-  const buf = new Uint8Array(await resp.arrayBuffer());
-  let bin = "";
-  for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-  return { data: btoa(bin), mimeType };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY not configured" }), {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -40,35 +30,38 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data, mimeType } = await fetchImageAsBase64(imageUrl);
-
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-    const aiResp = await fetch(geminiUrl, {
+    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": LOVABLE_API_KEY,
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{
-          role: "user",
-          parts: [
-            { text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
-            { inlineData: { mimeType, data } },
-          ],
-        }],
-        generationConfig: { responseMimeType: "application/json" },
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
+              { type: "image_url", image_url: { url: imageUrl } },
+            ],
+          },
+        ],
+        response_format: { type: "json_object" },
       }),
     });
 
     if (!aiResp.ok) {
       const err = await aiResp.text();
-      console.error("[classify-battery] Gemini error", aiResp.status, err);
+      console.error("[classify-battery] AI error", aiResp.status, err);
       return new Response(JSON.stringify({ error: "AI request failed", status: aiResp.status, details: err }), {
         status: aiResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const raw = await aiResp.json();
-    const content = raw?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+    const content = raw?.choices?.[0]?.message?.content ?? "{}";
     let parsed: { tipo?: string; confianca?: number; justificativa?: string } = {};
     try {
       parsed = JSON.parse(content);
