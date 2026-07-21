@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet';
+import { LoginDiagnostics } from '@/components/LoginDiagnostics';
 
 
 type Operadora = 'VIVO' | 'TEL';
