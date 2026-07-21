@@ -1,4 +1,4 @@
-// Bulk-classify pending battery photos using Google Gemini API directly.
+// Bulk-classify pending battery photos using Lovable AI Gateway (Gemini Flash)
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -8,10 +8,10 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias estacionárias de telecom. Analise a foto e classifique em UMA de quatro opções:
-- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), caixas plásticas retangulares grandes (pretas, cinzas ou azuis) com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa). Pesadas e volumosas.
+- "CHUMBO" — baterias chumbo-ácido (VRLA/AGM/GEL), caixas plásticas retangulares grandes com terminais parafusados no topo (Moura, GetPower, Freedom chumbo, Heliar, Unipower, CSB, Yuasa).
 - "LÍTIO" — baterias íon-lítio (LiFePO4/LFP, NMC) em módulos metálicos/plásticos padronizados com display/LED/BMS visível (Huawei ESM, Shoto, Narada Li, Pylontech, ZTE).
-- "POLÍMERO" — polímero de lítio (LiPo), pouches/sacolas planas seladas (incomum em telecom).
-- "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver nenhuma bateria visível na foto (gabinete vazio, só cabos/disjuntores/retificadores, foto de outro equipamento, foto ruim/escura ou fora de foco). NÃO chute um tipo se não conseguir ver a bateria.
+- "POLÍMERO" — polímero de lítio (LiPo), pouches/sacolas planas seladas.
+- "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível na foto (gabinete vazio, só cabos/disjuntores/retificadores, foto ruim/escura). NÃO chute.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
 function extractPath(url: string): { bucket: string; path: string } | null {
@@ -20,47 +20,32 @@ function extractPath(url: string): { bucket: string; path: string } | null {
   return { bucket: m[1], path: decodeURIComponent(m[2]) };
 }
 
-async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    const mimeType = resp.headers.get("content-type")?.split(";")[0] || "image/jpeg";
-    const buf = new Uint8Array(await resp.arrayBuffer());
-    let bin = "";
-    for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-    return { data: btoa(bin), mimeType };
-  } catch {
-    return null;
-  }
-}
-
 async function classifyImage(imgUrl: string, apiKey: string): Promise<{ tipo: string; confianca: number | null } | null> {
-  const img = await fetchImageAsBase64(imgUrl);
-  if (!img) return null;
-
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-  const resp = await fetch(geminiUrl, {
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{
-        role: "user",
-        parts: [
-          { text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
-          { inlineData: { mimeType: img.mimeType, data: img.data } },
-        ],
-      }],
-      generationConfig: { responseMimeType: "application/json" },
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
+            { type: "image_url", image_url: { url: imgUrl } },
+          ],
+        },
+      ],
+      response_format: { type: "json_object" },
     }),
   });
   if (!resp.ok) {
     const err = await resp.text();
-    console.error("Gemini error", resp.status, err.slice(0, 200));
+    console.error("AI error", resp.status, err.slice(0, 200));
     return null;
   }
   const data = await resp.json();
-  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+  const content = data?.choices?.[0]?.message?.content ?? "{}";
   let parsed: any = {};
   try { parsed = JSON.parse(content); } catch { /* ignore */ }
   let tipo = String(parsed.tipo || "").toUpperCase()
@@ -74,7 +59,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -123,7 +108,7 @@ Deno.serve(async (req) => {
         }
 
         processed++;
-        const result = await classifyImage(signedUrl, GEMINI_API_KEY);
+        const result = await classifyImage(signedUrl, LOVABLE_API_KEY);
         if (!result) { failed++; continue; }
         for (const j of pendingBanks) {
           existing[`gab${i - 1}_banco${j - 1}`] = { tipo: result.tipo, confianca: result.confianca };
