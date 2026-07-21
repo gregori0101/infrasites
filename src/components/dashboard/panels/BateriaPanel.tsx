@@ -52,6 +52,22 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
     () => batteries.filter((b) => !b.tipoIA && b.reportId).length,
     [batteries]
   );
+  const totalAnalisavel = useMemo(
+    () => batteries.filter((b) => b.reportId).length,
+    [batteries]
+  );
+  const analisadasCount = Math.max(0, totalAnalisavel - pendingAnalysisCount);
+  const progressPct = totalAnalisavel > 0 ? Math.round((analisadasCount / totalAnalisavel) * 100) : 0;
+
+  // Auto-refresh dashboard while server-side bulk processing is running
+  useEffect(() => {
+    if (pendingAnalysisCount === 0 || !onRefetch) return;
+    const id = setInterval(() => {
+      onRefetch();
+    }, 20000);
+    return () => clearInterval(id);
+  }, [pendingAnalysisCount, onRefetch]);
+
 
   const analyzeAllBatteries = async () => {
     const pending = batteries.filter((b) => !b.tipoIA && b.reportId);
