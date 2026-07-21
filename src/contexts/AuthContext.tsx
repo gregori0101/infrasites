@@ -42,23 +42,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
+  const fetchUserRole = async (userId: string): Promise<UserRole | null> => {
+    // Retry transient PostgREST schema-cache errors (PGRST002) that can happen
+    // right after backend migrations. Without retry the user gets bounced to
+    // /pending-approval because isApproved falls back to false.
+    const maxAttempts = 4;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching user role:', error);
-        return null;
+        if (!error) return (data as UserRole) ?? null;
+
+        const transient = error.code === 'PGRST002' || /schema cache/i.test(error.message || '');
+        console.error(`Error fetching user role (attempt ${attempt}/${maxAttempts}):`, error);
+        if (!transient || attempt === maxAttempts) return null;
+        await new Promise((r) => setTimeout(r, 500 * attempt));
+      } catch (err) {
+        console.error('Error in fetchUserRole:', err);
+        if (attempt === maxAttempts) return null;
+        await new Promise((r) => setTimeout(r, 500 * attempt));
       }
-      return data as UserRole;
-    } catch (err) {
-      console.error('Error in fetchUserRole:', err);
-      return null;
     }
+    return null;
   };
 
   const refreshRole = async () => {
