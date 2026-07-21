@@ -1,5 +1,4 @@
-// Bulk-classify pending battery photos for all reports.
-// Runs server-side with service role so we can re-sign private storage URLs.
+// Bulk-classify pending battery photos using Google Gemini API directly.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -15,42 +14,55 @@ const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias e
 - "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver nenhuma bateria visível na foto (gabinete vazio, só cabos/disjuntores/retificadores, foto de outro equipamento, foto ruim/escura ou fora de foco). NÃO chute um tipo se não conseguir ver a bateria.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
-
 function extractPath(url: string): { bucket: string; path: string } | null {
-  // Matches .../storage/v1/object/(public|sign)/<bucket>/<path...>
   const m = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/([^?]+)/);
   if (!m) return null;
   return { bucket: m[1], path: decodeURIComponent(m[2]) };
 }
 
-async function classifyImage(signedUrl: string, apiKey: string): Promise<{ tipo: string; confianca: number | null } | null> {
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const mimeType = resp.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+    const buf = new Uint8Array(await resp.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+    return { data: btoa(bin), mimeType };
+  } catch {
+    return null;
+  }
+}
+
+async function classifyImage(imgUrl: string, apiKey: string): Promise<{ tipo: string; confianca: number | null } | null> {
+  const img = await fetchImageAsBase64(imgUrl);
+  if (!img) return null;
+
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const resp = await fetch(geminiUrl, {
     method: "POST",
-    headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
-            { type: "image_url", image_url: { url: signedUrl } },
-          ],
-        },
-      ],
-      response_format: { type: "json_object" },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{
+        role: "user",
+        parts: [
+          { text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
+          { inlineData: { mimeType: img.mimeType, data: img.data } },
+        ],
+      }],
+      generationConfig: { responseMimeType: "application/json" },
     }),
   });
   if (!resp.ok) {
     const err = await resp.text();
-    console.error("AI error", resp.status, err.slice(0, 200));
+    console.error("Gemini error", resp.status, err.slice(0, 200));
     return null;
   }
   const data = await resp.json();
-  const content = data?.choices?.[0]?.message?.content ?? "{}";
+  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
   let parsed: any = {};
-  try { parsed = typeof content === "string" ? JSON.parse(content) : content; } catch { /* ignore */ }
+  try { parsed = JSON.parse(content); } catch { /* ignore */ }
   let tipo = String(parsed.tipo || "").toUpperCase()
     .replace("LITIO", "LÍTIO")
     .replace("POLIMERO", "POLÍMERO");
@@ -62,7 +74,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -73,7 +85,6 @@ Deno.serve(async (req) => {
     const pageSize: number = Math.min(Number(body.pageSize ?? 60), 500);
     const force: boolean = body.force === true;
 
-    // Fetch a page of reports; we return nextOffset = offset + pageSize so caller advances even when nothing pending.
     const photoCols = [1,2,3,4,5,6,7].flatMap(i => [`gab${i}_bat_foto`, ...[1,2,3,4,5,6,7,8,9,10,11,12].map(j=>`gab${i}_bat${j}_tipo`)]);
     const { data: reports, error } = await supabase
       .from("reports")
@@ -94,7 +105,6 @@ Deno.serve(async (req) => {
         if (processed >= limit) break;
         const url: string | null = r[`gab${i}_bat_foto`];
         if (!url) continue;
-        // list banks that need classification for this gabinete
         const pendingBanks: number[] = [];
         for (let j = 1; j <= 12; j++) {
           if (r[`gab${i}_bat${j}_tipo`] == null) continue;
@@ -104,7 +114,6 @@ Deno.serve(async (req) => {
         }
         if (pendingBanks.length === 0) continue;
 
-        // Re-sign URL if it's a supabase storage URL
         let signedUrl = url;
         const info = extractPath(url);
         if (info) {
@@ -114,7 +123,7 @@ Deno.serve(async (req) => {
         }
 
         processed++;
-        const result = await classifyImage(signedUrl, LOVABLE_API_KEY);
+        const result = await classifyImage(signedUrl, GEMINI_API_KEY);
         if (!result) { failed++; continue; }
         for (const j of pendingBanks) {
           existing[`gab${i - 1}_banco${j - 1}`] = { tipo: result.tipo, confianca: result.confianca };
