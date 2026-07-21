@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio, Sparkles, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,22 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
     () => batteries.filter((b) => !b.tipoIA && b.reportId).length,
     [batteries]
   );
+  const totalAnalisavel = useMemo(
+    () => batteries.filter((b) => b.reportId).length,
+    [batteries]
+  );
+  const analisadasCount = Math.max(0, totalAnalisavel - pendingAnalysisCount);
+  const progressPct = totalAnalisavel > 0 ? Math.round((analisadasCount / totalAnalisavel) * 100) : 0;
+
+  // Auto-refresh dashboard while server-side bulk processing is running
+  useEffect(() => {
+    if (pendingAnalysisCount === 0 || !onRefetch) return;
+    const id = setInterval(() => {
+      onRefetch();
+    }, 20000);
+    return () => clearInterval(id);
+  }, [pendingAnalysisCount, onRefetch]);
+
 
   const analyzeAllBatteries = async () => {
     const pending = batteries.filter((b) => !b.tipoIA && b.reportId);
@@ -251,34 +268,58 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
     <div className="space-y-6">
       {/* Análise IA em Lote */}
       <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-semibold text-sm">Classificação por IA (Lítio × Polímero)</p>
-              <p className="text-xs text-muted-foreground">
-                {pendingAnalysisCount > 0
-                  ? `${pendingAnalysisCount} bateria(s) ainda não analisadas por IA.`
-                  : "Todas as baterias com foto já foram analisadas."}
-              </p>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">Classificação por IA (Lítio × Polímero)</p>
+                <p className="text-xs text-muted-foreground">
+                  {pendingAnalysisCount > 0
+                    ? `${pendingAnalysisCount} bateria(s) pendentes de análise.`
+                    : "Todas as baterias com foto já foram analisadas."}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={analyzeAllBatteries}
+              disabled={bulkAnalyzing || pendingAnalysisCount === 0}
+              size="sm"
+              className="gap-2 shrink-0"
+            >
+              {bulkAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {bulkAnalyzing ? "Analisando..." : "Analisar todas com IA"}
+            </Button>
+          </div>
+
+          {totalAnalisavel > 0 && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  {pendingAnalysisCount > 0 && (
+                    <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                  )}
+                  <span className="font-medium text-foreground">
+                    {analisadasCount.toLocaleString("pt-BR")} / {totalAnalisavel.toLocaleString("pt-BR")}
+                  </span>
+                  <span>baterias analisadas</span>
+                  {pendingAnalysisCount > 0 && (
+                    <span className="text-primary">· atualiza automaticamente</span>
+                  )}
+                </span>
+                <span className="font-semibold text-primary">{progressPct}%</span>
+              </div>
+              <Progress value={progressPct} className="h-2" />
               {bulkAnalyzing && (
-                <p className="text-xs text-primary mt-1">
-                  Analisando {bulkProgress.done} / {bulkProgress.total}...
+                <p className="text-xs text-primary">
+                  Lote atual: {bulkProgress.done} / {bulkProgress.total}
                 </p>
               )}
             </div>
-          </div>
-          <Button
-            onClick={analyzeAllBatteries}
-            disabled={bulkAnalyzing || pendingAnalysisCount === 0}
-            size="sm"
-            className="gap-2 shrink-0"
-          >
-            {bulkAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            {bulkAnalyzing ? "Analisando..." : "Analisar todas com IA"}
-          </Button>
+          )}
         </CardContent>
       </Card>
+
 
 
       {/* CARD DESTAQUE: Total de Baterias Cadastradas */}
