@@ -116,8 +116,14 @@ export default function Login() {
           setLgpdConsent(false);
         }
       }
-    } catch (err) {
-      setError('Erro ao processar sua solicitação');
+    } catch (err: any) {
+      console.error('[Login] Exceção durante autenticação:', err);
+      const m = typeof err?.message === 'string' ? err.message : '';
+      if (m.toLowerCase().includes('failed to fetch') || m.toLowerCase().includes('networkerror')) {
+        setError('Falha de rede ao conectar. Verifique sua conexão, VPN ou firewall corporativo e tente novamente.');
+      } else {
+        setError(m || 'Erro ao processar sua solicitação. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
