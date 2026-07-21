@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias e
 - "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível (gabinete vazio, só cabos/disjuntores, foto de outro equipamento, foto ruim). NÃO chute.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
-const MODEL = "gemini-2.0-flash";
+const MODEL = "gemini-flash-latest";
 
 function buildAiUnavailablePayload(status: number, body: string) {
   let parsed: any = {};
