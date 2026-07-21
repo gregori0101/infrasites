@@ -1,4 +1,4 @@
-// Bulk-classify pending battery photos using Lovable AI Gateway (Gemini Flash)
+// Bulk-classify pending battery photos using Google Gemini API directly
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -14,6 +14,8 @@ const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias e
 - "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível na foto (gabinete vazio, só cabos/disjuntores/retificadores, foto ruim/escura). NÃO chute.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
+const MODEL = "gemini-2.0-flash";
+
 function extractPath(url: string): { bucket: string; path: string } | null {
   const m = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/([^?]+)/);
   if (!m) return null;
@@ -21,40 +23,26 @@ function extractPath(url: string): { bucket: string; path: string } | null {
 }
 
 function buildAiUnavailablePayload(status: number, body: string) {
-  let parsed: { type?: string; title?: string; message?: string; request_id?: string } = {};
-  try {
-    parsed = JSON.parse(body);
-  } catch {
-    parsed = {};
+  let parsed: any = {};
+  try { parsed = JSON.parse(body); } catch { /* noop */ }
+  const errMsg = parsed?.error?.message || parsed?.message || body?.slice(0, 200);
+  if (status === 402 || status === 403) {
+    return { ok: false as const, code: "AI_CREDITS_EXHAUSTED", status, message: `Google bloqueou: ${errMsg}. Verifique billing.` };
   }
-
-  if (status === 402 || parsed.type === "payment_required") {
-    return {
-      ok: false as const,
-      code: "AI_CREDITS_EXHAUSTED",
-      status,
-      message: "Créditos de IA esgotados. Adicione saldo em Settings → Cloud & AI balance e tente novamente.",
-      requestId: parsed.request_id ?? null,
-    };
+  if (status === 429) {
+    return { ok: false as const, code: "AI_RATE_LIMITED", status, message: `Cota Google excedida: ${errMsg}. Habilite billing.` };
   }
+  return { ok: false as const, code: "AI_REQUEST_FAILED", status, message: errMsg || "Falha na IA." };
+}
 
-  if (status === 429 || parsed.type === "rate_limited") {
-    return {
-      ok: false as const,
-      code: "AI_RATE_LIMITED",
-      status,
-      message: "Limite temporário de IA atingido. Aguarde alguns minutos e tente novamente.",
-      requestId: parsed.request_id ?? null,
-    };
-  }
-
-  return {
-    ok: false as const,
-    code: "AI_REQUEST_FAILED",
-    status,
-    message: parsed.message || parsed.title || "Não foi possível concluir a análise de IA.",
-    requestId: parsed.request_id ?? null,
-  };
+async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string }> {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
+  const mimeType = resp.headers.get("content-type") || "image/jpeg";
+  const buf = new Uint8Array(await resp.arrayBuffer());
+  let bin = "";
+  for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+  return { data: btoa(bin), mimeType };
 }
 
 type ClassifyImageResult =
@@ -62,36 +50,38 @@ type ClassifyImageResult =
   | ReturnType<typeof buildAiUnavailablePayload>;
 
 async function classifyImage(imgUrl: string, apiKey: string): Promise<ClassifyImageResult> {
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  let img: { data: string; mimeType: string };
+  try {
+    img = await fetchImageAsBase64(imgUrl);
+  } catch (e) {
+    return { ok: false as const, code: "AI_REQUEST_FAILED", status: 0, message: (e as Error).message };
+  }
+
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
-            { type: "image_url", image_url: { url: imgUrl } },
-          ],
-        },
-      ],
-      response_format: { type: "json_object" },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{
+        role: "user",
+        parts: [
+          { text: "Classifique a bateria mostrada. Se não houver bateria visível, retorne INDETERMINADO." },
+          { inlineData: { mimeType: img.mimeType, data: img.data } },
+        ],
+      }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0.1 },
     }),
   });
   if (!resp.ok) {
     const err = await resp.text();
-    console.error("AI error", resp.status, err.slice(0, 200));
+    console.error("Gemini error", resp.status, err.slice(0, 200));
     return buildAiUnavailablePayload(resp.status, err);
   }
   const data = await resp.json();
-  const content = data?.choices?.[0]?.message?.content ?? "{}";
+  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
   let parsed: any = {};
   try { parsed = JSON.parse(content); } catch { /* ignore */ }
-  let tipo = String(parsed.tipo || "").toUpperCase()
-    .replace("LITIO", "LÍTIO")
-    .replace("POLIMERO", "POLÍMERO");
+  let tipo = String(parsed.tipo || "").toUpperCase().replace("LITIO", "LÍTIO").replace("POLIMERO", "POLÍMERO");
   if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
   return { ok: true, tipo, confianca: parsed.confianca ?? null };
 }
@@ -100,7 +90,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -149,27 +139,16 @@ Deno.serve(async (req) => {
         }
 
         processed++;
-        const result = await classifyImage(signedUrl, LOVABLE_API_KEY);
+        const result = await classifyImage(signedUrl, GEMINI_API_KEY);
         if (!result.ok) {
           failed += pendingBanks.length;
-          details.push({ id: r.id, gab: i, code: result.code, status: result.status, message: result.message, requestId: result.requestId });
+          details.push({ id: r.id, gab: i, code: result.code, status: result.status, message: result.message });
           if (result.code === "AI_CREDITS_EXHAUSTED" || result.code === "AI_RATE_LIMITED") {
             return new Response(JSON.stringify({
-              ok: false,
-              code: result.code,
-              message: result.message,
-              processed,
-              updated,
-              skipped,
-              failed,
-              hitLimit: false,
-              done: false,
-              stopped: true,
-              details: details.slice(0, 10),
-              nextOffset: offsetReports,
-            }), {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+              ok: false, code: result.code, message: result.message,
+              processed, updated, skipped, failed, hitLimit: false, done: false, stopped: true,
+              details: details.slice(0, 10), nextOffset: offsetReports,
+            }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
           }
           continue;
         }
