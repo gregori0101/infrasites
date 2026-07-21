@@ -12,6 +12,43 @@ const SYSTEM_PROMPT = `Você é um especialista em identificação de baterias e
 - "INDETERMINADO" — use OBRIGATORIAMENTE quando NÃO houver bateria visível (gabinete vazio, só cabos/disjuntores, foto de outro equipamento, foto ruim). NÃO chute.
 Retorne APENAS JSON: {"tipo":"CHUMBO"|"LÍTIO"|"POLÍMERO"|"INDETERMINADO","confianca":0-1,"justificativa":"breve"}.`;
 
+function buildAiUnavailablePayload(status: number, body: string) {
+  let parsed: { type?: string; title?: string; message?: string; request_id?: string } = {};
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    parsed = {};
+  }
+
+  if (status === 402 || parsed.type === "payment_required") {
+    return {
+      ok: false,
+      code: "AI_CREDITS_EXHAUSTED",
+      status,
+      message: "Créditos de IA esgotados. Adicione saldo em Settings → Cloud & AI balance e tente novamente.",
+      requestId: parsed.request_id ?? null,
+    };
+  }
+
+  if (status === 429 || parsed.type === "rate_limited") {
+    return {
+      ok: false,
+      code: "AI_RATE_LIMITED",
+      status,
+      message: "Limite temporário de IA atingido. Aguarde alguns minutos e tente novamente.",
+      requestId: parsed.request_id ?? null,
+    };
+  }
+
+  return {
+    ok: false,
+    code: "AI_REQUEST_FAILED",
+    status,
+    message: parsed.message || parsed.title || "Não foi possível concluir a análise de IA.",
+    requestId: parsed.request_id ?? null,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -55,8 +92,8 @@ Deno.serve(async (req) => {
     if (!aiResp.ok) {
       const err = await aiResp.text();
       console.error("[classify-battery] AI error", aiResp.status, err);
-      return new Response(JSON.stringify({ error: "AI request failed", status: aiResp.status, details: err }), {
-        status: aiResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify(buildAiUnavailablePayload(aiResp.status, err)), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -74,7 +111,7 @@ Deno.serve(async (req) => {
     if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
 
     return new Response(
-      JSON.stringify({ tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
+      JSON.stringify({ ok: true, tipo, confianca: parsed.confianca ?? null, justificativa: parsed.justificativa ?? null }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

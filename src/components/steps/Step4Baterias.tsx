@@ -24,6 +24,23 @@ const CAPACIDADES: CapacidadeAh[] = [100, 105, 170, 200, 300, 400, 430, 500, 600
 const ESTADOS: BateriaEstado[] = ['OK', 'ESTUFADA', 'ESTOURADA', 'VAZANDO', 'TRINCADA', 'NÃO SEGURA CARGA'];
 const COLADA_OPTIONS: BateriaColada[] = ['SIM', 'NÃO', 'NA'];
 
+const createAiError = (message: string, code?: string) => Object.assign(new Error(message), { code });
+
+const getAiInvocationError = (result: any, error: any) => {
+  if (error) {
+    return createAiError(error.message || "Não foi possível analisar a foto.", error.code);
+  }
+
+  if (result?.ok === false) {
+    return createAiError(result.message || "Não foi possível analisar a foto.", result.code);
+  }
+
+  return null;
+};
+
+const isAiPauseError = (error: any) =>
+  error?.code === "AI_CREDITS_EXHAUSTED" || error?.code === "AI_RATE_LIMITED";
+
 const EMPTY_BANCO: BancoBateria = {
   tipo: null,
   fabricante: null,
@@ -56,7 +73,8 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
     const { data: result, error } = await supabase.functions.invoke('classify-battery', {
       body: { imageUrl },
     });
-    if (error) throw error;
+    const invocationError = getAiInvocationError(result, error);
+    if (invocationError) throw invocationError;
     const tipo = result?.tipo as 'LÍTIO' | 'POLÍMERO' | 'CHUMBO' | 'INDETERMINADO' | undefined;
     if (tipo !== 'LÍTIO' && tipo !== 'POLÍMERO' && tipo !== 'CHUMBO' && tipo !== 'INDETERMINADO') throw new Error('Resposta inválida');
     return { tipo, confianca: result?.confianca as number | null };
@@ -73,7 +91,8 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
       updateBanco(index, { tipoIA: tipo, confiancaIA: confianca ?? null });
       toast({ title: "Análise concluída", description: `IA classificou como ${tipo}${confianca ? ` (${Math.round(confianca * 100)}%)` : ''}.` });
     } catch (e: any) {
-      console.error('[classify-battery]', e);
+      if (isAiPauseError(e)) console.warn('[classify-battery]', e.message);
+      else console.error('[classify-battery]', e);
       toast({ title: "Falha na análise", description: e?.message || "Não foi possível analisar a foto.", variant: "destructive" });
     } finally {
       setAnalyzingIndex(null);
@@ -98,6 +117,7 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
 
     let ok = 0;
     let fail = 0;
+    let pauseMessage: string | null = null;
     for (const { b, i } of targets) {
       setBulkStatus((prev) => ({ ...prev, [i]: 'analyzing' }));
       try {
@@ -105,17 +125,23 @@ export function Step4Baterias({ showErrors = false, validationErrors = [] }: Ste
         updateBanco(i, { tipoIA: tipo, confiancaIA: confianca ?? null });
         setBulkStatus((prev) => ({ ...prev, [i]: 'done' }));
         ok++;
-      } catch (e) {
-        console.error('[classify-battery bulk]', i, e);
+      } catch (e: any) {
+        if (isAiPauseError(e)) {
+          pauseMessage = e.message;
+          console.warn('[classify-battery bulk]', e.message);
+        } else {
+          console.error('[classify-battery bulk]', i, e);
+        }
         setBulkStatus((prev) => ({ ...prev, [i]: 'error' }));
         fail++;
+        if (pauseMessage) break;
       }
     }
     setBulkAnalyzing(false);
     toast({
-      title: "Análise em lote concluída",
-      description: `${ok} analisadas com sucesso${fail > 0 ? `, ${fail} com erro` : ''}.`,
-      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+      title: pauseMessage ? "Análise pausada" : "Análise em lote concluída",
+      description: pauseMessage || `${ok} analisadas com sucesso${fail > 0 ? `, ${fail} com erro` : ''}.`,
+      variant: pauseMessage || (fail > 0 && ok === 0) ? "destructive" : "default",
     });
   };
 

@@ -20,7 +20,48 @@ function extractPath(url: string): { bucket: string; path: string } | null {
   return { bucket: m[1], path: decodeURIComponent(m[2]) };
 }
 
-async function classifyImage(imgUrl: string, apiKey: string): Promise<{ tipo: string; confianca: number | null } | null> {
+function buildAiUnavailablePayload(status: number, body: string) {
+  let parsed: { type?: string; title?: string; message?: string; request_id?: string } = {};
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    parsed = {};
+  }
+
+  if (status === 402 || parsed.type === "payment_required") {
+    return {
+      ok: false as const,
+      code: "AI_CREDITS_EXHAUSTED",
+      status,
+      message: "Créditos de IA esgotados. Adicione saldo em Settings → Cloud & AI balance e tente novamente.",
+      requestId: parsed.request_id ?? null,
+    };
+  }
+
+  if (status === 429 || parsed.type === "rate_limited") {
+    return {
+      ok: false as const,
+      code: "AI_RATE_LIMITED",
+      status,
+      message: "Limite temporário de IA atingido. Aguarde alguns minutos e tente novamente.",
+      requestId: parsed.request_id ?? null,
+    };
+  }
+
+  return {
+    ok: false as const,
+    code: "AI_REQUEST_FAILED",
+    status,
+    message: parsed.message || parsed.title || "Não foi possível concluir a análise de IA.",
+    requestId: parsed.request_id ?? null,
+  };
+}
+
+type ClassifyImageResult =
+  | { ok: true; tipo: string; confianca: number | null }
+  | ReturnType<typeof buildAiUnavailablePayload>;
+
+async function classifyImage(imgUrl: string, apiKey: string): Promise<ClassifyImageResult> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
@@ -42,7 +83,7 @@ async function classifyImage(imgUrl: string, apiKey: string): Promise<{ tipo: st
   if (!resp.ok) {
     const err = await resp.text();
     console.error("AI error", resp.status, err.slice(0, 200));
-    return null;
+    return buildAiUnavailablePayload(resp.status, err);
   }
   const data = await resp.json();
   const content = data?.choices?.[0]?.message?.content ?? "{}";
@@ -52,7 +93,7 @@ async function classifyImage(imgUrl: string, apiKey: string): Promise<{ tipo: st
     .replace("LITIO", "LÍTIO")
     .replace("POLIMERO", "POLÍMERO");
   if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") tipo = "INDETERMINADO";
-  return { tipo, confianca: parsed.confianca ?? null };
+  return { ok: true, tipo, confianca: parsed.confianca ?? null };
 }
 
 Deno.serve(async (req) => {
@@ -109,7 +150,29 @@ Deno.serve(async (req) => {
 
         processed++;
         const result = await classifyImage(signedUrl, LOVABLE_API_KEY);
-        if (!result) { failed++; continue; }
+        if (!result.ok) {
+          failed += pendingBanks.length;
+          details.push({ id: r.id, gab: i, code: result.code, status: result.status, message: result.message, requestId: result.requestId });
+          if (result.code === "AI_CREDITS_EXHAUSTED" || result.code === "AI_RATE_LIMITED") {
+            return new Response(JSON.stringify({
+              ok: false,
+              code: result.code,
+              message: result.message,
+              processed,
+              updated,
+              skipped,
+              failed,
+              hitLimit: false,
+              done: false,
+              stopped: true,
+              details: details.slice(0, 10),
+              nextOffset: offsetReports,
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          continue;
+        }
         for (const j of pendingBanks) {
           existing[`gab${i - 1}_banco${j - 1}`] = { tipo: result.tipo, confianca: result.confianca };
         }
@@ -128,7 +191,7 @@ Deno.serve(async (req) => {
     const hitLimit = processed >= limit;
     const advanced = hitLimit ? 0 : (reports?.length ?? 0);
     const done = (reports?.length ?? 0) < pageSize && !hitLimit;
-    return new Response(JSON.stringify({ processed, updated, skipped, failed, hitLimit, done, details: details.slice(0, 10), nextOffset: offsetReports + advanced }), {
+    return new Response(JSON.stringify({ ok: true, processed, updated, skipped, failed, hitLimit, done, details: details.slice(0, 10), nextOffset: offsetReports + advanced }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
