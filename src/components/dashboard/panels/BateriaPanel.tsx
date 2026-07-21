@@ -24,6 +24,23 @@ interface Props {
   ) => void;
 }
 
+const createAiError = (message: string, code?: string) => Object.assign(new Error(message), { code });
+
+const getAiInvocationError = (result: any, error: any) => {
+  if (error) {
+    return createAiError(error.message || "Não foi possível concluir a análise de IA.", error.code);
+  }
+
+  if (result?.ok === false) {
+    return createAiError(result.message || "Não foi possível concluir a análise de IA.", result.code);
+  }
+
+  return null;
+};
+
+const isAiPauseError = (error: any) =>
+  error?.code === "AI_CREDITS_EXHAUSTED" || error?.code === "AI_RATE_LIMITED";
+
 export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
   const { toast } = useToast();
@@ -56,6 +73,7 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
     // Cache existing baterias_tipo_ia per report to merge safely
     const reportMaps = new Map<string, Record<string, any>>();
     let ok = 0, fail = 0, done = 0;
+    let pauseMessage: string | null = null;
 
     for (const [, grp] of groups) {
       try {
@@ -70,7 +88,8 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
         const { data: result, error } = await supabase.functions.invoke("classify-battery", {
           body: { imageUrl: photoUrl },
         });
-        if (error) throw error;
+        const invocationError = getAiInvocationError(result, error);
+        if (invocationError) throw invocationError;
         const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | "CHUMBO" | "INDETERMINADO" | undefined;
         if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") throw new Error("Resposta inválida");
         const confianca = (result?.confianca as number | null) ?? null;
@@ -89,13 +108,20 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
           map[`gab${grp.gabinete - 1}_banco${banco - 1}`] = { tipo, confianca };
         }
         ok += grp.bancos.length;
-      } catch (e) {
-        console.error("[bulk classify-battery]", e);
+      } catch (e: any) {
+        if (isAiPauseError(e)) {
+          pauseMessage = e.message;
+          console.warn("[bulk classify-battery]", e.message);
+        } else {
+          console.error("[bulk classify-battery]", e);
+        }
         fail += grp.bancos.length;
       } finally {
         done += grp.bancos.length;
         setBulkProgress({ done, total: pending.length });
       }
+
+      if (pauseMessage) break;
     }
 
     // Persist merged maps per report
@@ -109,9 +135,9 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
 
     setBulkAnalyzing(false);
     toast({
-      title: "Análise em lote concluída",
-      description: `${ok} analisadas${fail > 0 ? `, ${fail} com erro` : ""}.`,
-      variant: fail > 0 && ok === 0 ? "destructive" : "default",
+      title: pauseMessage ? "Análise pausada" : "Análise em lote concluída",
+      description: pauseMessage || `${ok} analisadas${fail > 0 ? `, ${fail} com erro` : ""}.`,
+      variant: pauseMessage || (fail > 0 && ok === 0) ? "destructive" : "default",
     });
     onRefetch?.();
   };
