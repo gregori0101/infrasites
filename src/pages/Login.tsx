@@ -256,6 +256,7 @@ export default function Login() {
                   </button>
                 </div>
             </form>
+            <LoginDiagnostics />
           </CardContent>
         </Card>
       </div>
