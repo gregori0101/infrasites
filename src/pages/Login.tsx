@@ -61,10 +61,16 @@ export default function Login() {
       if (isLogin) {
         const { error, data } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
+          const rawMsg = typeof error?.message === 'string' ? error.message.trim() : '';
+          const msg = (!rawMsg || rawMsg === '{}' || rawMsg === '[object Object]')
+            ? 'Não foi possível conectar ao servidor de autenticação. Verifique sua conexão (rede corporativa/VPN/firewall) e tente novamente.'
+            : rawMsg;
+          if (msg.includes('Invalid login credentials')) {
             setError('Email ou senha incorretos');
+          } else if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror')) {
+            setError('Falha de rede ao conectar. Verifique sua conexão, VPN ou firewall corporativo e tente novamente.');
           } else {
-            setError(error.message);
+            setError(msg);
           }
         } else if (data?.user) {
           // Check if user is approved
