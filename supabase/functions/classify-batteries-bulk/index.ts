@@ -49,6 +49,21 @@ type ClassifyImageResult =
   | { ok: true; tipo: string; confianca: number | null }
   | ReturnType<typeof buildAiUnavailablePayload>;
 
+function markBanksAsIndeterminate(
+  existing: Record<string, any>,
+  gabinete: number,
+  bancos: number[],
+  reason: string,
+) {
+  for (const banco of bancos) {
+    existing[`gab${gabinete - 1}_banco${banco - 1}`] = {
+      tipo: "INDETERMINADO",
+      confianca: null,
+      erro: reason,
+    };
+  }
+}
+
 async function classifyImage(imgUrl: string, apiKey: string): Promise<ClassifyImageResult> {
   let img: { data: string; mimeType: string };
   try {
@@ -109,7 +124,7 @@ Deno.serve(async (req) => {
       .range(offsetReports, offsetReports + pageSize - 1);
     if (error) throw error;
 
-    let processed = 0, updated = 0, skipped = 0, failed = 0;
+    let processed = 0, updated = 0, skipped = 0, failed = 0, markedIndeterminate = 0;
     const details: any[] = [];
 
     for (const r of (reports ?? []) as any[]) {
@@ -134,22 +149,33 @@ Deno.serve(async (req) => {
         const info = extractPath(url);
         if (info) {
           const { data: signed, error: sErr } = await supabase.storage.from(info.bucket).createSignedUrl(info.path, 60 * 60);
-          if (sErr || !signed?.signedUrl) { failed++; details.push({ id: r.id, gab: i, err: sErr?.message }); continue; }
+          if (sErr || !signed?.signedUrl) {
+            markBanksAsIndeterminate(existing, i, pendingBanks, sErr?.message || "signed_url_failed");
+            changed = true;
+            failed += pendingBanks.length;
+            markedIndeterminate += pendingBanks.length;
+            details.push({ id: r.id, gab: i, err: sErr?.message || "signed_url_failed", markedIndeterminate: pendingBanks.length });
+            continue;
+          }
           signedUrl = signed.signedUrl;
         }
 
         processed++;
         const result = await classifyImage(signedUrl, GEMINI_API_KEY);
         if (!result.ok) {
-          failed += pendingBanks.length;
-          details.push({ id: r.id, gab: i, code: result.code, status: result.status, message: result.message });
           if (result.code === "AI_CREDITS_EXHAUSTED" || result.code === "AI_RATE_LIMITED") {
             return new Response(JSON.stringify({
               ok: false, code: result.code, message: result.message,
-              processed, updated, skipped, failed, hitLimit: false, done: false, stopped: true,
+              processed, updated, skipped, failed, markedIndeterminate, hitLimit: false, done: false, stopped: true,
               details: details.slice(0, 10), nextOffset: offsetReports,
             }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
           }
+
+          markBanksAsIndeterminate(existing, i, pendingBanks, result.message || result.code || "ai_request_failed");
+          changed = true;
+          failed += pendingBanks.length;
+          markedIndeterminate += pendingBanks.length;
+          details.push({ id: r.id, gab: i, code: result.code, status: result.status, message: result.message, markedIndeterminate: pendingBanks.length });
           continue;
         }
         for (const j of pendingBanks) {
@@ -170,7 +196,7 @@ Deno.serve(async (req) => {
     const hitLimit = processed >= limit;
     const advanced = hitLimit ? 0 : (reports?.length ?? 0);
     const done = (reports?.length ?? 0) < pageSize && !hitLimit;
-    return new Response(JSON.stringify({ ok: true, processed, updated, skipped, failed, hitLimit, done, details: details.slice(0, 10), nextOffset: offsetReports + advanced }), {
+    return new Response(JSON.stringify({ ok: true, processed, updated, skipped, failed, markedIndeterminate, hitLimit, done, details: details.slice(0, 10), nextOffset: offsetReports + advanced }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
