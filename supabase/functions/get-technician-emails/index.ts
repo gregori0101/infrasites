@@ -97,13 +97,19 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get user emails from auth.users
-    const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers({
-      perPage: 1000
-    })
-
-    if (usersError) {
-      throw usersError
+    // Get user emails from auth.users. If the Auth admin API is transiently
+    // unavailable (504/AuthRetryableFetchError), degrade gracefully.
+    let users: any[] = []
+    try {
+      const { data, error: usersError } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+      if (usersError) throw usersError
+      users = data?.users || []
+    } catch (e) {
+      console.error('listUsers failed, returning IDs without emails:', (e as Error)?.message)
+      const fallback = allUserIds.map(id => ({ id, email: id, area_atuacao: areaAtuacaoMap[id] || null }))
+      return new Response(JSON.stringify({ technicians: fallback }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
     // Filter and map to get emails for all relevant users
@@ -118,6 +124,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ technicians: technicianEmails }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
+
 
   } catch (error) {
     console.error('Error:', error)
