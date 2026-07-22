@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { Battery, ShieldCheck, ShieldAlert, ShieldX, Info, Zap, Building2, Boxes, AlertTriangle, RefreshCw, Shield, Lock, Radio, Sparkles, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
@@ -8,7 +8,6 @@ import { PanelStats, BatteryInfo } from "../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchBatteryPhoto } from "@/lib/reportDatabase";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props {
@@ -27,26 +26,27 @@ interface Props {
 
 const createAiError = (message: string, code?: string) => Object.assign(new Error(message), { code });
 
-const getAiInvocationError = (result: any, error: any) => {
-  if (error) {
-    return createAiError(error.message || "Não foi possível concluir a análise de IA.", error.code);
-  }
+const AI_BULK_AUTORUN_KEY = "battery-ai-bulk-autorun";
+const BULK_BATCH_LIMIT = 12;
+const BULK_PAGE_SIZE = 80;
 
-  if (result?.ok === false) {
-    return createAiError(result.message || "Não foi possível concluir a análise de IA.", result.code);
-  }
-
-  return null;
-};
-
-const isAiPauseError = (error: any) =>
-  error?.code === "AI_CREDITS_EXHAUSTED" || error?.code === "AI_RATE_LIMITED";
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props) {
   const [viewMode, setViewMode] = useState<"gabinete" | "site">("gabinete");
   const { toast } = useToast();
   const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+  const [bulkStatusMessage, setBulkStatusMessage] = useState<string | null>(null);
+  const [autoAnalyzeEnabled, setAutoAnalyzeEnabled] = useState(() => {
+    try {
+      return window.localStorage.getItem(AI_BULK_AUTORUN_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+  const autoAnalyzeRef = useRef(autoAnalyzeEnabled);
+  const bulkLoopRef = useRef(false);
 
   const pendingAnalysisCount = useMemo(
     () => batteries.filter((b) => !b.tipoIA && b.reportId).length,
@@ -68,96 +68,120 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
     return () => clearInterval(id);
   }, [pendingAnalysisCount, onRefetch]);
 
+  const setAutoAnalysis = useCallback((enabled: boolean) => {
+    autoAnalyzeRef.current = enabled;
+    setAutoAnalyzeEnabled(enabled);
+    try {
+      window.localStorage.setItem(AI_BULK_AUTORUN_KEY, enabled ? "true" : "false");
+    } catch {
+      // ignore storage failures
+    }
+  }, []);
 
-  const analyzeAllBatteries = async () => {
-    const pending = batteries.filter((b) => !b.tipoIA && b.reportId);
-    if (pending.length === 0) {
+  const analyzeAllBatteries = useCallback(async () => {
+    if (bulkLoopRef.current) return;
+
+    const initialPending = batteries.filter((b) => !b.tipoIA && b.reportId).length;
+    if (initialPending === 0) {
+      setAutoAnalysis(false);
       toast({ title: "Tudo analisado", description: "Não há baterias pendentes de análise." });
       return;
     }
 
+    bulkLoopRef.current = true;
     setBulkAnalyzing(true);
-    setBulkProgress({ done: 0, total: pending.length });
+    setBulkProgress({ done: 0, total: initialPending });
+    setBulkStatusMessage("Iniciando análise contínua...");
 
-    // Group by reportId+gabinete to fetch each photo once
-    const groups = new Map<string, { reportId: string; gabinete: number; bancos: number[] }>();
-    for (const b of pending) {
-      const k = `${b.reportId}::${b.gabinete}`;
-      if (!groups.has(k)) groups.set(k, { reportId: b.reportId, gabinete: b.gabinete, bancos: [] });
-      groups.get(k)!.bancos.push(b.banco);
-    }
+    let offset = 0;
+    let totalProcessed = 0;
+    let totalUpdated = 0;
+    let totalMarkedIndeterminate = 0;
+    let emptyBatches = 0;
 
-    // Cache existing baterias_tipo_ia per report to merge safely
-    const reportMaps = new Map<string, Record<string, any>>();
-    let ok = 0, fail = 0, done = 0;
-    let pauseMessage: string | null = null;
-
-    for (const [, grp] of groups) {
-      try {
-        const photoUrl = await fetchBatteryPhoto(grp.reportId, grp.gabinete);
-        if (!photoUrl) {
-          fail += grp.bancos.length;
-          done += grp.bancos.length;
-          setBulkProgress({ done, total: pending.length });
-          continue;
-        }
-
-        const { data: result, error } = await supabase.functions.invoke("classify-battery", {
-          body: { imageUrl: photoUrl },
+    try {
+      while (autoAnalyzeRef.current && emptyBatches < 8) {
+        const { data: result, error } = await supabase.functions.invoke("classify-batteries-bulk", {
+          body: {
+            limit: BULK_BATCH_LIMIT,
+            pageSize: BULK_PAGE_SIZE,
+            offset,
+          },
         });
-        const invocationError = getAiInvocationError(result, error);
-        if (invocationError) throw invocationError;
-        const tipo = result?.tipo as "LÍTIO" | "POLÍMERO" | "CHUMBO" | "INDETERMINADO" | undefined;
-        if (tipo !== "LÍTIO" && tipo !== "POLÍMERO" && tipo !== "CHUMBO" && tipo !== "INDETERMINADO") throw new Error("Resposta inválida");
-        const confianca = (result?.confianca as number | null) ?? null;
 
-        // Load current map (once per report)
-        if (!reportMaps.has(grp.reportId)) {
-          const { data: rep } = await supabase
-            .from("reports")
-            .select("baterias_tipo_ia")
-            .eq("id", grp.reportId)
-            .maybeSingle();
-          reportMaps.set(grp.reportId, (rep?.baterias_tipo_ia as Record<string, any>) || {});
+        if (error) {
+          throw createAiError(error.message || "Não foi possível executar o lote de IA.", error.code);
         }
-        const map = reportMaps.get(grp.reportId)!;
-        for (const banco of grp.bancos) {
-          map[`gab${grp.gabinete - 1}_banco${banco - 1}`] = { tipo, confianca };
+
+        if (result?.ok === false) {
+          throw createAiError(result.message || "A análise de IA foi interrompida.", result.code);
         }
-        ok += grp.bancos.length;
-      } catch (e: any) {
-        if (isAiPauseError(e)) {
-          pauseMessage = e.message;
-          console.warn("[bulk classify-battery]", e.message);
-        } else {
-          console.error("[bulk classify-battery]", e);
+
+        const processed = Number(result?.processed || 0);
+        const updated = Number(result?.updated || 0);
+        const markedIndeterminate = Number(result?.markedIndeterminate || 0);
+        totalProcessed += processed;
+        totalUpdated += updated;
+        totalMarkedIndeterminate += markedIndeterminate;
+
+        setBulkProgress({
+          done: Math.min(initialPending, totalProcessed + totalMarkedIndeterminate),
+          total: initialPending,
+        });
+        setBulkStatusMessage(
+          `${totalProcessed.toLocaleString("pt-BR")} foto(s) processadas nesta execução` +
+          (totalMarkedIndeterminate > 0 ? ` · ${totalMarkedIndeterminate.toLocaleString("pt-BR")} sem leitura marcadas como indeterminadas` : "")
+        );
+        onRefetch?.();
+
+        if (result?.done) {
+          setAutoAnalysis(false);
+          toast({
+            title: "Análise contínua concluída",
+            description: `${totalUpdated.toLocaleString("pt-BR")} relatório(s) atualizados.`,
+          });
+          break;
         }
-        fail += grp.bancos.length;
-      } finally {
-        done += grp.bancos.length;
-        setBulkProgress({ done, total: pending.length });
+
+        offset = Number(result?.nextOffset ?? offset);
+        if (processed === 0 && updated === 0 && markedIndeterminate === 0) emptyBatches++;
+        else emptyBatches = 0;
+
+        await wait(1500);
       }
 
-      if (pauseMessage) break;
+      if (!autoAnalyzeRef.current) {
+        setBulkStatusMessage("Análise pausada pelo usuário.");
+      } else if (emptyBatches >= 8) {
+        setAutoAnalysis(false);
+        setBulkStatusMessage("A fila não avançou após várias tentativas. Reteste a análise.");
+        toast({
+          title: "Análise pausada",
+          description: "A fila não avançou após várias tentativas seguidas.",
+          variant: "destructive",
+        });
+      }
+    } catch (e: any) {
+      console.error("[classify-batteries-bulk]", e);
+      setAutoAnalysis(false);
+      setBulkStatusMessage(e?.message || "Falha na análise contínua.");
+      toast({
+        title: "Análise pausada",
+        description: e?.message || "Não foi possível continuar a análise de IA.",
+        variant: "destructive",
+      });
+    } finally {
+      bulkLoopRef.current = false;
+      setBulkAnalyzing(false);
+      onRefetch?.();
     }
+  }, [batteries, onRefetch, setAutoAnalysis, toast]);
 
-    // Persist merged maps per report
-    for (const [reportId, map] of reportMaps) {
-      const { error } = await supabase
-        .from("reports")
-        .update({ baterias_tipo_ia: map })
-        .eq("id", reportId);
-      if (error) console.error("[bulk classify-battery] update", reportId, error);
+  useEffect(() => {
+    if (autoAnalyzeEnabled && pendingAnalysisCount > 0) {
+      analyzeAllBatteries();
     }
-
-    setBulkAnalyzing(false);
-    toast({
-      title: pauseMessage ? "Análise pausada" : "Análise em lote concluída",
-      description: pauseMessage || `${ok} analisadas${fail > 0 ? `, ${fail} com erro` : ""}.`,
-      variant: pauseMessage || (fail > 0 && ok === 0) ? "destructive" : "default",
-    });
-    onRefetch?.();
-  };
+  }, [autoAnalyzeEnabled, pendingAnalysisCount, analyzeAllBatteries]);
 
   
   // Get correct values based on view mode - unified (no GMG separation)
