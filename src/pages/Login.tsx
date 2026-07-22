@@ -102,10 +102,19 @@ export default function Login() {
           },
         });
         if (error) {
-          if (error.message.includes('User already registered')) {
+          const rawMsg = typeof error?.message === 'string' ? error.message.trim() : '';
+          const msg = (!rawMsg || rawMsg === '{}' || rawMsg === '[object Object]')
+            ? 'Não foi possível conectar ao servidor de autenticação. Verifique sua conexão (rede corporativa/VPN/firewall) e tente novamente.'
+            : rawMsg;
+          const lower = msg.toLowerCase();
+          if (msg.includes('User already registered') || lower.includes('already registered')) {
             setError('Este email já está cadastrado');
+          } else if (lower.includes('pwned') || lower.includes('weak') || lower.includes('compromised') || lower.includes('breach')) {
+            setError('Esta senha foi encontrada em vazamentos públicos. Escolha uma senha mais forte e única.');
+          } else if (lower.includes('failed to fetch') || lower.includes('networkerror')) {
+            setError('Falha de rede ao conectar. Verifique sua conexão, VPN ou firewall corporativo e tente novamente.');
           } else {
-            setError(error.message);
+            setError(msg);
           }
         } else if (signUpData?.user) {
           setSuccess('Cadastro realizado! Aguarde a aprovação de um gestor para acessar o sistema.');
