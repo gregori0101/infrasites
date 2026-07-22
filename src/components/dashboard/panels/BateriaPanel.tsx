@@ -119,7 +119,9 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
 
         const processed = Number(result?.processed || 0);
         const updated = Number(result?.updated || 0);
+        const skipped = Number(result?.skipped || 0);
         const markedIndeterminate = Number(result?.markedIndeterminate || 0);
+        const nextOffset = Number(result?.nextOffset ?? offset);
         totalProcessed += processed;
         totalUpdated += updated;
         totalMarkedIndeterminate += markedIndeterminate;
@@ -143,9 +145,13 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
           break;
         }
 
-        offset = Number(result?.nextOffset ?? offset);
-        if (processed === 0 && updated === 0 && markedIndeterminate === 0) emptyBatches++;
-        else emptyBatches = 0;
+        if (processed === 0 && updated === 0 && markedIndeterminate === 0 && skipped === 0) {
+          emptyBatches++;
+        } else {
+          emptyBatches = 0;
+        }
+
+        offset = nextOffset;
 
         await wait(1500);
       }
