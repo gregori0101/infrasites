@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -24,8 +25,8 @@ Deno.serve(async (req) => {
 
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
-    // Verify caller is admin
-    const supabaseClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    // Identify the caller
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
 
@@ -41,8 +42,23 @@ Deno.serve(async (req) => {
       requesterUserId = user.id;
     }
 
-    const { data: isAdmin } = await supabaseClient.rpc('is_admin', { _user_id: requesterUserId });
-    if (!isAdmin) {
+    // Verify admin using service role (avoids depending on a public RPC)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roleRow, error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role, approved')
+      .eq('user_id', requesterUserId)
+      .maybeSingle();
+
+    if (roleError) {
+      console.error('Error checking admin role:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify permissions' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!roleRow || roleRow.role !== 'administrador' || !roleRow.approved) {
       return new Response(
         JSON.stringify({ error: 'Admin access required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -65,8 +81,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to update user password
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
       password: newPassword,
     });
