@@ -80,6 +80,7 @@ export function generateBatteriesExcel(
     "Fabricante": bat.fabricante,
     "Tipo": bat.tipo,
     "Classificação": getTipoClassificadoText(bat.tipoClassificado),
+    "Tipo (IA)": bat.tipoIA ?? "",
     "Capacidade (Ah)": bat.capacidade,
     "Data Fabricação": bat.dataFabricacao,
     "Idade (anos)": bat.idade > 0 ? bat.idade : "N/A",

@@ -420,6 +420,7 @@ export function DrillDownModal({
                       <TableHead className="min-w-[50px]">Gab</TableHead>
                       <TableHead className="min-w-[100px]">Fabricante</TableHead>
                       <TableHead className="min-w-[80px]">Tipo</TableHead>
+                      <TableHead className="min-w-[90px]">Tipo (IA)</TableHead>
                       <TableHead className="min-w-[80px]">Capacidade</TableHead>
                       <TableHead className="min-w-[80px]">Fabricação</TableHead>
                       <TableHead className="min-w-[80px]">Idade</TableHead>
@@ -446,6 +447,13 @@ export function DrillDownModal({
                           <Badge variant="outline" className="text-xs">
                             {b.tipoClassificado === "chumbo" ? "Chumbo" : b.tipoClassificado === "litio" ? "Lítio" : "Outro"}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {b.tipoIA ? (
+                            <Badge variant="outline" className="text-xs">{b.tipoIA}</Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                         <TableCell>{b.capacidade}Ah</TableCell>
                         <TableCell>{b.dataFabricacao}</TableCell>
