@@ -135,7 +135,6 @@ Deno.serve(async (req) => {
       for (let i = 1; i <= 7; i++) {
         if (processed >= limit) break;
         const url: string | null = r[`gab${i}_bat_foto`];
-        if (!url) continue;
         const pendingBanks: number[] = [];
         for (let j = 1; j <= 12; j++) {
           if (r[`gab${i}_bat${j}_tipo`] == null) continue;
@@ -144,6 +143,14 @@ Deno.serve(async (req) => {
           pendingBanks.push(j);
         }
         if (pendingBanks.length === 0) continue;
+
+        if (!url) {
+          markBanksAsIndeterminate(existing, i, pendingBanks, "sem_foto");
+          changed = true;
+          markedIndeterminate += pendingBanks.length;
+          continue;
+        }
+
 
         let signedUrl = url;
         const info = extractPath(url);
