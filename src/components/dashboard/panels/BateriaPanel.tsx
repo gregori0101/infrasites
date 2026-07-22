@@ -306,13 +306,20 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
               </div>
             </div>
             <Button
-              onClick={analyzeAllBatteries}
-              disabled={bulkAnalyzing || pendingAnalysisCount === 0}
+              onClick={() => {
+                if (autoAnalyzeEnabled || bulkAnalyzing) {
+                  setAutoAnalysis(false);
+                } else {
+                  setAutoAnalysis(true);
+                }
+              }}
+              disabled={pendingAnalysisCount === 0}
               size="sm"
               className="gap-2 shrink-0"
+              variant={autoAnalyzeEnabled || bulkAnalyzing ? "secondary" : "default"}
             >
               {bulkAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {bulkAnalyzing ? "Analisando..." : "Analisar todas com IA"}
+              {autoAnalyzeEnabled || bulkAnalyzing ? "Pausar análise" : "Rodar IA sem parar"}
             </Button>
           </div>
 
@@ -336,8 +343,11 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
               <Progress value={progressPct} className="h-2" />
               {bulkAnalyzing && (
                 <p className="text-xs text-primary">
-                  Lote atual: {bulkProgress.done} / {bulkProgress.total}
+                  Lote contínuo: {bulkProgress.done} / {bulkProgress.total}
                 </p>
+              )}
+              {bulkStatusMessage && (
+                <p className="text-xs text-muted-foreground">{bulkStatusMessage}</p>
               )}
             </div>
           )}
