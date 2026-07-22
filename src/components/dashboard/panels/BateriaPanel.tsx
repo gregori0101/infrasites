@@ -170,13 +170,14 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Falha na análise contínua.";
       console.error("[classify-batteries-bulk]", e);
       setAutoAnalysis(false);
-      setBulkStatusMessage(e?.message || "Falha na análise contínua.");
+      setBulkStatusMessage(message);
       toast({
         title: "Análise pausada",
-        description: e?.message || "Não foi possível continuar a análise de IA.",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -229,7 +230,7 @@ export function BateriaPanel({ stats, batteries, onRefetch, onDrillDown }: Props
 
   // Protection stats computed from batteries
   const protecaoStats = useMemo(() => {
-    let total = batteries.length;
+    const total = batteries.length;
     let coladas = 0;
     let comGradil = 0;
     let protegidas = 0;
