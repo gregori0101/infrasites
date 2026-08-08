@@ -132,6 +132,7 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
   // Identification
   sectionTitle('Identificacao da vistoria');
   field('Site', data.site_code);
+  field('Estado', data.estado ?? '-');
   field('Operadora', data.operadora ?? '-');
   field('Tecnico', data.tecnico ?? '-');
   field('Data', format(new Date(data.created_at), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR }));
@@ -184,14 +185,18 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
     doc.setTextColor(...GRAY_DARK);
     doc.text(item.rotulo, margin + 2, y + 4.8);
 
-    const badgeColor = item.vulneravel ? DANGER : SUCCESS;
-    const badgeText = item.vulneravel ? 'VULNERAVEL' : 'NAO VULNERAVEL';
-    doc.setFillColor(...badgeColor);
-    doc.roundedRect(pageWidth - margin - 32, y + 1.2, 30, 4.6, 1, 1, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(6);
-    doc.text(badgeText, pageWidth - margin - 17, y + 4.4, { align: 'center' });
-    y += 10;
+    if (item.item_key === 'placa_site') {
+      y += 2;
+    } else {
+      const badgeColor = item.vulneravel ? DANGER : SUCCESS;
+      const badgeText = item.vulneravel ? 'VULNERAVEL' : 'NAO VULNERAVEL';
+      doc.setFillColor(...badgeColor);
+      doc.roundedRect(pageWidth - margin - 32, y + 1.2, 30, 4.6, 1, 1, 'F');
+      doc.setTextColor(...WHITE);
+      doc.setFontSize(6);
+      doc.text(badgeText, pageWidth - margin - 17, y + 4.4, { align: 'center' });
+      y += 10;
+    }
 
     if (item.observacao && item.observacao.trim()) {
       doc.setFont('helvetica', 'normal');
