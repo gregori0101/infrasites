@@ -88,6 +88,7 @@ const COLORS = ['#8b5cf6', '#f97316', '#10b981', '#ef4444', '#3b82f6', '#f43f5e'
 export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('30');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [exportingAll, setExportingAll] = useState(false);
@@ -111,6 +112,11 @@ export default function VandalismoPainelGestor() {
       );
     }
 
+    // Filter by Estado
+    if (estadoFilter !== 'all') {
+      data = data.filter(v => v.estado === estadoFilter);
+    }
+
     // Date
     const now = new Date();
     if (dateFilter === '7') {
@@ -128,7 +134,7 @@ export default function VandalismoPainelGestor() {
     }
 
     return data;
-  }, [allVistorias, searchTerm, dateFilter]);
+  }, [allVistorias, searchTerm, estadoFilter, dateFilter]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
@@ -179,16 +185,45 @@ export default function VandalismoPainelGestor() {
       .slice(-15);
   }, [filteredData]);
 
-  const siteRanking = useMemo(() => {
-    const counts: Record<string, number> = {};
-    filteredData.forEach(v => {
-      counts[v.site_code] = (counts[v.site_code] || 0) + 1;
+  const siteStats = useMemo(() => {
+    const stats: Record<string, { count: number; totalVuln: number; estado: string }> = {};
+    allVistorias.forEach(v => {
+      if (!stats[v.site_code]) {
+        stats[v.site_code] = { count: 0, totalVuln: 0, estado: v.estado || '-' };
+      }
+      stats[v.site_code].count += 1;
+      stats[v.site_code].totalVuln += v.indiceVulnerabilidade;
     });
-    return Object.entries(counts)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
-  }, [filteredData]);
+
+    return Object.entries(stats)
+      .map(([site, s]) => ({
+        site,
+        estado: s.estado,
+        count: s.count,
+        avgVuln: s.totalVuln / s.count
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [allVistorias]);
+
+  const estadoStats = useMemo(() => {
+    const stats: Record<string, { count: number; totalVuln: number }> = {};
+    allVistorias.forEach(v => {
+      const uf = v.estado || 'NI';
+      if (!stats[uf]) stats[uf] = { count: 0, totalVuln: 0 };
+      stats[uf].count += 1;
+      stats[uf].totalVuln += v.indiceVulnerabilidade;
+    });
+
+    return Object.entries(stats).map(([uf, s]) => ({
+      uf,
+      count: s.count,
+      avgVuln: s.totalVuln / s.count
+    })).sort((a, b) => b.count - a.count);
+  }, [allVistorias]);
+
+  const siteRanking = useMemo(() => {
+    return siteStats.slice(0, 5).map(s => ({ name: s.site, value: s.count }));
+  }, [siteStats]);
 
   // --- Actions ---
   const handleExportExcel = () => {
@@ -290,8 +325,21 @@ export default function VandalismoPainelGestor() {
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:inline">Período:</span>
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estado:</span>
+              <select
+                value={estadoFilter}
+                onChange={(e) => setEstadoFilter(e.target.value)}
+                className="h-8 px-2 rounded-md border border-border bg-muted/30 text-xs focus:outline-none"
+              >
+                <option value="all">Todos</option>
+                {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
+                  <option key={uf} value={uf}>{uf}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex bg-muted p-1 rounded-lg border border-border">
               {(['7', '30', 'month', 'all'] as const).map((opt) => (
                 <button
@@ -447,6 +495,78 @@ export default function VandalismoPainelGestor() {
           </Card>
         </div>
 
+        {/* SITE AND STATE STATS SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="border-none shadow-md bg-card lg:col-span-2">
+            <CardHeader className="pb-2 border-b border-border mb-4">
+              <CardTitle className="text-base font-bold text-foreground">Visão por Site</CardTitle>
+              <CardDescription className="text-xs font-medium text-muted-foreground">Recorrência e Vulnerabilidade Média</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-64">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] uppercase">Site</TableHead>
+                      <TableHead className="text-[10px] uppercase text-center">UF</TableHead>
+                      <TableHead className="text-[10px] uppercase text-center">Vandalismos</TableHead>
+                      <TableHead className="text-[10px] uppercase text-right">Vuln. Média</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {siteStats.map((s) => (
+                      <TableRow key={s.site}>
+                        <TableCell className="font-mono text-xs">{s.site}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="text-[10px] px-1 py-0">{s.estado}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center text-xs font-bold">{s.count}x</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="h-1.5 w-12 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${s.avgVuln > 60 ? 'bg-destructive' : s.avgVuln > 25 ? 'bg-orange-500' : 'bg-emerald-500'}`}
+                                style={{ width: `${s.avgVuln}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] font-bold">{s.avgVuln.toFixed(0)}%</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md bg-card">
+            <CardHeader className="pb-2 border-b border-border mb-4">
+              <CardTitle className="text-base font-bold text-foreground">Visão por Estado</CardTitle>
+              <CardDescription className="text-xs font-medium text-muted-foreground">Ocorrências e Risco por UF</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {estadoStats.map((e) => (
+                <div key={e.uf} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold">{e.uf}</span>
+                    <span className="text-muted-foreground">{e.count} ocorrências</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${e.avgVuln > 50 ? 'bg-destructive' : 'bg-orange-500'}`}
+                        style={{ width: `${e.avgVuln}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold w-8 text-right">{e.avgVuln.toFixed(0)}%</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* DATA TABLE SECTION */}
         <Card className="border-none shadow-md bg-card overflow-hidden">
           <CardHeader className="pb-4 border-b border-border">
@@ -475,6 +595,7 @@ export default function VandalismoPainelGestor() {
                   <TableRow>
                     <TableHead>Data</TableHead>
                     <TableHead>Site</TableHead>
+                    <TableHead>UF</TableHead>
                     <TableHead>Técnico</TableHead>
                     <TableHead>Índice Vuln.</TableHead>
                     <TableHead>BO</TableHead>
@@ -492,6 +613,9 @@ export default function VandalismoPainelGestor() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="font-mono bg-background text-foreground border-border">{v.site_code}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-[10px] px-1 py-0">{v.estado || '-'}</Badge>
                       </TableCell>
                       <TableCell className="text-xs max-w-[150px] truncate text-muted-foreground">
                         {v.tecnico?.split('@')[0] || '-'}
@@ -582,6 +706,10 @@ export default function VandalismoPainelGestor() {
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
                   <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</p>
+                  <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
