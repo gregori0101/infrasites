@@ -88,9 +88,8 @@ export default function Dashboard() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
-  // Determine the operadora filter to use in query
-  // TEL users always see TEL only; VIVO users can filter or see all
-  const effectiveOperadoraFilter = isVivoUser ? filters.operadora : 'TEL';
+  // All users see everything
+  const effectiveOperadoraFilter = filters.operadora;
   
   // Fetch reports using React Query
   const {
