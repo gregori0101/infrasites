@@ -794,33 +794,88 @@ export default function VandalismoPainelGestor() {
 
           <ScrollArea className="flex-1 p-6">
             <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
-                  <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</p>
-                  <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
-                  <p className="text-sm font-medium">{selectedCase?.operadora || '-'}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
-                  <p className="text-sm font-medium">
-                    {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
-                  </p>
-                </div>
-              </div>
+              {isEditing ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Sigla do Site</label>
+                      <Input 
+                        value={editForm.site_code} 
+                        onChange={(e) => setEditForm({...editForm, site_code: e.target.value})}
+                        className="h-8 text-xs font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</label>
+                      <select
+                        value={editForm.estado}
+                        onChange={(e) => setEditForm({...editForm, estado: e.target.value})}
+                        className="w-full h-8 px-2 rounded-md border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                      >
+                        <option value="">Selecione</option>
+                        {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
+                          <option key={uf} value={uf}>{uf}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</label>
+                      <Input 
+                        value={editForm.operadora || ''} 
+                        onChange={(e) => setEditForm({...editForm, operadora: e.target.value})}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</label>
+                      <Input 
+                        value={editForm.tecnico || ''} 
+                        onChange={(e) => setEditForm({...editForm, tecnico: e.target.value})}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Descrição da Ocorrência</h4>
-                <div className="bg-muted/30 p-3 rounded-md border border-border text-sm text-foreground whitespace-pre-wrap">
-                  {selectedCase?.descricao}
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-muted-foreground uppercase font-bold">Descrição da Ocorrência</label>
+                    <textarea 
+                      value={editForm.descricao} 
+                      onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
+                      className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
+                      <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</p>
+                      <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
+                      <p className="text-sm font-medium">{selectedCase?.operadora || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
+                      <p className="text-sm font-medium">
+                        {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Descrição da Ocorrência</h4>
+                    <div className="bg-muted/30 p-3 rounded-md border border-border text-sm text-foreground whitespace-pre-wrap">
+                      {selectedCase?.descricao}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
