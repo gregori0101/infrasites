@@ -190,7 +190,7 @@ export default function CheckVandalismo() {
 
   return (
     <div className="min-h-screen bg-background pb-28">
-      <header className="sticky top-0 z-20 bg-primary text-primary-foreground shadow-md">
+      <header className="sticky top-0 z-20 bg-primary text-primary-foreground shadow-md dark:border-b dark:border-primary/20">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => navigate('/')}>
             <ArrowLeft className="h-5 w-5" />
