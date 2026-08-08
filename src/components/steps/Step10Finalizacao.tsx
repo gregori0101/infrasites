@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, Send, 
-  CheckCircle, Loader2, AlertCircle, Upload, FileDown, Pencil
+  CheckCircle, Loader2, AlertCircle, Upload, FileDown, Pencil, LayoutDashboard, Plus
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
