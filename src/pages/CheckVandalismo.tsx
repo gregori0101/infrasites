@@ -53,6 +53,7 @@ export default function CheckVandalismo() {
   const boInputRef = useRef<HTMLInputElement>(null);
 
   const [siteCode, setSiteCode] = useState('');
+  const [estado, setEstado] = useState('');
   const [descricao, setDescricao] = useState('');
   const [fotosOcorrido, setFotosOcorrido] = useState<string[]>([]);
   const [itens, setItens] = useState<Record<string, VandalismoItemState>>(initialItens);
@@ -72,7 +73,7 @@ export default function CheckVandalismo() {
     [qtdGabinetes],
   );
 
-  const vulneraveisCount = visibleItens.filter((i) => itens[i.key]?.vulneravel).length;
+  const vulneraveisCount = visibleItens.filter((i) => i.key !== 'placa_site' && itens[i.key]?.vulneravel).length;
   const preenchidosCount = visibleItens.filter((i) => (itens[i.key]?.fotos.length ?? 0) >= i.minFotos).length;
 
   const captureGeo = () => {
@@ -115,6 +116,7 @@ export default function CheckVandalismo() {
   };
 
   const validate = (): string | null => {
+    if (!estado) return 'Selecione o Estado.';
     if (!siteCode.trim()) return 'Informe a sigla do site.';
     if (descricao.trim().length < 10) return 'Descreva o vandalismo/furto com pelo menos 10 caracteres.';
     if (fotosOcorrido.length < VANDALISMO_MIN_FOTOS_OCORRIDO)
@@ -136,6 +138,7 @@ export default function CheckVandalismo() {
     try {
       const id = await saveVistoriaVandalismo({
         siteCode,
+        estado,
         descricao,
         operadora: userOperadora ?? null,
         latitude: geo.latitude,
@@ -180,6 +183,7 @@ export default function CheckVandalismo() {
 
   const resetForm = () => {
     setSiteCode('');
+    setEstado('');
     setDescricao('');
     setFotosOcorrido([]);
     setItens(initialItens());
@@ -230,15 +234,34 @@ export default function CheckVandalismo() {
             <CardTitle className="text-base">1. Identificação e Registro do Vandalismo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="site">Sigla do Site *</Label>
-              <Input
-                id="site"
-                value={siteCode}
-                onChange={(e) => setSiteCode(e.target.value.toUpperCase())}
-                placeholder="Ex: PACRE"
-                autoCapitalize="characters"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="estado">Estado (UF) *</Label>
+                <select
+                  id="estado"
+                  value={estado}
+                  onChange={(e) => setEstado(e.target.value)}
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Selecione...</option>
+                  {['PA', 'AM', 'MA', 'AP', 'RR'].map((uf) => (
+                    <option key={uf} value={uf}>
+                      {uf}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="site">Sigla do Site *</Label>
+                <Input
+                  id="site"
+                  value={siteCode}
+                  onChange={(e) => setSiteCode(e.target.value.toUpperCase())}
+                  placeholder="Ex: PACRE"
+                  autoCapitalize="characters"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

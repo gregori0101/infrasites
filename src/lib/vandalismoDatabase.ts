@@ -33,6 +33,7 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     .insert({
       user_id: userId,
       site_code: input.siteCode.trim().toUpperCase(),
+      estado: input.estado.trim().toUpperCase(),
       descricao: input.descricao.trim(),
       operadora: input.operadora ?? null,
       latitude: input.latitude ?? null,
@@ -89,7 +90,7 @@ export async function listVistoriasVandalismo(): Promise<VandalismoVistoria[]> {
   const { data, error } = await supabase
     .from('vandalismo_vistorias')
     .select(
-      'id,user_id,site_code,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
+      'id,user_id,site_code,estado,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
     )
     .order('created_at', { ascending: false })
     .limit(300);
@@ -103,7 +104,7 @@ export async function getVistoriaVandalismo(id: string): Promise<VandalismoVisto
     supabase
       .from('vandalismo_vistorias')
       .select(
-        'id,user_id,site_code,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
+        'id,user_id,site_code,estado,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -165,13 +166,14 @@ export async function listVistoriasComItens(): Promise<VandalismoVistoriaResumo[
 
   return vistorias.map((v) => {
     const itens = (byVistoria.get(v.id) ?? []).sort((a, b) => a.ordem - b.ordem);
-    const vulneraveis = itens.filter((i) => i.vulneravel).length;
+    const filteredItens = itens.filter(i => i.item_key !== 'placa_site');
+    const vulneraveis = filteredItens.filter((i) => i.vulneravel).length;
     return {
       ...v,
       itens,
-      totalItens: itens.length,
+      totalItens: filteredItens.length,
       vulneraveis,
-      indiceVulnerabilidade: itens.length > 0 ? (vulneraveis / itens.length) * 100 : 0,
+      indiceVulnerabilidade: filteredItens.length > 0 ? (vulneraveis / filteredItens.length) * 100 : 0,
     };
   });
 }
