@@ -606,12 +606,15 @@ export default function VandalismoPainelGestor() {
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {selectedCase?.fotos?.map((f, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted">
+                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" onClick={() => window.open(f.url, '_blank')}>
                       <SignedImage 
                         src={f.url} 
-                        className="object-cover w-full h-full" 
+                        className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
                         alt={`Foto ocorrido ${idx + 1}`} 
                       />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                        <span className="text-[10px] text-white font-bold uppercase">Ver Original</span>
+                      </div>
                     </div>
                   ))}
                   {(!selectedCase?.fotos || selectedCase.fotos.length === 0) && (
@@ -634,13 +637,17 @@ export default function VandalismoPainelGestor() {
                           {i.fotos.map((foto, fIdx) => (
                             <div 
                               key={fIdx} 
-                              className="relative aspect-square w-16 h-16 rounded border overflow-hidden bg-muted group/foto"
+                              className="relative aspect-square w-16 h-16 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
+                              onClick={() => window.open(foto, '_blank')}
                             >
                               <SignedImage 
                                 src={foto} 
-                                className="object-cover w-full h-full" 
+                                className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
                                 alt={`${i.rotulo} - ${fIdx + 1}`} 
                               />
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                                <Search className="h-3 w-3 text-white" />
+                              </div>
                             </div>
                           ))}
                         </div>
