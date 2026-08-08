@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   FileText,
+  LayoutDashboard,
   Loader2,
   MapPin,
   Paperclip,
