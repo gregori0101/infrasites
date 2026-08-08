@@ -87,7 +87,7 @@ export default function VandalismoMapa() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="rounded-full" 
+              className="rounded-full hover:bg-muted" 
               onClick={() => navigate('/check-vandalismo/gestor')}
             >
               <ArrowLeft className="h-5 w-5" />
