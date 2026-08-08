@@ -390,10 +390,10 @@ export default function VandalismoPainelGestor() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Vulnerabilidades Críticas</CardTitle>
-              <CardDescription>Itens mais apontados como vulneráveis</CardDescription>
+          <Card className="border-none shadow-md bg-white">
+            <CardHeader className="pb-2 border-b border-slate-50 mb-4">
+              <CardTitle className="text-base font-bold text-slate-900">Vulnerabilidades Críticas</CardTitle>
+              <CardDescription className="text-xs font-medium">Itens com maior incidência</CardDescription>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
