@@ -72,7 +72,7 @@ import {
   Line,
 } from 'recharts';
 import { toast } from 'sonner';
-import { listVistoriasComItens, VandalismoVistoriaResumo, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
+// Removed imports from here as they were moved to top
 import {
   generateVandalismoExcel,
   downloadCasePDF,
@@ -87,7 +87,7 @@ export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('30');
-  const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaResumo | null>(null);
+  const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
 
@@ -481,7 +481,10 @@ export default function VandalismoPainelGestor() {
                 </TableHeader>
                 <TableBody>
                   {filteredData.map((v) => (
-                    <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={() => setSelectedCase(v)}>
+                    <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={async () => {
+                      const full = await getVistoriaVandalismo(v.id);
+                      setSelectedCase(full);
+                    }}>
                       <TableCell className="text-xs font-medium text-foreground">
                         {format(parseISO(v.created_at), 'dd/MM/yyyy HH:mm')}
                       </TableCell>
@@ -523,7 +526,10 @@ export default function VandalismoPainelGestor() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedCase(v)}>
+                              <DropdownMenuItem onClick={async () => {
+                                const full = await getVistoriaVandalismo(v.id);
+                                setSelectedCase(full);
+                              }}>
                                 <Eye className="h-4 w-4 mr-2" /> Visualizar
                               </DropdownMenuItem>
                               {v.bo_url && (
