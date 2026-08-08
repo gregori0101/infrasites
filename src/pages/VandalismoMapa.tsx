@@ -5,7 +5,7 @@ import { listVistoriasComItens, getVistoriaVandalismo } from '@/lib/vandalismoDa
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
