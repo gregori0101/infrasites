@@ -27,13 +27,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createColoredIcon(color: string) {
+function createColoredIcon(color: string, uf: string = '') {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
       background: ${color};
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
       border: 2px solid white;
@@ -42,10 +42,19 @@ function createColoredIcon(color: string) {
       align-items: center;
       justify-content: center;
     ">
+      <div style="
+        transform: rotate(45deg);
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      ">
+        ${uf}
+      </div>
     </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -24],
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 }
 
@@ -231,13 +240,13 @@ export default function VandalismoMapa() {
               <Marker
                 key={v.id}
                 position={[v.latitude!, v.longitude!]}
-                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
+                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.estado)}
               >
                 <Popup>
-                  <div className="space-y-2 min-w-[200px] p-1">
+                  <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-bold text-sm text-primary">{v.site_code}</h3>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted rounded border">{v.estado}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded border border-slate-200 dark:border-slate-700">{v.estado}</span>
                     </div>
                     
                     <div className="flex items-center gap-2">
