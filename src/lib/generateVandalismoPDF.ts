@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
 import { resolveStorageUrl } from '@/lib/storageUrl';
+import { supabase } from '@/integrations/supabase/client';
 
 const PURPLE: [number, number, number] = [102, 0, 153];
 const PURPLE_DARK: [number, number, number] = [75, 0, 115];
