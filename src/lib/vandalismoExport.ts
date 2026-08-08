@@ -22,6 +22,7 @@ export function generateVandalismoExcel(vistorias: VandalismoVistoriaResumo[]): 
   const rows = vistorias.map((v) => {
     const base: Record<string, string | number> = {
       'Sigla do Site': v.site_code,
+      Estado: v.estado ?? '-',
       Data: format(new Date(v.created_at), 'dd/MM/yyyy HH:mm'),
       Técnico: v.tecnico ?? '-',
       Operadora: v.operadora ?? '-',

@@ -35,14 +35,16 @@ export function VandalismoChecklistItem({ def, state, onChange, siteCode, opcion
               {!opcional && faltaFoto && ' — pendente'}
             </p>
           </div>
-          {vulneravel ? (
-            <Badge variant="destructive" className="shrink-0">
-              <ShieldAlert className="h-3 w-3 mr-1" /> Vulnerável
-            </Badge>
-          ) : (
-            <Badge className="shrink-0 bg-emerald-600 hover:bg-emerald-600 text-white">
-              <ShieldCheck className="h-3 w-3 mr-1" /> Não Vulnerável
-            </Badge>
+          {def.key !== 'placa_site' && (
+            vulneravel ? (
+              <Badge variant="destructive" className="shrink-0">
+                <ShieldAlert className="h-3 w-3 mr-1" /> Vulnerável
+              </Badge>
+            ) : (
+              <Badge className="shrink-0 bg-emerald-600 hover:bg-emerald-600 text-white">
+                <ShieldCheck className="h-3 w-3 mr-1" /> Não Vulnerável
+              </Badge>
+            )
           )}
         </div>
 
@@ -63,25 +65,27 @@ export function VandalismoChecklistItem({ def, state, onChange, siteCode, opcion
           className="text-sm"
         />
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant={!vulneravel ? 'default' : 'outline'}
-            className={cn(!vulneravel && 'bg-emerald-600 hover:bg-emerald-700 text-white')}
-            size="sm"
-            onClick={() => onChange({ ...state, vulneravel: false })}
-          >
-            <ShieldCheck className="h-4 w-4 mr-2" /> Não Vulnerável
-          </Button>
-          <Button
-            type="button"
-            variant={vulneravel ? 'destructive' : 'outline'}
-            size="sm"
-            onClick={() => onChange({ ...state, vulneravel: true })}
-          >
-            <ShieldAlert className="h-4 w-4 mr-2" /> Vulnerável
-          </Button>
-        </div>
+        {def.key !== 'placa_site' && (
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant={!vulneravel ? 'default' : 'outline'}
+              className={cn(!vulneravel && 'bg-emerald-600 hover:bg-emerald-700 text-white')}
+              size="sm"
+              onClick={() => onChange({ ...state, vulneravel: false })}
+            >
+              <ShieldCheck className="h-4 w-4 mr-2" /> Não Vulnerável
+            </Button>
+            <Button
+              type="button"
+              variant={vulneravel ? 'destructive' : 'outline'}
+              size="sm"
+              onClick={() => onChange({ ...state, vulneravel: true })}
+            >
+              <ShieldAlert className="h-4 w-4 mr-2" /> Vulnerável
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
