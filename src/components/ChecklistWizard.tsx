@@ -17,8 +17,8 @@ import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Plug, Cable,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus, LogOut, Users,
-  Building2, ClipboardList, Pencil
+  Moon, Sun, History, AlertCircle, FilePlus, LogOut, Users,
+  Building2, Pencil
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -56,7 +56,7 @@ export function ChecklistWizard() {
     clearEditingMode,
   } = useChecklist();
 
-  const { signOut, isGestor, isAdmin, user } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
@@ -206,28 +206,6 @@ export function ChecklistWizard() {
             >
               <FilePlus className="w-4 h-4" />
             </Button>
-            {isGestor && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => navigate('/dashboard')}
-                  title="Dashboard"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => navigate('/atribuicoes')}
-                  title="Atribuir Vistorias"
-                >
-                  <ClipboardList className="w-4 h-4" />
-                </Button>
-              </>
-            )}
             {isAdmin && (
               <>
                 <Button
