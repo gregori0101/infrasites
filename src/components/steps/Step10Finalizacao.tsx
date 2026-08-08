@@ -42,6 +42,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode } = useChecklist();
   const { user, isGestor, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
   const [userOperadora, setUserOperadora] = React.useState<string>('VIVO');
