@@ -308,63 +308,63 @@ export default function VandalismoPainelGestor() {
 
         {/* KPI CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-none shadow-md bg-white overflow-hidden group">
+          <Card className="border-none shadow-md bg-card overflow-hidden group">
             <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
             <CardHeader className="pb-2">
-              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Total de Registros</CardDescription>
-              <CardTitle className="text-4xl font-black text-slate-900">{totalOccurrences}</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Total de Registros</CardDescription>
+              <CardTitle className="text-4xl font-black text-foreground">{totalOccurrences}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-500">Ocorrências totais</span>
+                <span className="text-xs font-medium text-muted-foreground">Ocorrências totais</span>
                 <ShieldAlert className="h-5 w-5 text-primary/20 group-hover:text-primary/40 transition-colors" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md bg-white overflow-hidden group">
+          <Card className="border-none shadow-md bg-card overflow-hidden group">
             <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
             <CardHeader className="pb-2">
-              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Frequência Mensal</CardDescription>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Frequência Mensal</CardDescription>
               <div className="flex items-baseline gap-2">
-                <CardTitle className="text-4xl font-black text-slate-900">{currentMonthCount}</CardTitle>
-                <div className={`text-xs font-bold flex items-center ${monthVariation >= 0 ? 'text-destructive' : 'text-emerald-600'}`}>
+                <CardTitle className="text-4xl font-black text-foreground">{currentMonthCount}</CardTitle>
+                <div className={`text-xs font-bold flex items-center ${monthVariation >= 0 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-500'}`}>
                   {monthVariation >= 0 ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingUp className="h-3 w-3 mr-0.5 rotate-180" />}
                   {monthVariation > 0 ? '+' : ''}{monthVariation.toFixed(0)}%
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <span className="text-xs font-medium text-slate-500">Registros no mês atual</span>
+              <span className="text-xs font-medium text-muted-foreground">Registros no mês atual</span>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md bg-white overflow-hidden group">
+          <Card className="border-none shadow-md bg-card overflow-hidden group">
             <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
             <CardHeader className="pb-2">
-              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Vulnerabilidade Média</CardDescription>
-              <CardTitle className="text-4xl font-black text-slate-900">{avgVulnerability.toFixed(0)}<span className="text-2xl opacity-40">%</span></CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Vulnerabilidade Média</CardDescription>
+              <CardTitle className="text-4xl font-black text-foreground">{avgVulnerability.toFixed(0)}<span className="text-2xl opacity-40">%</span></CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden">
+              <div className="w-full bg-muted h-1.5 rounded-full mt-1 overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-1000 ${avgVulnerability > 50 ? 'bg-destructive' : 'bg-orange-500'}`} 
                   style={{ width: `${avgVulnerability}%` }} 
                 />
               </div>
-              <p className="text-[10px] text-slate-400 mt-2 font-medium">Grau de risco médio das estações</p>
+              <p className="text-[10px] text-muted-foreground mt-2 font-medium">Grau de risco médio das estações</p>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md bg-white overflow-hidden group">
+          <Card className="border-none shadow-md bg-card overflow-hidden group">
             <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
             <CardHeader className="pb-2">
-              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Abrangência Local</CardDescription>
-              <CardTitle className="text-4xl font-black text-slate-900">{new Set(filteredData.map(v => v.site_code)).size}</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Abrangência Local</CardDescription>
+              <CardTitle className="text-4xl font-black text-foreground">{new Set(filteredData.map(v => v.site_code)).size}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-500">Localidades afetadas</span>
+                <span className="text-xs font-medium text-muted-foreground">Localidades afetadas</span>
                 <MapPin className="h-5 w-5 text-emerald-500/20 group-hover:text-emerald-500/40 transition-colors" />
               </div>
             </CardContent>
