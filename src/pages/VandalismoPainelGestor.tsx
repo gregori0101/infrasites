@@ -373,9 +373,9 @@ export default function VandalismoPainelGestor() {
 
         {/* CHARTS SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border-none shadow-md bg-white">
-            <CardHeader className="pb-2 border-b border-slate-50 mb-4">
-              <CardTitle className="text-base font-bold text-slate-900">Histórico Temporal</CardTitle>
+          <Card className="lg:col-span-2 border-none shadow-md bg-card">
+            <CardHeader className="pb-2 border-b border-border mb-4">
+              <CardTitle className="text-base font-bold text-foreground">Histórico Temporal</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
