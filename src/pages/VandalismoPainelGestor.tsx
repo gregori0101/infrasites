@@ -403,7 +403,7 @@ export default function VandalismoPainelGestor() {
                     }}
                     itemStyle={{ color: 'hsl(var(--foreground))' }}
                   />
-                  <Bar dataKey="value" fill="#660099" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
