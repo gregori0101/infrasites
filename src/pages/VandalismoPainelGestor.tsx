@@ -254,11 +254,11 @@ export default function VandalismoPainelGestor() {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button 
               variant="outline" 
-              className="flex-1 sm:flex-none border-slate-200 shadow-sm hover:bg-slate-50" 
+              className="flex-1 sm:flex-none border-border shadow-sm hover:bg-muted/50" 
               onClick={handleExportExcel} 
               disabled={exportingAll}
             >
-              {exportingAll ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2 text-emerald-600" />}
+              {exportingAll ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-500" />}
               Excel
             </Button>
             <Button 
