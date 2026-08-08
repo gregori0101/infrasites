@@ -56,6 +56,34 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground">
                       Checklist de inspeção de sites e gabinetes de telecomunicações
                     </p>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full text-xs font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/checklist");
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-2" />
+                        Checklist
+                      </Button>
+                      {(isAdmin || isGestor) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/dashboard");
+                          }}
+                        >
+                          <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
+                          Painel Gestor
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -74,8 +102,20 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground">
                       Vistoria de estações vandalizadas e registro de vulnerabilidades
                     </p>
-                    {(isAdmin || isGestor) && (
-                      <div className="mt-4 flex gap-2">
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full text-xs font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/check-vandalismo");
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-2" />
+                        Checklist
+                      </Button>
+                      {(isAdmin || isGestor) && (
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -88,8 +128,8 @@ export default function Home() {
                           <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
                           Painel Gestor
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -109,6 +149,34 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground">
                       Auditoria de ordens de serviço
                     </p>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full text-xs font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/auditoria");
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-2" />
+                        Checklist
+                      </Button>
+                      {(isAdmin || isGestor) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/auditoria/dashboard");
+                          }}
+                        >
+                          <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
+                          Painel Gestor
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -127,9 +195,38 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground">
                       Registro e auditoria de reparos de fibra óptica
                     </p>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full text-xs font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/auditoria-ta/novo-registro");
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-2" />
+                        Checklist
+                      </Button>
+                      {(isAdmin || isGestor) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/auditoria-ta/admin");
+                          }}
+                        >
+                          <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
+                          Painel Gestor
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+
 
               {/* Painel de Monitoramento */}
               <Card
