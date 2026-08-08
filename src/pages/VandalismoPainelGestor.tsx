@@ -372,8 +372,8 @@ export default function VandalismoPainelGestor() {
         </div>
 
         {/* CHARTS SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border-none shadow-md bg-card">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="border-none shadow-md bg-card">
             <CardHeader className="pb-2 border-b border-border mb-4">
               <CardTitle className="text-base font-bold text-foreground">Histórico Temporal</CardTitle>
             </CardHeader>
@@ -411,25 +411,23 @@ export default function VandalismoPainelGestor() {
 
           <Card className="border-none shadow-md bg-card">
             <CardHeader className="pb-2 border-b border-border mb-4">
-              <CardTitle className="text-base font-bold text-foreground">Vulnerabilidades Críticas</CardTitle>
-              <CardDescription className="text-xs font-medium text-muted-foreground">Itens com maior incidência</CardDescription>
+              <CardTitle className="text-base font-bold text-foreground">Ranking de Localidades</CardTitle>
+              <CardDescription className="text-xs font-medium text-muted-foreground">Sites com mais ocorrências</CardDescription>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={vulnStats}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {vulnStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
+                <BarChart data={siteRanking} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                  <XAxis type="number" hide />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    width={80}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
@@ -438,19 +436,9 @@ export default function VandalismoPainelGestor() {
                       borderRadius: '8px'
                     }}
                   />
-                </PieChart>
+                  <Bar dataKey="value" fill="hsl(var(--orange-500))" radius={[0, 4, 4, 0]} />
+                </BarChart>
               </ResponsiveContainer>
-              <div className="mt-2 space-y-1">
-                {vulnStats.slice(0, 3).map((s, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i] }} />
-                      <span className="truncate w-32 text-muted-foreground font-medium">{s.name}</span>
-                    </span>
-                    <span className="font-bold text-foreground">{s.value}</span>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
         </div>
