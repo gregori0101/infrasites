@@ -312,6 +312,17 @@ export default function VandalismoPainelGestor() {
     setIsEditing(true);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
+    try {
+      await deleteVistoriaVandalismo(id);
+      toast.success('Vistoria excluída');
+      refetch();
+    } catch (err) {
+      toast.error('Erro ao excluir');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <header className="bg-card border-b sticky top-0 z-30">
