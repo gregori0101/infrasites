@@ -21,11 +21,21 @@ import {
   Trash2,
   MapPin,
   Image as ImageIcon,
+  Edit,
+  Save,
+  X,
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { SignedImage } from '@/components/ui/signed-image';
-import { VandalismoVistoriaResumo, getVistoriaVandalismo, deleteVistoriaVandalismo, listVistoriasComItens } from '@/lib/vandalismoDatabase';
+import { 
+  VandalismoVistoriaResumo, 
+  getVistoriaVandalismo, 
+  deleteVistoriaVandalismo, 
+  listVistoriasComItens,
+  updateVistoriaVandalismo,
+  updateVistoriaItem
+} from '@/lib/vandalismoDatabase';
 import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
 import {
   Card,
