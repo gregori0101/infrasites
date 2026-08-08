@@ -442,20 +442,6 @@ export default function VandalismoPainelGestor() {
             </CardContent>
           </Card>
         </div>
-              <div className="mt-2 space-y-1">
-                {vulnStats.slice(0, 3).map((s, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i] }} />
-                      <span className="truncate w-32 text-muted-foreground font-medium">{s.name}</span>
-                    </span>
-                    <span className="font-bold text-foreground">{s.value}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* DATA TABLE SECTION */}
         <Card className="border-none shadow-md bg-card overflow-hidden">
