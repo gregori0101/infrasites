@@ -23,6 +23,7 @@ export interface VandalismoVistoria {
   latitude: number | null;
   longitude: number | null;
   endereco: string | null;
+  estado: string | null;
   bo_url: string | null;
   bo_nome: string | null;
   tecnico: string | null;

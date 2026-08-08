@@ -18,6 +18,7 @@ interface SaveVistoriaInput {
   boUrl?: string | null;
   boNome?: string | null;
   tecnico?: string | null;
+  estado: string | null;
   fotosOcorrido: string[];
   itens: Record<string, VandalismoItemState>;
 }
@@ -137,6 +138,7 @@ export interface VandalismoVistoriaResumo extends VandalismoVistoria {
   totalItens: number;
   vulneraveis: number;
   indiceVulnerabilidade: number;
+  estado: string | null;
 }
 
 /** Fetch all vistorias with their checklist items (for the manager dashboard). */
