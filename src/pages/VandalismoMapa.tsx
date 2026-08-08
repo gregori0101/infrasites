@@ -80,7 +80,7 @@ export default function VandalismoMapa() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen overflow-hidden bg-background flex flex-col">
       <header className="bg-card border-b px-4 py-4 sticky top-0 z-[1001]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -119,7 +119,7 @@ export default function VandalismoMapa() {
         </div>
       </header>
 
-      <main className="flex-1 relative z-0">
+      <main className="flex-1 min-h-0 relative z-0">
         {vistoriasComLocalizacao.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-muted-foreground">
             <div className="max-w-xs">
@@ -139,8 +139,12 @@ export default function VandalismoMapa() {
           <MapContainer
             center={center}
             zoom={5}
+            className="h-full w-full"
             style={{ height: '100%', width: '100%' }}
             scrollWheelZoom
+            whenReady={() => {
+              setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+            }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
