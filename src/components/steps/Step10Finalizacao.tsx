@@ -40,12 +40,13 @@ interface Step10Props {
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode } = useChecklist();
-  const { user } = useAuth();
+  const { user, isGestor, isAdmin } = useAuth();
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
   const [userOperadora, setUserOperadora] = React.useState<string>('VIVO');
   const [showDownloadDialog, setShowDownloadDialog] = React.useState(false);
   const [downloadPdfOption, setDownloadPdfOption] = React.useState<boolean | null>(null);
+  const [showCompletionActions, setShowCompletionActions] = React.useState(false);
 
   const progress = calculateProgress();
 
