@@ -60,6 +60,25 @@ export default function Home() {
                 </CardContent>
               </Card>
 
+              {/* Check Vandalismo */}
+              <Card
+                className="cursor-pointer border-2 border-transparent hover:border-destructive/50 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                onClick={() => navigate("/check-vandalismo")}
+              >
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="flex-shrink-0 h-14 w-14 rounded-xl bg-destructive/10 flex items-center justify-center">
+                    <ShieldAlert className="h-7 w-7 text-destructive" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-semibold text-lg text-foreground">Check Vandalismo</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Vistoria de estações vandalizadas e registro de vulnerabilidades
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+
               {/* Auditoria OS */}
               <Card
                 className="cursor-pointer border-2 border-transparent hover:border-primary/50 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
