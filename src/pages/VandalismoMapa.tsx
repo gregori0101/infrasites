@@ -88,9 +88,19 @@ export default function VandalismoMapa() {
               variant="ghost" 
               size="icon" 
               className="rounded-full hover:bg-muted" 
-              onClick={() => navigate('/check-vandalismo/gestor')}
+              onClick={() => navigate('/')}
+              title="Voltar para Início"
             >
               <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full hover:bg-muted" 
+              onClick={() => navigate('/check-vandalismo/gestor')}
+              title="Voltar para o Painel"
+            >
+              <LayoutDashboard className="h-5 w-5" />
             </Button>
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
