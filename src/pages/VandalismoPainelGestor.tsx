@@ -275,28 +275,28 @@ export default function VandalismoPainelGestor() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* FILTERS SECTION */}
-        <section className="bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <section className="bg-card p-4 rounded-xl shadow-sm border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-96 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Buscar por site, técnico ou descrição..."
-              className="pl-9 bg-slate-50 border-transparent focus:bg-white transition-all"
+              className="pl-9 bg-muted/30 border-transparent focus:bg-background transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">Período:</span>
-            <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:inline">Período:</span>
+            <div className="flex bg-muted p-1 rounded-lg border border-border">
               {(['7', '30', 'month', 'all'] as const).map((opt) => (
                 <button
                   key={opt}
                   onClick={() => setDateFilter(opt)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                     dateFilter === opt 
-                    ? 'bg-white text-primary shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-card text-primary shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {opt === '7' ? '7D' : opt === '30' ? '30D' : opt === 'month' ? 'Mês' : 'Tudo'}
