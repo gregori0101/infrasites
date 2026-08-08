@@ -140,6 +140,7 @@ export interface VandalismoVistoriaResumo extends VandalismoVistoria {
   vulneraveis: number;
   indiceVulnerabilidade: number;
   estado: string | null;
+  totalAnterior?: number;
 }
 
 /** Fetch all vistorias with their checklist items (for the manager dashboard). */
@@ -166,11 +167,20 @@ export async function listVistoriasComItens(): Promise<VandalismoVistoriaResumo[
 
   return vistorias.map((v) => {
     const itens = (byVistoria.get(v.id) ?? []).sort((a, b) => a.ordem - b.ordem);
+    // Site plate photo does not enter the denominator for vulnerability calculation (%)
     const filteredItens = itens.filter(i => i.item_key !== 'placa_site');
     const vulneraveis = filteredItens.filter((i) => i.vulneravel).length;
+    
+    // Calculate previous occurrences for the same site
+    const anterior = vistorias.filter(prev => 
+      prev.site_code === v.site_code && 
+      new Date(prev.created_at) < new Date(v.created_at)
+    ).length;
+
     return {
       ...v,
       itens,
+      totalAnterior: anterior,
       totalItens: filteredItens.length,
       vulneraveis,
       indiceVulnerabilidade: filteredItens.length > 0 ? (vulneraveis / filteredItens.length) * 100 : 0,

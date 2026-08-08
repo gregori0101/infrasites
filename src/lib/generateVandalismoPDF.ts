@@ -136,6 +136,16 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
   field('Operadora', data.operadora ?? '-');
   field('Tecnico', data.tecnico ?? '-');
   field('Data', format(new Date(data.created_at), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR }));
+  
+  // Fetch previous occurrences for the PDF
+  const { data: previousData } = await supabase
+    .from('vandalismo_vistorias')
+    .select('id', { count: 'exact' })
+    .eq('site_code', data.site_code)
+    .lt('created_at', data.created_at);
+  
+  field('Vandalismos Anteriores', (previousData?.length || 0).toString());
+
   if (data.endereco) field('Endereco', data.endereco);
   if (data.latitude != null && data.longitude != null) {
     field('Coordenadas', `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`);
