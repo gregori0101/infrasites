@@ -61,15 +61,14 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { userOperadora, isAdmin, isGestor } = useAuth();
   const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
-  // TEL users can only see TEL reports; VIVO users can see all by default
-  const isVivoUser = userOperadora === 'VIVO';
+  // All users see everything by default
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: { from: undefined, to: undefined },
     technician: "",
     stateUf: "all",
     status: "all",
     siteType: "all",
-    operadora: isVivoUser ? "all" : "TEL", // TEL users default to TEL only
+    operadora: "all", 
     areaAtuacao: "all",
     siteCode: "",
     municipio: "all",
@@ -89,9 +88,8 @@ export default function Dashboard() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
-  // Determine the operadora filter to use in query
-  // TEL users always see TEL only; VIVO users can filter or see all
-  const effectiveOperadoraFilter = isVivoUser ? filters.operadora : 'TEL';
+  // All users see everything
+  const effectiveOperadoraFilter = filters.operadora;
   
   // Fetch reports using React Query
   const {
@@ -711,7 +709,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard Executivo</h1>
                 <Badge variant="outline" className="text-xs font-semibold border-primary/30 text-primary">
-                  {!isVivoUser ? "TEL" : filters.operadora === "all" ? "Todas" : filters.operadora}
+                  {filters.operadora === "all" ? "Todas" : filters.operadora}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">Análise completa da infraestrutura de telecomunicações</p>
@@ -735,7 +733,7 @@ export default function Dashboard() {
             uniqueSiteTypes={uniqueSiteTypes}
             uniqueSiteCodes={uniqueSiteCodes}
             uniqueMunicipios={uniqueMunicipios}
-            showOperadoraFilter={isVivoUser}
+            showOperadoraFilter={true}
             showAreaAtuacaoFilter={false}
           />
 
@@ -761,7 +759,7 @@ export default function Dashboard() {
               <FileSearch className="w-16 h-16 text-muted-foreground/40 mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma vistoria encontrada</h3>
               <p className="text-muted-foreground max-w-md">
-                Nenhuma vistoria encontrada para a empresa <strong>{!isVivoUser ? "TEL" : filters.operadora === "all" ? "todas" : filters.operadora}</strong>. As vistorias aparecerão aqui conforme forem realizadas pelos técnicos.
+                Nenhuma vistoria encontrada para a empresa <strong>{filters.operadora === "all" ? "todas" : filters.operadora}</strong>. As vistorias aparecerão aqui conforme forem realizadas pelos técnicos.
               </p>
             </div>
           )}

@@ -72,7 +72,7 @@ export default function ReportsHistory() {
   const [stateFilter, setStateFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [operadoraFilter, setOperadoraFilter] = useState<"all" | "VIVO" | "TEL">(isVivoUser ? "all" : "TEL");
+  const [operadoraFilter, setOperadoraFilter] = useState<"all" | "VIVO" | "TEL">("all");
   const [currentPage, setCurrentPage] = useState(1);
   // Applied filters (only update when user clicks "Filtrar")
   const [appliedFilters, setAppliedFilters] = useState({
@@ -80,7 +80,7 @@ export default function ReportsHistory() {
     stateUf: "",
     startDate: "",
     endDate: "",
-    operadora: isVivoUser ? "all" : "TEL",
+    operadora: "all",
   });
 
   // TanStack Query for robust data fetching with retries
@@ -132,13 +132,13 @@ export default function ReportsHistory() {
     setStateFilter("");
     setDateFrom("");
     setDateTo("");
-    setOperadoraFilter(isVivoUser ? "all" : "TEL");
+    setOperadoraFilter("all");
     setAppliedFilters({
       siteCode: "",
       stateUf: "",
       startDate: "",
       endDate: "",
-      operadora: isVivoUser ? "all" : "TEL",
+      operadora: "all",
     });
   };
 
@@ -364,7 +364,7 @@ export default function ReportsHistory() {
               </div>
             </div>
             {/* Operadora Filter - only for VIVO users */}
-            {isVivoUser && (
+            {true && (
               <div className="space-y-1">
                 <Label className="text-xs">Operadora</Label>
                 <Select value={operadoraFilter} onValueChange={(val) => setOperadoraFilter(val as "all" | "VIVO" | "TEL")}>
