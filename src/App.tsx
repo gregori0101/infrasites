@@ -30,6 +30,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
+const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Fiber Guardian pages
