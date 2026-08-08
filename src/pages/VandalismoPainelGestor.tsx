@@ -225,118 +225,146 @@ export default function VandalismoPainelGestor() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      <header className="bg-primary text-primary-foreground shadow-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => navigate('/')}>
-              <ArrowLeft className="h-5 w-5" />
+    <div className="min-h-screen bg-slate-50/50 pb-20">
+      <header className="bg-white border-b sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full hover:bg-slate-100" 
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <LayoutDashboard className="h-5 w-5" />
-                Painel Gestor - Vandalismo
-              </h1>
-              <p className="text-xs opacity-80">Controle operacional e indicadores estratégicos</p>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary/10 p-1.5 rounded-lg">
+                  <LayoutDashboard className="h-5 w-5 text-primary" />
+                </div>
+                <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Painel de Gestão
+                </h1>
+              </div>
+              <p className="text-sm text-slate-500 font-medium">Controle de Vandalismo & Vulnerabilidades</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-white/10 hover:bg-white/20 border-white/20 text-white" onClick={handleExportExcel} disabled={exportingAll}>
-              {exportingAll ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}
-              Excel Completo
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              className="flex-1 sm:flex-none border-slate-200 shadow-sm hover:bg-slate-50" 
+              onClick={handleExportExcel} 
+              disabled={exportingAll}
+            >
+              {exportingAll ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2 text-emerald-600" />}
+              Excel
             </Button>
-            <Button variant="outline" size="sm" className="bg-white/10 hover:bg-white/20 border-white/20 text-white" onClick={handleExportZip} disabled={exportingZip}>
+            <Button 
+              className="flex-1 sm:flex-none shadow-sm" 
+              onClick={handleExportZip} 
+              disabled={exportingZip}
+            >
               {exportingZip ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-              ZIP Relatórios
+              Relatórios ZIP
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* FILTERS */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+        {/* FILTERS SECTION */}
+        <section className="bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-96 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
             <Input
-              placeholder="Buscar site, técnico ou descrição..."
-              className="pl-9"
+              placeholder="Buscar por site, técnico ou descrição..."
+              className="pl-9 bg-slate-50 border-transparent focus:bg-white transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <Filter className="h-4 w-4 text-muted-foreground mr-1" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  {dateFilter === '7' ? 'Últimos 7 dias' :
-                   dateFilter === '30' ? 'Últimos 30 dias' :
-                   dateFilter === 'month' ? 'Mês atual' :
-                   dateFilter === 'year' ? 'Este ano' : 'Todo o período'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setDateFilter('7')}>Últimos 7 dias</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDateFilter('30')}>Últimos 30 dias</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDateFilter('month')}>Mês atual</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDateFilter('year')}>Este ano</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDateFilter('all')}>Todo o período</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">Período:</span>
+            <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+              {(['7', '30', 'month', 'all'] as const).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setDateFilter(opt)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    dateFilter === opt 
+                    ? 'bg-white text-primary shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {opt === '7' ? '7D' : opt === '30' ? '30D' : opt === 'month' ? 'Mês' : 'Tudo'}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* KPI CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-none shadow-md bg-white overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
             <CardHeader className="pb-2">
-              <CardDescription>Total Ocorrências</CardDescription>
-              <CardTitle className="text-3xl font-bold">{totalOccurrences}</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Total de Registros</CardDescription>
+              <CardTitle className="text-4xl font-black text-slate-900">{totalOccurrences}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-muted-foreground flex items-center gap-1">
-                <ShieldAlert className="h-3 w-3 text-destructive" />
-                Registros no sistema
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-500">Ocorrências totais</span>
+                <ShieldAlert className="h-5 w-5 text-primary/20 group-hover:text-primary/40 transition-colors" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-md bg-white overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
             <CardHeader className="pb-2">
-              <CardDescription>Ocorrências (Mês)</CardDescription>
-              <CardTitle className="text-3xl font-bold">{currentMonthCount}</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Frequência Mensal</CardDescription>
+              <div className="flex items-baseline gap-2">
+                <CardTitle className="text-4xl font-black text-slate-900">{currentMonthCount}</CardTitle>
+                <div className={`text-xs font-bold flex items-center ${monthVariation >= 0 ? 'text-destructive' : 'text-emerald-600'}`}>
+                  {monthVariation >= 0 ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingUp className="h-3 w-3 mr-0.5 rotate-180" />}
+                  {monthVariation > 0 ? '+' : ''}{monthVariation.toFixed(0)}%
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-xs flex items-center gap-1 ${monthVariation >= 0 ? 'text-destructive' : 'text-emerald-600'}`}>
-                <TrendingUp className={`h-3 w-3 ${monthVariation < 0 ? 'rotate-180' : ''}`} />
-                {monthVariation > 0 ? '+' : ''}{monthVariation.toFixed(1)}% vs mês anterior
-              </div>
+              <span className="text-xs font-medium text-slate-500">Registros no mês atual</span>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-md bg-white overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
             <CardHeader className="pb-2">
-              <CardDescription>Vulnerabilidade Média</CardDescription>
-              <CardTitle className="text-3xl font-bold">{avgVulnerability.toFixed(1)}%</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Vulnerabilidade Média</CardDescription>
+              <CardTitle className="text-4xl font-black text-slate-900">{avgVulnerability.toFixed(0)}<span className="text-2xl opacity-40">%</span></CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-muted-foreground">
-                Média de pontos frágeis por site
+              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-1000 ${avgVulnerability > 50 ? 'bg-destructive' : 'bg-orange-500'}`} 
+                  style={{ width: `${avgVulnerability}%` }} 
+                />
               </div>
+              <p className="text-[10px] text-slate-400 mt-2 font-medium">Grau de risco médio das estações</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-md bg-white overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
             <CardHeader className="pb-2">
-              <CardDescription>Sites Atingidos</CardDescription>
-              <CardTitle className="text-3xl font-bold">{new Set(filteredData.map(v => v.site_code)).size}</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">Abrangência Local</CardDescription>
+              <CardTitle className="text-4xl font-black text-slate-900">{new Set(filteredData.map(v => v.site_code)).size}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-muted-foreground">
-                Localidades distintas com registros
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-500">Localidades afetadas</span>
+                <MapPin className="h-5 w-5 text-emerald-500/20 group-hover:text-emerald-500/40 transition-colors" />
               </div>
             </CardContent>
           </Card>
