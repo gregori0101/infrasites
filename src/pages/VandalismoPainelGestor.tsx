@@ -483,75 +483,8 @@ export default function VandalismoPainelGestor() {
         </div>
 
         {/* CHARTS SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-none shadow-md bg-card">
-            <CardHeader className="pb-2 border-b border-border mb-4">
-              <CardTitle className="text-base font-bold text-foreground">Histórico Temporal</CardTitle>
-            </CardHeader>
-            <CardContent className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={historyData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="name" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <YAxis 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      borderColor: 'hsl(var(--border))',
-                      color: 'hsl(var(--foreground))',
-                      borderRadius: '8px'
-                    }}
-                    itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={30} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-md bg-card">
-            <CardHeader className="pb-2 border-b border-border mb-4">
-              <CardTitle className="text-base font-bold text-foreground">Ranking de Localidades</CardTitle>
-              <CardDescription className="text-xs font-medium text-muted-foreground">Sites com mais ocorrências</CardDescription>
-            </CardHeader>
-            <CardContent className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={siteRanking} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-                  <XAxis type="number" hide />
-                  <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    width={80}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      borderColor: 'hsl(var(--border))',
-                      color: 'hsl(var(--foreground))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 gap-6">
+          {/* O painel de Ranking de Localidades e Histórico Temporal foi removido conforme solicitado */}
         </div>
 
         {/* SITE AND STATE STATS SECTION */}
