@@ -768,9 +768,26 @@ export default function VandalismoPainelGestor() {
                 </DialogDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" onClick={() => selectedCase && downloadCasePDF(selectedCase.id, selectedCase.site_code)}>
-                  <FileText className="h-4 w-4 mr-2" /> PDF
-                </Button>
+                {!isEditing ? (
+                  <>
+                    <Button size="sm" variant="outline" onClick={startEditing}>
+                      <Edit className="h-4 w-4 mr-2" /> Editar
+                    </Button>
+                    <Button size="sm" onClick={() => selectedCase && downloadCasePDF(selectedCase.id, selectedCase.site_code)}>
+                      <FileText className="h-4 w-4 mr-2" /> PDF
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>
+                      <X className="h-4 w-4 mr-2" /> Cancelar
+                    </Button>
+                    <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
+                      {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                      Salvar
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </DialogHeader>
