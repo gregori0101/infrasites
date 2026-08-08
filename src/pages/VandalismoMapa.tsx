@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { listVistoriasComItens } from '@/lib/vandalismoDatabase';
+import { listVistoriasComItens, getVistoriaVandalismo } from '@/lib/vandalismoDatabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, ArrowLeft, Maximize2, ShieldAlert } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -49,10 +49,11 @@ export default function VandalismoMapa() {
   const { data: vistorias = [], isLoading } = useQuery({
     queryKey: ['vandalismo_gestor'],
     queryFn: listVistoriasComItens,
+    refetchOnWindowFocus: false
   });
 
   const vistoriasComLocalizacao = useMemo(() => {
-    return vistorias.filter(v => v.latitude && v.longitude);
+    return vistorias.filter(v => v.latitude != null && v.longitude != null);
   }, [vistorias]);
 
   const filteredData = useMemo(() => {
@@ -61,7 +62,7 @@ export default function VandalismoMapa() {
   }, [vistoriasComLocalizacao, estadoFilter]);
 
   const center = useMemo<[number, number]>(() => {
-    if (filteredData.length === 0) return [-2.5, -50.0]; // Northern Brazil approx center
+    if (filteredData.length === 0) return [-2.5, -50.0];
     const avgLat = filteredData.reduce((a, v) => a + (v.latitude || 0), 0) / filteredData.length;
     const avgLng = filteredData.reduce((a, v) => a + (v.longitude || 0), 0) / filteredData.length;
     return [avgLat, avgLng];
@@ -70,14 +71,17 @@ export default function VandalismoMapa() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground animate-pulse">Carregando mapa de ocorrências...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="bg-card border-b px-4 py-4 sticky top-0 z-30">
+      <header className="bg-card border-b px-4 py-4 sticky top-0 z-[1001]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button 
@@ -102,7 +106,7 @@ export default function VandalismoMapa() {
               <SelectTrigger className="w-32 h-9">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1002]">
                 <SelectItem value="all">Todos ({vistoriasComLocalizacao.length})</SelectItem>
                 {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
                   <SelectItem key={uf} value={uf}>
@@ -115,7 +119,7 @@ export default function VandalismoMapa() {
         </div>
       </header>
 
-      <main className="flex-1 relative">
+      <main className="flex-1 relative z-0">
         {vistoriasComLocalizacao.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-muted-foreground">
             <div className="max-w-xs">
@@ -149,7 +153,7 @@ export default function VandalismoMapa() {
                 icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
               >
                 <Popup>
-                  <div className="space-y-2 min-w-[200px]">
+                  <div className="space-y-2 min-w-[200px] p-1">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-bold text-sm text-primary">{v.site_code}</h3>
                       <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted rounded border">{v.estado}</span>
@@ -165,28 +169,31 @@ export default function VandalismoMapa() {
                       <span className="text-[10px] font-black">{v.indiceVulnerabilidade.toFixed(0)}%</span>
                     </div>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2 italic">
                       {v.descricao || 'Sem descrição'}
                     </p>
 
-                    <div className="pt-1 flex flex-col gap-1">
-                       <span className="text-[10px] text-muted-foreground">
-                        {v.tecnico?.split('@')[0]} • {format(parseISO(v.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
-                      </span>
+                    <div className="pt-1 border-t border-border mt-2 space-y-1">
+                       <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <span className="font-semibold text-foreground">{v.tecnico?.split('@')[0]}</span>
+                        <span>•</span>
+                        <span>{format(parseISO(v.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
+                      </div>
                       {v.endereco && (
-                        <span className="text-[10px] flex items-center gap-1">
-                          <MapPin className="h-2 w-2" /> {v.endereco}
-                        </span>
+                        <div className="text-[10px] flex items-start gap-1 text-muted-foreground">
+                          <MapPin className="h-2 w-2 mt-0.5 shrink-0" /> 
+                          <span className="truncate">{v.endereco}</span>
+                        </div>
                       )}
                     </div>
 
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="w-full mt-2 h-7 text-[10px]"
+                      className="w-full mt-2 h-8 text-[11px] font-bold"
                       onClick={() => navigate('/check-vandalismo/gestor')}
                     >
-                      <ShieldAlert className="h-3 w-3 mr-1" /> Ver no Painel
+                      <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes no Painel
                     </Button>
                   </div>
                 </Popup>
@@ -196,19 +203,22 @@ export default function VandalismoMapa() {
         )}
       </main>
 
-      {/* Legend */}
-      <div className="bg-card border-t p-3 flex flex-wrap justify-center gap-4 text-[10px] font-bold uppercase tracking-wider">
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-full bg-emerald-500" />
-          <span>Baixo Risco</span>
+      <div className="bg-card border-t p-3 flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest relative z-[1001]">
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-emerald-500 border border-white shadow-sm" />
+          <span className="text-muted-foreground">Baixo Risco</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-full bg-orange-500" />
-          <span>Risco Médio</span>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-orange-500 border border-white shadow-sm" />
+          <span className="text-muted-foreground">Risco Médio</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-full bg-destructive" />
-          <span>Alto Risco</span>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-destructive border border-white shadow-sm" />
+          <span className="text-muted-foreground">Alto Risco</span>
+        </div>
+        <div className="hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 bg-muted/50 rounded-full">
+          <Info className="h-3 w-3 text-primary" />
+          <span className="text-muted-foreground normal-case font-medium">Clique nos marcadores para detalhes</span>
         </div>
       </div>
     </div>
