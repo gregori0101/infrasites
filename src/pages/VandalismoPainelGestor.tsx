@@ -266,15 +266,50 @@ export default function VandalismoPainelGestor() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
+  const handleSaveEdit = async () => {
+    if (!selectedCase) return;
+    setIsSaving(true);
     try {
-      await deleteVistoriaVandalismo(id);
-      toast.success('Vistoria excluída');
+      await updateVistoriaVandalismo(selectedCase.id, {
+        siteCode: editForm.site_code,
+        descricao: editForm.descricao,
+        operadora: editForm.operadora,
+        tecnico: editForm.tecnico,
+        estado: editForm.estado,
+      });
+
+      // Update items if modified
+      for (const item of editForm.itens || []) {
+        const original = selectedCase.itens.find(i => i.id === item.id);
+        if (original && (original.vulneravel !== item.vulneravel || original.observacao !== item.observacao)) {
+          await updateVistoriaItem(item.id, item.vulneravel, item.observacao);
+        }
+      }
+
+      toast.success('Informações atualizadas com sucesso');
+      setIsEditing(false);
       refetch();
-    } catch (err) {
-      toast.error('Erro ao excluir');
+      // Refresh current selected case view
+      const updated = await getVistoriaVandalismo(selectedCase.id);
+      setSelectedCase(updated);
+    } catch (err: any) {
+      toast.error('Erro ao salvar: ' + err.message);
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const startEditing = () => {
+    if (!selectedCase) return;
+    setEditForm({
+      site_code: selectedCase.site_code,
+      descricao: selectedCase.descricao,
+      operadora: selectedCase.operadora,
+      tecnico: selectedCase.tecnico,
+      estado: selectedCase.estado,
+      itens: selectedCase.itens.map(i => ({ ...i }))
+    });
+    setIsEditing(true);
   };
 
   return (
