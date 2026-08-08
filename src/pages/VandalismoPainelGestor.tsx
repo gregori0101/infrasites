@@ -22,9 +22,11 @@ import {
   MapPin,
   Image as ImageIcon,
 } from 'lucide-react';
-import { SignedImage } from '@/components/ui/signed-image';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SignedImage } from '@/components/ui/signed-image';
+import { VandalismoVistoriaResumo, getVistoriaVandalismo, deleteVistoriaVandalismo, listVistoriasComItens } from '@/lib/vandalismoDatabase';
+import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
 import {
   Card,
   CardContent,
