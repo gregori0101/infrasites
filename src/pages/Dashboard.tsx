@@ -61,15 +61,14 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { userOperadora, isAdmin, isGestor } = useAuth();
   const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
-  // TEL users can only see TEL reports; VIVO users can see all by default
-  const isVivoUser = userOperadora === 'VIVO';
+  // All users see everything by default
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: { from: undefined, to: undefined },
     technician: "",
     stateUf: "all",
     status: "all",
     siteType: "all",
-    operadora: isVivoUser ? "all" : "TEL", // TEL users default to TEL only
+    operadora: "all", 
     areaAtuacao: "all",
     siteCode: "",
     municipio: "all",
