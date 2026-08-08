@@ -60,18 +60,20 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     if (fotosError) throw new Error(`Falha ao salvar fotos: ${fotosError.message}`);
   }
 
-  const itensRows = VANDALISMO_ITENS.map((def, index) => {
+  const itensRows = VANDALISMO_ITENS.flatMap((def, index) => {
     const state = input.itens[def.key];
-    if (!state || (state.fotos.length === 0 && !state.vulneravel)) return null;
-    return {
-      vistoria_id: vistoriaId,
-      item_key: def.key,
-      rotulo: def.rotulo,
-      vulneravel: state.vulneravel,
-      fotos: state.fotos,
-      ordem: index,
-    };
-  }).filter(Boolean) as Array<Record<string, unknown>>;
+    if (!state || (state.fotos.length === 0 && !state.vulneravel)) return [];
+    return [
+      {
+        vistoria_id: vistoriaId,
+        item_key: def.key,
+        rotulo: def.rotulo,
+        vulneravel: state.vulneravel,
+        fotos: state.fotos,
+        ordem: index,
+      },
+    ];
+  });
 
   if (itensRows.length > 0) {
     const { error: itensError } = await supabase.from('vandalismo_itens').insert(itensRows);
