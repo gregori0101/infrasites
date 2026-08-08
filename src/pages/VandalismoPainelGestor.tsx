@@ -904,34 +904,68 @@ export default function VandalismoPainelGestor() {
               <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-destructive pl-2 text-foreground">Vulnerabilidades Identificadas</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {selectedCase?.itens.map((i, idx) => (
-                    <div key={idx} className={`flex items-start justify-between p-2 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 dark:bg-destructive/10 border-destructive/20' : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'}`}>
-                      <div className="flex-1">
-                        <span className="font-medium text-foreground">{i.rotulo}</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {i.fotos.map((foto, fIdx) => (
-                            <div 
-                              key={fIdx} 
-                              className="relative aspect-square w-16 h-16 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
-                              onClick={() => window.open(foto, '_blank')}
+                  {(isEditing ? editForm.itens : selectedCase?.itens)?.map((i: any, idx: number) => (
+                    <div key={idx} className={`flex flex-col p-3 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 dark:bg-destructive/10 border-destructive/20' : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'}`}>
+                      <div className="flex items-start justify-between">
+                        <span className="font-bold text-foreground">{i.rotulo}</span>
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground">Vulnerável?</span>
+                            <button
+                              onClick={() => {
+                                const newItens = [...editForm.itens];
+                                newItens[idx].vulneravel = !newItens[idx].vulneravel;
+                                setEditForm({ ...editForm, itens: newItens });
+                              }}
+                              className={`w-10 h-5 rounded-full relative transition-colors ${i.vulneravel ? 'bg-destructive' : 'bg-emerald-500'}`}
                             >
-                              <SignedImage 
-                                src={foto} 
-                                className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
-                                alt={`${i.rotulo} - ${fIdx + 1}`} 
-                              />
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
-                                <Search className="h-3 w-3 text-white" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        {i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>}
+                              <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${i.vulneravel ? 'right-1' : 'left-1'}`} />
+                            </button>
+                          </div>
+                        ) : (
+                          i.vulneravel ? (
+                            <Badge variant="destructive" className="h-5 text-[9px] px-1 ml-2">Vulnerável</Badge>
+                          ) : (
+                            <Badge className="h-5 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[9px] px-1 ml-2">OK</Badge>
+                          )
+                        )}
                       </div>
-                      {i.vulneravel ? (
-                        <Badge variant="destructive" className="h-5 text-[9px] px-1 ml-2">Vulnerável</Badge>
+
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {i.fotos.map((foto: string, fIdx: number) => (
+                          <div 
+                            key={fIdx} 
+                            className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
+                            onClick={() => window.open(foto, '_blank')}
+                          >
+                            <SignedImage 
+                              src={foto} 
+                              className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
+                              alt={`${i.rotulo} - ${fIdx + 1}`} 
+                            />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                              <Search className="h-3 w-3 text-white" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {isEditing ? (
+                        <div className="mt-2">
+                          <label className="text-[9px] uppercase font-bold text-muted-foreground block mb-1">Observação</label>
+                          <textarea 
+                            value={i.observacao || ''}
+                            onChange={(e) => {
+                              const newItens = [...editForm.itens];
+                              newItens[idx].observacao = e.target.value;
+                              setEditForm({ ...editForm, itens: newItens });
+                            }}
+                            className="w-full h-12 p-2 rounded border border-input bg-background text-[10px] focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                            placeholder="Adicione uma observação..."
+                          />
+                        </div>
                       ) : (
-                        <Badge className="h-5 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[9px] px-1 ml-2">OK</Badge>
+                        i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>
                       )}
                     </div>
                   ))}
