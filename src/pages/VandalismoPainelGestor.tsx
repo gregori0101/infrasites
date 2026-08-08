@@ -79,7 +79,7 @@ import {
   downloadBlob,
 } from '@/lib/vandalismoExport';
 
-const COLORS = ['#660099', '#f97316', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6'];
+const COLORS = ['#8b5cf6', '#f97316', '#10b981', '#ef4444', '#3b82f6', '#f43f5e'];
 
 export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
