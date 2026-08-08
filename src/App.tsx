@@ -194,6 +194,11 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/instalar" element={<Install />} />
+                  <Route path="/check-vandalismo" element={
+                    <ProtectedRoute>
+                      <CheckVandalismo />
+                    </ProtectedRoute>
+                  } />
 
                   {/* Auditoria TA (Fiber Guardian) routes */}
                   <Route path="/auditoria-ta" element={
