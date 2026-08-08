@@ -19,6 +19,7 @@ import {
   Paperclip,
   Loader2,
   Trash2,
+  MapPin,
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
