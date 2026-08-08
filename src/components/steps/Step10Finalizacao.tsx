@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import { useChecklist } from "@/contexts/ChecklistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { FormCard } from "@/components/ui/form-card";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { 
   FileText, Camera, Send, 
-  CheckCircle, Loader2, AlertCircle, Upload, FileDown, Pencil
+  CheckCircle, Loader2, AlertCircle, Upload, FileDown, Pencil, LayoutDashboard, Plus
 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF, downloadPDF } from "@/lib/generatePDF";
@@ -40,12 +41,14 @@ interface Step10Props {
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
   const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode } = useChecklist();
-  const { user } = useAuth();
+  const { user, isGestor, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [isSending, setIsSending] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string>('');
   const [userOperadora, setUserOperadora] = React.useState<string>('VIVO');
   const [showDownloadDialog, setShowDownloadDialog] = React.useState(false);
   const [downloadPdfOption, setDownloadPdfOption] = React.useState<boolean | null>(null);
+  const [showCompletionActions, setShowCompletionActions] = React.useState(false);
 
   const progress = calculateProgress();
 
@@ -225,13 +228,9 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
             description: editingReportId ? 'As alterações foram salvas.' : 'Os dados foram salvos no servidor.'
           });
           
-          // Reset do formulário após envio bem-sucedido
-          setTimeout(() => {
-            if (editingReportId) {
-              clearEditingMode();
-            }
-            resetChecklist();
-          }, 2000);
+          // Mantém o resultado visível para oferecer um próximo passo claro,
+          // sem adicionar atalhos permanentes ao cabeçalho.
+          setShowCompletionActions(true);
         } else {
           throw new Error(result.error || 'Erro ao salvar no banco');
         }
@@ -402,23 +401,66 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         </div>
       )}
 
-      <Button
-        className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
-        onClick={handleSendClick}
-        disabled={isSending || progress < 50}
-      >
-        {isSending ? (
-          <>
-            <Loader2 className="w-6 h-6 animate-spin" />
-            {uploadProgress || (editingReportId ? 'Salvando...' : 'Enviando...')}
-          </>
-        ) : (
-          <>
-            <Send className="w-6 h-6" />
-            {editingReportId ? 'Salvar Alterações' : 'Enviar Relatório'}
-          </>
-        )}
-      </Button>
+      {!showCompletionActions && (
+        <Button
+          className="w-full h-16 text-lg font-semibold gap-3 bg-primary hover:bg-primary/90"
+          onClick={handleSendClick}
+          disabled={isSending || progress < 50}
+        >
+          {isSending ? (
+            <>
+              <Loader2 className="w-6 h-6 animate-spin" />
+              {uploadProgress || (editingReportId ? 'Salvando...' : 'Enviando...')}
+            </>
+          ) : (
+            <>
+              <Send className="w-6 h-6" />
+              {editingReportId ? 'Salvar Alterações' : 'Enviar Relatório'}
+            </>
+          )}
+        </Button>
+      )}
+
+      {showCompletionActions && (
+        <div className="rounded-lg border border-success/30 bg-success/10 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-success shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-success">Gabinete salvo com sucesso</p>
+              <p className="text-sm text-muted-foreground">
+                Escolha o próximo destino para continuar o trabalho.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(isGestor || isAdmin) && (
+              <Button
+                className="w-full gap-2"
+                onClick={() => {
+                  if (editingReportId) clearEditingMode();
+                  resetChecklist();
+                  navigate('/dashboard');
+                }}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Voltar ao Painel Gestor
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                if (editingReportId) clearEditingMode();
+                resetChecklist();
+                setShowCompletionActions(false);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Novo checklist
+            </Button>
+          </div>
+        </div>
+      )}
 
       <p className="text-xs text-center text-muted-foreground">
         As fotos serão comprimidas e salvas no servidor.
