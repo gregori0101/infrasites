@@ -226,28 +226,28 @@ export default function VandalismoPainelGestor() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
-      <header className="bg-white border-b sticky top-0 z-30">
+    <div className="min-h-screen bg-background pb-20">
+      <header className="bg-card border-b sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="rounded-full hover:bg-slate-100" 
+              className="rounded-full hover:bg-muted" 
               onClick={() => navigate('/')}
             >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
+              <ArrowLeft className="h-5 w-5 text-muted-foreground" />
             </Button>
             <div>
               <div className="flex items-center gap-2">
                 <div className="bg-primary/10 p-1.5 rounded-lg">
                   <LayoutDashboard className="h-5 w-5 text-primary" />
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-xl font-bold text-foreground tracking-tight">
                   Painel de Gestão
                 </h1>
               </div>
-              <p className="text-sm text-slate-500 font-medium">Controle de Vandalismo & Vulnerabilidades</p>
+              <p className="text-sm text-muted-foreground font-medium">Controle de Vandalismo & Vulnerabilidades</p>
             </div>
           </div>
 
