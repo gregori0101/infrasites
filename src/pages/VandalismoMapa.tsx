@@ -27,13 +27,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createColoredIcon(color: string, uf: string = '') {
+function createColoredIcon(color: string, siteCode: string = '') {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
       background: ${color};
-      width: 32px;
-      height: 32px;
+      width: 48px;
+      height: 48px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
       border: 2px solid white;
@@ -45,16 +45,22 @@ function createColoredIcon(color: string, uf: string = '') {
       <div style="
         transform: rotate(45deg);
         color: white;
-        font-size: 10px;
+        font-size: 8px;
         font-weight: 900;
         text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        text-align: center;
+        width: 100%;
+        padding: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       ">
-        ${uf}
+        ${siteCode}
       </div>
     </div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -48],
   });
 }
 
@@ -240,7 +246,7 @@ export default function VandalismoMapa() {
               <Marker
                 key={v.id}
                 position={[v.latitude!, v.longitude!]}
-                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.estado)}
+                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.site_code)}
               >
                 <Popup>
                   <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
