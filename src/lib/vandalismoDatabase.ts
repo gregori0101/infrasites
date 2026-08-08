@@ -187,3 +187,42 @@ export async function listVistoriasComItens(): Promise<VandalismoVistoriaResumo[
     };
   });
 }
+
+interface UpdateVistoriaInput {
+  siteCode?: string;
+  descricao?: string;
+  operadora?: string | null;
+  tecnico?: string | null;
+  estado?: string | null;
+  status?: string;
+}
+
+export async function updateVistoriaVandalismo(id: string, input: UpdateVistoriaInput): Promise<void> {
+  const updates: any = {};
+  if (input.siteCode !== undefined) updates.site_code = input.siteCode.trim().toUpperCase();
+  if (input.descricao !== undefined) updates.descricao = input.descricao.trim();
+  if (input.operadora !== undefined) updates.operadora = input.operadora;
+  if (input.tecnico !== undefined) updates.tecnico = input.tecnico;
+  if (input.estado !== undefined) updates.estado = input.estado;
+  if (input.status !== undefined) updates.status = input.status;
+  updates.updated_at = new Date().toISOString();
+
+  const { error } = await supabase
+    .from('vandalismo_vistorias')
+    .update(updates)
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function updateVistoriaItem(id: string, vulneravel: boolean, observacao?: string | null): Promise<void> {
+  const { error } = await supabase
+    .from('vandalismo_itens')
+    .update({ 
+      vulneravel, 
+      observacao: observacao?.trim() || null 
+    })
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+}
