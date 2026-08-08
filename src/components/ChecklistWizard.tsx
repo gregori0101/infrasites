@@ -17,8 +17,8 @@ import { Step10Finalizacao } from "@/components/steps/Step10Finalizacao";
 import { 
   MapPin, Server, Zap, Battery, Fan, Plug, Cable,
   Fuel, FileCheck, ChevronLeft, ChevronRight,
-  Moon, Sun, History, AlertCircle, LayoutDashboard, FilePlus, LogOut, Users,
-  Building2, ClipboardList, Pencil
+  Moon, Sun, History, AlertCircle, FilePlus, LogOut, Users,
+  Building2, Pencil
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
