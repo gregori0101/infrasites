@@ -32,6 +32,7 @@ const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
 const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
+const VandalismoMapa = lazy(() => import("./pages/VandalismoMapa"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Fiber Guardian pages
@@ -203,6 +204,11 @@ const App = () => {
                   <Route path="/check-vandalismo/gestor" element={
                     <ProtectedRoute requireGestor>
                       <VandalismoPainelGestor />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/check-vandalismo/mapa" element={
+                    <ProtectedRoute requireGestor>
+                      <VandalismoMapa />
                     </ProtectedRoute>
                   } />
 
