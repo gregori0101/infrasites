@@ -131,3 +131,45 @@ export async function deleteVistoriaVandalismo(id: string): Promise<void> {
   const { error } = await supabase.from('vandalismo_vistorias').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+
+export interface VandalismoVistoriaResumo extends VandalismoVistoria {
+  itens: VandalismoItemRow[];
+  totalItens: number;
+  vulneraveis: number;
+  indiceVulnerabilidade: number;
+}
+
+/** Fetch all vistorias with their checklist items (for the manager dashboard). */
+export async function listVistoriasComItens(): Promise<VandalismoVistoriaResumo[]> {
+  const vistorias = await listVistoriasVandalismo();
+  if (vistorias.length === 0) return [];
+
+  const ids = vistorias.map((v) => v.id);
+  const { data, error } = await supabase
+    .from('vandalismo_itens')
+    .select('id,vistoria_id,item_key,rotulo,vulneravel,fotos,observacao,ordem')
+    .in('vistoria_id', ids);
+
+  if (error) throw new Error(error.message);
+
+  const byVistoria = new Map<string, VandalismoItemRow[]>();
+  for (const row of (data ?? []) as unknown[]) {
+    const r = row as VandalismoItemRow & { fotos: unknown };
+    const item: VandalismoItemRow = { ...r, fotos: Array.isArray(r.fotos) ? (r.fotos as string[]) : [] };
+    const list = byVistoria.get(item.vistoria_id) ?? [];
+    list.push(item);
+    byVistoria.set(item.vistoria_id, list);
+  }
+
+  return vistorias.map((v) => {
+    const itens = (byVistoria.get(v.id) ?? []).sort((a, b) => a.ordem - b.ordem);
+    const vulneraveis = itens.filter((i) => i.vulneravel).length;
+    return {
+      ...v,
+      itens,
+      totalItens: itens.length,
+      vulneraveis,
+      indiceVulnerabilidade: itens.length > 0 ? (vulneraveis / itens.length) * 100 : 0,
+    };
+  });
+}
