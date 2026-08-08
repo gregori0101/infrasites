@@ -3397,6 +3397,133 @@ export type Database = {
         }
         Relationships: []
       }
+      vandalismo_fotos: {
+        Row: {
+          categoria: string
+          created_at: string
+          id: string
+          ordem: number
+          url: string
+          vistoria_id: string
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+          url: string
+          vistoria_id: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+          url?: string
+          vistoria_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vandalismo_fotos_vistoria_id_fkey"
+            columns: ["vistoria_id"]
+            isOneToOne: false
+            referencedRelation: "vandalismo_vistorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vandalismo_itens: {
+        Row: {
+          created_at: string
+          fotos: Json
+          id: string
+          item_key: string
+          ordem: number
+          rotulo: string
+          vistoria_id: string
+          vulneravel: boolean
+        }
+        Insert: {
+          created_at?: string
+          fotos?: Json
+          id?: string
+          item_key: string
+          ordem?: number
+          rotulo: string
+          vistoria_id: string
+          vulneravel?: boolean
+        }
+        Update: {
+          created_at?: string
+          fotos?: Json
+          id?: string
+          item_key?: string
+          ordem?: number
+          rotulo?: string
+          vistoria_id?: string
+          vulneravel?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vandalismo_itens_vistoria_id_fkey"
+            columns: ["vistoria_id"]
+            isOneToOne: false
+            referencedRelation: "vandalismo_vistorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vandalismo_vistorias: {
+        Row: {
+          bo_nome: string | null
+          bo_url: string | null
+          created_at: string
+          descricao: string
+          endereco: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          operadora: string | null
+          site_code: string
+          status: string
+          tecnico: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bo_nome?: string | null
+          bo_url?: string | null
+          created_at?: string
+          descricao?: string
+          endereco?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          operadora?: string | null
+          site_code: string
+          status?: string
+          tecnico?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          bo_nome?: string | null
+          bo_url?: string | null
+          created_at?: string
+          descricao?: string
+          endereco?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          operadora?: string | null
+          site_code?: string
+          status?: string
+          tecnico?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
