@@ -117,7 +117,14 @@ export function VandalismoPhotoGrid({
         }}
       />
 
-      {preview && <Lightbox src={preview} isOpen={!!preview} onClose={() => setPreview(null)} />}
+      {preview !== null && (
+        <Lightbox
+          images={value.map((url, i) => ({ url, label: `Foto ${i + 1}` }))}
+          initialIndex={Math.max(0, value.indexOf(preview))}
+          open={preview !== null}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }
