@@ -28,6 +28,7 @@ export function generateVandalismoExcel(vistorias: VandalismoVistoriaResumo[]): 
       Operadora: v.operadora ?? '-',
       Descrição: v.descricao,
       'BO Anexado': v.bo_url ? 'SIM' : 'NÃO',
+      'Total de Vandalismos Anteriores do Site': v.totalAnterior ?? 0,
       'Total de Itens': v.totalItens,
       'Total de Vulnerabilidades': v.vulneraveis,
       'Índice de Vulnerabilidade (%)': Number(v.indiceVulnerabilidade.toFixed(1)),
