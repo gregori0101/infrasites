@@ -465,7 +465,7 @@ export default function VandalismoPainelGestor() {
                 </TableHeader>
                 <TableBody>
                   {filteredData.map((v) => (
-                    <TableRow key={v.id} className="cursor-pointer hover:bg-slate-100/50" onClick={() => setSelectedCase(v)}>
+                    <TableRow key={v.id} className="cursor-pointer hover:bg-slate-50 transition-colors group/row" onClick={() => setSelectedCase(v)}>
                       <TableCell className="text-xs font-medium">
                         {format(parseISO(v.created_at), 'dd/MM/yyyy HH:mm')}
                       </TableCell>
