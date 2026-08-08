@@ -206,28 +206,6 @@ export function ChecklistWizard() {
             >
               <FilePlus className="w-4 h-4" />
             </Button>
-            {isGestor && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => navigate('/dashboard')}
-                  title="Dashboard"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => navigate('/atribuicoes')}
-                  title="Atribuir Vistorias"
-                >
-                  <ClipboardList className="w-4 h-4" />
-                </Button>
-              </>
-            )}
             {isAdmin && (
               <>
                 <Button
