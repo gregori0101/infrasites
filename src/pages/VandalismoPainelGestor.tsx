@@ -99,7 +99,7 @@ export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('30');
+  const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('all');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
