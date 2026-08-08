@@ -714,6 +714,22 @@ export default function VandalismoPainelGestor() {
                               <DropdownMenuItem onClick={async () => {
                                 const full = await getVistoriaVandalismo(v.id);
                                 setSelectedCase(full);
+                                // Trigger edit mode directly
+                                setEditForm({
+                                  site_code: full?.site_code,
+                                  descricao: full?.descricao,
+                                  operadora: full?.operadora,
+                                  tecnico: full?.tecnico,
+                                  estado: full?.estado,
+                                  itens: full?.itens.map(i => ({ ...i }))
+                                });
+                                setIsEditing(true);
+                              }}>
+                                <Edit className="h-4 w-4 mr-2" /> Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={async () => {
+                                const full = await getVistoriaVandalismo(v.id);
+                                setSelectedCase(full);
                               }}>
                                 <Eye className="h-4 w-4 mr-2" /> Visualizar
                               </DropdownMenuItem>
