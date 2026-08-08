@@ -101,8 +101,11 @@ export default function VandalismoPainelGestor() {
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('30');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: allVistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
