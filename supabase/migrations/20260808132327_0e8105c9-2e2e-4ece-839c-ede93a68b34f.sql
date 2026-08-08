@@ -1,0 +1,1 @@
+ALTER TABLE public.vandalismo_itens ADD COLUMN IF NOT EXISTS observacao text;

@@ -3438,6 +3438,7 @@ export type Database = {
           fotos: Json
           id: string
           item_key: string
+          observacao: string | null
           ordem: number
           rotulo: string
           vistoria_id: string
@@ -3448,6 +3449,7 @@ export type Database = {
           fotos?: Json
           id?: string
           item_key: string
+          observacao?: string | null
           ordem?: number
           rotulo: string
           vistoria_id: string
@@ -3458,6 +3460,7 @@ export type Database = {
           fotos?: Json
           id?: string
           item_key?: string
+          observacao?: string | null
           ordem?: number
           rotulo?: string
           vistoria_id?: string
