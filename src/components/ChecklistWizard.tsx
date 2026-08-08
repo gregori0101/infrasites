@@ -56,7 +56,7 @@ export function ChecklistWizard() {
     clearEditingMode,
   } = useChecklist();
 
-  const { signOut, isGestor, isAdmin, user } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
