@@ -193,6 +193,16 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
     doc.text(badgeText, pageWidth - margin - 17, y + 4.4, { align: 'center' });
     y += 10;
 
+    if (item.observacao && item.observacao.trim()) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY_DARK);
+      const linhas = doc.splitTextToSize(`Obs.: ${item.observacao.trim()}`, contentWidth - 4);
+      checkNewPage(linhas.length * 4 + 4);
+      doc.text(linhas, margin + 2, y);
+      y += linhas.length * 4 + 3;
+    }
+
     if (item.fotos.length > 0) {
       await photoGrid(item.fotos, 'Foto');
     }

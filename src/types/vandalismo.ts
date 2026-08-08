@@ -11,6 +11,7 @@ export interface VandalismoItemDef {
 export interface VandalismoItemState {
   vulneravel: boolean;
   fotos: string[];
+  observacao?: string;
 }
 
 export interface VandalismoVistoria {
@@ -45,6 +46,7 @@ export interface VandalismoItemRow {
   rotulo: string;
   vulneravel: boolean;
   fotos: string[];
+  observacao?: string | null;
   ordem: number;
 }
 
