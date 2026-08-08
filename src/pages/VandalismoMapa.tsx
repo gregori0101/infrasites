@@ -1,16 +1,23 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { listVistoriasComItens, getVistoriaVandalismo } from '@/lib/vandalismoDatabase';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { listVistoriasComItens, getVistoriaVandalismo, updateVistoriaVandalismo, updateVistoriaItem, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Loader2 as Spinner, Save, ImageIcon, Paperclip, Search, Trash2 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { SignedImage } from '@/components/ui/signed-image';
+import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
+import { downloadCasePDF, downloadBO } from '@/lib/vandalismoExport';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 // Fix leaflet default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -45,8 +52,12 @@ function createColoredIcon(color: string) {
 export default function VandalismoMapa() {
   const navigate = useNavigate();
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
+  const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
   
-  const { data: vistorias = [], isLoading } = useQuery({
+  const { data: vistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
     queryFn: listVistoriasComItens,
     refetchOnWindowFocus: false
@@ -67,6 +78,62 @@ export default function VandalismoMapa() {
     const avgLng = filteredData.reduce((a, v) => a + (v.longitude || 0), 0) / filteredData.length;
     return [avgLat, avgLng];
   }, [filteredData]);
+
+  const handleSaveEdit = async () => {
+    if (!selectedCase) return;
+    setIsSaving(true);
+    try {
+      await updateVistoriaVandalismo(selectedCase.id, {
+        siteCode: editForm.site_code,
+        descricao: editForm.descricao,
+        operadora: editForm.operadora,
+        tecnico: editForm.tecnico,
+        estado: editForm.estado,
+      });
+
+      for (const item of editForm.itens || []) {
+        const original = selectedCase.itens.find(i => i.id === item.id);
+        if (original && (original.vulneravel !== item.vulneravel || original.observacao !== item.observacao)) {
+          await updateVistoriaItem(item.id, item.vulneravel, item.observacao);
+        }
+      }
+
+      toast.success('Informações atualizadas com sucesso');
+      setIsEditing(false);
+      refetch();
+      const updated = await getVistoriaVandalismo(selectedCase.id);
+      setSelectedCase(updated);
+    } catch (err: any) {
+      toast.error('Erro ao salvar: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const startEditing = () => {
+    if (!selectedCase) return;
+    setEditForm({
+      site_code: selectedCase.site_code,
+      descricao: selectedCase.descricao,
+      operadora: selectedCase.operadora,
+      tecnico: selectedCase.tecnico,
+      estado: selectedCase.estado,
+      itens: selectedCase.itens.map(i => ({ ...i }))
+    });
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
+    try {
+      await deleteVistoriaVandalismo(id);
+      toast.success('Vistoria excluída');
+      setSelectedCase(null);
+      refetch();
+    } catch (err) {
+      toast.error('Erro ao excluir');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -205,9 +272,12 @@ export default function VandalismoMapa() {
                       size="sm"
                       variant="secondary"
                       className="w-full mt-2 h-8 text-[11px] font-bold"
-                      onClick={() => navigate('/check-vandalismo/gestor')}
+                      onClick={async () => {
+                        const full = await getVistoriaVandalismo(v.id);
+                        setSelectedCase(full);
+                      }}
                     >
-                      <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes no Painel
+                      <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes da Ocorrência
                     </Button>
                   </div>
                 </Popup>
@@ -216,6 +286,239 @@ export default function VandalismoMapa() {
           </MapContainer>
         )}
       </main>
+
+      <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
+        <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0 overflow-hidden z-[1005]">
+          <DialogHeader className="p-6 pb-2 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  Vistoria Site: <span className="font-mono text-primary">{selectedCase?.site_code}</span>
+                </DialogTitle>
+                <DialogDescription>
+                  Realizada em {selectedCase ? format(parseISO(selectedCase.created_at), "PPP 'às' HH:mm", { locale: ptBR }) : ''}
+                </DialogDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                {!isEditing ? (
+                  <>
+                    <Button size="sm" variant="outline" onClick={startEditing}>
+                      <Edit className="h-4 w-4 mr-2" /> Editar
+                    </Button>
+                    <Button size="sm" onClick={() => selectedCase && downloadCasePDF(selectedCase.id, selectedCase.site_code)}>
+                      <FileText className="h-4 w-4 mr-2" /> PDF
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => selectedCase && handleDelete(selectedCase.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>
+                      <X className="h-4 w-4 mr-2" /> Cancelar
+                    </Button>
+                    <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
+                      {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                      Salvar
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 p-6">
+            <div className="space-y-6">
+              {isEditing ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Sigla do Site</label>
+                      <Input 
+                        value={editForm.site_code} 
+                        onChange={(e) => setEditForm({...editForm, site_code: e.target.value})}
+                        className="h-8 text-xs font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</label>
+                      <select
+                        value={editForm.estado}
+                        onChange={(e) => setEditForm({...editForm, estado: e.target.value})}
+                        className="w-full h-8 px-2 rounded-md border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                      >
+                        <option value="">Selecione</option>
+                        {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
+                          <option key={uf} value={uf}>{uf}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</label>
+                      <Input 
+                        value={editForm.operadora || ''} 
+                        onChange={(e) => setEditForm({...editForm, operadora: e.target.value})}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</label>
+                      <Input 
+                        value={editForm.tecnico || ''} 
+                        onChange={(e) => setEditForm({...editForm, tecnico: e.target.value})}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-muted-foreground uppercase font-bold">Descrição da Ocorrência</label>
+                    <textarea 
+                      value={editForm.descricao} 
+                      onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
+                      className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
+                      <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</p>
+                      <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
+                      <p className="text-sm font-medium">{selectedCase?.operadora || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
+                      <p className="text-sm font-medium">
+                        {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Descrição da Ocorrência</h4>
+                    <div className="bg-muted/30 p-3 rounded-md border border-border text-sm text-foreground whitespace-pre-wrap">
+                      {selectedCase?.descricao}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {selectedCase?.fotos?.map((f, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" onClick={() => window.open(f.url, '_blank')}>
+                      <SignedImage 
+                        src={f.url} 
+                        className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
+                        alt={`Foto ocorrido ${idx + 1}`} 
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                        <span className="text-[10px] text-white font-bold uppercase">Ver Original</span>
+                      </div>
+                    </div>
+                  ))}
+                  {(!selectedCase?.fotos || selectedCase.fotos.length === 0) && (
+                    <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold border-l-4 border-destructive pl-2 text-foreground">Vulnerabilidades Identificadas</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {(isEditing ? editForm.itens : selectedCase?.itens)?.map((i: any, idx: number) => (
+                    <div key={idx} className={`flex flex-col p-3 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 dark:bg-destructive/10 border-destructive/20' : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'}`}>
+                      <div className="flex items-start justify-between">
+                        <span className="font-bold text-foreground">{i.rotulo}</span>
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground">Vulnerável?</span>
+                            <button
+                              onClick={() => {
+                                const newItens = [...editForm.itens];
+                                newItens[idx].vulneravel = !newItens[idx].vulneravel;
+                                setEditForm({ ...editForm, itens: newItens });
+                              }}
+                              className={`w-10 h-5 rounded-full relative transition-colors ${i.vulneravel ? 'bg-destructive' : 'bg-emerald-500'}`}
+                            >
+                              <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${i.vulneravel ? 'right-1' : 'left-1'}`} />
+                            </button>
+                          </div>
+                        ) : (
+                          i.vulneravel ? (
+                            <Badge variant="destructive" className="h-5 text-[9px] px-1 ml-2">Vulnerável</Badge>
+                          ) : (
+                            <Badge className="h-5 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[9px] px-1 ml-2">OK</Badge>
+                          )
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {i.fotos.map((foto: string, fIdx: number) => (
+                          <div 
+                            key={fIdx} 
+                            className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
+                            onClick={() => window.open(foto, '_blank')}
+                          >
+                            <SignedImage 
+                              src={foto} 
+                              className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
+                              alt={`${i.rotulo} - ${fIdx + 1}`} 
+                            />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                              <Search className="h-3 w-3 text-white" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {isEditing ? (
+                        <div className="mt-2">
+                          <label className="text-[9px] uppercase font-bold text-muted-foreground block mb-1">Observação</label>
+                          <textarea 
+                            value={i.observacao || ''}
+                            onChange={(e) => {
+                              const newItens = [...editForm.itens];
+                              newItens[idx].observacao = e.target.value;
+                              setEditForm({ ...editForm, itens: newItens });
+                            }}
+                            className="w-full h-12 p-2 rounded border border-input bg-background text-[10px] focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                            placeholder="Adicione uma observação..."
+                          />
+                        </div>
+                      ) : (
+                        i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedCase?.bo_url && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Boletim de Ocorrência</h4>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => downloadBO(selectedCase!.bo_url!, selectedCase!.bo_nome)}>
+                    <Paperclip className="h-4 w-4 mr-2" /> {selectedCase.bo_nome || 'Baixar Boletim'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-card border-t p-3 flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest relative z-[1001]">
         <div className="flex items-center gap-2">
