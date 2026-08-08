@@ -204,7 +204,7 @@ export default function CheckVandalismo() {
               <ShieldAlert className="h-3 w-3 mr-1" />
               {vulneraveisCount}
             </Badge>
-            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white text-[10px]">
+            <Badge className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white text-[10px] border-none">
               <ShieldCheck className="h-3 w-3 mr-1" />
               {preenchidosCount}/{visibleItens.length}
             </Badge>
