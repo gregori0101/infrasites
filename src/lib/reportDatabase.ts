@@ -660,7 +660,7 @@ export async function fetchReportsSummary(filters?: {
   const { validateReportFilters } = await import('./validation');
   validateReportFilters(filters);
 
-  const pageSize = 1000;
+  const pageSize = 5000;
   let page = 0;
   let all: ReportRow[] = [];
 
@@ -718,7 +718,7 @@ export async function fetchReportsForDashboard(filters?: {
   endDate?: string;
   operadora?: string; // 'VIVO', 'TEL', or 'all'
 }): Promise<ReportRow[]> {
-  const pageSize = 1000;
+  const pageSize = 5000;
   let page = 0;
   let all: ReportRow[] = [];
   const columns = buildDashboardColumns() + ',operadora';

@@ -93,7 +93,7 @@ export async function listVistoriasVandalismo(): Promise<VandalismoVistoria[]> {
       'id,user_id,site_code,estado,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
     )
     .order('created_at', { ascending: false })
-    .limit(300);
+    .limit(5000);
 
   if (error) throw new Error(error.message);
   return (data ?? []) as VandalismoVistoria[];
