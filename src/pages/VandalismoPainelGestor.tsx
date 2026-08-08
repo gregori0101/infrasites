@@ -20,9 +20,13 @@ import {
   Loader2,
   Trash2,
   MapPin,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SignedImage } from '@/components/ui/signed-image';
+import { VandalismoVistoriaResumo, getVistoriaVandalismo, deleteVistoriaVandalismo, listVistoriasComItens } from '@/lib/vandalismoDatabase';
+import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
 import {
   Card,
   CardContent,
@@ -70,7 +74,7 @@ import {
   Line,
 } from 'recharts';
 import { toast } from 'sonner';
-import { listVistoriasComItens, VandalismoVistoriaResumo, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
+// Removed imports from here as they were moved to top
 import {
   generateVandalismoExcel,
   downloadCasePDF,
@@ -85,7 +89,7 @@ export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('30');
-  const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaResumo | null>(null);
+  const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
 
@@ -479,7 +483,10 @@ export default function VandalismoPainelGestor() {
                 </TableHeader>
                 <TableBody>
                   {filteredData.map((v) => (
-                    <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={() => setSelectedCase(v)}>
+                    <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={async () => {
+                      const full = await getVistoriaVandalismo(v.id);
+                      setSelectedCase(full);
+                    }}>
                       <TableCell className="text-xs font-medium text-foreground">
                         {format(parseISO(v.created_at), 'dd/MM/yyyy HH:mm')}
                       </TableCell>
@@ -521,7 +528,10 @@ export default function VandalismoPainelGestor() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedCase(v)}>
+                              <DropdownMenuItem onClick={async () => {
+                                const full = await getVistoriaVandalismo(v.id);
+                                setSelectedCase(full);
+                              }}>
                                 <Eye className="h-4 w-4 mr-2" /> Visualizar
                               </DropdownMenuItem>
                               {v.bo_url && (
@@ -593,12 +603,47 @@ export default function VandalismoPainelGestor() {
               </div>
 
               <div className="space-y-3">
+                <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {selectedCase?.fotos?.map((f, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted">
+                      <SignedImage 
+                        src={f.url} 
+                        className="object-cover w-full h-full" 
+                        alt={`Foto ocorrido ${idx + 1}`} 
+                      />
+                    </div>
+                  ))}
+                  {(!selectedCase?.fotos || selectedCase.fotos.length === 0) && (
+                    <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-destructive pl-2 text-foreground">Vulnerabilidades Identificadas</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {selectedCase?.itens.map((i, idx) => (
                     <div key={idx} className={`flex items-start justify-between p-2 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 dark:bg-destructive/10 border-destructive/20' : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'}`}>
                       <div className="flex-1">
                         <span className="font-medium text-foreground">{i.rotulo}</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {i.fotos.map((foto, fIdx) => (
+                            <div 
+                              key={fIdx} 
+                              className="relative aspect-square w-16 h-16 rounded border overflow-hidden bg-muted group/foto"
+                            >
+                              <SignedImage 
+                                src={foto} 
+                                className="object-cover w-full h-full" 
+                                alt={`${i.rotulo} - ${fIdx + 1}`} 
+                              />
+                            </div>
+                          ))}
+                        </div>
                         {i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>}
                       </div>
                       {i.vulneravel ? (
