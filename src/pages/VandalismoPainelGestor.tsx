@@ -465,34 +465,34 @@ export default function VandalismoPainelGestor() {
                 </TableHeader>
                 <TableBody>
                   {filteredData.map((v) => (
-                    <TableRow key={v.id} className="cursor-pointer hover:bg-slate-50 transition-colors group/row" onClick={() => setSelectedCase(v)}>
-                      <TableCell className="text-xs font-medium">
+                    <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={() => setSelectedCase(v)}>
+                      <TableCell className="text-xs font-medium text-foreground">
                         {format(parseISO(v.created_at), 'dd/MM/yyyy HH:mm')}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="font-mono bg-white">{v.site_code}</Badge>
+                        <Badge variant="outline" className="font-mono bg-background text-foreground border-border">{v.site_code}</Badge>
                       </TableCell>
-                      <TableCell className="text-xs max-w-[150px] truncate">
+                      <TableCell className="text-xs max-w-[150px] truncate text-muted-foreground">
                         {v.tecnico?.split('@')[0] || '-'}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-16 bg-muted rounded-full overflow-hidden">
                             <div
                               className={`h-full ${v.indiceVulnerabilidade > 50 ? 'bg-destructive' : v.indiceVulnerabilidade > 20 ? 'bg-orange-500' : 'bg-emerald-500'}`}
                               style={{ width: `${v.indiceVulnerabilidade}%` }}
                             />
                           </div>
-                          <span className="text-[10px] font-bold">{v.indiceVulnerabilidade.toFixed(0)}%</span>
+                          <span className="text-[10px] font-bold text-foreground">{v.indiceVulnerabilidade.toFixed(0)}%</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {v.bo_url ? (
-                          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none text-[10px]">
+                          <Badge className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 border-none text-[10px]">
                             Anexado
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="text-[10px] text-muted-foreground">Pendente</Badge>
+                          <Badge variant="secondary" className="text-[10px] text-muted-foreground bg-muted/50 border-none">Pendente</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
