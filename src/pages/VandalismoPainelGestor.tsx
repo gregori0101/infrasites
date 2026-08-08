@@ -436,7 +436,7 @@ export default function VandalismoPainelGestor() {
                       borderRadius: '8px'
                     }}
                   />
-                  <Bar dataKey="value" fill="hsl(var(--orange-500))" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
