@@ -200,6 +200,9 @@ const App = () => {
                       <CheckVandalismo />
                     </ProtectedRoute>
                   } />
+                  <Route path="/check-vandalismo/gestor" element={
+                    <ProtectedRoute requireGestor>
+                      <VandalismoPainelGestor />
 
                   {/* Auditoria TA (Fiber Guardian) routes */}
                   <Route path="/auditoria-ta" element={
