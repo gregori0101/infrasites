@@ -190,7 +190,7 @@ export default function CheckVandalismo() {
 
   return (
     <div className="min-h-screen bg-background pb-28">
-      <header className="sticky top-0 z-20 bg-primary text-primary-foreground shadow-md">
+      <header className="sticky top-0 z-20 bg-primary text-primary-foreground shadow-md dark:border-b dark:border-primary/20">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => navigate('/')}>
             <ArrowLeft className="h-5 w-5" />
@@ -204,7 +204,7 @@ export default function CheckVandalismo() {
               <ShieldAlert className="h-3 w-3 mr-1" />
               {vulneraveisCount}
             </Badge>
-            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white text-[10px]">
+            <Badge className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white text-[10px] border-none">
               <ShieldCheck className="h-3 w-3 mr-1" />
               {preenchidosCount}/{visibleItens.length}
             </Badge>
