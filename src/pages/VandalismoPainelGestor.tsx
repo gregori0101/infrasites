@@ -429,12 +429,14 @@ export default function VandalismoPainelGestor() {
           </Card>
         </div>
 
-        {/* DATA TABLE */}
-        <Card>
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">Gestão de Casos</CardTitle>
-              <CardDescription>Lista completa de vistorias realizadas</CardDescription>
+        {/* DATA TABLE SECTION */}
+        <Card className="border-none shadow-md bg-white overflow-hidden">
+          <CardHeader className="pb-4 border-b border-slate-50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg font-bold text-slate-900">Histórico de Vistorias</CardTitle>
+                <CardDescription className="text-sm font-medium">Gestão detalhada de casos registrados</CardDescription>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
