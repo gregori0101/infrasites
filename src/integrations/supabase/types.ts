@@ -3483,6 +3483,7 @@ export type Database = {
           created_at: string
           descricao: string
           endereco: string | null
+          estado: string | null
           id: string
           latitude: number | null
           longitude: number | null
@@ -3499,6 +3500,7 @@ export type Database = {
           created_at?: string
           descricao?: string
           endereco?: string | null
+          estado?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
@@ -3515,6 +3517,7 @@ export type Database = {
           created_at?: string
           descricao?: string
           endereco?: string | null
+          estado?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
