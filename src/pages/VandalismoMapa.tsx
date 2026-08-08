@@ -234,10 +234,10 @@ export default function VandalismoMapa() {
                 icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
               >
                 <Popup>
-                  <div className="space-y-2 min-w-[200px] p-1">
+                  <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-bold text-sm text-primary">{v.site_code}</h3>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted rounded border">{v.estado}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded border border-slate-200 dark:border-slate-700">{v.estado}</span>
                     </div>
                     
                     <div className="flex items-center gap-2">
