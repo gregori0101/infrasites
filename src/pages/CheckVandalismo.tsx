@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   FileText,
+  LayoutDashboard,
   Loader2,
   MapPin,
   Paperclip,
@@ -48,7 +49,7 @@ const initialItens = (): Record<string, VandalismoItemState> =>
 
 export default function CheckVandalismo() {
   const navigate = useNavigate();
-  const { user, userOperadora } = useAuth();
+  const { user, userOperadora, isAdmin, isGestor } = useAuth();
   const boInputRef = useRef<HTMLInputElement>(null);
 
   const [siteCode, setSiteCode] = useState('');
@@ -207,6 +208,17 @@ export default function CheckVandalismo() {
               <ShieldCheck className="h-3 w-3 mr-1" />
               {preenchidosCount}/{visibleItens.length}
             </Badge>
+            {(isAdmin || isGestor) && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary-foreground hover:bg-white/20"
+                onClick={() => navigate('/check-vandalismo/gestor')}
+                title="Painel Gestor"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </div>
       </header>

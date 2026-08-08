@@ -74,6 +74,22 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground">
                       Vistoria de estações vandalizadas e registro de vulnerabilidades
                     </p>
+                    {(isAdmin || isGestor) && (
+                      <div className="mt-4 flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/check-vandalismo/gestor");
+                          }}
+                        >
+                          <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
+                          Painel Gestor
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
