@@ -353,6 +353,14 @@ export default function VandalismoPainelGestor() {
             <Button 
               variant="outline" 
               className="flex-1 sm:flex-none border-border shadow-sm hover:bg-muted/50" 
+              onClick={() => navigate('/check-vandalismo/mapa')} 
+            >
+              <MapPin className="h-4 w-4 mr-2 text-primary" />
+              Mapa
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex-1 sm:flex-none border-border shadow-sm hover:bg-muted/50" 
               onClick={handleExportExcel} 
               disabled={exportingAll}
             >
