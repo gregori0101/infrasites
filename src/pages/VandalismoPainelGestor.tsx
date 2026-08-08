@@ -572,25 +572,25 @@ export default function VandalismoPainelGestor() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Descrição da Ocorrência</h4>
-                <div className="bg-slate-50 p-3 rounded-md border text-sm whitespace-pre-wrap">
+                <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Descrição da Ocorrência</h4>
+                <div className="bg-muted/30 p-3 rounded-md border border-border text-sm text-foreground whitespace-pre-wrap">
                   {selectedCase?.descricao}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-bold border-l-4 border-destructive pl-2">Vulnerabilidades Identificadas</h4>
+                <h4 className="text-sm font-bold border-l-4 border-destructive pl-2 text-foreground">Vulnerabilidades Identificadas</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {selectedCase?.itens.map((i, idx) => (
-                    <div key={idx} className={`flex items-start justify-between p-2 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 border-destructive/20' : 'bg-emerald-50/30 border-emerald-100'}`}>
+                    <div key={idx} className={`flex items-start justify-between p-2 rounded border text-xs ${i.vulneravel ? 'bg-destructive/5 dark:bg-destructive/10 border-destructive/20' : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'}`}>
                       <div className="flex-1">
-                        <span className="font-medium">{i.rotulo}</span>
+                        <span className="font-medium text-foreground">{i.rotulo}</span>
                         {i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>}
                       </div>
                       {i.vulneravel ? (
                         <Badge variant="destructive" className="h-5 text-[9px] px-1 ml-2">Vulnerável</Badge>
                       ) : (
-                        <Badge className="h-5 bg-emerald-100 text-emerald-700 border-none text-[9px] px-1 ml-2">OK</Badge>
+                        <Badge className="h-5 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[9px] px-1 ml-2">OK</Badge>
                       )}
                     </div>
                   ))}
