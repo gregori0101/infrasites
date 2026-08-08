@@ -2,6 +2,7 @@ import { ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { VandalismoItemDef, VandalismoItemState } from '@/types/vandalismo';
 import { VandalismoPhotoGrid } from './VandalismoPhotoGrid';
@@ -51,6 +52,15 @@ export function VandalismoChecklistItem({ def, state, onChange, siteCode, opcion
           category={`vandalismo_${def.key}`}
           siteCode={siteCode}
           max={def.maxFotos}
+        />
+
+        <Textarea
+          value={state.observacao ?? ''}
+          onChange={(e) => onChange({ ...state, observacao: e.target.value })}
+          placeholder="Observação (opcional)"
+          rows={2}
+          maxLength={1000}
+          className="text-sm"
         />
 
         <div className="grid grid-cols-2 gap-2">

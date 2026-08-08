@@ -62,7 +62,7 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
 
   const itensRows = VANDALISMO_ITENS.flatMap((def, index) => {
     const state = input.itens[def.key];
-    if (!state || (state.fotos.length === 0 && !state.vulneravel)) return [];
+    if (!state || (state.fotos.length === 0 && !state.vulneravel && !state.observacao?.trim())) return [];
     return [
       {
         vistoria_id: vistoriaId,
@@ -70,6 +70,7 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
         rotulo: def.rotulo,
         vulneravel: state.vulneravel,
         fotos: state.fotos,
+        observacao: state.observacao?.trim() || null,
         ordem: index,
       },
     ];
@@ -108,7 +109,7 @@ export async function getVistoriaVandalismo(id: string): Promise<VandalismoVisto
     supabase.from('vandalismo_fotos').select('id,vistoria_id,categoria,url,ordem').eq('vistoria_id', id).order('ordem'),
     supabase
       .from('vandalismo_itens')
-      .select('id,vistoria_id,item_key,rotulo,vulneravel,fotos,ordem')
+      .select('id,vistoria_id,item_key,rotulo,vulneravel,fotos,observacao,ordem')
       .eq('vistoria_id', id)
       .order('ordem'),
   ]);
