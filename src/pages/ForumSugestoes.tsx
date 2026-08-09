@@ -318,7 +318,7 @@ export default function ForumSugestoes() {
                           Concluído
                         </Badge>
                       )}
-                      {getStatusBadge(post.status)}
+                      {getStatusBadge(post.status || 'pendente')}
                     </div>
                   </div>
                 </CardHeader>
