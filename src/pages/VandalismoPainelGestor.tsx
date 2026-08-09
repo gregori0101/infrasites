@@ -105,6 +105,7 @@ export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
+  const [municipioSearch, setMunicipioSearch] = useState('');
   const [boFilter, setBoFilter] = useState<'all' | 'with' | 'without'>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('all');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
@@ -141,6 +142,12 @@ export default function VandalismoPainelGestor() {
     // Filter by Estado
     if (estadoFilter !== 'all') {
       data = data.filter(v => v.estado === estadoFilter);
+    }
+
+    // Filter by Município
+    if (municipioSearch) {
+      const low = municipioSearch.toLowerCase();
+      data = data.filter(v => v.municipio?.toLowerCase().includes(low));
     }
 
     // Filter by BO
@@ -185,7 +192,7 @@ export default function VandalismoPainelGestor() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, estadoFilter, boFilter, dateFilter, sortOrder]);
+  }, [searchTerm, estadoFilter, municipioSearch, boFilter, dateFilter, sortOrder]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
