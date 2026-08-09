@@ -104,6 +104,27 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
     setRotation((prev) => (prev + 90) % 360);
   }, []);
 
+  const handleDownload = useCallback(async () => {
+    try {
+      const url = images[currentIndex].url;
+      const label = images[currentIndex].label;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${label.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Download iniciado");
+    } catch (error) {
+      console.error("Erro ao baixar imagem:", error);
+      toast.error("Erro ao baixar imagem");
+    }
+  }, [currentIndex, images]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (zoom > 1) {
       setIsDragging(true);
