@@ -14,14 +14,12 @@ import {
   User, 
   MessageSquare,
   AlertCircle,
-  X,
-  Plus
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { SignedImage } from "@/components/ui/signed-image";
 import { uploadPhoto } from "@/lib/photoStorage";
@@ -41,7 +39,7 @@ export default function ForumSugestoes() {
     queryKey: ["forum_posts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("forum_posts")
+        .from("forum_posts" as any)
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -51,7 +49,7 @@ export default function ForumSugestoes() {
 
   const createPostMutation = useMutation({
     mutationFn: async (payload: { text: string; imageUrl?: string }) => {
-      const { error } = await supabase.from("forum_posts").insert({
+      const { error } = await supabase.from("forum_posts" as any).insert({
         user_id: user?.id,
         text_content: payload.text,
         image_url: payload.imageUrl,
@@ -72,7 +70,7 @@ export default function ForumSugestoes() {
   const updateResponseMutation = useMutation({
     mutationFn: async ({ postId, response, isFixed }: { postId: string; response: string; isFixed: boolean }) => {
       const { error } = await supabase
-        .from("forum_posts")
+        .from("forum_posts" as any)
         .update({ admin_response: response, is_fixed: isFixed })
         .eq("id", postId);
       if (error) throw error;
@@ -125,7 +123,6 @@ export default function ForumSugestoes() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* Create Post Card */}
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -183,7 +180,6 @@ export default function ForumSugestoes() {
           </CardContent>
         </Card>
 
-        {/* Posts List */}
         <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-10 text-muted-foreground">Carregando sugestões...</div>
@@ -232,7 +228,7 @@ export default function ForumSugestoes() {
                   {post.admin_response && (
                     <div className="bg-muted/50 p-3 rounded-lg border-l-4 border-primary">
                       <div className="flex items-center gap-2 mb-1">
-                        <ShieldAlert className="h-3 w-3 text-primary" />
+                        <ShieldAlertIcon className="h-3 w-3 text-primary" />
                         <span className="text-[10px] font-bold uppercase text-primary">Resposta do Administrador</span>
                       </div>
                       <p className="text-sm italic">{post.admin_response}</p>
@@ -289,7 +285,6 @@ export default function ForumSugestoes() {
   );
 }
 
-// Re-using icon
-function ShieldAlert({ className }: { className?: string }) {
+function ShieldAlertIcon({ className }: { className?: string }) {
   return <AlertCircle className={className} />;
 }
