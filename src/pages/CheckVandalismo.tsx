@@ -63,6 +63,8 @@ export default function CheckVandalismo() {
     latitude: null,
     longitude: null,
   });
+  const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [gpsError, setGpsError] = useState<string | null>(null);
   const [boFile, setBoFile] = useState<{ url: string; nome: string } | null>(null);
   const [uploadingBO, setUploadingBO] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -79,9 +81,14 @@ export default function CheckVandalismo() {
 
   const captureGeo = () => {
     if (!navigator.geolocation) {
+      setGpsStatus('error');
+      setGpsError('Geolocalização indisponível neste dispositivo. Informe o município manualmente.');
       toast.error('Geolocalização indisponível neste dispositivo');
       return;
     }
+
+    setGpsStatus('loading');
+    setGpsError(null);
 
     const options = {
       enableHighAccuracy: true,
@@ -101,12 +108,18 @@ export default function CheckVandalismo() {
           const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || data.address?.suburb;
           if (city) {
             setMunicipio(city);
+            setGpsStatus('success');
+            setGpsError(null);
             toast.info(`Município identificado: ${city}`);
           } else {
+            setGpsStatus('error');
+            setGpsError('Não foi possível identificar o município pela localização. Informe manualmente.');
             toast.warning('Município não identificado automaticamente. Por favor, preencha manualmente.');
           }
         } catch (err) {
           console.warn('Falha ao obter município via reverse geocode', err);
+          setGpsStatus('error');
+          setGpsError('Erro ao consultar o município pela localização. Informe manualmente.');
           toast.warning('Erro ao identificar município. Por favor, preencha manualmente.');
         }
       },
@@ -115,7 +128,9 @@ export default function CheckVandalismo() {
         if (error.code === 1) msg = 'Permissão de localização negada. Por favor, preencha o município manualmente.';
         else if (error.code === 2) msg = 'Posição indisponível. Por favor, preencha o município manualmente.';
         else if (error.code === 3) msg = 'Tempo esgotado ao obter localização. Por favor, preencha o município manualmente.';
-        
+
+        setGpsStatus('error');
+        setGpsError(msg);
         toast.error(msg);
       },
       options
@@ -298,17 +313,36 @@ export default function CheckVandalismo() {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="municipio">Município *</Label>
-              <Input
-                id="municipio"
-                value={municipio}
-                onChange={(e) => setMunicipio(e.target.value)}
-                placeholder="Ex: Manaus"
-                className={!municipio && (saving || !!savedId) ? "border-destructive" : ""}
-              />
-              <p className="text-[10px] text-muted-foreground">Preencha manualmente se o GPS falhar ou não for autorizado.</p>
-            </div>
+            {gpsStatus === 'success' && municipio && (
+              <div className="space-y-1">
+                <Label>Município</Label>
+                <div className="flex items-center gap-2 rounded-md border p-2 bg-muted/40">
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm">{municipio}</span>
+                  <Badge variant="secondary" className="ml-auto text-[10px]">GPS</Badge>
+                </div>
+              </div>
+            )}
+
+            {gpsStatus === 'error' && (
+              <div className="space-y-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
+                <div className="flex items-start gap-2">
+                  <ShieldAlert className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                  <p className="text-xs text-destructive font-medium">{gpsError ?? 'Falha na geolocalização.'}</p>
+                </div>
+                <Label htmlFor="municipio">Município (manual) *</Label>
+                <Input
+                  id="municipio"
+                  value={municipio}
+                  onChange={(e) => setMunicipio(e.target.value)}
+                  placeholder="Ex: Manaus"
+                  className={!municipio ? 'border-destructive' : ''}
+                />
+                <Button variant="outline" size="sm" onClick={captureGeo}>
+                  <MapPin className="h-4 w-4 mr-2" /> Tentar GPS novamente
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="descricao">O que foi vandalizado e/ou furtado? *</Label>
@@ -373,14 +407,22 @@ export default function CheckVandalismo() {
 
             <div className="space-y-2">
               <Label>Localização</Label>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={captureGeo}>
-                  <MapPin className="h-4 w-4 mr-2" /> Capturar GPS
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={captureGeo} disabled={gpsStatus === 'loading'}>
+                  {gpsStatus === 'loading' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4 mr-2" />
+                  )}
+                  {gpsStatus === 'loading' ? 'Obtendo GPS...' : 'Capturar GPS'}
                 </Button>
                 {geo.latitude != null && (
                   <span className="text-xs text-muted-foreground">
                     {geo.latitude.toFixed(5)}, {geo.longitude?.toFixed(5)}
                   </span>
+                )}
+                {gpsStatus === 'error' && (
+                  <Badge variant="destructive" className="text-[10px]">Falha no GPS</Badge>
                 )}
               </div>
             </div>
