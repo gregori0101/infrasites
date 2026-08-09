@@ -295,7 +295,7 @@ export default function ForumSugestoes() {
                             {(!post.history || post.history.length === 0) && (
                               <p className="text-sm text-muted-foreground text-center py-4">Nenhuma alteração registrada.</p>
                             )}
-                            {post.history?.map((h: any, i: number) => (
+                            {((post.history || []) as any[]).map((h: any, i: number) => (
                               <div key={i} className="border-l-2 border-primary pl-4 py-1 space-y-1">
                                 <p className="text-[10px] text-muted-foreground">
                                   {format(new Date(h.date), "dd/MM/yy HH:mm", { locale: ptBR })}
