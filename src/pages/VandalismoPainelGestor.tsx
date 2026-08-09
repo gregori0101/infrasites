@@ -106,6 +106,7 @@ export default function VandalismoPainelGestor() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [municipioSearch, setMunicipioSearch] = useState('');
+  const [showMunicipioSuggestions, setShowMunicipioSuggestions] = useState(false);
   const [boFilter, setBoFilter] = useState<'all' | 'with' | 'without'>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('all');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
@@ -288,6 +289,20 @@ export default function VandalismoPainelGestor() {
   const siteRanking = useMemo(() => {
     return siteStats.slice(0, 5).map(s => ({ name: s.site, value: s.count }));
   }, [siteStats]);
+
+  const municipioSuggestions = useMemo(() => {
+    if (!municipioSearch || municipioSearch.length < 2) return [];
+    const lowSearch = municipioSearch.toLowerCase();
+    const uniqueMunicipios = new Set<string>();
+    
+    allVistorias.forEach(v => {
+      if (v.municipio && v.municipio.toLowerCase().includes(lowSearch)) {
+        uniqueMunicipios.add(v.municipio);
+      }
+    });
+    
+    return Array.from(uniqueMunicipios).sort().slice(0, 5);
+  }, [allVistorias, municipioSearch]);
 
   // --- Actions ---
   const handleExportExcel = () => {
@@ -618,6 +633,44 @@ export default function VandalismoPainelGestor() {
                       <option key={uf} value={uf}>{uf}</option>
                     ))}
                   </select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Mun:</span>
+                  <div className="relative w-full sm:w-48 group">
+                    <Input
+                      placeholder="Município..."
+                      className="h-8 pl-3 bg-muted/30 border-transparent focus:bg-background text-xs transition-all"
+                      value={municipioSearch}
+                      onChange={(e) => {
+                        setMunicipioSearch(e.target.value);
+                        setShowMunicipioSuggestions(true);
+                      }}
+                      onFocus={() => setShowMunicipioSuggestions(true)}
+                    />
+                    {showMunicipioSuggestions && municipioSuggestions.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {municipioSuggestions.map((m) => (
+                          <button
+                            key={m}
+                            className="w-full px-3 py-2 text-left text-[11px] hover:bg-primary hover:text-primary-foreground transition-colors font-medium border-b border-border/50 last:border-0"
+                            onClick={() => {
+                              setMunicipioSearch(m);
+                              setShowMunicipioSuggestions(false);
+                            }}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {showMunicipioSuggestions && (
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setShowMunicipioSuggestions(false)} 
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
