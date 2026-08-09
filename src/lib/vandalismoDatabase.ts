@@ -199,6 +199,9 @@ interface UpdateVistoriaInput {
   estado?: string | null;
   municipio?: string | null;
   status?: string;
+  boUrl?: string | null;
+  boNome?: string | null;
+  fotosOcorrido?: string[];
 }
 
 export async function updateVistoriaVandalismo(id: string, input: UpdateVistoriaInput): Promise<void> {
@@ -210,6 +213,8 @@ export async function updateVistoriaVandalismo(id: string, input: UpdateVistoria
   if (input.estado !== undefined) updates.estado = input.estado;
   if (input.municipio !== undefined) updates.municipio = input.municipio;
   if (input.status !== undefined) updates.status = input.status;
+  if (input.boUrl !== undefined) updates.bo_url = input.boUrl;
+  if (input.boNome !== undefined) updates.bo_nome = input.boNome;
   updates.updated_at = new Date().toISOString();
 
   const { error } = await supabase
@@ -218,15 +223,51 @@ export async function updateVistoriaVandalismo(id: string, input: UpdateVistoria
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+
+  // Update photos if provided
+  if (input.fotosOcorrido !== undefined) {
+    // Delete existing photos of this category
+    const { error: delError } = await supabase
+      .from('vandalismo_fotos')
+      .delete()
+      .eq('vistoria_id', id)
+      .eq('categoria', 'ocorrido');
+    
+    if (delError) throw new Error(`Falha ao atualizar fotos: ${delError.message}`);
+
+    // Insert new ones
+    if (input.fotosOcorrido.length > 0) {
+      const { error: insError } = await supabase.from('vandalismo_fotos').insert(
+        input.fotosOcorrido.map((url, index) => ({
+          vistoria_id: id,
+          categoria: 'ocorrido',
+          url,
+          ordem: index,
+        })),
+      );
+      if (insError) throw new Error(`Falha ao salvar novas fotos: ${insError.message}`);
+    }
+  }
 }
 
-export async function updateVistoriaItem(id: string, vulneravel: boolean, observacao?: string | null): Promise<void> {
+export async function updateVistoriaItem(
+  id: string, 
+  vulneravel: boolean, 
+  observacao?: string | null,
+  fotos?: string[]
+): Promise<void> {
+  const updates: any = { 
+    vulneravel, 
+    observacao: observacao?.trim() || null 
+  };
+  
+  if (fotos !== undefined) {
+    updates.fotos = fotos;
+  }
+
   const { error } = await supabase
     .from('vandalismo_itens')
-    .update({ 
-      vulneravel, 
-      observacao: observacao?.trim() || null 
-    })
+    .update(updates)
     .eq('id', id);
 
   if (error) throw new Error(error.message);
