@@ -280,28 +280,34 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails Container */}
       {images.length > 1 && (
-        <div className="px-4 py-3 bg-black/50 shrink-0 overflow-x-auto">
-          <div className="flex gap-2 justify-center">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => { setCurrentIndex(idx); resetView(); }}
-                className={cn(
-                  "w-16 h-12 rounded overflow-hidden border-2 transition-all shrink-0",
-                  idx === currentIndex
-                    ? "border-primary ring-2 ring-primary/50"
-                    : "border-transparent opacity-60 hover:opacity-100"
-                )}
-              >
-                <ResolvedImg
-                  src={img.url}
-                  alt={img.label}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
+        <div className="px-4 py-4 bg-black/60 shrink-0 border-t border-white/10">
+          <div className="max-w-4xl mx-auto overflow-x-auto scrollbar-hide">
+            <div className="flex gap-3 justify-start sm:justify-center min-w-max pb-2">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => { setCurrentIndex(idx); resetView(); }}
+                  className={cn(
+                    "w-20 h-14 rounded-md overflow-hidden border-2 transition-all shrink-0 relative group",
+                    idx === currentIndex
+                      ? "border-primary ring-2 ring-primary/40 scale-105 z-10"
+                      : "border-transparent opacity-40 hover:opacity-100 hover:scale-105"
+                  )}
+                >
+                  <ResolvedImg
+                    src={img.url}
+                    alt={img.label}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className={cn(
+                    "absolute inset-0 bg-primary/20 transition-opacity",
+                    idx === currentIndex ? "opacity-100" : "opacity-0 group-hover:opacity-10"
+                  )} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
