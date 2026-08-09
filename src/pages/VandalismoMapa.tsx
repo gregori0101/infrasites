@@ -687,7 +687,54 @@ export default function VandalismoMapa() {
                 </div>
               </div>
 
-              {selectedCase?.bo_url && (
+              {isEditing && (
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Boletim de Ocorrência</h4>
+                  <div className="flex flex-col gap-2">
+                    {editForm.bo_url ? (
+                      <div className="flex items-center justify-between p-2 bg-muted rounded border">
+                        <span className="text-xs truncate max-w-[200px]">{editForm.bo_nome || 'Arquivo do BO'}</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadBO(editForm.bo_url, editForm.bo_nome)}>
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setEditForm({...editForm, bo_url: null, bo_nome: null})}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="w-full h-10 border border-dashed border-primary/40 bg-primary/5 rounded flex items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                        <Paperclip className="h-4 w-4 text-primary mr-2" />
+                        <span className="text-xs font-bold text-primary uppercase">Anexar BO (PDF/Imagem)</span>
+                        <input 
+                          type="file" 
+                          accept="application/pdf,image/*" 
+                          className="hidden" 
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            toast.info('Fazendo upload do BO...');
+                            try {
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `bo_${Math.random()}.${fileExt}`;
+                              const filePath = `vandalismo/bo/${fileName}`;
+                              const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                              if (uploadError) throw uploadError;
+                              const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                              setEditForm({...editForm, bo_url: publicUrl, bo_nome: file.name});
+                              toast.success('BO anexado com sucesso');
+                            } catch (err) {
+                              toast.error('Erro no upload do BO');
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!isEditing && selectedCase?.bo_url && (
                 <div className="space-y-2">
                   <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Boletim de Ocorrência</h4>
                   <Button variant="outline" size="sm" className="w-full" onClick={() => downloadBO(selectedCase!.bo_url!, selectedCase!.bo_nome)}>
@@ -695,6 +742,7 @@ export default function VandalismoMapa() {
                   </Button>
                 </div>
               )}
+
             </div>
           </ScrollArea>
         </DialogContent>
