@@ -968,6 +968,13 @@ export default function VandalismoPainelGestor() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
