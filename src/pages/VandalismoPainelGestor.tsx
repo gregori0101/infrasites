@@ -171,6 +171,12 @@ export default function VandalismoPainelGestor() {
     ? filteredData.reduce((acc, v) => acc + v.indiceVulnerabilidade, 0) / filteredData.length
     : 0;
 
+  const boMetrics = useMemo(() => {
+    const withBO = filteredData.filter(v => !!v.bo_url).length;
+    const withoutBO = filteredData.length - withBO;
+    return { withBO, withoutBO };
+  }, [filteredData]);
+
   // --- Charts Data ---
   const vulnStats = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -472,6 +478,30 @@ export default function VandalismoPainelGestor() {
                 />
               </div>
               <p className="text-[10px] text-muted-foreground mt-2 font-medium">Grau de risco médio das estações</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md bg-card overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Boletins de Ocorrência</CardDescription>
+              <div className="flex items-baseline gap-2">
+                <CardTitle className="text-4xl font-black text-foreground">{boMetrics.withBO}</CardTitle>
+                <span className="text-xs text-muted-foreground font-medium">com anexo</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between text-[10px] font-medium text-muted-foreground mb-1">
+                <span>{boMetrics.withoutBO} sem BO</span>
+                <span>{totalOccurrences > 0 ? ((boMetrics.withBO / totalOccurrences) * 100).toFixed(0) : 0}%</span>
+              </div>
+              <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden flex">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-700" 
+                  style={{ width: `${totalOccurrences > 0 ? (boMetrics.withBO / totalOccurrences) * 100 : 0}%` }} 
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 font-medium">Proporção de casos documentados</p>
             </CardContent>
           </Card>
 
