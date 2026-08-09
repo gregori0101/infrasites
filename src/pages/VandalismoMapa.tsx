@@ -134,6 +134,12 @@ export default function VandalismoMapa() {
     }
   };
 
+  const openLightbox = (images: { url: string; label: string }[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
