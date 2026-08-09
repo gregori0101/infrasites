@@ -398,7 +398,8 @@ export default function ForumSugestoes() {
                           size="sm"
                           onClick={() => updateResponseMutation.mutate({ 
                             postId: post.id, 
-                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
+                            response: adminResponses[post.id] ?? (post.admin_response as string) ?? "", 
+
                             isFixed: false,
                             status: selectedStatus[post.id] || post.status,
                             statusReason: statusReasons[post.id] ?? post.status_reason ?? ""
