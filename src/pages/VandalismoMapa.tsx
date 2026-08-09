@@ -36,7 +36,8 @@ function createColoredIcon(color: string) {
       height: 14px;
       border-radius: 50%;
       border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      opacity: 0.9;
     "></div>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
