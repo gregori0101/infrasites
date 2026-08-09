@@ -361,7 +361,7 @@ export default function VandalismoMapa() {
             <div className="space-y-6">
               {isEditing ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-muted-foreground uppercase font-bold">Sigla do Site</label>
                       <Input 
@@ -382,6 +382,14 @@ export default function VandalismoMapa() {
                           <option key={uf} value={uf}>{uf}</option>
                         ))}
                       </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold text-primary">Município</label>
+                      <Input 
+                        value={editForm.municipio || ''} 
+                        onChange={(e) => setEditForm({...editForm, municipio: e.target.value})}
+                        className="h-8 text-xs border-primary/30"
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</label>
@@ -412,7 +420,19 @@ export default function VandalismoMapa() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">BO Status</p>
+                      {selectedCase?.bo_url ? (
+                        <Badge className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[10px]">Anexado</Badge>
+                      ) : (
+                        <Badge variant="destructive" className="text-[10px] bg-destructive/10 text-destructive border-none">Não anexado</Badge>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Recorrência Site</p>
+                      <p className="text-sm font-bold text-primary">{selectedCase?.totalAnterior || 0} vandalismos anteriores</p>
+                    </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
                       <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
@@ -422,12 +442,16 @@ export default function VandalismoMapa() {
                       <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
                     </div>
                     <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Município</p>
+                      <p className="text-sm font-medium">{selectedCase?.municipio || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
                       <p className="text-sm font-medium">{selectedCase?.operadora || '-'}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium truncate">
                         {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
                       </p>
                     </div>
@@ -441,6 +465,7 @@ export default function VandalismoMapa() {
                   </div>
                 </>
               )}
+
 
               <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
