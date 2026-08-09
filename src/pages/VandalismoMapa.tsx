@@ -51,6 +51,8 @@ export default function VandalismoMapa() {
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
+  const [exportingAll, setExportingAll] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
