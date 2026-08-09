@@ -541,6 +541,13 @@ export default function VandalismoMapa() {
         </DialogContent>
       </Dialog>
 
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+
       <div className="bg-card border-t p-3 flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest relative z-[1001]">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-emerald-500 border border-white shadow-sm" />
