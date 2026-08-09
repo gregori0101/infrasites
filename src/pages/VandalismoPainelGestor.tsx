@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -24,6 +24,11 @@ import {
   Edit,
   Save,
   X,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  RotateCw
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -84,7 +89,7 @@ import {
   Line,
 } from 'recharts';
 import { toast } from 'sonner';
-// Removed imports from here as they were moved to top
+import { Lightbox } from "@/components/ui/lightbox";
 import {
   generateVandalismoExcel,
   downloadCasePDF,
@@ -107,6 +112,9 @@ export default function VandalismoPainelGestor() {
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: allVistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
@@ -333,6 +341,12 @@ export default function VandalismoPainelGestor() {
     } catch (err) {
       toast.error('Erro ao excluir');
     }
+  };
+
+  const openLightbox = (images: { url: string; label: string }[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   return (
@@ -835,14 +849,24 @@ export default function VandalismoPainelGestor() {
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {selectedCase?.fotos?.map((f, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" onClick={() => window.open(f.url, '_blank')}>
+                    <div 
+                      key={idx} 
+                      className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
+                      onClick={() => {
+                        const images = selectedCase.fotos.map((img, i) => ({ 
+                          url: img.url, 
+                          label: `Foto do Ocorrido ${i + 1}` 
+                        }));
+                        openLightbox(images, idx);
+                      }}
+                    >
                       <SignedImage 
                         src={f.url} 
                         className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
                         alt={`Foto ocorrido ${idx + 1}`} 
                       />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
-                        <span className="text-[10px] text-white font-bold uppercase">Ver Original</span>
+                        <Search className="h-5 w-5 text-white" />
                       </div>
                     </div>
                   ))}
@@ -890,7 +914,13 @@ export default function VandalismoPainelGestor() {
                           <div 
                             key={fIdx} 
                             className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
-                            onClick={() => window.open(foto, '_blank')}
+                            onClick={() => {
+                              const images = i.fotos.map((img: string, idx: number) => ({
+                                url: img,
+                                label: `${i.rotulo} - Foto ${idx + 1}`
+                              }));
+                              openLightbox(images, fIdx);
+                            }}
                           >
                             <SignedImage 
                               src={foto} 
@@ -938,6 +968,13 @@ export default function VandalismoPainelGestor() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }

@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { listVistoriasComItens, getVistoriaVandalismo, updateVistoriaVandalismo, updateVistoriaItem, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Loader2 as Spinner, Save, ImageIcon, Paperclip, Search, Trash2 } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Save, ImageIcon, Paperclip, Search, Trash2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -13,6 +13,7 @@ import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SignedImage } from '@/components/ui/signed-image';
+import { Lightbox } from "@/components/ui/lightbox";
 import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
 import { downloadCasePDF, downloadBO } from '@/lib/vandalismoExport';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,9 @@ export default function VandalismoMapa() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   
   const { data: vistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
@@ -128,6 +132,12 @@ export default function VandalismoMapa() {
     } catch (err) {
       toast.error('Erro ao excluir');
     }
+  };
+
+  const openLightbox = (images: { url: string; label: string }[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   if (isLoading) {
@@ -411,14 +421,24 @@ export default function VandalismoMapa() {
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {selectedCase?.fotos?.map((f, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" onClick={() => window.open(f.url, '_blank')}>
+                    <div 
+                      key={idx} 
+                      className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
+                      onClick={() => {
+                        const images = selectedCase.fotos.map((img, i) => ({ 
+                          url: img.url, 
+                          label: `Foto do Ocorrido ${i + 1}` 
+                        }));
+                        openLightbox(images, idx);
+                      }}
+                    >
                       <SignedImage 
                         src={f.url} 
                         className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
                         alt={`Foto ocorrido ${idx + 1}`} 
                       />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
-                        <span className="text-[10px] text-white font-bold uppercase">Ver Original</span>
+                        <Search className="h-5 w-5 text-white" />
                       </div>
                     </div>
                   ))}
@@ -466,7 +486,13 @@ export default function VandalismoMapa() {
                           <div 
                             key={fIdx} 
                             className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
-                            onClick={() => window.open(foto, '_blank')}
+                            onClick={() => {
+                              const images = i.fotos.map((img: string, idx: number) => ({
+                                url: img,
+                                label: `${i.rotulo} - Foto ${idx + 1}`
+                              }));
+                              openLightbox(images, fIdx);
+                            }}
                           >
                             <SignedImage 
                               src={foto} 
@@ -514,6 +540,13 @@ export default function VandalismoMapa() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <Lightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
 
       <div className="bg-card border-t p-3 flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest relative z-[1001]">
         <div className="flex items-center gap-2">
