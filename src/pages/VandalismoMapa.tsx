@@ -90,12 +90,20 @@ export default function VandalismoMapa() {
         operadora: editForm.operadora,
         tecnico: editForm.tecnico,
         estado: editForm.estado,
+        municipio: editForm.municipio,
+        boUrl: editForm.bo_url,
+        boNome: editForm.bo_nome,
+        fotosOcorrido: editForm.fotos_ocorrido
       });
 
       for (const item of editForm.itens || []) {
         const original = selectedCase.itens.find(i => i.id === item.id);
-        if (original && (original.vulneravel !== item.vulneravel || original.observacao !== item.observacao)) {
-          await updateVistoriaItem(item.id, item.vulneravel, item.observacao);
+        if (original && (
+          original.vulneravel !== item.vulneravel || 
+          original.observacao !== item.observacao ||
+          JSON.stringify(original.fotos) !== JSON.stringify(item.fotos)
+        )) {
+          await updateVistoriaItem(item.id, item.vulneravel, item.observacao, item.fotos);
         }
       }
 
@@ -110,6 +118,7 @@ export default function VandalismoMapa() {
       setIsSaving(false);
     }
   };
+
 
   const startEditing = () => {
     if (!selectedCase) return;
