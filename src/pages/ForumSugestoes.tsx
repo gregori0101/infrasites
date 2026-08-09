@@ -14,7 +14,8 @@ import {
   User, 
   MessageSquare,
   AlertCircle,
-  X
+  X,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -78,6 +79,23 @@ export default function ForumSugestoes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum_posts"] });
       toast.success("Resposta enviada!");
+    },
+  });
+
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase
+        .from("forum_posts" as any)
+        .delete()
+        .eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["forum_posts"] });
+      toast.success("Sugestão excluída!");
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao excluir: " + error.message);
     },
   });
 
@@ -246,33 +264,48 @@ export default function ForumSugestoes() {
                         onChange={(e) => setAdminResponses(prev => ({ ...prev, [post.id]: e.target.value }))}
                       />
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="secondary" 
+                    <div className="flex justify-between items-center w-full gap-2">
+                      <Button
+                        variant="destructive"
                         size="sm"
-                        onClick={() => updateResponseMutation.mutate({ 
-                          postId: post.id, 
-                          response: adminResponses[post.id] ?? post.admin_response ?? "", 
-                          isFixed: false 
-                        })}
-                        disabled={updateResponseMutation.isPending}
+                        onClick={() => {
+                          if (confirm("Deseja realmente excluir esta sugestão?")) {
+                            deletePostMutation.mutate(post.id);
+                          }
+                        }}
+                        disabled={deletePostMutation.isPending}
                       >
-                        Salvar Resposta
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
                       </Button>
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => updateResponseMutation.mutate({ 
-                          postId: post.id, 
-                          response: adminResponses[post.id] ?? post.admin_response ?? "", 
-                          isFixed: true 
-                        })}
-                        disabled={updateResponseMutation.isPending}
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Confirmar Melhoria
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={() => updateResponseMutation.mutate({ 
+                            postId: post.id, 
+                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
+                            isFixed: false 
+                          })}
+                          disabled={updateResponseMutation.isPending}
+                        >
+                          Salvar Resposta
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => updateResponseMutation.mutate({ 
+                            postId: post.id, 
+                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
+                            isFixed: true 
+                          })}
+                          disabled={updateResponseMutation.isPending}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Confirmar Melhoria
+                        </Button>
+                      </div>
                     </div>
                   </CardFooter>
                 )}
