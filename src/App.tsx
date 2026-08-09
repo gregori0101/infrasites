@@ -34,6 +34,7 @@ const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
 const VandalismoMapa = lazy(() => import("./pages/VandalismoMapa"));
 const VandalismoResumo = lazy(() => import("./pages/VandalismoResumo"));
+const ForumSugestoes = lazy(() => import("./pages/ForumSugestoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Fiber Guardian pages
@@ -215,6 +216,11 @@ const App = () => {
                   <Route path="/check-vandalismo/resumo" element={
                     <ProtectedRoute>
                       <VandalismoResumo />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/forum" element={
+                    <ProtectedRoute>
+                      <ForumSugestoes />
                     </ProtectedRoute>
                   } />
 

@@ -195,6 +195,39 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_posts: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_fixed: boolean | null
+          text_content: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_fixed?: boolean | null
+          text_content: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_fixed?: boolean | null
+          text_content?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fotos_reparo: {
         Row: {
           caminho_arquivo: string
