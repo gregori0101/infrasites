@@ -697,7 +697,9 @@ export default function VandalismoPainelGestor() {
                             Anexado
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="text-[10px] text-muted-foreground bg-muted/50 border-none">Pendente</Badge>
+                          <Badge variant="destructive" className="text-[10px] bg-destructive/10 text-destructive hover:bg-destructive/10 border-none">
+                            Não anexado
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
