@@ -590,7 +590,7 @@ export default function VandalismoMapa() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {i.fotos.map((foto: string, fIdx: number) => (
+                        {(isEditing ? i.fotos : i.fotos)?.map((foto: string, fIdx: number) => (
                           <div 
                             key={fIdx} 
                             className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
@@ -610,9 +610,60 @@ export default function VandalismoMapa() {
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
                               <Search className="h-3 w-3 text-white" />
                             </div>
+                            {isEditing && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newItens = [...editForm.itens];
+                                  const newFotos = [...newItens[idx].fotos];
+                                  newFotos.splice(fIdx, 1);
+                                  newItens[idx].fotos = newFotos;
+                                  setEditForm({...editForm, itens: newItens});
+                                }}
+                                className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5 shadow-sm"
+                              >
+                                <X className="h-2 w-2" />
+                              </button>
+                            )}
                           </div>
                         ))}
+                        {isEditing && i.fotos.length < 10 && (
+                          <label className="w-12 h-12 rounded border border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                            <ImageIcon className="h-4 w-4 text-primary" />
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              multiple 
+                              className="hidden" 
+                              onChange={async (e) => {
+                                const files = e.target.files;
+                                if (!files) return;
+                                toast.info('Fazendo upload...');
+                                const newUrls = [];
+                                for (let i_file = 0; i_file < files.length; i_file++) {
+                                  try {
+                                    const file = files[i_file];
+                                    const fileExt = file.name.split('.').pop();
+                                    const fileName = `${Math.random()}.${fileExt}`;
+                                    const filePath = `vandalismo/${fileName}`;
+                                    const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                                    if (uploadError) throw uploadError;
+                                    const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                                    newUrls.push(publicUrl);
+                                  } catch (err) {
+                                    toast.error('Erro no upload');
+                                  }
+                                }
+                                const newItens = [...editForm.itens];
+                                newItens[idx].fotos = [...newItens[idx].fotos, ...newUrls];
+                                setEditForm({...editForm, itens: newItens});
+                                toast.success('Upload concluído');
+                              }}
+                            />
+                          </label>
+                        )}
                       </div>
+
 
                       {isEditing ? (
                         <div className="mt-2">
