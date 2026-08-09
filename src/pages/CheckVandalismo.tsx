@@ -163,7 +163,10 @@ export default function CheckVandalismo() {
 
   const validate = (): string | null => {
     if (!estado) return 'Selecione o Estado.';
-    if (!municipio.trim()) return 'O município é obrigatório. Por favor, preencha manualmente se a geolocalização falhar.';
+    if (!municipio.trim())
+      return gpsStatus === 'error'
+        ? 'O município é obrigatório. Preencha manualmente no campo indicado.'
+        : 'Capture o GPS para identificar o município.';
     if (!siteCode.trim()) return 'Informe a sigla do site.';
     if (descricao.trim().length < 10) return 'Descreva o vandalismo/furto com pelo menos 10 caracteres.';
     if (fotosOcorrido.length < VANDALISMO_MIN_FOTOS_OCORRIDO)
@@ -238,6 +241,8 @@ export default function CheckVandalismo() {
     setItens(initialItens());
     setBoFile(null);
     setGeo({ latitude: null, longitude: null });
+    setGpsStatus('idle');
+    setGpsError(null);
     setSavedId(null);
   };
 
