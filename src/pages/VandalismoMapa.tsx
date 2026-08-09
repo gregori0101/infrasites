@@ -230,35 +230,35 @@ export default function VandalismoMapa() {
                 icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
               >
                 <Popup>
-                  <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
+                  <div className="space-y-2 min-w-[200px] p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm text-slate-900 dark:text-slate-100 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-bold text-sm text-primary">{v.site_code}</h3>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded border border-slate-200 dark:border-slate-700">{v.estado}</span>
+                      <h3 className="font-bold text-sm text-primary/90">{v.site_code}</h3>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 rounded border border-slate-200/50 dark:border-slate-700/50">{v.estado}</span>
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                      <div className="h-1.5 flex-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          className={`h-full ${v.indiceVulnerabilidade > 50 ? 'bg-destructive' : v.indiceVulnerabilidade > 20 ? 'bg-orange-500' : 'bg-emerald-500'}`}
+                          className={`h-full ${v.indiceVulnerabilidade > 50 ? 'bg-destructive/70' : v.indiceVulnerabilidade > 20 ? 'bg-orange-400/70' : 'bg-emerald-400/70'}`}
                           style={{ width: `${v.indiceVulnerabilidade}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-black">{v.indiceVulnerabilidade.toFixed(0)}%</span>
+                      <span className="text-[10px] font-semibold text-slate-500">{v.indiceVulnerabilidade.toFixed(0)}%</span>
                     </div>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2 italic">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 italic leading-tight">
                       {v.descricao || 'Sem descrição'}
                     </p>
 
-                    <div className="pt-1 border-t border-border mt-2 space-y-1">
-                       <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <span className="font-semibold text-foreground">{v.tecnico?.split('@')[0]}</span>
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/50 mt-1 space-y-1">
+                       <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                        <span className="font-medium text-slate-600 dark:text-slate-300">{v.tecnico?.split('@')[0]}</span>
                         <span>•</span>
                         <span>{format(parseISO(v.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
                       </div>
                       {v.endereco && (
-                        <div className="text-[10px] flex items-start gap-1 text-muted-foreground">
-                          <MapPin className="h-2 w-2 mt-0.5 shrink-0" /> 
+                        <div className="text-[10px] flex items-start gap-1 text-slate-400">
+                          <MapPin className="h-2 w-2 mt-0.5 shrink-0 opacity-50" /> 
                           <span className="truncate">{v.endereco}</span>
                         </div>
                       )}
@@ -266,14 +266,14 @@ export default function VandalismoMapa() {
 
                     <Button
                       size="sm"
-                      variant="secondary"
-                      className="w-full mt-2 h-8 text-[11px] font-bold"
+                      variant="outline"
+                      className="w-full mt-2 h-8 text-[11px] font-semibold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
                       onClick={async () => {
                         const full = await getVistoriaVandalismo(v.id);
                         setSelectedCase(full);
                       }}
                     >
-                      <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes da Ocorrência
+                      <ShieldAlert className="h-3 w-3 mr-1.5 opacity-70" /> Detalhes da Ocorrência
                     </Button>
                   </div>
                 </Popup>
