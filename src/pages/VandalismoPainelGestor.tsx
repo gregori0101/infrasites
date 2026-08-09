@@ -116,6 +116,11 @@ export default function VandalismoPainelGestor() {
   const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  
+  // Pagination and Sort
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
   const { data: allVistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
