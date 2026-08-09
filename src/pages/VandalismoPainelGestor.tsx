@@ -332,15 +332,10 @@ export default function VandalismoPainelGestor() {
     setIsEditing(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
-    try {
-      await deleteVistoriaVandalismo(id);
-      toast.success('Vistoria excluída');
-      refetch();
-    } catch (err) {
-      toast.error('Erro ao excluir');
-    }
+  const openLightbox = (images: { url: string; label: string }[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   return (
