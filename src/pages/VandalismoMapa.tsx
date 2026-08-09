@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { listVistoriasComItens, getVistoriaVandalismo, updateVistoriaVandalismo, updateVistoriaItem, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
+
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Save, ImageIcon, Paperclip, Search, Trash2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
