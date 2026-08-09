@@ -99,6 +99,7 @@ export default function VandalismoPainelGestor() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
+  const [boFilter, setBoFilter] = useState<'all' | 'with' | 'without'>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('all');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -115,19 +116,24 @@ export default function VandalismoPainelGestor() {
   const filteredData = useMemo(() => {
     let data = [...allVistorias];
 
-    // Search
+    // Search (Site Code Only)
     if (searchTerm) {
       const low = searchTerm.toLowerCase();
       data = data.filter(v =>
-        v.site_code.toLowerCase().includes(low) ||
-        v.tecnico?.toLowerCase().includes(low) ||
-        v.descricao.toLowerCase().includes(low)
+        v.site_code.toLowerCase().includes(low)
       );
     }
 
     // Filter by Estado
     if (estadoFilter !== 'all') {
       data = data.filter(v => v.estado === estadoFilter);
+    }
+
+    // Filter by BO
+    if (boFilter === 'with') {
+      data = data.filter(v => !!v.bo_url);
+    } else if (boFilter === 'without') {
+      data = data.filter(v => !v.bo_url);
     }
 
     // Date
@@ -147,7 +153,7 @@ export default function VandalismoPainelGestor() {
     }
 
     return data;
-  }, [allVistorias, searchTerm, estadoFilter, dateFilter]);
+  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
@@ -380,10 +386,10 @@ export default function VandalismoPainelGestor() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* FILTERS SECTION */}
         <section className="bg-card p-4 rounded-xl shadow-sm border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96 group">
+          <div className="relative w-full md:w-64 group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              placeholder="Buscar por site, técnico ou descrição..."
+              placeholder="Digite a sigla do site..."
               className="pl-9 bg-muted/30 border-transparent focus:bg-background transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -402,6 +408,19 @@ export default function VandalismoPainelGestor() {
                 {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
                   <option key={uf} value={uf}>{uf}</option>
                 ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">BO:</span>
+              <select
+                value={boFilter}
+                onChange={(e) => setBoFilter(e.target.value as any)}
+                className="h-8 px-2 rounded-md border border-border bg-muted/30 text-xs focus:outline-none"
+              >
+                <option value="all">Todos</option>
+                <option value="with">Com BO</option>
+                <option value="without">Sem BO</option>
               </select>
             </div>
 
