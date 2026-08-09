@@ -640,8 +640,8 @@ export default function VandalismoPainelGestor() {
                     <Input
                       placeholder="Buscar município..."
                       className="h-8 pl-6 bg-muted/30 border-transparent focus:bg-background text-[10px] w-32 transition-all"
-                      value={editForm.municipioFilter || ''}
-                      onChange={(e) => setEditForm({...editForm, municipioFilter: e.target.value})}
+                      value={municipioSearch}
+                      onChange={(e) => setMunicipioSearch(e.target.value)}
                     />
                   </div>
                 </div>
