@@ -504,20 +504,6 @@ export default function VandalismoPainelGestor() {
               <p className="text-[10px] text-muted-foreground mt-2 font-medium">Proporção de casos documentados</p>
             </CardContent>
           </Card>
-
-          <Card className="border-none shadow-md bg-card overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Abrangência Local</CardDescription>
-              <CardTitle className="text-4xl font-black text-foreground">{new Set(filteredData.map(v => v.site_code)).size}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">Localidades afetadas</span>
-                <MapPin className="h-5 w-5 text-emerald-500/20 group-hover:text-emerald-500/40 transition-colors" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* CHARTS SECTION */}
