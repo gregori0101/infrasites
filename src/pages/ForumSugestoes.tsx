@@ -348,7 +348,7 @@ export default function ForumSugestoes() {
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase text-muted-foreground">Status & Resposta</label>
                         <Select 
-                          value={selectedStatus[post.id] || post.status} 
+                          value={selectedStatus[post.id] || post.status || 'pendente'} 
                           onValueChange={(val) => setSelectedStatus(prev => ({ ...prev, [post.id]: val }))}
                         >
                           <SelectTrigger className="h-9">
