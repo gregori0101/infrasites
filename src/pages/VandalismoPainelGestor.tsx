@@ -28,7 +28,8 @@ import {
   ChevronRight,
   ZoomIn,
   ZoomOut,
-  RotateCw
+  RotateCw,
+  ArrowUpDown,
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
