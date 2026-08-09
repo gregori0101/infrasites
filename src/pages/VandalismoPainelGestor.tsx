@@ -320,6 +320,7 @@ export default function VandalismoPainelGestor() {
         operadora: editForm.operadora,
         tecnico: editForm.tecnico,
         estado: editForm.estado,
+        municipio: editForm.municipio,
       });
 
       // Update items if modified
@@ -351,6 +352,7 @@ export default function VandalismoPainelGestor() {
       operadora: selectedCase.operadora,
       tecnico: selectedCase.tecnico,
       estado: selectedCase.estado,
+      municipio: selectedCase.municipio,
       itens: selectedCase.itens.map(i => ({ ...i }))
     });
     setIsEditing(true);
@@ -624,6 +626,19 @@ export default function VandalismoPainelGestor() {
                   </select>
                 </div>
 
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Município:</span>
+                  <div className="relative group">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Input
+                      placeholder="Buscar município..."
+                      className="h-8 pl-6 bg-muted/30 border-transparent focus:bg-background text-[10px] w-32 transition-all"
+                      value={editForm.municipioFilter || ''}
+                      onChange={(e) => setEditForm({...editForm, municipioFilter: e.target.value})}
+                    />
+                  </div>
+                </div>
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -724,6 +739,7 @@ export default function VandalismoPainelGestor() {
                                   operadora: full?.operadora,
                                   tecnico: full?.tecnico,
                                   estado: full?.estado,
+                                  municipio: full?.municipio,
                                   itens: full?.itens.map(i => ({ ...i }))
                                 });
                                 setIsEditing(true);
@@ -893,6 +909,14 @@ export default function VandalismoPainelGestor() {
                         className="h-8 text-xs"
                       />
                     </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Município</label>
+                      <Input 
+                        value={editForm.municipio || ''} 
+                        onChange={(e) => setEditForm({...editForm, municipio: e.target.value})}
+                        className="h-8 text-xs"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -936,6 +960,10 @@ export default function VandalismoPainelGestor() {
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</p>
                       <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Município</p>
+                      <p className="text-sm font-medium">{selectedCase?.municipio || '-'}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
