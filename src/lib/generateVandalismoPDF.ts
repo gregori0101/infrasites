@@ -132,6 +132,7 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
 
   // Identification
   sectionTitle('Identificacao da vistoria');
+  field('BO', data.bo_url ? 'Anexado' : 'Não anexado');
   field('Site', data.site_code);
   field('Estado', data.estado ?? '-');
   field('Operadora', data.operadora ?? '-');
