@@ -477,36 +477,84 @@ export default function VandalismoMapa() {
 
               <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {selectedCase?.fotos?.map((f, idx) => (
-                    <div 
-                      key={idx} 
-                      className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
-                      onClick={() => {
-                        const images = selectedCase.fotos.map((img, i) => ({ 
-                          url: img.url, 
-                          label: `Foto do Ocorrido ${i + 1}` 
-                        }));
-                        openLightbox(images, idx);
-                      }}
-                    >
-                      <SignedImage 
-                        src={f.url} 
-                        className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
-                        alt={`Foto ocorrido ${idx + 1}`} 
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
-                        <Search className="h-5 w-5 text-white" />
-                      </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                      {(isEditing ? editForm.fotos_ocorrido : selectedCase?.fotos?.map(f => f.url))?.map((url: string, idx: number) => (
+                        <div 
+                          key={idx} 
+                          className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
+                          onClick={() => {
+                            const images = (isEditing ? editForm.fotos_ocorrido : selectedCase!.fotos.map(f => f.url)).map((img: string, i: number) => ({ 
+                              url: img, 
+                              label: `Foto do Ocorrido ${i + 1}` 
+                            }));
+                            openLightbox(images, idx);
+                          }}
+                        >
+                          <SignedImage 
+                            src={url} 
+                            className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
+                            alt={`Foto ocorrido ${idx + 1}`} 
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                            <Search className="h-5 w-5 text-white" />
+                          </div>
+                          {isEditing && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newFotos = [...editForm.fotos_ocorrido];
+                                newFotos.splice(idx, 1);
+                                setEditForm({...editForm, fotos_ocorrido: newFotos});
+                              }}
+                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {isEditing && editForm.fotos_ocorrido?.length < 20 && (
+                        <label className="aspect-square rounded-lg border border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                          <ImageIcon className="h-6 w-6 text-primary mb-1" />
+                          <span className="text-[10px] font-bold text-primary uppercase">Add Foto</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            className="hidden" 
+                            onChange={async (e) => {
+                              const files = e.target.files;
+                              if (!files) return;
+                              toast.info('Fazendo upload...');
+                              const newUrls = [];
+                              for (let i = 0; i < files.length; i++) {
+                                try {
+                                  const file = files[i];
+                                  const fileExt = file.name.split('.').pop();
+                                  const fileName = `${Math.random()}.${fileExt}`;
+                                  const filePath = `vandalismo/${fileName}`;
+                                  const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                                  if (uploadError) throw uploadError;
+                                  const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                                  newUrls.push(publicUrl);
+                                } catch (err) {
+                                  toast.error('Erro no upload');
+                                }
+                              }
+                              setEditForm({...editForm, fotos_ocorrido: [...editForm.fotos_ocorrido, ...newUrls]});
+                              toast.success('Upload concluído');
+                            }}
+                          />
+                        </label>
+                      )}
+                      {(!isEditing && (!selectedCase?.fotos || selectedCase.fotos.length === 0)) && (
+                        <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  {(!selectedCase?.fotos || selectedCase.fotos.length === 0) && (
-                    <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
-                    </div>
-                  )}
-                </div>
+
               </div>
 
               <div className="space-y-3">
