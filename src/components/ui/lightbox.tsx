@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { DismissableLayerBranch } from "@radix-ui/react-dismissable-layer";
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useResolvedImageUrl } from "@/components/ui/signed-image";
+import { toast } from "sonner";
 
 function ResolvedImg({ src, ...rest }: React.ImgHTMLAttributes<HTMLImageElement> & { src: string }) {
   const resolved = useResolvedImageUrl(src);
