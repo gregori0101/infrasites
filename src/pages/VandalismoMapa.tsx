@@ -350,7 +350,7 @@ export default function VandalismoMapa() {
       </main>
 
       <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
-        <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0 overflow-hidden z-[1005]">
+        <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0 overflow-hidden z-[5000]">
           <DialogHeader className="p-6 pb-2 border-b">
             <div className="flex items-center justify-between">
               <div>
