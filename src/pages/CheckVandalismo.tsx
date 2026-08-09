@@ -55,6 +55,7 @@ export default function CheckVandalismo() {
   const [siteCode, setSiteCode] = useState('');
   const [estado, setEstado] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [municipio, setMunicipio] = useState('');
   const [fotosOcorrido, setFotosOcorrido] = useState<string[]>([]);
   const [itens, setItens] = useState<Record<string, VandalismoItemState>>(initialItens);
   const [qtdGabinetes, setQtdGabinetes] = useState(1);
@@ -82,9 +83,22 @@ export default function CheckVandalismo() {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGeo({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setGeo({ latitude, longitude });
         toast.success('Localização capturada');
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`);
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || data.address?.suburb;
+          if (city) {
+            setMunicipio(city);
+            toast.info(`Município identificado: ${city}`);
+          }
+        } catch (err) {
+          console.warn('Falha ao obter município via reverse geocode', err);
+        }
       },
       () => toast.error('Não foi possível obter a localização'),
       { enableHighAccuracy: true, timeout: 15000 },
@@ -140,6 +154,7 @@ export default function CheckVandalismo() {
         siteCode,
         estado,
         descricao,
+        municipio,
         operadora: userOperadora ?? null,
         latitude: geo.latitude,
         longitude: geo.longitude,
@@ -184,6 +199,7 @@ export default function CheckVandalismo() {
   const resetForm = () => {
     setSiteCode('');
     setEstado('');
+    setMunicipio('');
     setDescricao('');
     setFotosOcorrido([]);
     setItens(initialItens());
@@ -262,6 +278,16 @@ export default function CheckVandalismo() {
                   autoCapitalize="characters"
                 />
               </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="municipio">Município (Capturado via GPS ou preenchimento manual)</Label>
+              <Input
+                id="municipio"
+                value={municipio}
+                onChange={(e) => setMunicipio(e.target.value)}
+                placeholder="Ex: Manaus"
+              />
             </div>
 
             <div className="space-y-2">
