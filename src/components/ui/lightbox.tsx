@@ -167,7 +167,7 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
   return createPortal(
     <DismissableLayerBranch>
     <div
-      className="fixed inset-0 z-[100] bg-black/95 flex flex-col pointer-events-auto"
+      className="fixed inset-0 z-[9999] bg-black/95 flex flex-col pointer-events-auto"
       onClick={handleBackdropClick}
       onKeyDown={e => e.stopPropagation()}
       onPointerDown={e => e.stopPropagation()}
