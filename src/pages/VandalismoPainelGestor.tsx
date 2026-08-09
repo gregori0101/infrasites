@@ -914,7 +914,13 @@ export default function VandalismoPainelGestor() {
                           <div 
                             key={fIdx} 
                             className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
-                            onClick={() => window.open(foto, '_blank')}
+                            onClick={() => {
+                              const images = i.fotos.map((img: string, idx: number) => ({
+                                url: img,
+                                label: `${i.rotulo} - Foto ${idx + 1}`
+                              }));
+                              openLightbox(images, fIdx);
+                            }}
                           >
                             <SignedImage 
                               src={foto} 
