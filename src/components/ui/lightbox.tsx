@@ -214,6 +214,15 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
           <Button
             variant="ghost"
             size="icon"
+            onClick={handleDownload}
+            className="text-white hover:bg-white/20"
+            title="Baixar imagem"
+          >
+            <Download className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             className="text-white hover:bg-white/20 ml-2"
           >
