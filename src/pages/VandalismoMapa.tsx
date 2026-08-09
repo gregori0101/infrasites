@@ -27,40 +27,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createColoredIcon(color: string, siteCode: string = '') {
+function createColoredIcon(color: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
       background: ${color};
-      width: 48px;
-      height: 48px;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
       border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <div style="
-        transform: rotate(45deg);
-        color: white;
-        font-size: 8px;
-        font-weight: 900;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        text-align: center;
-        width: 100%;
-        padding: 2px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      ">
-        ${siteCode}
-      </div>
-    </div>`,
-    iconSize: [48, 48],
-    iconAnchor: [24, 48],
-    popupAnchor: [0, -48],
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -7],
   });
 }
 
