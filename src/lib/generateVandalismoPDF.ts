@@ -135,6 +135,7 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
   field('BO', data.bo_url ? 'Anexado' : 'Não anexado');
   field('Site', data.site_code);
   field('Estado', data.estado ?? '-');
+  field('Municipio', data.municipio ?? '-');
   field('Operadora', data.operadora ?? '-');
   field('Tecnico', data.tecnico ?? '-');
   field('Data', format(new Date(data.created_at), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR }));

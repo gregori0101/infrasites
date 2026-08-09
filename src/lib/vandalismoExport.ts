@@ -23,6 +23,7 @@ export function generateVandalismoExcel(vistorias: VandalismoVistoriaResumo[]): 
     const base: Record<string, string | number> = {
       'Sigla do Site': v.site_code,
       Estado: v.estado ?? '-',
+      Município: v.municipio ?? '-',
       Data: format(new Date(v.created_at), 'dd/MM/yyyy HH:mm'),
       Técnico: v.tecnico ?? '-',
       Operadora: v.operadora ?? '-',

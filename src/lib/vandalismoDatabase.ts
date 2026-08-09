@@ -19,6 +19,7 @@ interface SaveVistoriaInput {
   boNome?: string | null;
   tecnico?: string | null;
   estado: string | null;
+  municipio?: string | null;
   fotosOcorrido: string[];
   itens: Record<string, VandalismoItemState>;
 }
@@ -34,6 +35,7 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
       user_id: userId,
       site_code: input.siteCode.trim().toUpperCase(),
       estado: input.estado.trim().toUpperCase(),
+      municipio: input.municipio?.trim() || null,
       descricao: input.descricao.trim(),
       operadora: input.operadora ?? null,
       latitude: input.latitude ?? null,
@@ -90,7 +92,7 @@ export async function listVistoriasVandalismo(): Promise<VandalismoVistoria[]> {
   const { data, error } = await supabase
     .from('vandalismo_vistorias')
     .select(
-      'id,user_id,site_code,estado,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
+      'id,user_id,site_code,estado,municipio,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
     )
     .order('created_at', { ascending: false })
     .limit(5000);
@@ -104,7 +106,7 @@ export async function getVistoriaVandalismo(id: string): Promise<VandalismoVisto
     supabase
       .from('vandalismo_vistorias')
       .select(
-        'id,user_id,site_code,estado,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
+        'id,user_id,site_code,estado,municipio,operadora,descricao,latitude,longitude,endereco,bo_url,bo_nome,tecnico,status,created_at,updated_at',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -140,6 +142,7 @@ export interface VandalismoVistoriaResumo extends VandalismoVistoria {
   vulneraveis: number;
   indiceVulnerabilidade: number;
   estado: string | null;
+  municipio: string | null;
   totalAnterior?: number;
 }
 
@@ -194,6 +197,7 @@ interface UpdateVistoriaInput {
   operadora?: string | null;
   tecnico?: string | null;
   estado?: string | null;
+  municipio?: string | null;
   status?: string;
 }
 
@@ -204,6 +208,7 @@ export async function updateVistoriaVandalismo(id: string, input: UpdateVistoria
   if (input.operadora !== undefined) updates.operadora = input.operadora;
   if (input.tecnico !== undefined) updates.tecnico = input.tecnico;
   if (input.estado !== undefined) updates.estado = input.estado;
+  if (input.municipio !== undefined) updates.municipio = input.municipio;
   if (input.status !== undefined) updates.status = input.status;
   updates.updated_at = new Date().toISOString();
 
