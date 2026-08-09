@@ -52,6 +52,9 @@ export default function VandalismoMapa() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   
   const { data: vistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
