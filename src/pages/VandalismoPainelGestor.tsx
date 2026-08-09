@@ -112,6 +112,9 @@ export default function VandalismoPainelGestor() {
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: allVistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
