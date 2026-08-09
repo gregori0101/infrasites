@@ -624,6 +624,15 @@ export default function VandalismoPainelGestor() {
                   </select>
                 </div>
 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[10px] font-bold uppercase tracking-wider gap-2 border-border bg-muted/30"
+                  onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                >
+                  <ArrowUpDown className="h-3 w-3" />
+                  {sortOrder === 'desc' ? 'Mais Recentes' : 'Mais Antigos'}
+                </Button>
               </div>
             </div>
 
