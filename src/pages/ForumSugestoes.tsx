@@ -129,7 +129,7 @@ export default function ForumSugestoes() {
           is_fixed: isFixed,
           status: status || post?.status || 'pendente',
           status_reason: statusReason || post?.status_reason,
-          history: [...(post?.history || []), newHistoryItem]
+          history: [...((post?.history as any[]) || []), newHistoryItem]
         })
         .eq("id", postId);
       if (error) throw error;
