@@ -373,14 +373,6 @@ export default function VandalismoPainelGestor() {
               {exportingAll ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-500" />}
               Excel
             </Button>
-            <Button 
-              className="flex-1 sm:flex-none shadow-sm" 
-              onClick={handleExportZip} 
-              disabled={exportingZip}
-            >
-              {exportingZip ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-              Relatórios ZIP
-            </Button>
           </div>
         </div>
       </header>
