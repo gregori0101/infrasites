@@ -148,6 +148,7 @@ export default function CheckVandalismo() {
 
   const validate = (): string | null => {
     if (!estado) return 'Selecione o Estado.';
+    if (!municipio.trim()) return 'O município é obrigatório. Por favor, preencha manualmente se a geolocalização falhar.';
     if (!siteCode.trim()) return 'Informe a sigla do site.';
     if (descricao.trim().length < 10) return 'Descreva o vandalismo/furto com pelo menos 10 caracteres.';
     if (fotosOcorrido.length < VANDALISMO_MIN_FOTOS_OCORRIDO)
@@ -298,13 +299,15 @@ export default function CheckVandalismo() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="municipio">Município (Capturado via GPS ou preenchimento manual)</Label>
+              <Label htmlFor="municipio">Município *</Label>
               <Input
                 id="municipio"
                 value={municipio}
                 onChange={(e) => setMunicipio(e.target.value)}
                 placeholder="Ex: Manaus"
+                className={!municipio && (saving || !!savedId) ? "border-destructive" : ""}
               />
+              <p className="text-[10px] text-muted-foreground">Preencha manualmente se o GPS falhar ou não for autorizado.</p>
             </div>
 
             <div className="space-y-2">
