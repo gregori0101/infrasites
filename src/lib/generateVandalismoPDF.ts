@@ -151,7 +151,8 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
   if (data.latitude != null && data.longitude != null) {
     field('Coordenadas', `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`);
   }
-  if (data.bo_url) field('Boletim de Ocorrencia', data.bo_nome || 'Documento anexado');
+  field('BO', data.bo_url ? 'Anexado' : 'Não anexado');
+  if (data.bo_url) field('Documento', data.bo_nome || 'Arquivo de BO');
 
   // Description
   sectionTitle('Descricao do vandalismo / furto');
