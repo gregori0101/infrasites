@@ -199,9 +199,12 @@ export type Database = {
         Row: {
           admin_response: string | null
           created_at: string
+          history: Json | null
           id: string
           image_url: string | null
           is_fixed: boolean | null
+          status: Database["public"]["Enums"]["forum_status"] | null
+          status_reason: string | null
           text_content: string
           updated_at: string
           user_id: string
@@ -209,9 +212,12 @@ export type Database = {
         Insert: {
           admin_response?: string | null
           created_at?: string
+          history?: Json | null
           id?: string
           image_url?: string | null
           is_fixed?: boolean | null
+          status?: Database["public"]["Enums"]["forum_status"] | null
+          status_reason?: string | null
           text_content: string
           updated_at?: string
           user_id: string
@@ -219,9 +225,12 @@ export type Database = {
         Update: {
           admin_response?: string | null
           created_at?: string
+          history?: Json | null
           id?: string
           image_url?: string | null
           is_fixed?: boolean | null
+          status?: Database["public"]["Enums"]["forum_status"] | null
+          status_reason?: string | null
           text_content?: string
           updated_at?: string
           user_id?: string
@@ -4545,6 +4554,7 @@ export type Database = {
     Enums: {
       app_role: "gestor" | "tecnico" | "administrador"
       assignment_status: "pendente" | "em_andamento" | "concluido" | "atrasado"
+      forum_status: "pendente" | "analise" | "aprovada" | "rejeitada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4674,6 +4684,7 @@ export const Constants = {
     Enums: {
       app_role: ["gestor", "tecnico", "administrador"],
       assignment_status: ["pendente", "em_andamento", "concluido", "atrasado"],
+      forum_status: ["pendente", "analise", "aprovada", "rejeitada"],
     },
   },
 } as const

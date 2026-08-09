@@ -15,8 +15,27 @@ import {
   MessageSquare,
   AlertCircle,
   X,
-  Trash2
+  Trash2,
+  History,
+  CheckCircle,
+  AlertTriangle,
+  Search,
+  Check
 } from "lucide-react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +54,18 @@ export default function ForumSugestoes() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [adminResponses, setAdminResponses] = useState<Record<string, string>>({});
+  const [statusReasons, setStatusReasons] = useState<Record<string, string>>({});
+  const [selectedStatus, setSelectedStatus] = useState<Record<string, string>>({});
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pendente': return <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+      case 'analise': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50"><Search className="h-3 w-3 mr-1" /> Em Análise</Badge>;
+      case 'aprovada': return <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50"><CheckCircle className="h-3 w-3 mr-1" /> Aprovada</Badge>;
+      case 'rejeitada': return <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5"><AlertTriangle className="h-3 w-3 mr-1" /> Rejeitada</Badge>;
+      default: return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+    }
+  };
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["forum_posts"],
@@ -69,16 +100,43 @@ export default function ForumSugestoes() {
   });
 
   const updateResponseMutation = useMutation({
-    mutationFn: async ({ postId, response, isFixed }: { postId: string; response: string; isFixed: boolean }) => {
+    mutationFn: async ({ 
+      postId, 
+      response, 
+      isFixed, 
+      status, 
+      statusReason 
+    }: { 
+      postId: string; 
+      response: string; 
+      isFixed: boolean;
+      status?: string;
+      statusReason?: string;
+    }) => {
+      const post = ((posts || []) as any[]).find((p: any) => p.id === postId);
+      const newHistoryItem = {
+        date: new Date().toISOString(),
+        old_status: post?.status || 'pendente',
+        new_status: status || post?.status || 'pendente',
+        reason: statusReason || "",
+        admin_response: response
+      };
+
       const { error } = await supabase
         .from("forum_posts" as any)
-        .update({ admin_response: response, is_fixed: isFixed })
+        .update({ 
+          admin_response: response, 
+          is_fixed: isFixed,
+          status: status || post?.status || 'pendente',
+          status_reason: statusReason || post?.status_reason,
+          history: [...((post?.history as any[]) || []), newHistoryItem]
+        })
         .eq("id", postId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum_posts"] });
-      toast.success("Resposta enviada!");
+      toast.success("Sugestão atualizada!");
     },
   });
 
@@ -221,17 +279,47 @@ export default function ForumSugestoes() {
                         {format(new Date(post.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
                       </span>
                     </div>
-                    {post.is_fixed ? (
-                      <Badge className="bg-emerald-600 hover:bg-emerald-700">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Melhoria Executada
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-orange-600 border-orange-200">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pendente
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] gap-1">
+                            <History className="h-3 w-3" />
+                            Histórico
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Histórico da Sugestão</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                            {(!post.history || post.history.length === 0) && (
+                              <p className="text-sm text-muted-foreground text-center py-4">Nenhuma alteração registrada.</p>
+                            )}
+                            {((post.history || []) as any[]).map((h: any, i: number) => (
+                              <div key={i} className="border-l-2 border-primary pl-4 py-1 space-y-1">
+                                <p className="text-[10px] text-muted-foreground">
+                                  {format(new Date(h.date), "dd/MM/yy HH:mm", { locale: ptBR })}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-medium uppercase">{h.old_status}</span>
+                                  <span className="text-xs text-muted-foreground">→</span>
+                                  <span className="text-xs font-bold uppercase text-primary">{h.new_status}</span>
+                                </div>
+                                {h.reason && <p className="text-xs italic">Motivo: {h.reason}</p>}
+                                {h.admin_response && <p className="text-xs">Resp: {h.admin_response as string}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      {post.is_fixed && (
+                        <Badge className="bg-emerald-600 hover:bg-emerald-700">
+                          <Check className="h-3 w-3 mr-1" />
+                          Concluído
+                        </Badge>
+                      )}
+                      {getStatusBadge(post.status || 'pendente')}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -255,14 +343,40 @@ export default function ForumSugestoes() {
                 </CardContent>
                 
                 {isAdmin && (
-                  <CardFooter className="pt-2 border-t flex flex-col items-stretch gap-3">
-                    <div className="flex items-center gap-2">
-                      <Textarea 
-                        placeholder="Escreva a resposta ou confirmação de melhoria..."
-                        className="text-sm min-h-[60px]"
-                        value={adminResponses[post.id] ?? post.admin_response ?? ""}
-                        onChange={(e) => setAdminResponses(prev => ({ ...prev, [post.id]: e.target.value }))}
-                      />
+                  <CardFooter className="pt-2 border-t flex flex-col items-stretch gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Status & Resposta</label>
+                        <Select 
+                          value={selectedStatus[post.id] || post.status || 'pendente'} 
+                          onValueChange={(val) => setSelectedStatus(prev => ({ ...prev, [post.id]: val }))}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pendente">Pendente</SelectItem>
+                            <SelectItem value="analise">Em Análise</SelectItem>
+                            <SelectItem value="aprovada">Aprovada</SelectItem>
+                            <SelectItem value="rejeitada">Rejeitada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Textarea 
+                          placeholder="Resposta pública do administrador..."
+                          className="text-sm min-h-[60px]"
+                          value={adminResponses[post.id] ?? (post.admin_response as string) ?? ""}
+                          onChange={(e) => setAdminResponses(prev => ({ ...prev, [post.id]: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Motivo Interno (Enviado por notificação)</label>
+                        <Textarea 
+                          placeholder="Motivo da mudança de status ou rejeição..."
+                          className="text-sm min-h-[107px]"
+                          value={statusReasons[post.id] ?? (post.status_reason as string) ?? ""}
+                          onChange={(e) => setStatusReasons(prev => ({ ...prev, [post.id]: e.target.value }))}
+                        />
+                      </div>
                     </div>
                     <div className="flex justify-between items-center w-full gap-2">
                       <Button
@@ -284,12 +398,16 @@ export default function ForumSugestoes() {
                           size="sm"
                           onClick={() => updateResponseMutation.mutate({ 
                             postId: post.id, 
-                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
-                            isFixed: false 
+                            response: adminResponses[post.id] ?? (post.admin_response as string) ?? "", 
+
+                            isFixed: false,
+                            status: selectedStatus[post.id] || post.status || 'pendente',
+                            statusReason: statusReasons[post.id] ?? (post.status_reason as string) ?? ""
+
                           })}
                           disabled={updateResponseMutation.isPending}
                         >
-                          Salvar Resposta
+                          Atualizar Status
                         </Button>
                         <Button 
                           variant="default" 
@@ -297,13 +415,15 @@ export default function ForumSugestoes() {
                           className="bg-emerald-600 hover:bg-emerald-700"
                           onClick={() => updateResponseMutation.mutate({ 
                             postId: post.id, 
-                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
-                            isFixed: true 
+                            response: adminResponses[post.id] ?? (post.admin_response as string) ?? "", 
+                            isFixed: true,
+                            status: 'aprovada',
+                            statusReason: "Melhoria finalizada e executada com sucesso."
                           })}
                           disabled={updateResponseMutation.isPending}
                         >
                           <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Confirmar Melhoria
+                          Marcar como Concluído
                         </Button>
                       </div>
                     </div>
