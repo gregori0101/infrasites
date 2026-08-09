@@ -28,7 +28,8 @@ import {
   ChevronRight,
   ZoomIn,
   ZoomOut,
-  RotateCw
+  RotateCw,
+  ArrowUpDown,
 } from 'lucide-react';
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -115,6 +116,11 @@ export default function VandalismoPainelGestor() {
   const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  
+  // Pagination and Sort
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
   const { data: allVistorias = [], isLoading, refetch } = useQuery({
     queryKey: ['vandalismo_gestor'],
@@ -159,9 +165,27 @@ export default function VandalismoPainelGestor() {
       const limit = new Date(now.getFullYear(), 0, 1);
       data = data.filter(v => isAfter(parseISO(v.created_at), limit));
     }
+    
+    // Sort
+    data.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
 
     return data;
-  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter]);
+  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter, sortOrder]);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, estadoFilter, boFilter, dateFilter, sortOrder]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
@@ -600,6 +624,15 @@ export default function VandalismoPainelGestor() {
                   </select>
                 </div>
 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[10px] font-bold uppercase tracking-wider gap-2 border-border bg-muted/30"
+                  onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                >
+                  <ArrowUpDown className="h-3 w-3" />
+                  {sortOrder === 'desc' ? 'Mais Recentes' : 'Mais Antigos'}
+                </Button>
               </div>
             </div>
 
@@ -630,7 +663,7 @@ export default function VandalismoPainelGestor() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.map((v) => (
+                  {paginatedData.map((v) => (
                     <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={async () => {
                       const full = await getVistoriaVandalismo(v.id);
                       setSelectedCase(full);
@@ -717,6 +750,62 @@ export default function VandalismoPainelGestor() {
                   ))}
                 </TableBody>
               </Table>
+            )}
+            
+            {filteredData.length > itemsPerPage && (
+              <div className="flex items-center justify-between py-4 border-t mt-4">
+                <div className="text-xs text-muted-foreground font-medium">
+                  Mostrando <span className="text-foreground">{Math.min(filteredData.length, (currentPage - 1) * itemsPerPage + 1)}</span> a <span className="text-foreground">{Math.min(filteredData.length, currentPage * itemsPerPage)}</span> de <span className="text-foreground">{filteredData.length}</span> registros
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="icon"
+                          className="h-8 w-8 text-xs"
+                          onClick={() => setCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
