@@ -663,7 +663,7 @@ export default function VandalismoPainelGestor() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.map((v) => (
+                  {paginatedData.map((v) => (
                     <TableRow key={v.id} className="cursor-pointer hover:bg-muted/50 transition-colors group/row" onClick={async () => {
                       const full = await getVistoriaVandalismo(v.id);
                       setSelectedCase(full);
