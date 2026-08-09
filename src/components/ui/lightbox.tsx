@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { DismissableLayerBranch } from "@radix-ui/react-dismissable-layer";
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useResolvedImageUrl } from "@/components/ui/signed-image";
+import { toast } from "sonner";
 
 function ResolvedImg({ src, ...rest }: React.ImgHTMLAttributes<HTMLImageElement> & { src: string }) {
   const resolved = useResolvedImageUrl(src);
@@ -103,6 +104,27 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
     setRotation((prev) => (prev + 90) % 360);
   }, []);
 
+  const handleDownload = useCallback(async () => {
+    try {
+      const url = images[currentIndex].url;
+      const label = images[currentIndex].label;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${label.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Download iniciado");
+    } catch (error) {
+      console.error("Erro ao baixar imagem:", error);
+      toast.error("Erro ao baixar imagem");
+    }
+  }, [currentIndex, images]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (zoom > 1) {
       setIsDragging(true);
@@ -192,6 +214,15 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
           <Button
             variant="ghost"
             size="icon"
+            onClick={handleDownload}
+            className="text-white hover:bg-white/20"
+            title="Baixar imagem"
+          >
+            <Download className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             className="text-white hover:bg-white/20 ml-2"
           >
@@ -249,28 +280,34 @@ export function Lightbox({ images, initialIndex, open, onClose }: LightboxProps)
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails Container */}
       {images.length > 1 && (
-        <div className="px-4 py-3 bg-black/50 shrink-0 overflow-x-auto">
-          <div className="flex gap-2 justify-center">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => { setCurrentIndex(idx); resetView(); }}
-                className={cn(
-                  "w-16 h-12 rounded overflow-hidden border-2 transition-all shrink-0",
-                  idx === currentIndex
-                    ? "border-primary ring-2 ring-primary/50"
-                    : "border-transparent opacity-60 hover:opacity-100"
-                )}
-              >
-                <ResolvedImg
-                  src={img.url}
-                  alt={img.label}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
+        <div className="px-4 py-4 bg-black/60 shrink-0 border-t border-white/10">
+          <div className="max-w-4xl mx-auto overflow-x-auto scrollbar-hide">
+            <div className="flex gap-3 justify-start sm:justify-center min-w-max pb-2">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => { setCurrentIndex(idx); resetView(); }}
+                  className={cn(
+                    "w-20 h-14 rounded-md overflow-hidden border-2 transition-all shrink-0 relative group",
+                    idx === currentIndex
+                      ? "border-primary ring-2 ring-primary/40 scale-105 z-10"
+                      : "border-transparent opacity-40 hover:opacity-100 hover:scale-105"
+                  )}
+                >
+                  <ResolvedImg
+                    src={img.url}
+                    alt={img.label}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className={cn(
+                    "absolute inset-0 bg-primary/20 transition-opacity",
+                    idx === currentIndex ? "opacity-100" : "opacity-0 group-hover:opacity-10"
+                  )} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
