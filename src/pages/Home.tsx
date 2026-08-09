@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar, ShieldAlert } from "lucide-react";
+import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar, ShieldAlert, MessageSquare } from "lucide-react";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 
@@ -248,6 +248,17 @@ export default function Home() {
             </div>
           </div>
         </main>
+
+        {/* Floating Forum Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            size="lg"
+            className="rounded-full h-14 w-14 shadow-2xl animate-bounce hover:animate-none bg-primary hover:bg-primary/90"
+            onClick={() => navigate("/forum")}
+          >
+            <MessageSquare className="h-6 w-6 text-primary-foreground" />
+          </Button>
+        </div>
       </div>
     </>
   );
