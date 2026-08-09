@@ -3487,6 +3487,7 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          municipio: string | null
           operadora: string | null
           site_code: string
           status: string
@@ -3504,6 +3505,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          municipio?: string | null
           operadora?: string | null
           site_code: string
           status?: string
@@ -3521,6 +3523,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          municipio?: string | null
           operadora?: string | null
           site_code?: string
           status?: string
