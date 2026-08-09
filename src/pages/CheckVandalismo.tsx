@@ -82,6 +82,13 @@ export default function CheckVandalismo() {
       toast.error('Geolocalização indisponível neste dispositivo');
       return;
     }
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    };
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -95,13 +102,23 @@ export default function CheckVandalismo() {
           if (city) {
             setMunicipio(city);
             toast.info(`Município identificado: ${city}`);
+          } else {
+            toast.warning('Município não identificado automaticamente. Por favor, preencha manualmente.');
           }
         } catch (err) {
           console.warn('Falha ao obter município via reverse geocode', err);
+          toast.warning('Erro ao identificar município. Por favor, preencha manualmente.');
         }
       },
-      () => toast.error('Não foi possível obter a localização'),
-      { enableHighAccuracy: true, timeout: 15000 },
+      (error) => {
+        let msg = 'Não foi possível obter a localização';
+        if (error.code === 1) msg = 'Permissão de localização negada. Por favor, preencha o município manualmente.';
+        else if (error.code === 2) msg = 'Posição indisponível. Por favor, preencha o município manualmente.';
+        else if (error.code === 3) msg = 'Tempo esgotado ao obter localização. Por favor, preencha o município manualmente.';
+        
+        toast.error(msg);
+      },
+      options
     );
   };
 

@@ -106,6 +106,7 @@ export default function VandalismoPainelGestor() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [municipioSearch, setMunicipioSearch] = useState('');
+  const [showMunicipioSuggestions, setShowMunicipioSuggestions] = useState(false);
   const [boFilter, setBoFilter] = useState<'all' | 'with' | 'without'>('all');
   const [dateFilter, setDateFilter] = useState<'7' | '30' | 'month' | 'year' | 'all'>('all');
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
@@ -288,6 +289,20 @@ export default function VandalismoPainelGestor() {
   const siteRanking = useMemo(() => {
     return siteStats.slice(0, 5).map(s => ({ name: s.site, value: s.count }));
   }, [siteStats]);
+
+  const municipioSuggestions = useMemo(() => {
+    if (!municipioSearch || municipioSearch.length < 2) return [];
+    const lowSearch = municipioSearch.toLowerCase();
+    const uniqueMunicipios = new Set<string>();
+    
+    allVistorias.forEach(v => {
+      if (v.municipio && v.municipio.toLowerCase().includes(lowSearch)) {
+        uniqueMunicipios.add(v.municipio);
+      }
+    });
+    
+    return Array.from(uniqueMunicipios).sort().slice(0, 5);
+  }, [allVistorias, municipioSearch]);
 
   // --- Actions ---
   const handleExportExcel = () => {
