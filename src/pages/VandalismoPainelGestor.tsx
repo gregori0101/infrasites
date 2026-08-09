@@ -34,6 +34,8 @@ import {
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { SignedImage } from '@/components/ui/signed-image';
+import { supabase } from '@/integrations/supabase/client';
+import { VandalismoPhotoGrid } from '@/components/vandalismo/VandalismoPhotoGrid';
 import { 
   VandalismoVistoriaResumo, 
   getVistoriaVandalismo, 
@@ -42,7 +44,11 @@ import {
   updateVistoriaVandalismo,
   updateVistoriaItem
 } from '@/lib/vandalismoDatabase';
-import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
+import { 
+  VandalismoVistoriaCompleta, 
+  VANDALISMO_MAX_FOTOS_OCORRIDO,
+  VANDALISMO_ITENS
+} from '@/types/vandalismo';
 import {
   Card,
   CardContent,
@@ -343,13 +349,20 @@ export default function VandalismoPainelGestor() {
         tecnico: editForm.tecnico,
         estado: editForm.estado,
         municipio: editForm.municipio,
+        boUrl: editForm.bo_url,
+        boNome: editForm.bo_nome,
+        fotosOcorrido: editForm.fotos_ocorrido
       });
 
       // Update items if modified
       for (const item of editForm.itens || []) {
         const original = selectedCase.itens.find(i => i.id === item.id);
-        if (original && (original.vulneravel !== item.vulneravel || original.observacao !== item.observacao)) {
-          await updateVistoriaItem(item.id, item.vulneravel, item.observacao);
+        if (original && (
+          original.vulneravel !== item.vulneravel || 
+          original.observacao !== item.observacao ||
+          JSON.stringify(original.fotos) !== JSON.stringify(item.fotos)
+        )) {
+          await updateVistoriaItem(item.id, item.vulneravel, item.observacao, item.fotos);
         }
       }
 
@@ -375,6 +388,9 @@ export default function VandalismoPainelGestor() {
       tecnico: selectedCase.tecnico,
       estado: selectedCase.estado,
       municipio: selectedCase.municipio,
+      bo_url: selectedCase.bo_url,
+      bo_nome: selectedCase.bo_nome,
+      fotos_ocorrido: selectedCase.fotos.map(f => f.url),
       itens: selectedCase.itens.map(i => ({ ...i }))
     });
     setIsEditing(true);
@@ -919,7 +935,7 @@ export default function VandalismoPainelGestor() {
             <div className="space-y-6">
               {isEditing ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-muted-foreground uppercase font-bold">Sigla do Site</label>
                       <Input 
@@ -965,6 +981,50 @@ export default function VandalismoPainelGestor() {
                         className="h-8 text-xs"
                       />
                     </div>
+                    <div className="space-y-1.5 flex flex-col justify-end">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold">Boletim de Ocorrência</label>
+                      <div className="flex items-center gap-2">
+                        {editForm.bo_url ? (
+                          <div className="flex items-center gap-2 text-[10px] bg-muted/50 p-1.5 rounded border flex-1 truncate">
+                            <Paperclip className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{editForm.bo_nome}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 hover:text-destructive" 
+                              onClick={() => setEditForm({...editForm, bo_url: null, bo_nome: null})}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="w-full">
+                            <Input
+                              type="file"
+                              accept="application/pdf,image/*"
+                              className="h-8 text-[10px] cursor-pointer"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 15 * 1024 * 1024) {
+                                  toast.error('Arquivo muito grande (máx 15MB)');
+                                  return;
+                                }
+                                try {
+                                  const path = `vandalismo/${(editForm.site_code || 'EDIT').toUpperCase()}/bo_${Date.now()}`;
+                                  const { error } = await supabase.storage.from('report-photos').upload(path, file);
+                                  if (error) throw error;
+                                  setEditForm({...editForm, bo_url: path, bo_nome: file.name});
+                                  toast.success('BO atualizado');
+                                } catch (err: any) {
+                                  toast.error('Erro no upload: ' + err.message);
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -973,6 +1033,17 @@ export default function VandalismoPainelGestor() {
                       value={editForm.descricao} 
                       onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
                       className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-muted-foreground uppercase font-bold">Fotos do Ocorrido</label>
+                    <VandalismoPhotoGrid 
+                      value={editForm.fotos_ocorrido || []}
+                      onChange={(fotos) => setEditForm({...editForm, fotos_ocorrido: fotos})}
+                      category="ocorrido"
+                      siteCode={editForm.site_code}
+                      max={VANDALISMO_MAX_FOTOS_OCORRIDO}
                     />
                   </div>
                 </div>
@@ -1124,18 +1195,32 @@ export default function VandalismoPainelGestor() {
                       </div>
 
                       {isEditing ? (
-                        <div className="mt-2">
-                          <label className="text-[9px] uppercase font-bold text-muted-foreground block mb-1">Observação</label>
-                          <textarea 
-                            value={i.observacao || ''}
-                            onChange={(e) => {
+                        <div className="mt-2 space-y-2">
+                          <label className="text-[9px] uppercase font-bold text-muted-foreground block">Fotos do Item</label>
+                          <VandalismoPhotoGrid 
+                            value={i.fotos || []}
+                            onChange={(fotos) => {
                               const newItens = [...editForm.itens];
-                              newItens[idx].observacao = e.target.value;
+                              newItens[idx].fotos = fotos;
                               setEditForm({ ...editForm, itens: newItens });
                             }}
-                            className="w-full h-12 p-2 rounded border border-input bg-background text-[10px] focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                            placeholder="Adicione uma observação..."
+                            category={i.item_key}
+                            siteCode={editForm.site_code}
+                            max={VANDALISMO_ITENS.find(def => def.key === i.item_key)?.maxFotos || 4}
                           />
+                          <div className="mt-1">
+                            <label className="text-[9px] uppercase font-bold text-muted-foreground block mb-1">Observação</label>
+                            <textarea 
+                              value={i.observacao || ''}
+                              onChange={(e) => {
+                                const newItens = [...editForm.itens];
+                                newItens[idx].observacao = e.target.value;
+                                setEditForm({ ...editForm, itens: newItens });
+                              }}
+                              className="w-full h-12 p-2 rounded border border-input bg-background text-[10px] focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                              placeholder="Adicione uma observação..."
+                            />
+                          </div>
                         </div>
                       ) : (
                         i.observacao && <p className="text-[10px] text-muted-foreground mt-1 italic">Obs: {i.observacao}</p>
