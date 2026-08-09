@@ -226,7 +226,7 @@ export default function VandalismoMapa() {
               <Marker
                 key={v.id}
                 position={[v.latitude!, v.longitude!]}
-                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.site_code)}
+                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
               >
                 <Popup>
                   <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
