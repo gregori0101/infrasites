@@ -306,7 +306,7 @@ export default function ForumSugestoes() {
                                   <span className="text-xs font-bold uppercase text-primary">{h.new_status}</span>
                                 </div>
                                 {h.reason && <p className="text-xs italic">Motivo: {h.reason}</p>}
-                                {h.admin_response && <p className="text-xs">Resp: {h.admin_response}</p>}
+                                {h.admin_response && <p className="text-xs">Resp: {h.admin_response as string}</p>}
                               </div>
                             ))}
                           </div>
