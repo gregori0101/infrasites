@@ -212,6 +212,11 @@ const App = () => {
                       <VandalismoMapa />
                     </ProtectedRoute>
                   } />
+                  <Route path="/check-vandalismo/resumo" element={
+                    <ProtectedRoute>
+                      <VandalismoResumo />
+                    </ProtectedRoute>
+                  } />
 
                   {/* Auditoria TA (Fiber Guardian) routes */}
                   <Route path="/auditoria-ta" element={
