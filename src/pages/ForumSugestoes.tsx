@@ -373,7 +373,7 @@ export default function ForumSugestoes() {
                         <Textarea 
                           placeholder="Motivo da mudança de status ou rejeição..."
                           className="text-sm min-h-[107px]"
-                          value={statusReasons[post.id] ?? post.status_reason ?? ""}
+                          value={statusReasons[post.id] ?? (post.status_reason as string) ?? ""}
                           onChange={(e) => setStatusReasons(prev => ({ ...prev, [post.id]: e.target.value }))}
                         />
                       </div>
