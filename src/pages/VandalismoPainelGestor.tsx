@@ -634,6 +634,44 @@ export default function VandalismoPainelGestor() {
                     ))}
                   </select>
                 </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Mun:</span>
+                  <div className="relative w-full sm:w-48 group">
+                    <Input
+                      placeholder="Município..."
+                      className="h-8 pl-3 bg-muted/30 border-transparent focus:bg-background text-xs transition-all"
+                      value={municipioSearch}
+                      onChange={(e) => {
+                        setMunicipioSearch(e.target.value);
+                        setShowMunicipioSuggestions(true);
+                      }}
+                      onFocus={() => setShowMunicipioSuggestions(true)}
+                    />
+                    {showMunicipioSuggestions && municipioSuggestions.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {municipioSuggestions.map((m) => (
+                          <button
+                            key={m}
+                            className="w-full px-3 py-2 text-left text-[11px] hover:bg-primary hover:text-primary-foreground transition-colors font-medium border-b border-border/50 last:border-0"
+                            onClick={() => {
+                              setMunicipioSearch(m);
+                              setShowMunicipioSuggestions(false);
+                            }}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {showMunicipioSuggestions && (
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setShowMunicipioSuggestions(false)} 
+                      />
+                    )}
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">BO:</span>
