@@ -364,7 +364,7 @@ export default function ForumSugestoes() {
                         <Textarea 
                           placeholder="Resposta pública do administrador..."
                           className="text-sm min-h-[60px]"
-                          value={adminResponses[post.id] ?? post.admin_response ?? ""}
+                          value={adminResponses[post.id] ?? (post.admin_response as string) ?? ""}
                           onChange={(e) => setAdminResponses(prev => ({ ...prev, [post.id]: e.target.value }))}
                         />
                       </div>
