@@ -586,21 +586,6 @@ export default function VandalismoPainelGestor() {
                   </select>
                 </div>
 
-                <div className="flex bg-muted p-0.5 rounded-lg border border-border">
-                  {(['7', '30', 'month', 'all'] as const).map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setDateFilter(opt)}
-                      className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
-                        dateFilter === opt 
-                        ? 'bg-card text-primary shadow-sm' 
-                        : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      {opt === '7' ? '7D' : opt === '30' ? '30D' : opt === 'month' ? 'Mês' : 'Tudo'}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
