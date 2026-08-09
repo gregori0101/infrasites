@@ -34,6 +34,8 @@ import {
 import { format, subDays, startOfMonth, isAfter, isBefore, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { SignedImage } from '@/components/ui/signed-image';
+import { supabase } from '@/integrations/supabase/client';
+import { VandalismoPhotoGrid } from '@/components/vandalismo/VandalismoPhotoGrid';
 import { 
   VandalismoVistoriaResumo, 
   getVistoriaVandalismo, 
@@ -42,7 +44,11 @@ import {
   updateVistoriaVandalismo,
   updateVistoriaItem
 } from '@/lib/vandalismoDatabase';
-import { VandalismoVistoriaCompleta } from '@/types/vandalismo';
+import { 
+  VandalismoVistoriaCompleta, 
+  VANDALISMO_MAX_FOTOS_OCORRIDO,
+  VANDALISMO_ITENS
+} from '@/types/vandalismo';
 import {
   Card,
   CardContent,
