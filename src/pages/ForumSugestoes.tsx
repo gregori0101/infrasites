@@ -113,7 +113,7 @@ export default function ForumSugestoes() {
       status?: string;
       statusReason?: string;
     }) => {
-      const post = (posts as any[]).find((p: any) => p.id === postId);
+      const post = ((posts || []) as any[]).find((p: any) => p.id === postId);
       const newHistoryItem = {
         date: new Date().toISOString(),
         old_status: post?.status || 'pendente',
