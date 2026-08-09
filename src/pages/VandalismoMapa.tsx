@@ -128,10 +128,15 @@ export default function VandalismoMapa() {
       operadora: selectedCase.operadora,
       tecnico: selectedCase.tecnico,
       estado: selectedCase.estado,
+      municipio: selectedCase.municipio,
+      bo_url: selectedCase.bo_url,
+      bo_nome: selectedCase.bo_nome,
+      fotos_ocorrido: selectedCase.fotos.map(f => f.url),
       itens: selectedCase.itens.map(i => ({ ...i }))
     });
     setIsEditing(true);
   };
+
 
   const handleDelete = async (id: string) => {
     if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
