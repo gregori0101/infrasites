@@ -401,8 +401,9 @@ export default function ForumSugestoes() {
                             response: adminResponses[post.id] ?? (post.admin_response as string) ?? "", 
 
                             isFixed: false,
-                            status: selectedStatus[post.id] || post.status,
-                            statusReason: statusReasons[post.id] ?? post.status_reason ?? ""
+                            status: selectedStatus[post.id] || post.status || 'pendente',
+                            statusReason: statusReasons[post.id] ?? (post.status_reason as string) ?? ""
+
                           })}
                           disabled={updateResponseMutation.isPending}
                         >
