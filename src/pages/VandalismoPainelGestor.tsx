@@ -945,28 +945,6 @@ export default function VandalismoPainelGestor() {
                         {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Boletim de Ocorrência (BO)</p>
-                      <div className="flex items-center gap-2">
-                        <p className={`text-sm font-bold ${selectedCase?.bo_url ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
-                          {selectedCase?.bo_url ? 'Anexado' : 'Não anexado'}
-                        </p>
-                        {selectedCase?.bo_url && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 text-primary" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadBO(selectedCase.bo_url!, selectedCase.bo_nome);
-                            }}
-                            title="Baixar BO"
-                          >
-                            <Paperclip className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   <div className="space-y-2">
