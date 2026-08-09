@@ -431,8 +431,9 @@ export default function VandalismoMapa() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Recorrência Site</p>
-                      <p className="text-sm font-bold text-primary">{selectedCase?.totalAnterior || 0} vandalismos anteriores</p>
+                      <p className="text-sm font-bold text-primary">{(selectedCase as any)?.totalAnterior || 0} vandalismos anteriores</p>
                     </div>
+
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
                       <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
