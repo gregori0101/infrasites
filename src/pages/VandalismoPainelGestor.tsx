@@ -384,63 +384,8 @@ export default function VandalismoPainelGestor() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* FILTERS SECTION */}
-        <section className="bg-card p-4 rounded-xl shadow-sm border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-64 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              placeholder="Digite a sigla do site..."
-              className="pl-9 bg-muted/30 border-transparent focus:bg-background transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        {/* Os filtros foram movidos para dentro do Card de Histórico de Vistorias */}
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estado:</span>
-              <select
-                value={estadoFilter}
-                onChange={(e) => setEstadoFilter(e.target.value)}
-                className="h-8 px-2 rounded-md border border-border bg-muted/30 text-xs focus:outline-none"
-              >
-                <option value="all">Todos</option>
-                {['PA', 'AM', 'MA', 'AP', 'RR'].map(uf => (
-                  <option key={uf} value={uf}>{uf}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">BO:</span>
-              <select
-                value={boFilter}
-                onChange={(e) => setBoFilter(e.target.value as any)}
-                className="h-8 px-2 rounded-md border border-border bg-muted/30 text-xs focus:outline-none"
-              >
-                <option value="all">Todos</option>
-                <option value="with">Com BO</option>
-                <option value="without">Sem BO</option>
-              </select>
-            </div>
-
-            <div className="flex bg-muted p-1 rounded-lg border border-border">
-              {(['7', '30', 'month', 'all'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setDateFilter(opt)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                    dateFilter === opt 
-                    ? 'bg-card text-primary shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {opt === '7' ? '7D' : opt === '30' ? '30D' : opt === 'month' ? 'Mês' : 'Tudo'}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* KPI CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
