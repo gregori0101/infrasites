@@ -55,7 +55,9 @@ export interface VandalismoItemRow {
 export interface VandalismoVistoriaCompleta extends VandalismoVistoria {
   fotos: VandalismoFoto[];
   itens: VandalismoItemRow[];
+  totalAnterior?: number;
 }
+
 
 export const VANDALISMO_MIN_FOTOS_OCORRIDO = 3;
 export const VANDALISMO_MAX_FOTOS_OCORRIDO = 20;

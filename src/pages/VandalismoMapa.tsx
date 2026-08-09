@@ -1,10 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { listVistoriasComItens, getVistoriaVandalismo, updateVistoriaVandalismo, updateVistoriaItem, deleteVistoriaVandalismo } from '@/lib/vandalismoDatabase';
+
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Save, ImageIcon, Paperclip, Search, Trash2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, ShieldAlert, Info, LayoutDashboard, Edit, FileText, X, Save, ImageIcon, Paperclip, Search, Trash2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -28,22 +30,29 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createColoredIcon(color: string) {
+function createColoredIcon(color: string, siteCode: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
       background: ${color};
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       border: 2px solid white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 8px;
     "></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -7],
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+    popupAnchor: [0, -8],
   });
 }
+
 
 export default function VandalismoMapa() {
   const navigate = useNavigate();
@@ -51,6 +60,8 @@ export default function VandalismoMapa() {
   const [selectedCase, setSelectedCase] = useState<VandalismoVistoriaCompleta | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
+  const [exportingAll, setExportingAll] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ url: string; label: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -88,12 +99,20 @@ export default function VandalismoMapa() {
         operadora: editForm.operadora,
         tecnico: editForm.tecnico,
         estado: editForm.estado,
+        municipio: editForm.municipio,
+        boUrl: editForm.bo_url,
+        boNome: editForm.bo_nome,
+        fotosOcorrido: editForm.fotos_ocorrido
       });
 
       for (const item of editForm.itens || []) {
         const original = selectedCase.itens.find(i => i.id === item.id);
-        if (original && (original.vulneravel !== item.vulneravel || original.observacao !== item.observacao)) {
-          await updateVistoriaItem(item.id, item.vulneravel, item.observacao);
+        if (original && (
+          original.vulneravel !== item.vulneravel || 
+          original.observacao !== item.observacao ||
+          JSON.stringify(original.fotos) !== JSON.stringify(item.fotos)
+        )) {
+          await updateVistoriaItem(item.id, item.vulneravel, item.observacao, item.fotos);
         }
       }
 
@@ -109,6 +128,7 @@ export default function VandalismoMapa() {
     }
   };
 
+
   const startEditing = () => {
     if (!selectedCase) return;
     setEditForm({
@@ -117,10 +137,15 @@ export default function VandalismoMapa() {
       operadora: selectedCase.operadora,
       tecnico: selectedCase.tecnico,
       estado: selectedCase.estado,
+      municipio: selectedCase.municipio,
+      bo_url: selectedCase.bo_url,
+      bo_nome: selectedCase.bo_nome,
+      fotos_ocorrido: selectedCase.fotos.map(f => f.url),
       itens: selectedCase.itens.map(i => ({ ...i }))
     });
     setIsEditing(true);
   };
+
 
   const handleDelete = async (id: string) => {
     if (!confirm('Deseja realmente excluir esta vistoria? Esta ação é irreversível.')) return;
@@ -236,7 +261,7 @@ export default function VandalismoMapa() {
               <Marker
                 key={v.id}
                 position={[v.latitude!, v.longitude!]}
-                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981')}
+                icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.site_code)}
               >
                 <Popup>
                   <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
@@ -260,10 +285,18 @@ export default function VandalismoMapa() {
                     </p>
 
                     <div className="pt-1 border-t border-border mt-2 space-y-1">
-                       <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                         <span className="font-semibold text-foreground">{v.tecnico?.split('@')[0]}</span>
                         <span>•</span>
                         <span>{format(parseISO(v.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                        {v.municipio && <span>{v.municipio}</span>}
+                        {v.bo_url ? (
+                          <Badge className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 border-none text-[8px] h-3.5 px-1 font-bold">BO Anexado</Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-[8px] bg-destructive/10 text-destructive hover:bg-destructive/10 border-none h-3.5 px-1 font-bold">Sem BO</Badge>
+                        )}
                       </div>
                       {v.endereco && (
                         <div className="text-[10px] flex items-start gap-1 text-muted-foreground">
@@ -272,6 +305,7 @@ export default function VandalismoMapa() {
                         </div>
                       )}
                     </div>
+
 
                     <Button
                       size="sm"
@@ -336,7 +370,7 @@ export default function VandalismoMapa() {
             <div className="space-y-6">
               {isEditing ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-muted-foreground uppercase font-bold">Sigla do Site</label>
                       <Input 
@@ -357,6 +391,14 @@ export default function VandalismoMapa() {
                           <option key={uf} value={uf}>{uf}</option>
                         ))}
                       </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-muted-foreground uppercase font-bold text-primary">Município</label>
+                      <Input 
+                        value={editForm.municipio || ''} 
+                        onChange={(e) => setEditForm({...editForm, municipio: e.target.value})}
+                        className="h-8 text-xs border-primary/30"
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</label>
@@ -387,7 +429,20 @@ export default function VandalismoMapa() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">BO Status</p>
+                      {selectedCase?.bo_url ? (
+                        <Badge className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-none text-[10px]">Anexado</Badge>
+                      ) : (
+                        <Badge variant="destructive" className="text-[10px] bg-destructive/10 text-destructive border-none">Não anexado</Badge>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Recorrência Site</p>
+                      <p className="text-sm font-bold text-primary">{(selectedCase as any)?.totalAnterior || 0} vandalismos anteriores</p>
+                    </div>
+
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Técnico</p>
                       <p className="text-sm font-medium">{selectedCase?.tecnico || '-'}</p>
@@ -397,12 +452,16 @@ export default function VandalismoMapa() {
                       <p className="text-sm font-medium">{selectedCase?.estado || '-'}</p>
                     </div>
                     <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Município</p>
+                      <p className="text-sm font-medium">{selectedCase?.municipio || '-'}</p>
+                    </div>
+                    <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Operadora</p>
                       <p className="text-sm font-medium">{selectedCase?.operadora || '-'}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium truncate">
                         {selectedCase?.latitude ? `${selectedCase.latitude.toFixed(5)}, ${selectedCase.longitude?.toFixed(5)}` : 'Não capturada'}
                       </p>
                     </div>
@@ -417,38 +476,87 @@ export default function VandalismoMapa() {
                 </>
               )}
 
+
               <div className="space-y-3">
                 <h4 className="text-sm font-bold border-l-4 border-primary pl-2 text-foreground">Fotos do Ocorrido</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {selectedCase?.fotos?.map((f, idx) => (
-                    <div 
-                      key={idx} 
-                      className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
-                      onClick={() => {
-                        const images = selectedCase.fotos.map((img, i) => ({ 
-                          url: img.url, 
-                          label: `Foto do Ocorrido ${i + 1}` 
-                        }));
-                        openLightbox(images, idx);
-                      }}
-                    >
-                      <SignedImage 
-                        src={f.url} 
-                        className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
-                        alt={`Foto ocorrido ${idx + 1}`} 
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
-                        <Search className="h-5 w-5 text-white" />
-                      </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                      {(isEditing ? editForm.fotos_ocorrido : selectedCase?.fotos?.map(f => f.url))?.map((url: string, idx: number) => (
+                        <div 
+                          key={idx} 
+                          className="relative aspect-square rounded-lg border overflow-hidden bg-muted group/foto cursor-pointer" 
+                          onClick={() => {
+                            const images = (isEditing ? editForm.fotos_ocorrido : selectedCase!.fotos.map(f => f.url)).map((img: string, i: number) => ({ 
+                              url: img, 
+                              label: `Foto do Ocorrido ${i + 1}` 
+                            }));
+                            openLightbox(images, idx);
+                          }}
+                        >
+                          <SignedImage 
+                            src={url} 
+                            className="object-cover w-full h-full transition-transform group-hover/foto:scale-105" 
+                            alt={`Foto ocorrido ${idx + 1}`} 
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
+                            <Search className="h-5 w-5 text-white" />
+                          </div>
+                          {isEditing && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newFotos = [...editForm.fotos_ocorrido];
+                                newFotos.splice(idx, 1);
+                                setEditForm({...editForm, fotos_ocorrido: newFotos});
+                              }}
+                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {isEditing && editForm.fotos_ocorrido?.length < 20 && (
+                        <label className="aspect-square rounded-lg border border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                          <ImageIcon className="h-6 w-6 text-primary mb-1" />
+                          <span className="text-[10px] font-bold text-primary uppercase">Add Foto</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            className="hidden" 
+                            onChange={async (e) => {
+                              const files = e.target.files;
+                              if (!files) return;
+                              toast.info('Fazendo upload...');
+                              const newUrls = [];
+                              for (let i = 0; i < files.length; i++) {
+                                try {
+                                  const file = files[i];
+                                  const fileExt = file.name.split('.').pop();
+                                  const fileName = `${Math.random()}.${fileExt}`;
+                                  const filePath = `vandalismo/${fileName}`;
+                                  const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                                  if (uploadError) throw uploadError;
+                                  const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                                  newUrls.push(publicUrl);
+                                } catch (err) {
+                                  toast.error('Erro no upload');
+                                }
+                              }
+                              setEditForm({...editForm, fotos_ocorrido: [...editForm.fotos_ocorrido, ...newUrls]});
+                              toast.success('Upload concluído');
+                            }}
+                          />
+                        </label>
+                      )}
+                      {(!isEditing && (!selectedCase?.fotos || selectedCase.fotos.length === 0)) && (
+                        <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  {(!selectedCase?.fotos || selectedCase.fotos.length === 0) && (
-                    <div className="col-span-full py-8 text-center bg-muted/20 rounded-lg border border-dashed">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">Nenhuma foto do ocorrido anexada</p>
-                    </div>
-                  )}
-                </div>
+
               </div>
 
               <div className="space-y-3">
@@ -482,7 +590,7 @@ export default function VandalismoMapa() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {i.fotos.map((foto: string, fIdx: number) => (
+                        {(isEditing ? i.fotos : i.fotos)?.map((foto: string, fIdx: number) => (
                           <div 
                             key={fIdx} 
                             className="relative aspect-square w-12 h-12 rounded border overflow-hidden bg-muted group/foto cursor-pointer"
@@ -502,9 +610,60 @@ export default function VandalismoMapa() {
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity">
                               <Search className="h-3 w-3 text-white" />
                             </div>
+                            {isEditing && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newItens = [...editForm.itens];
+                                  const newFotos = [...newItens[idx].fotos];
+                                  newFotos.splice(fIdx, 1);
+                                  newItens[idx].fotos = newFotos;
+                                  setEditForm({...editForm, itens: newItens});
+                                }}
+                                className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5 shadow-sm"
+                              >
+                                <X className="h-2 w-2" />
+                              </button>
+                            )}
                           </div>
                         ))}
+                        {isEditing && i.fotos.length < 10 && (
+                          <label className="w-12 h-12 rounded border border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                            <ImageIcon className="h-4 w-4 text-primary" />
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              multiple 
+                              className="hidden" 
+                              onChange={async (e) => {
+                                const files = e.target.files;
+                                if (!files) return;
+                                toast.info('Fazendo upload...');
+                                const newUrls = [];
+                                for (let i_file = 0; i_file < files.length; i_file++) {
+                                  try {
+                                    const file = files[i_file];
+                                    const fileExt = file.name.split('.').pop();
+                                    const fileName = `${Math.random()}.${fileExt}`;
+                                    const filePath = `vandalismo/${fileName}`;
+                                    const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                                    if (uploadError) throw uploadError;
+                                    const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                                    newUrls.push(publicUrl);
+                                  } catch (err) {
+                                    toast.error('Erro no upload');
+                                  }
+                                }
+                                const newItens = [...editForm.itens];
+                                newItens[idx].fotos = [...newItens[idx].fotos, ...newUrls];
+                                setEditForm({...editForm, itens: newItens});
+                                toast.success('Upload concluído');
+                              }}
+                            />
+                          </label>
+                        )}
                       </div>
+
 
                       {isEditing ? (
                         <div className="mt-2">
@@ -528,7 +687,54 @@ export default function VandalismoMapa() {
                 </div>
               </div>
 
-              {selectedCase?.bo_url && (
+              {isEditing && (
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Boletim de Ocorrência</h4>
+                  <div className="flex flex-col gap-2">
+                    {editForm.bo_url ? (
+                      <div className="flex items-center justify-between p-2 bg-muted rounded border">
+                        <span className="text-xs truncate max-w-[200px]">{editForm.bo_nome || 'Arquivo do BO'}</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => downloadBO(editForm.bo_url, editForm.bo_nome)}>
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setEditForm({...editForm, bo_url: null, bo_nome: null})}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="w-full h-10 border border-dashed border-primary/40 bg-primary/5 rounded flex items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
+                        <Paperclip className="h-4 w-4 text-primary mr-2" />
+                        <span className="text-xs font-bold text-primary uppercase">Anexar BO (PDF/Imagem)</span>
+                        <input 
+                          type="file" 
+                          accept="application/pdf,image/*" 
+                          className="hidden" 
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            toast.info('Fazendo upload do BO...');
+                            try {
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `bo_${Math.random()}.${fileExt}`;
+                              const filePath = `vandalismo/bo/${fileName}`;
+                              const { error: uploadError } = await supabase.storage.from('report-photos').upload(filePath, file);
+                              if (uploadError) throw uploadError;
+                              const { data: { publicUrl } } = supabase.storage.from('report-photos').getPublicUrl(filePath);
+                              setEditForm({...editForm, bo_url: publicUrl, bo_nome: file.name});
+                              toast.success('BO anexado com sucesso');
+                            } catch (err) {
+                              toast.error('Erro no upload do BO');
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!isEditing && selectedCase?.bo_url && (
                 <div className="space-y-2">
                   <h4 className="text-sm font-bold border-l-4 border-primary pl-2">Boletim de Ocorrência</h4>
                   <Button variant="outline" size="sm" className="w-full" onClick={() => downloadBO(selectedCase!.bo_url!, selectedCase!.bo_nome)}>
@@ -536,6 +742,7 @@ export default function VandalismoMapa() {
                   </Button>
                 </div>
               )}
+
             </div>
           </ScrollArea>
         </DialogContent>
