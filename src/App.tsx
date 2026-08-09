@@ -33,6 +33,7 @@ const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
 const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
 const VandalismoMapa = lazy(() => import("./pages/VandalismoMapa"));
+const VandalismoResumo = lazy(() => import("./pages/VandalismoResumo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Fiber Guardian pages
