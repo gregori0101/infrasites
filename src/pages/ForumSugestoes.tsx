@@ -113,11 +113,11 @@ export default function ForumSugestoes() {
       status?: string;
       statusReason?: string;
     }) => {
-      const post = posts.find((p: any) => p.id === postId);
+      const post = (posts as any[]).find((p: any) => p.id === postId);
       const newHistoryItem = {
         date: new Date().toISOString(),
-        old_status: post.status,
-        new_status: status || post.status,
+        old_status: post?.status || 'pendente',
+        new_status: status || post?.status || 'pendente',
         reason: statusReason || "",
         admin_response: response
       };
@@ -127,9 +127,9 @@ export default function ForumSugestoes() {
         .update({ 
           admin_response: response, 
           is_fixed: isFixed,
-          status: status || post.status,
-          status_reason: statusReason || post.status_reason,
-          history: [...(post.history || []), newHistoryItem]
+          status: status || post?.status || 'pendente',
+          status_reason: statusReason || post?.status_reason,
+          history: [...(post?.history || []), newHistoryItem]
         })
         .eq("id", postId);
       if (error) throw error;
