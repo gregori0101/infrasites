@@ -165,9 +165,27 @@ export default function VandalismoPainelGestor() {
       const limit = new Date(now.getFullYear(), 0, 1);
       data = data.filter(v => isAfter(parseISO(v.created_at), limit));
     }
+    
+    // Sort
+    data.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
 
     return data;
-  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter]);
+  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter, sortOrder]);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, estadoFilter, boFilter, dateFilter, sortOrder]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
