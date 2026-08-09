@@ -415,7 +415,7 @@ export default function ForumSugestoes() {
                           className="bg-emerald-600 hover:bg-emerald-700"
                           onClick={() => updateResponseMutation.mutate({ 
                             postId: post.id, 
-                            response: adminResponses[post.id] ?? post.admin_response ?? "", 
+                            response: adminResponses[post.id] ?? (post.admin_response as string) ?? "", 
                             isFixed: true,
                             status: 'aprovada',
                             statusReason: "Melhoria finalizada e executada com sucesso."
