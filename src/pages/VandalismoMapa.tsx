@@ -264,10 +264,17 @@ export default function VandalismoMapa() {
                 icon={createColoredIcon(v.indiceVulnerabilidade > 50 ? '#ef4444' : v.indiceVulnerabilidade > 20 ? '#f97316' : '#10b981', v.site_code)}
               >
                 <Popup>
-                  <div className="space-y-2 min-w-[200px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
+                  <div className="space-y-2 min-w-[220px] p-1 bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-bold text-sm text-primary">{v.site_code}</h3>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded border border-slate-200 dark:border-slate-700">{v.estado}</span>
+                      <div className="flex gap-1">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded border border-slate-200 dark:border-slate-700">{v.estado}</span>
+                        {v.totalAnterior > 0 && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded border border-orange-200 dark:border-orange-800/50">
+                            {v.totalAnterior + 1}ª vez
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -306,18 +313,34 @@ export default function VandalismoMapa() {
                       )}
                     </div>
 
-
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="w-full mt-2 h-8 text-[11px] font-bold"
-                      onClick={async () => {
-                        const full = await getVistoriaVandalismo(v.id);
-                        setSelectedCase(full);
-                      }}
-                    >
-                      <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes da Ocorrência
-                    </Button>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="flex-1 h-8 text-[11px] font-bold"
+                        onClick={async () => {
+                          const full = await getVistoriaVandalismo(v.id);
+                          setSelectedCase(full);
+                        }}
+                      >
+                        <ShieldAlert className="h-3 w-3 mr-1.5" /> Detalhes
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-2"
+                        onClick={async () => {
+                          const full = await getVistoriaVandalismo(v.id);
+                          setSelectedCase(full);
+                          setTimeout(() => {
+                            const btn = document.querySelector('[data-edit-trigger]');
+                            if (btn instanceof HTMLElement) btn.click();
+                          }, 100);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -341,7 +364,7 @@ export default function VandalismoMapa() {
               <div className="flex items-center gap-2">
                 {!isEditing ? (
                   <>
-                    <Button size="sm" variant="outline" onClick={startEditing}>
+                    <Button size="sm" variant="outline" onClick={startEditing} data-edit-trigger>
                       <Edit className="h-4 w-4 mr-2" /> Editar
                     </Button>
                     <Button size="sm" onClick={() => selectedCase && downloadCasePDF(selectedCase.id, selectedCase.site_code)}>
