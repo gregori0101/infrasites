@@ -116,19 +116,24 @@ export default function VandalismoPainelGestor() {
   const filteredData = useMemo(() => {
     let data = [...allVistorias];
 
-    // Search
+    // Search (Site Code Only)
     if (searchTerm) {
       const low = searchTerm.toLowerCase();
       data = data.filter(v =>
-        v.site_code.toLowerCase().includes(low) ||
-        v.tecnico?.toLowerCase().includes(low) ||
-        v.descricao.toLowerCase().includes(low)
+        v.site_code.toLowerCase().includes(low)
       );
     }
 
     // Filter by Estado
     if (estadoFilter !== 'all') {
       data = data.filter(v => v.estado === estadoFilter);
+    }
+
+    // Filter by BO
+    if (boFilter === 'with') {
+      data = data.filter(v => !!v.bo_url);
+    } else if (boFilter === 'without') {
+      data = data.filter(v => !v.bo_url);
     }
 
     // Date
@@ -148,7 +153,7 @@ export default function VandalismoPainelGestor() {
     }
 
     return data;
-  }, [allVistorias, searchTerm, estadoFilter, dateFilter]);
+  }, [allVistorias, searchTerm, estadoFilter, boFilter, dateFilter]);
 
   // --- Metrics ---
   const totalOccurrences = filteredData.length;
