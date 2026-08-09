@@ -89,7 +89,7 @@ import {
   Line,
 } from 'recharts';
 import { toast } from 'sonner';
-// Removed imports from here as they were moved to top
+import { Lightbox } from "@/components/ui/lightbox";
 import {
   generateVandalismoExcel,
   downloadCasePDF,
