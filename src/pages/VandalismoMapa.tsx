@@ -276,10 +276,18 @@ export default function VandalismoMapa() {
                     </p>
 
                     <div className="pt-1 border-t border-border mt-2 space-y-1">
-                       <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                         <span className="font-semibold text-foreground">{v.tecnico?.split('@')[0]}</span>
                         <span>•</span>
                         <span>{format(parseISO(v.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                        {v.municipio && <span>{v.municipio}</span>}
+                        {v.bo_url ? (
+                          <Badge className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 border-none text-[8px] h-3.5 px-1 font-bold">BO Anexado</Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-[8px] bg-destructive/10 text-destructive hover:bg-destructive/10 border-none h-3.5 px-1 font-bold">Sem BO</Badge>
+                        )}
                       </div>
                       {v.endereco && (
                         <div className="text-[10px] flex items-start gap-1 text-muted-foreground">
@@ -288,6 +296,7 @@ export default function VandalismoMapa() {
                         </div>
                       )}
                     </div>
+
 
                     <Button
                       size="sm"
