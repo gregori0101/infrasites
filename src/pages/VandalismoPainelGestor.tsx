@@ -686,18 +686,6 @@ export default function VandalismoPainelGestor() {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Município:</span>
-                  <div className="relative group">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    <Input
-                      placeholder="Buscar município..."
-                      className="h-8 pl-6 bg-muted/30 border-transparent focus:bg-background text-[10px] w-32 transition-all"
-                      value={municipioSearch}
-                      onChange={(e) => setMunicipioSearch(e.target.value)}
-                    />
-                  </div>
-                </div>
 
                 <Button
                   variant="outline"
