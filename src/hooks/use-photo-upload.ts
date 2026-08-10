@@ -122,12 +122,18 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
         setUploadProgress(60);
 
-        // Upload to Storage with retry
+        // Upload to Storage with automatic retry when the connection drops
         let uploadError: { message: string } | null = null;
         let retries = 0;
-        const maxRetries = 2;
+        const maxRetries = 4;
 
         while (retries <= maxRetries) {
+          // Wait for the network before each attempt (offline-safe)
+          if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            toast.warning('Sem conexão — a foto será enviada assim que a rede voltar.', { duration: 5000 });
+            await waitForOnline();
+          }
+
           const { error } = await supabase.storage.from(BUCKET_NAME).upload(fileName, blob, {
             contentType: blob.type,
             upsert: true,
@@ -156,13 +162,18 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
           if (retries <= maxRetries) {
             console.log(`[PhotoUpload] Retry ${retries}/${maxRetries} for ${category}`);
-            await new Promise((resolve) => setTimeout(resolve, 800 * retries));
+            if (isNetworkError(error)) {
+              toast.warning(`Conexão instável. Reenviando foto (${retries}/${maxRetries})...`, { duration: 4000 });
+              await waitForOnline();
+            }
+            await new Promise((resolve) => setTimeout(resolve, 800 * Math.pow(2, retries - 1)));
           }
         }
 
         if (uploadError) {
           throw new Error(`Upload failed: ${uploadError.message}`);
         }
+
 
         setUploadProgress(90);
 
