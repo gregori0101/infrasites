@@ -8,7 +8,9 @@ import {
   compressFileToBlobWithFallback,
 } from '@/lib/imageCompression';
 import { toast } from 'sonner';
+import { waitForOnline, isNetworkError } from '@/lib/networkRetry';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const BUCKET_NAME = 'report-photos';
 const MAX_SIZE_KB = 400; // Target size for localStorage-safe storage (fallback only)
