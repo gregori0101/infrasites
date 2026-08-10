@@ -41,12 +41,22 @@ export function VandalismoPhotoGrid({
     }
 
     const uploaded: string[] = [];
+    let failed = 0;
     for (const file of selected) {
-      const url = await uploadPhotoFile(file);
-      if (url) uploaded.push(url);
+      try {
+        const url = await uploadPhotoFile(file);
+        if (url) uploaded.push(url);
+        else failed++;
+      } catch {
+        failed++;
+      }
     }
     if (uploaded.length > 0) onChange([...value, ...uploaded]);
+    if (failed > 0) {
+      toast.error(`${failed} foto(s) não foram enviadas. Verifique a conexão e tente novamente.`);
+    }
   };
+
 
   const remove = (index: number) => {
     onChange(value.filter((_, i) => i !== index));
