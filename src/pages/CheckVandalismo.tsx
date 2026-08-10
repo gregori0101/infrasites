@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -8,6 +8,7 @@ import {
   Loader2,
   MapPin,
   Paperclip,
+  RotateCcw,
   Save,
   ShieldAlert,
   ShieldCheck,
@@ -47,29 +48,104 @@ import {
 const initialItens = (): Record<string, VandalismoItemState> =>
   Object.fromEntries(VANDALISMO_ITENS.map((i) => [i.key, { vulneravel: false, fotos: [] }]));
 
+const DRAFT_KEY = 'vandalismo_draft_v1';
+
+interface VandalismoDraft {
+  siteCode: string;
+  estado: string;
+  descricao: string;
+  municipio: string;
+  fotosOcorrido: string[];
+  itens: Record<string, VandalismoItemState>;
+  qtdGabinetes: number;
+  geo: { latitude: number | null; longitude: number | null };
+  gpsStatus: 'idle' | 'loading' | 'success' | 'error';
+  gpsError: string | null;
+  boFile: { url: string; nome: string } | null;
+  savedAt: string;
+}
+
+function loadDraft(): VandalismoDraft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as VandalismoDraft;
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function CheckVandalismo() {
   const navigate = useNavigate();
   const { user, userOperadora, isAdmin, isGestor } = useAuth();
   const boInputRef = useRef<HTMLInputElement>(null);
+  const draftRef = useRef<VandalismoDraft | null>(loadDraft());
+  const draft = draftRef.current;
 
-  const [siteCode, setSiteCode] = useState('');
-  const [estado, setEstado] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [municipio, setMunicipio] = useState('');
-  const [fotosOcorrido, setFotosOcorrido] = useState<string[]>([]);
-  const [itens, setItens] = useState<Record<string, VandalismoItemState>>(initialItens);
-  const [qtdGabinetes, setQtdGabinetes] = useState(1);
-  const [geo, setGeo] = useState<{ latitude: number | null; longitude: number | null }>({
-    latitude: null,
-    longitude: null,
-  });
-  const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [gpsError, setGpsError] = useState<string | null>(null);
-  const [boFile, setBoFile] = useState<{ url: string; nome: string } | null>(null);
+  const [siteCode, setSiteCode] = useState(draft?.siteCode ?? '');
+  const [estado, setEstado] = useState(draft?.estado ?? '');
+  const [descricao, setDescricao] = useState(draft?.descricao ?? '');
+  const [municipio, setMunicipio] = useState(draft?.municipio ?? '');
+  const [fotosOcorrido, setFotosOcorrido] = useState<string[]>(draft?.fotosOcorrido ?? []);
+  const [itens, setItens] = useState<Record<string, VandalismoItemState>>(
+    () => ({ ...initialItens(), ...(draft?.itens ?? {}) }),
+  );
+  const [qtdGabinetes, setQtdGabinetes] = useState(draft?.qtdGabinetes ?? 1);
+  const [geo, setGeo] = useState<{ latitude: number | null; longitude: number | null }>(
+    draft?.geo ?? { latitude: null, longitude: null },
+  );
+  const [gpsStatus, setGpsStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
+    draft?.gpsStatus === 'loading' ? 'idle' : (draft?.gpsStatus ?? 'idle'),
+  );
+  const [gpsError, setGpsError] = useState<string | null>(draft?.gpsError ?? null);
+  const [boFile, setBoFile] = useState<{ url: string; nome: string } | null>(draft?.boFile ?? null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(!!draft);
   const [uploadingBO, setUploadingBO] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  // Restore notice
+  useEffect(() => {
+    if (draftRestored) {
+      toast.info('Rascunho restaurado', { description: 'Os dados preenchidos anteriormente foram recuperados.' });
+      setDraftRestored(false);
+    }
+  }, [draftRestored]);
+
+  // Persist draft on every change so a page reload never loses the checklist
+  useEffect(() => {
+    const payload: VandalismoDraft = {
+      siteCode,
+      estado,
+      descricao,
+      municipio,
+      fotosOcorrido,
+      itens,
+      qtdGabinetes,
+      geo,
+      gpsStatus,
+      gpsError,
+      boFile,
+      savedAt: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('[Vandalismo] Falha ao salvar rascunho local', err);
+    }
+  }, [siteCode, estado, descricao, municipio, fotosOcorrido, itens, qtdGabinetes, geo, gpsStatus, gpsError, boFile]);
 
   const visibleItens = useMemo(
     () => VANDALISMO_ITENS.filter((i) => !i.gabineteOpcional || i.gabineteOpcional <= qtdGabinetes),
@@ -202,6 +278,7 @@ export default function CheckVandalismo() {
         itens,
       });
       setSavedId(id);
+      clearDraft();
       toast.success('Vistoria salva com sucesso');
     } catch (err) {
       toast.error('Erro ao salvar vistoria', { description: (err as Error).message });
@@ -244,6 +321,8 @@ export default function CheckVandalismo() {
     setGpsStatus('idle');
     setGpsError(null);
     setSavedId(null);
+    setQtdGabinetes(1);
+    clearDraft();
   };
 
   return (
@@ -266,6 +345,15 @@ export default function CheckVandalismo() {
               <ShieldCheck className="h-3 w-3 mr-1" />
               {preenchidosCount}/{visibleItens.length}
             </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-primary-foreground hover:bg-white/20"
+              onClick={() => setConfirmReset(true)}
+              title="Zerar e iniciar novo relatório"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </Button>
             {(isAdmin || isGestor) && (
               <Button 
                 variant="ghost" 
@@ -481,6 +569,10 @@ export default function CheckVandalismo() {
             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
             {savedId ? 'Vistoria salva' : 'Finalizar e Salvar Vistoria'}
           </Button>
+          <Button variant="outline" size="lg" onClick={() => setConfirmReset(true)} disabled={saving}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Novo
+          </Button>
           {savedId && (
             <Button variant="outline" size="lg" onClick={handleGeneratePDF} disabled={generating}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
@@ -489,6 +581,30 @@ export default function CheckVandalismo() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Iniciar novo relatório?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todos os dados preenchidos (incluindo o rascunho salvo neste dispositivo) serão apagados. As fotos já
+              enviadas permanecem no armazenamento, mas serão removidas deste formulário.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                resetForm();
+                setConfirmReset(false);
+                toast.success('Novo relatório iniciado');
+              }}
+            >
+              Zerar e começar novo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!savedId} onOpenChange={(open) => !open && setSavedId(savedId)}>
         <AlertDialogContent>
