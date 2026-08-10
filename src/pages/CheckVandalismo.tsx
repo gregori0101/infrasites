@@ -569,10 +569,6 @@ export default function CheckVandalismo() {
             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
             {savedId ? 'Vistoria salva' : 'Finalizar e Salvar Vistoria'}
           </Button>
-          <Button variant="outline" size="lg" onClick={() => setConfirmReset(true)} disabled={saving}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Novo
-          </Button>
           {savedId && (
             <Button variant="outline" size="lg" onClick={handleGeneratePDF} disabled={generating}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
