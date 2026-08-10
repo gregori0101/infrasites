@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { uploadStatus } from '@/lib/uploadStatus';
 
 /** Wait until the browser reports it is online again (or until timeout). */
 export function waitForOnline(timeoutMs = 120000): Promise<boolean> {
@@ -82,6 +83,7 @@ export async function retryOnNetworkError<T>(
       lastError = error;
       if (attempt === retries || !isNetworkError(error)) throw error;
 
+      uploadStatus.syncRetry(attempt + 1, label);
       if (notify) {
         toast.warning(
           `Conexão instável${label ? ` (${label})` : ''}. Tentando novamente (${attempt + 1}/${retries})...`,
@@ -89,8 +91,10 @@ export async function retryOnNetworkError<T>(
         );
       }
 
+      uploadStatus.setRetrying(true);
       await waitForOnline();
       await new Promise((resolve) => setTimeout(resolve, baseDelayMs * Math.pow(2, attempt)));
+      uploadStatus.setRetrying(false);
     }
   }
 
