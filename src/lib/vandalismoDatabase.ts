@@ -56,7 +56,10 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     { label: 'salvar vistoria' },
   );
 
-  if (error || !vistoria) throw new Error(error?.message || 'Falha ao salvar a vistoria.');
+  if (error || !vistoria) {
+    uploadStatus.syncEnd();
+    throw new Error(error?.message || 'Falha ao salvar a vistoria.');
+  }
 
   const vistoriaId = vistoria.id as string;
 
