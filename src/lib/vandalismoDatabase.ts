@@ -31,8 +31,8 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
   if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
 
   const { data: vistoria, error } = await retryOnNetworkError(
-    () =>
-      supabase
+    async () =>
+      await supabase
     .from('vandalismo_vistorias')
     .insert({
       user_id: userId,
@@ -61,7 +61,7 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
   const rollback = async () => {
     try {
       await retryOnNetworkError(
-        () => supabase.from('vandalismo_vistorias').delete().eq('id', vistoriaId),
+        async () => await supabase.from('vandalismo_vistorias').delete().eq('id', vistoriaId),
         { retries: 2, notify: false },
       );
     } catch (e) {
@@ -72,8 +72,8 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
   try {
     if (input.fotosOcorrido.length > 0) {
       const { error: fotosError } = await retryOnNetworkError(
-        () =>
-          supabase.from('vandalismo_fotos').insert(
+        async () =>
+          await supabase.from('vandalismo_fotos').insert(
             input.fotosOcorrido.map((url, index) => ({
               vistoria_id: vistoriaId,
               categoria: 'ocorrido',
@@ -104,15 +104,15 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
 
     if (itensRows.length > 0) {
       const { error: itensError } = await retryOnNetworkError(
-        () => supabase.from('vandalismo_itens').insert(itensRows),
+        async () => await supabase.from('vandalismo_itens').insert(itensRows),
         { label: 'salvar itens' },
       );
       if (itensError) throw new Error(`Falha ao salvar itens: ${itensError.message}`);
 
       // Verify everything landed (RLS can silently filter rows)
       const { count, error: countError } = await retryOnNetworkError(
-        () =>
-          supabase
+        async () =>
+          await supabase
             .from('vandalismo_itens')
             .select('id', { count: 'exact', head: true })
             .eq('vistoria_id', vistoriaId),
