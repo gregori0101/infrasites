@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { retryOnNetworkError } from '@/lib/networkRetry';
 import {
   VandalismoItemState,
   VandalismoVistoriaCompleta,
@@ -29,7 +30,9 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
   const userId = sessionData.session?.user?.id;
   if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
 
-  const { data: vistoria, error } = await supabase
+  const { data: vistoria, error } = await retryOnNetworkError(
+    () =>
+      supabase
     .from('vandalismo_vistorias')
     .insert({
       user_id: userId,
@@ -46,7 +49,9 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
       tecnico: input.tecnico ?? null,
     })
     .select('id')
-    .single();
+    .single(),
+    { label: 'salvar vistoria' },
+  );
 
   if (error || !vistoria) throw new Error(error?.message || 'Falha ao salvar a vistoria.');
 
@@ -54,18 +59,29 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
 
   // From here on, roll back the vistoria if anything fails, so no partial report is left behind.
   const rollback = async () => {
-    await supabase.from('vandalismo_vistorias').delete().eq('id', vistoriaId);
+    try {
+      await retryOnNetworkError(
+        () => supabase.from('vandalismo_vistorias').delete().eq('id', vistoriaId),
+        { retries: 2, notify: false },
+      );
+    } catch (e) {
+      console.error('[Vandalismo] Falha ao reverter vistoria parcial:', e);
+    }
   };
 
   try {
     if (input.fotosOcorrido.length > 0) {
-      const { error: fotosError } = await supabase.from('vandalismo_fotos').insert(
-        input.fotosOcorrido.map((url, index) => ({
-          vistoria_id: vistoriaId,
-          categoria: 'ocorrido',
-          url,
-          ordem: index,
-        })),
+      const { error: fotosError } = await retryOnNetworkError(
+        () =>
+          supabase.from('vandalismo_fotos').insert(
+            input.fotosOcorrido.map((url, index) => ({
+              vistoria_id: vistoriaId,
+              categoria: 'ocorrido',
+              url,
+              ordem: index,
+            })),
+          ),
+        { label: 'salvar fotos' },
       );
       if (fotosError) throw new Error(`Falha ao salvar fotos: ${fotosError.message}`);
     }
@@ -87,14 +103,21 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     });
 
     if (itensRows.length > 0) {
-      const { error: itensError } = await supabase.from('vandalismo_itens').insert(itensRows);
+      const { error: itensError } = await retryOnNetworkError(
+        () => supabase.from('vandalismo_itens').insert(itensRows),
+        { label: 'salvar itens' },
+      );
       if (itensError) throw new Error(`Falha ao salvar itens: ${itensError.message}`);
 
       // Verify everything landed (RLS can silently filter rows)
-      const { count, error: countError } = await supabase
-        .from('vandalismo_itens')
-        .select('id', { count: 'exact', head: true })
-        .eq('vistoria_id', vistoriaId);
+      const { count, error: countError } = await retryOnNetworkError(
+        () =>
+          supabase
+            .from('vandalismo_itens')
+            .select('id', { count: 'exact', head: true })
+            .eq('vistoria_id', vistoriaId),
+        { label: 'verificar itens' },
+      );
       if (countError) throw new Error(countError.message);
       if ((count ?? 0) < itensRows.length) {
         throw new Error('Os itens do checklist não foram gravados por completo. Tente novamente.');
