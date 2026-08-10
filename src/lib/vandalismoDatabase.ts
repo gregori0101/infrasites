@@ -52,38 +52,59 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
 
   const vistoriaId = vistoria.id as string;
 
-  if (input.fotosOcorrido.length > 0) {
-    const { error: fotosError } = await supabase.from('vandalismo_fotos').insert(
-      input.fotosOcorrido.map((url, index) => ({
-        vistoria_id: vistoriaId,
-        categoria: 'ocorrido',
-        url,
-        ordem: index,
-      })),
-    );
-    if (fotosError) throw new Error(`Falha ao salvar fotos: ${fotosError.message}`);
+  // From here on, roll back the vistoria if anything fails, so no partial report is left behind.
+  const rollback = async () => {
+    await supabase.from('vandalismo_vistorias').delete().eq('id', vistoriaId);
+  };
+
+  try {
+    if (input.fotosOcorrido.length > 0) {
+      const { error: fotosError } = await supabase.from('vandalismo_fotos').insert(
+        input.fotosOcorrido.map((url, index) => ({
+          vistoria_id: vistoriaId,
+          categoria: 'ocorrido',
+          url,
+          ordem: index,
+        })),
+      );
+      if (fotosError) throw new Error(`Falha ao salvar fotos: ${fotosError.message}`);
+    }
+
+    const itensRows = VANDALISMO_ITENS.flatMap((def, index) => {
+      const state = input.itens[def.key];
+      if (!state || (state.fotos.length === 0 && !state.vulneravel && !state.observacao?.trim())) return [];
+      return [
+        {
+          vistoria_id: vistoriaId,
+          item_key: def.key,
+          rotulo: def.rotulo,
+          vulneravel: state.vulneravel,
+          fotos: state.fotos,
+          observacao: state.observacao?.trim() || null,
+          ordem: index,
+        },
+      ];
+    });
+
+    if (itensRows.length > 0) {
+      const { error: itensError } = await supabase.from('vandalismo_itens').insert(itensRows);
+      if (itensError) throw new Error(`Falha ao salvar itens: ${itensError.message}`);
+
+      // Verify everything landed (RLS can silently filter rows)
+      const { count, error: countError } = await supabase
+        .from('vandalismo_itens')
+        .select('id', { count: 'exact', head: true })
+        .eq('vistoria_id', vistoriaId);
+      if (countError) throw new Error(countError.message);
+      if ((count ?? 0) < itensRows.length) {
+        throw new Error('Os itens do checklist não foram gravados por completo. Tente novamente.');
+      }
+    }
+  } catch (err) {
+    await rollback();
+    throw err instanceof Error ? err : new Error('Falha ao salvar a vistoria.');
   }
 
-  const itensRows = VANDALISMO_ITENS.flatMap((def, index) => {
-    const state = input.itens[def.key];
-    if (!state || (state.fotos.length === 0 && !state.vulneravel && !state.observacao?.trim())) return [];
-    return [
-      {
-        vistoria_id: vistoriaId,
-        item_key: def.key,
-        rotulo: def.rotulo,
-        vulneravel: state.vulneravel,
-        fotos: state.fotos,
-        observacao: state.observacao?.trim() || null,
-        ordem: index,
-      },
-    ];
-  });
-
-  if (itensRows.length > 0) {
-    const { error: itensError } = await supabase.from('vandalismo_itens').insert(itensRows);
-    if (itensError) throw new Error(`Falha ao salvar itens: ${itensError.message}`);
-  }
 
   return vistoriaId;
 }
