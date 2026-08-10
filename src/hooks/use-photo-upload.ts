@@ -9,6 +9,7 @@ import {
 } from '@/lib/imageCompression';
 import { toast } from 'sonner';
 import { waitForOnline, isNetworkError } from '@/lib/networkRetry';
+import { uploadStatus } from '@/lib/uploadStatus';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 
@@ -99,6 +100,8 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
     async (file: File): Promise<string | null> => {
       setIsUploading(true);
       setUploadProgress(10);
+      const taskId = uuidv4();
+      uploadStatus.start(taskId, category);
 
       try {
         // CRITICAL: Larger delay for mobile to allow UI to stabilize
@@ -151,6 +154,7 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
               error.message?.includes('policy') ||
               error.message?.includes('403') ||
               error.message?.includes('Unauthorized')) {
+            uploadStatus.fail(taskId);
             console.error(`[PhotoUpload] Permission denied for ${category}:`, error);
             toast.error('Sem permissão para enviar foto', {
               description: 'Verifique se você está logado e seu usuário está aprovado.',
@@ -164,6 +168,7 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
 
           if (retries <= maxRetries) {
             console.log(`[PhotoUpload] Retry ${retries}/${maxRetries} for ${category}`);
+            uploadStatus.retry(taskId, retries, category);
             if (isNetworkError(error)) {
               toast.warning(`Conexão instável. Reenviando foto (${retries}/${maxRetries})...`, { duration: 4000 });
               await waitForOnline();
@@ -192,9 +197,11 @@ export function usePhotoUpload({ siteCode, category, onSuccess, onError }: UsePh
         setUploadProgress(100);
         console.log(`[PhotoUpload] Success: ${fileName}`);
 
+        uploadStatus.success(taskId);
         onSuccess?.(publicUrl);
         return publicUrl;
       } catch (error) {
+        uploadStatus.fail(taskId);
         console.error('[PhotoUpload] Error:', error);
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
         onError?.(new Error(errorMessage));

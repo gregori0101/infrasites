@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { retryOnNetworkError } from '@/lib/networkRetry';
+import { uploadStatus } from '@/lib/uploadStatus';
 import {
   VandalismoItemState,
   VandalismoVistoriaCompleta,
@@ -30,6 +31,8 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
   const userId = sessionData.session?.user?.id;
   if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
 
+  uploadStatus.syncStart('enviando relatório');
+
   const { data: vistoria, error } = await retryOnNetworkError(
     async () =>
       await supabase
@@ -53,7 +56,10 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     { label: 'salvar vistoria' },
   );
 
-  if (error || !vistoria) throw new Error(error?.message || 'Falha ao salvar a vistoria.');
+  if (error || !vistoria) {
+    uploadStatus.syncEnd();
+    throw new Error(error?.message || 'Falha ao salvar a vistoria.');
+  }
 
   const vistoriaId = vistoria.id as string;
 
@@ -125,8 +131,11 @@ export async function saveVistoriaVandalismo(input: SaveVistoriaInput): Promise<
     }
   } catch (err) {
     await rollback();
+    uploadStatus.syncEnd();
     throw err instanceof Error ? err : new Error('Falha ao salvar a vistoria.');
   }
+
+  uploadStatus.syncEnd();
 
 
   return vistoriaId;

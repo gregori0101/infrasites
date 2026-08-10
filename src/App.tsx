@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UploadStatusIndicator } from "@/components/ui/upload-status-indicator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ChecklistProvider } from "@/contexts/ChecklistContext";
@@ -121,6 +122,7 @@ const App = () => {
             <GlobalErrorHandlers />
             <Toaster />
             <Sonner position="top-center" />
+            <UploadStatusIndicator />
             <BrowserRouter>
               <PWAInstallPrompt />
               <PWAUpdatePrompt />
