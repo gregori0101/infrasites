@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar, ShieldAlert, Globe, Network, ChevronRight } from "lucide-react";
+import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar, ShieldAlert, MessageSquare, Network, ChevronRight } from "lucide-react";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -241,10 +241,7 @@ export default function Home() {
             className="rounded-full h-14 w-14 shadow-2xl animate-bounce hover:animate-none bg-primary hover:bg-primary/90"
             onClick={() => navigate("/forum")}
           >
-            <Globe className="hidden" />
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary-foreground">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            <MessageSquare className="h-6 w-6 text-primary-foreground" />
           </Button>
         </div>
       </div>
