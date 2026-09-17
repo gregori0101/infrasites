@@ -31,6 +31,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
+const Backbone = lazy(() => import("./pages/Backbone"));
 const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
 const VandalismoMapa = lazy(() => import("./pages/VandalismoMapa"));
@@ -197,6 +198,11 @@ const App = () => {
                   <Route path="/monitoramento" element={
                     <ProtectedRoute>
                       <PainelMonitoramento />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/backbone" element={
+                    <ProtectedRoute>
+                      <Backbone />
                     </ProtectedRoute>
                   } />
                   <Route path="/instalar" element={<Install />} />
