@@ -52,7 +52,7 @@ const tools: Tool[] = [
     actions: [
       { label: "Checklist", path: "/check-vandalismo" },
       { label: "Painel Gestor", path: "/check-vandalismo/gestor", managerOnly: true },
-      { label: "Mapa", path: "/check-vandalismo/mapa" },
+      { label: "Mapa", path: "/check-vandalismo/mapa", managerOnly: true },
     ],
   },
   {
