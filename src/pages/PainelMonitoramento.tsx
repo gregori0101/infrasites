@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 
-const MONITORING_URL = "https://vivonorte.fun";
+const MONITORING_URL = "https://vivonorteapp.com/";
 
 export default function PainelMonitoramento() {
   const navigate = useNavigate();
