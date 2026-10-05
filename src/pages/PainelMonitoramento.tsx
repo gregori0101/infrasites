@@ -35,10 +35,7 @@ function buildDocument(html: string) {
   },true);
 })();
 </script>`;
-  const fixed = html.replace(/location\.href\s*=\s*(['"])\//g, "window.__monNav($1/").replace(
-    /window\.__monNav\((['"])([^'"]*)\1/g,
-    "window.__monNav($1$2$1)//",
-  );
+  const fixed = html.replace(/location\.href\s*=\s*(['"])(\/[^'"]*)\1/g, "window.__monNav($1$2$1)");
   return fixed.replace(/<head[^>]*>/i, (m) => m + shim);
 }
 
