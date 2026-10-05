@@ -21,7 +21,6 @@ Deno.serve(async (req) => {
     const upstream = await fetch(UPSTREAM + path, {
       method: req.method,
       headers: {
-        "ngrok-skip-browser-warning": "1",
         "User-Agent": "InfraSites-Monitor-Proxy",
         ...(req.headers.get("content-type") ? { "Content-Type": req.headers.get("content-type")! } : {}),
       },
