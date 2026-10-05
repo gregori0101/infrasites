@@ -17,3 +17,5 @@ verify_jwt = false
 
 [functions.fix-photo-urls]
 verify_jwt = false
+[functions.monitor-proxy]
+verify_jwt = false
