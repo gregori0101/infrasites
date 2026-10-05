@@ -1,6 +1,6 @@
-// Proxy for the monitoring panel hosted behind ngrok.
-// Lets devices that block ngrok domains (or show the ngrok warning page) load it through our backend.
-const UPSTREAM = "https://mildly-nonusable-sanjuanita.ngrok-free.dev";
+// Proxy for the monitoring panel.
+// Lets devices that block the original address (or show a blank screen) load it through our backend.
+const UPSTREAM = "http://vivonorteapp.com";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
