@@ -1,6 +1,6 @@
-// Proxy for the monitoring panel hosted behind ngrok.
-// Lets devices that block ngrok domains (or show the ngrok warning page) load it through our backend.
-const UPSTREAM = "https://mildly-nonusable-sanjuanita.ngrok-free.dev";
+// Proxy for the monitoring panel.
+// Lets devices that block the original address (or show a blank screen) load it through our backend.
+const UPSTREAM = "http://vivonorteapp.com";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +21,6 @@ Deno.serve(async (req) => {
     const upstream = await fetch(UPSTREAM + path, {
       method: req.method,
       headers: {
-        "ngrok-skip-browser-warning": "1",
         "User-Agent": "InfraSites-Monitor-Proxy",
         ...(req.headers.get("content-type") ? { "Content-Type": req.headers.get("content-type")! } : {}),
       },
