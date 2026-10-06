@@ -19,3 +19,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.monitor-proxy]
 verify_jwt = false
+[functions.backbone-proxy]
+verify_jwt = false
