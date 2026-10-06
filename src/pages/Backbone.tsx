@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 
 // Served through our backend relay so the original address is never opened directly.
-const PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/backbone-proxy/v3`;
+const PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/backbone-proxy/v4`;
 
 function buildDocument(html: string) {
   const shim = `<base href="${PROXY}/"><script>
@@ -25,6 +25,7 @@ function buildDocument(html: string) {
     if(i&&i.url&&i.url.indexOf(location.origin)===0) return of(new Request(px(i.url),i),o);
     return of(i,o);
   };
+  ['pushState','replaceState'].forEach(function(k){var o=history[k];history[k]=function(st,t,u){try{return o.call(history,st,t,u)}catch(e){try{window.__bbPath=String(u||'/');return o.call(history,st,t)}catch(_){}}};});
   var oo=XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open=function(m,u){arguments[1]=px(u);return oo.apply(this,arguments);};
 })();
