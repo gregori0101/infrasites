@@ -26,8 +26,12 @@ Deno.serve(async (req) => {
       },
       body: req.method === "POST" ? await req.text() : undefined,
     });
-    const body = await upstream.arrayBuffer();
     const ct = upstream.headers.get("content-type") || "application/octet-stream";
+    let body: ArrayBuffer | string = await upstream.arrayBuffer();
+    if (/javascript|text\/html|text\/css/.test(ct)) {
+      const self = `${Deno.env.get("SUPABASE_URL")}/functions/v1/backbone-proxy`;
+      body = new TextDecoder().decode(body).replace(/(["'`(])\/assets\//g, `$1${self}/assets/`);
+    }
     return new Response(body, {
       status: upstream.status,
       headers: {
