@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { VivoLogo } from "@/components/ui/vivo-logo";
 
 // Served through our backend relay so the original address is never opened directly.
 const PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/backbone-proxy/v4`;
@@ -37,7 +33,6 @@ function buildDocument(html: string) {
 }
 
 export default function Backbone() {
-  const navigate = useNavigate();
   const [doc, setDoc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -68,19 +63,6 @@ export default function Backbone() {
       </Helmet>
 
       <div className="h-screen flex flex-col bg-background">
-        <header className="border-b bg-card px-3 h-9 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate("/")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-sm font-semibold truncate">Backbone Norte</h1>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setReloadKey((k) => k + 1)} title="Recarregar">
-              <RefreshCw className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          <VivoLogo className="h-5 w-auto" />
-        </header>
-
         <main className="flex-1 min-h-0 relative">
           {error && (
             <div className="absolute inset-x-0 top-0 z-10 bg-destructive text-destructive-foreground text-xs text-center py-1">
