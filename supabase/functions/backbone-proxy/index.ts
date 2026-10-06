@@ -30,7 +30,10 @@ Deno.serve(async (req) => {
     let body: ArrayBuffer | string = await upstream.arrayBuffer();
     if (/javascript|text\/html|text\/css/.test(ct)) {
       const self = `${Deno.env.get("SUPABASE_URL")}/functions/v1/backbone-proxy`;
-      body = new TextDecoder().decode(body).replace(/(["'`(])\/?assets\//g, `$1${self}/assets/`);
+      body = new TextDecoder().decode(body)
+        .replace(/(["'`(])\/assets\//g, `$1${self}/assets/`)
+        // Vite preload helper: function(e){return"/"+e}
+        .replace(/function\((\w+)\)\{return(["'`])\/\2\+\1\}/g, (_m, v) => `function(${v}){return${JSON.stringify(self + "/")}+${v}}`);
     }
     return new Response(body, {
       status: upstream.status,
