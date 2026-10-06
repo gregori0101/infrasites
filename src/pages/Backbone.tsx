@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 
 // Served through our backend relay so the original address is never opened directly.
-const PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/backbone-proxy`;
+const PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/backbone-proxy/v3`;
 
 function buildDocument(html: string) {
   const shim = `<base href="${PROXY}/"><script>

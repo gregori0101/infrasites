@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const idx = url.pathname.indexOf("/backbone-proxy");
   let path = idx >= 0 ? url.pathname.slice(idx + "/backbone-proxy".length) : "/";
+  path = path.replace(/^\/v\d+(?=\/|$)/, "");
   if (!path || path === "") path = "/";
   if (!path.startsWith("/") || path.startsWith("//")) {
     return new Response("invalid path", { status: 400, headers: cors });
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
     const ct = upstream.headers.get("content-type") || "application/octet-stream";
     let body: ArrayBuffer | string = await upstream.arrayBuffer();
     if (/javascript|text\/html|text\/css/.test(ct)) {
-      const self = `${Deno.env.get("SUPABASE_URL")}/functions/v1/backbone-proxy`;
+      const self = `${Deno.env.get("SUPABASE_URL")}/functions/v1/backbone-proxy/v3`;
       body = new TextDecoder().decode(body)
         .replace(/(["'`(])\/assets\//g, `$1${self}/assets/`)
         // Vite preload helper: function(e){return"/"+e}
