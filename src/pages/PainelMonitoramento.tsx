@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet";
 // the original address (or show a blank screen) can still load it.
 const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/monitor-proxy`;
 
-function buildDocument(html: string) {
+export function buildDocument(html: string) {
   const shim = `<script>
 (function(){
   var P=${JSON.stringify(PROXY_URL)};
