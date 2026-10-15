@@ -23,17 +23,50 @@ function buildDocument(html: string) {
   };
   var oo=XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open=function(m,u){arguments[1]=px(u);return oo.apply(this,arguments);};
-  window.__monNav=function(p){parent.postMessage({type:'monitor-nav',path:p},'*');};
+  var nested = window.parent !== window.top;
+  window.__monNav=function(p){ if(nested){ loadSelf(p); return; } parent.postMessage({type:'monitor-nav',path:p},'*');};
+  function loadSelf(p){ var fe=window.frameElement; if(fe) frameLoad(fe,p); }
+  function isRel(u){ return typeof u==='string' && u.charAt(0)==='/' && u.charAt(1)!=='/'; }
+  var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'src');
+  function frameLoad(f,u){
+    f.setAttribute('data-mon-src',u);
+    of(px(u),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+      f.srcdoc=window.top.__monBuild(t);
+    }).catch(function(){});
+  }
+  window.__monFrameLoad=frameLoad;
+  Object.defineProperty(HTMLIFrameElement.prototype,'src',{
+    configurable:true,
+    get:function(){ return this.getAttribute('data-mon-src') || d.get.call(this); },
+    set:function(u){
+      if(isRel(u)) return frameLoad(this,u);
+      if(u==='about:blank'){ this.removeAttribute('data-mon-src'); this.removeAttribute('srcdoc'); }
+      d.set.call(this,u);
+    }
+  });
+  function scan(){ document.querySelectorAll('iframe[data-mon-init]').forEach(function(f){
+    var u=f.getAttribute('data-mon-init'); f.removeAttribute('data-mon-init'); frameLoad(f,u); }); }
+  document.addEventListener('DOMContentLoaded',scan);
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
     if(!a) return; var h=a.getAttribute('href');
-    if(h&&h.charAt(0)==='/'&&h.charAt(1)!=='/'){e.preventDefault();window.__monNav(h);}
+    if(a.getAttribute('target')==='_blank') return;
+    if(isRel(h)){e.preventDefault();window.__monNav(h);}
   },true);
 })();
 </script>`;
-  const fixed = html.replace(/location\.href\s*=\s*(['"])(\/[^'"]*)\1/g, "window.__monNav($1$2$1)");
+  let fixed = html.replace(/location\.href\s*=\s*(['"])(\/[^'"]*)\1/g, "window.__monNav($1$2$1)");
+  // Inner panels: load through the relay instead of the app's own address
+  fixed = fixed.replace(/<iframe([^>]*?)\ssrc=(["'])(\/(?!\/)[^"']*)\2/gi, "<iframe$1 data-mon-init=$2$3$2");
+  // Images, scripts, styles with internal paths
+  fixed = fixed.replace(
+    /(<(?:img|script|link|source|video|audio)\b[^>]*?\s(?:src|href)=)(["'])(\/(?!\/)[^"']*)\2/gi,
+    (_m, pre, q, p) => `${pre}${q}${PROXY_URL}?path=${encodeURIComponent(p)}${q}`,
+  );
   return fixed.replace(/<head[^>]*>/i, (m) => m + shim);
 }
+
+(window as unknown as { __monBuild: typeof buildDocument }).__monBuild = buildDocument;
 
 export default function PainelMonitoramento() {
   const [path, setPath] = useState("/");
