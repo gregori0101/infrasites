@@ -50,8 +50,11 @@ function buildDocument(html: string) {
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
     if(!a) return; var h=a.getAttribute('href');
-    if(a.getAttribute('target')==='_blank') return;
-    if(isRel(h)){e.preventDefault();window.__monNav(h);}
+    if(isRel(h)){
+      e.preventDefault();
+      if(a.getAttribute('target')){ window.top.postMessage({type:'monitor-nav',path:h},'*'); }
+      else window.__monNav(h);
+    }
   },true);
 })();
 </script>`;
