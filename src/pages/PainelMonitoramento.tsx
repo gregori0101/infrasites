@@ -6,11 +6,16 @@ import { Helmet } from "react-helmet";
 const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/monitor-proxy`;
 
 export function buildDocument(html: string) {
+  // Pages that declare an external <base> (mirrors of other systems) must keep
+  // their own addresses untouched, otherwise their files are requested from the wrong place.
+  const hasBase = /<base\s[^>]*href=["']https?:/i.test(html);
   const shim = `<script>
 (function(){
   var P=${JSON.stringify(PROXY_URL)};
+  var B=${hasBase ? "true" : "false"};
   function px(u){
     if(typeof u!=='string') return u;
+    if(B) return u;
     if(/^https?:\\/\\//i.test(u)||u.indexOf('data:')===0||u.indexOf('blob:')===0) return u;
     if(u.charAt(0)!=='/') u='/'+u;
     return P+'?path='+encodeURIComponent(u);
@@ -26,7 +31,7 @@ export function buildDocument(html: string) {
   var nested = window.parent !== window.top;
   window.__monNav=function(p){ if(nested){ loadSelf(p); return; } parent.postMessage({type:'monitor-nav',path:p},'*');};
   function loadSelf(p){ var fe=window.frameElement; if(fe) frameLoad(fe,p); }
-  function isRel(u){ return typeof u==='string' && u.charAt(0)==='/' && u.charAt(1)!=='/'; }
+  function isRel(u){ return !B && typeof u==='string' && u.charAt(0)==='/' && u.charAt(1)!=='/'; }
   var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'src');
   function frameLoad(f,u){
     f.setAttribute('data-mon-src',u);
@@ -58,6 +63,7 @@ export function buildDocument(html: string) {
   },true);
 })();
 </script>`;
+  if (hasBase) return html.replace(/<head[^>]*>/i, (m) => m + shim);
   let fixed = html.replace(/location\.href\s*=\s*(['"])(\/[^'"]*)\1/g, "window.__monNav($1$2$1)");
   // Inner panels: load through the relay instead of the app's own address
   fixed = fixed.replace(/<iframe([^>]*?)\ssrc=(["'])(\/(?!\/)[^"']*)\2/gi, "<iframe$1 data-mon-init=$2$3$2");
