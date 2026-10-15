@@ -50,7 +50,6 @@ function buildDocument(html: string) {
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
     if(!a) return; var h=a.getAttribute('href');
-    if(a.getAttribute('target')==='_blank') return;
     if(isRel(h)){e.preventDefault();window.__monNav(h);}
   },true);
 })();
