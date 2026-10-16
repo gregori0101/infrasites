@@ -3,7 +3,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { entrySchema, validMonitorPath } from './validation.ts';
 
 const UPSTREAM = 'http://vivonorteapp.com';
-const headers = { ...corsHeaders, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' };
+const headers = { ...corsHeaders, 'Access-Control-Allow-Headers': `${corsHeaders['Access-Control-Allow-Headers']}, x-eps-session`, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
 async function digest(value: string) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
