@@ -129,7 +129,6 @@ export default function PainelMonitoramento() {
           )}
           {doc ? (
             <iframe
-              key={`${path}-${reloadKey}`}
               srcDoc={doc}
               title="Painel de Monitoramento"
               className="w-full h-full border-0"
