@@ -302,6 +302,71 @@ export type Database = {
         }
         Relationships: []
       }
+      monitor_eps_access_logs: {
+        Row: {
+          accessed_at: string
+          full_name: string
+          id: string
+        }
+        Insert: {
+          accessed_at?: string
+          full_name: string
+          id?: string
+        }
+        Update: {
+          accessed_at?: string
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      monitor_eps_login_attempts: {
+        Row: {
+          attempts: number
+          client_hash: string
+          window_started_at: string
+        }
+        Insert: {
+          attempts?: number
+          client_hash: string
+          window_started_at?: string
+        }
+        Update: {
+          attempts?: number
+          client_hash?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
+      monitor_eps_sessions: {
+        Row: {
+          access_id: string
+          created_at: string
+          expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          access_id: string
+          created_at?: string
+          expires_at: string
+          token_hash: string
+        }
+        Update: {
+          access_id?: string
+          created_at?: string
+          expires_at?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitor_eps_sessions_access_id_fkey"
+            columns: ["access_id"]
+            isOneToOne: false
+            referencedRelation: "monitor_eps_access_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reparos: {
         Row: {
           atualizado_em: string
@@ -4549,6 +4614,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      monitor_eps_allow_login: {
+        Args: { p_client_hash: string }
+        Returns: boolean
       }
     }
     Enums: {

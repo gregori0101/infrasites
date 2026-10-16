@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792184622790,
+      "tag": "0000_monitor_eps_sessions_and_access_logs",
+      "breakpoints": true
+    }
+  ]
+}
