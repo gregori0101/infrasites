@@ -31,6 +31,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
 const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
+const MonitoramentoEPS = lazy(() => import("./pages/MonitoramentoEPS"));
 const Backbone = lazy(() => import("./pages/Backbone"));
 const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
@@ -131,6 +132,7 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/login" element={<Login />} />
+                  <Route path="/monitoramento-eps" element={<MonitoramentoEPS />} />
                   <Route path="/pending-approval" element={<PendingApproval />} />
                   
                   {/* Protected routes */}
