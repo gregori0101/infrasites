@@ -1,24 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 
 // The panel is served through our own backend relay, so devices that block
 // the original address (or show a blank screen) can still load it.
 const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/monitor-proxy`;
 
-export function buildDocument(html: string) {
+export function buildDocument(html: string, proxyUrl = PROXY_URL) {
   // Pages that declare an external <base> (mirrors of other systems) must keep
   // their own addresses untouched, otherwise their files are requested from the wrong place.
   const hasBase = /<base\s[^>]*href=["']https?:/i.test(html);
   const shim = `<script>
 (function(){
-  var P=${JSON.stringify(PROXY_URL)};
+  var P=${JSON.stringify(proxyUrl)};
   var B=${hasBase ? "true" : "false"};
   function px(u){
     if(typeof u!=='string') return u;
     if(B) return u;
     if(/^https?:\\/\\//i.test(u)||u.indexOf('data:')===0||u.indexOf('blob:')===0) return u;
     if(u.charAt(0)!=='/') u='/'+u;
-    return P+'?path='+encodeURIComponent(u);
+    return P+(P.indexOf('?')>=0?'&':'?')+'path='+encodeURIComponent(u);
   }
   var of=window.fetch.bind(window);
   window.fetch=function(i,o){
@@ -36,7 +36,7 @@ export function buildDocument(html: string) {
   function frameLoad(f,u){
     f.setAttribute('data-mon-src',u);
     of(px(u),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
-      f.srcdoc=window.top.__monBuild(t);
+      f.srcdoc=window.top.__monBuild(t,P);
     }).catch(function(){});
   }
   window.__monFrameLoad=frameLoad;
@@ -70,29 +70,35 @@ export function buildDocument(html: string) {
   // Images, scripts, styles with internal paths
   fixed = fixed.replace(
     /(<(?:img|script|link|source|video|audio)\b[^>]*?\s(?:src|href)=)(["'])(\/(?!\/)[^"']*)\2/gi,
-    (_m, pre, q, p) => `${pre}${q}${PROXY_URL}?path=${encodeURIComponent(p)}${q}`,
+    (_m, pre, q, p) => `${pre}${q}${proxyUrl}${proxyUrl.includes('?') ? '&' : '?'}path=${encodeURIComponent(p)}${q}`,
   );
   return fixed.replace(/<head[^>]*>/i, (m) => m + shim);
 }
 
 (window as unknown as { __monBuild: typeof buildDocument }).__monBuild = buildDocument;
 
-export default function PainelMonitoramento() {
+export default function PainelMonitoramento({ proxyUrl = PROXY_URL, onUnauthorized }: { proxyUrl?: string; onUnauthorized?: () => void } = {}) {
   const [path, setPath] = useState("/");
   const [doc, setDoc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const requestId = useRef(0);
+  const frame = useRef<HTMLIFrameElement>(null);
 
   const load = useCallback(async (p: string) => {
+    const id = ++requestId.current;
     setError(null);
     try {
-      const res = await fetch(`${PROXY_URL}?path=${encodeURIComponent(p)}`, { cache: "no-store" });
+      const res = await fetch(`${proxyUrl}${proxyUrl.includes('?') ? '&' : '?'}path=${encodeURIComponent(p)}`, { cache: "no-store", referrerPolicy: "no-referrer" });
+      if (id !== requestId.current) return;
+      if (res.status === 401 && onUnauthorized) { onUnauthorized(); return; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setDoc(buildDocument(await res.text()));
+      const html = await res.text();
+      if (id === requestId.current) setDoc(buildDocument(html, proxyUrl));
     } catch (e) {
-      setError("Não foi possível carregar o painel. Tentando novamente...");
+      if (id === requestId.current) setError("Não foi possível carregar o painel. Tentando novamente...");
     }
-  }, []);
+  }, [proxyUrl, onUnauthorized]);
 
   useEffect(() => {
     load(path);
@@ -107,7 +113,13 @@ export default function PainelMonitoramento() {
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      if (e.data?.type === "monitor-nav" && typeof e.data.path === "string") setPath(e.data.path);
+      const ownsSource = (w: Window | null): boolean => {
+        if (!w) return false;
+        if (w === e.source) return true;
+        try { for (let i = 0; i < w.frames.length; i++) if (ownsSource(w.frames[i])) return true; } catch { return false; }
+        return false;
+      };
+      if (ownsSource(frame.current?.contentWindow ?? null) && e.data?.type === "monitor-nav" && typeof e.data.path === "string" && e.data.path.startsWith('/') && !e.data.path.startsWith('//')) setPath(e.data.path);
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
@@ -129,7 +141,9 @@ export default function PainelMonitoramento() {
           )}
           {doc ? (
             <iframe
+              ref={frame}
               srcDoc={doc}
+              referrerPolicy="no-referrer"
               title="Painel de Monitoramento"
               className="w-full h-full border-0"
               sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads allow-modals"
