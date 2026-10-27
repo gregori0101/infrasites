@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const IndexInner = () => {
   const { isTecnico, isGestor, isAdmin } = useAuth();
-  const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport } = useChecklist();
+  const { updateData, setCurrentStep, setCurrentGabinete, loadFromPreviousReport, resetChecklist } = useChecklist();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState<string>("inbox");
   const [selectedAssignment, setSelectedAssignment] = React.useState<SiteAssignment | null>(null);
@@ -28,6 +28,8 @@ const IndexInner = () => {
         // (already set in prefillData, but ensuring consistency)
       } else {
         // Start fresh - just pre-fill site data
+        resetChecklist();
+        sessionStorage.setItem('currentAssignmentId', assignment.id);
         updateData('siglaSite', assignment.site.site_code);
         updateData('uf', assignment.site.uf as any);
       }

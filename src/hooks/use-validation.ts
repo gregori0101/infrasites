@@ -11,10 +11,8 @@ export interface StepValidation {
   errors: ValidationError[];
 }
 
-export function useStepValidation(data: ChecklistData, currentStep: number, currentGabinete: number): StepValidation {
+export function validateStep(data: ChecklistData, currentStep: number, currentGabinete: number): StepValidation {
   const gabinete = data.gabinetes[currentGabinete];
-
-  return useMemo(() => {
     const errors: ValidationError[] = [];
 
     // Check if sections are skipped (não se aplica)
@@ -85,6 +83,10 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
         if (!gabinete.climatizacao.tipo) {
           errors.push({ field: 'climatizacao.tipo', message: 'Selecione o tipo de climatização' });
         }
+        if (gabinete.climatizacao.temPlcLeadLag) {
+          if (!gabinete.climatizacao.plcLeadLagStatus) errors.push({ field: 'climatizacao.plcLeadLagStatus', message: 'Informe o status do PLC Lead-Lag' });
+          if (!gabinete.climatizacao.fotoPlcLeadLag) errors.push({ field: 'climatizacao.fotoPlcLeadLag', message: 'Foto do PLC Lead-Lag é obrigatória' });
+        }
         break;
 
       case 5: // Step6FibraOptica
@@ -121,7 +123,21 @@ export function useStepValidation(data: ChecklistData, currentStep: number, curr
       isValid: errors.length === 0,
       errors
     };
-  }, [data, gabinete, currentStep, currentGabinete]);
+}
+
+export function useStepValidation(data: ChecklistData, currentStep: number, currentGabinete: number): StepValidation {
+  return useMemo(() => validateStep(data, currentStep, currentGabinete), [data, currentStep, currentGabinete]);
+}
+
+export function validateChecklist(data: ChecklistData): StepValidation & { step?: number; gabinete?: number } {
+  for (let step = 0; step <= 8; step++) {
+    const count = step >= 1 && step <= 4 ? data.gabinetes.length : 1;
+    for (let gabinete = 0; gabinete < count; gabinete++) {
+      const result = validateStep(data, step, gabinete);
+      if (!result.isValid) return { ...result, step, gabinete };
+    }
+  }
+  return { isValid: true, errors: [] };
 }
 
 export function getFieldError(errors: ValidationError[], field: string): string | undefined {
