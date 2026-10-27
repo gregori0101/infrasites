@@ -660,7 +660,7 @@ export async function fetchReportsSummary(filters?: {
   const { validateReportFilters } = await import('./validation');
   validateReportFilters(filters);
 
-  const pageSize = 5000;
+  const pageSize = 1000; // Respect the API's maximum rows per response.
   let page = 0;
   let all: ReportRow[] = [];
 
@@ -668,7 +668,8 @@ export async function fetchReportsSummary(filters?: {
     let query = supabase
       .from('reports')
       .select(SUMMARY_COLUMNS + ',operadora')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false });
 
     if (filters?.siteCode) {
       query = query.ilike('site_code', `%${filters.siteCode}%`);
@@ -702,7 +703,6 @@ export async function fetchReportsSummary(filters?: {
 
     if (batch.length < pageSize) break;
     page += 1;
-    if (page > 50) break;
   }
 
   return all;
@@ -718,7 +718,7 @@ export async function fetchReportsForDashboard(filters?: {
   endDate?: string;
   operadora?: string; // 'VIVO', 'TEL', or 'all'
 }): Promise<ReportRow[]> {
-  const pageSize = 5000;
+  const pageSize = 1000; // Respect the API's maximum rows per response.
   let page = 0;
   let all: ReportRow[] = [];
   const columns = buildDashboardColumns() + ',operadora';
@@ -727,7 +727,8 @@ export async function fetchReportsForDashboard(filters?: {
     let query = supabase
       .from('reports')
       .select(columns)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false });
 
     if (filters?.siteCode) {
       query = query.ilike('site_code', `%${filters.siteCode}%`);
@@ -761,7 +762,6 @@ export async function fetchReportsForDashboard(filters?: {
 
     if (batch.length < pageSize) break;
     page += 1;
-    if (page > 50) break;
   }
 
   return all;
@@ -799,7 +799,8 @@ export async function fetchReportsForExcel(filters?: {
     let query = supabase
       .from('reports')
       .select(columns)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false });
 
     if (filters?.siteCode) {
       query = query.ilike('site_code', `%${filters.siteCode}%`);
@@ -832,7 +833,6 @@ export async function fetchReportsForExcel(filters?: {
 
     if (batch.length < pageSize) break;
     page += 1;
-    if (page > 50) break;
   }
 
   return all;
