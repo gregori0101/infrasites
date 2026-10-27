@@ -5,4 +5,4 @@
 
 # Contagem de vistorias
 - [x] Corrigir paginação do dashboard, histórico e exportação sem alterar filtros de acesso.
-- [ ] Testar leitura além de mil registros e conferir o total no painel.
+- [x] Testar paginação: quatro testes passaram e a consulta autenticada recuperou 1421 registros únicos, igual ao total armazenado. A conta de teste é redirecionada à inicial, impedindo conferir o dashboard visualmente.
