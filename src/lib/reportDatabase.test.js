@@ -25,6 +25,21 @@ mock.module('@/integrations/supabase/client', () => ({
 }));
 
 const { fetchReportsSummary, fetchReportsForDashboard, fetchReportsForExcel } = await import('./reportDatabase');
+const { buildReportRow } = await import('./reportDatabase');
+const { reportToChecklist } = await import('./reportToChecklist');
+const { INITIAL_CHECKLIST } = await import('@/types/checklist');
+
+test('PLC evidence survives database mapping and restores for editing', () => {
+  const data = JSON.parse(JSON.stringify(INITIAL_CHECKLIST));
+  data.id = 'draft';
+  data.gabinetes[0].climatizacao.temPlcLeadLag = true;
+  data.gabinetes[0].climatizacao.fotoPlcLeadLag = 'https://example.test/plc.jpg';
+  const row = buildReportRow(data);
+  expect(row.fotos_extras.gab1_plc_foto).toEqual(['https://example.test/plc.jpg']);
+  expect(reportToChecklist(row).gabinetes[0].climatizacao.fotoPlcLeadLag).toBe('https://example.test/plc.jpg');
+  data.gabinetes[0].climatizacao.fotoPlcLeadLag = null;
+  expect(buildReportRow(data).fotos_extras).toBeNull();
+});
 
 for (const [name, fetchReports] of [
   ['dashboard', fetchReportsForDashboard],
