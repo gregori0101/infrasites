@@ -511,6 +511,7 @@ export function buildReportRow(data: ChecklistData): ReportRow {
   }
 
   // Fotos extras - store as JSON
+  row.fotos_extras = null;
   if (data.fotosExtras && typeof data.fotosExtras === 'object') {
     // Filter out empty arrays and only keep non-empty photo arrays
     const validExtras: Record<string, string[]> = {};
@@ -522,6 +523,11 @@ export function buildReportRow(data: ChecklistData): ReportRow {
         }
       }
     }
+    data.gabinetes.forEach((gab, index) => {
+      const key = `gab${index + 1}_plc_foto`;
+      delete validExtras[key];
+      if (!skipClimatizacao && gab.climatizacao.fotoPlcLeadLag) validExtras[key] = [gab.climatizacao.fotoPlcLeadLag];
+    });
     if (Object.keys(validExtras).length > 0) {
       row.fotos_extras = validExtras;
     }

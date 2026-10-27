@@ -326,6 +326,10 @@ export async function uploadAllPhotos(
 
     // Climate photos
     if (gab.climatizacao) {
+      gab.climatizacao.fotoPlcLeadLag = await uploadSinglePhoto(
+        gab.climatizacao.fotoPlcLeadLag,
+        `${prefix}_plc_lead_lag`
+      );
       gab.climatizacao.fotoAR1 = await uploadSinglePhoto(
         gab.climatizacao.fotoAR1,
         `${prefix}_ar1`

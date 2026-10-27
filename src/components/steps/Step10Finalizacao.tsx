@@ -19,7 +19,7 @@ import { saveReportToDatabase, updateReportInDatabase } from "@/lib/reportDataba
 import { updateAssignmentStatus } from "@/lib/assignmentDatabase";
 import { uploadAllPhotos } from "@/lib/photoStorage";
 import { format } from "date-fns";
-import { ValidationError, getFieldError } from "@/hooks/use-validation";
+import { ValidationError, getFieldError, validateChecklist } from "@/hooks/use-validation";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -40,7 +40,7 @@ interface Step10Props {
 
 export function Step10Finalizacao({ showErrors = false, validationErrors = [] }: Step10Props) {
   const tecnicoError = showErrors && getFieldError(validationErrors, 'tecnico');
-  const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode } = useChecklist();
+  const { data, updateData, calculateProgress, resetChecklist, editingReportId, clearEditingMode, setCurrentStep, setCurrentGabinete } = useChecklist();
   const { user, isGestor, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [isSending, setIsSending] = React.useState(false);
@@ -49,6 +49,8 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   const [showDownloadDialog, setShowDownloadDialog] = React.useState(false);
   const [downloadPdfOption, setDownloadPdfOption] = React.useState<boolean | null>(null);
   const [showCompletionActions, setShowCompletionActions] = React.useState(false);
+  const sendingRef = React.useRef(false);
+  React.useEffect(() => { setShowCompletionActions(data.sincronizado && !editingReportId); }, [data.id, data.sincronizado, editingReportId]);
 
   const progress = calculateProgress();
 
@@ -70,6 +72,14 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   }, [user?.id]);
 
   const handleSendClick = () => {
+    if (sendingRef.current) return;
+    const validation = validateChecklist(data);
+    if (!validation.isValid) {
+      setCurrentStep(validation.step ?? 0);
+      setCurrentGabinete(validation.gabinete ?? 0);
+      toast.error('Checklist incompleto', { description: validation.errors[0]?.message });
+      return;
+    }
     if (progress < 50) {
       toast.error('Checklist incompleto', {
         description: 'Preencha pelo menos 50% dos campos para enviar.'
@@ -89,6 +99,8 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
   };
 
   const handleConfirmSend = async (shouldDownloadPdf: boolean) => {
+    if (sendingRef.current || (data.sincronizado && !editingReportId)) return;
+    sendingRef.current = true;
     setShowDownloadDialog(false);
     setDownloadPdfOption(shouldDownloadPdf);
 
@@ -231,6 +243,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
           // Mantém o resultado visível para oferecer um próximo passo claro,
           // sem adicionar atalhos permanentes ao cabeçalho.
           setShowCompletionActions(true);
+          updateData('sincronizado', true);
         } else {
           throw new Error(result.error || 'Erro ao salvar no banco');
         }
@@ -248,6 +261,7 @@ export function Step10Finalizacao({ showErrors = false, validationErrors = [] }:
         description: 'Por favor, tente novamente.'
       });
     } finally {
+      sendingRef.current = false;
       setIsSending(false);
       setUploadProgress('');
     }

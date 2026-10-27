@@ -351,7 +351,11 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentGabinete, data.gabinetes.length]);
 
-  const [editingReportId, setEditingReportId] = React.useState<string | null>(null);
+  const [editingReportId, setEditingReportId] = React.useState<string | null>(() => localStorage.getItem(`${CURRENT_SESSION_KEY}_editing`));
+  useEffect(() => {
+    if (editingReportId) localStorage.setItem(`${CURRENT_SESSION_KEY}_editing`, editingReportId);
+    else localStorage.removeItem(`${CURRENT_SESSION_KEY}_editing`);
+  }, [editingReportId]);
 
   const resetChecklist = useCallback(() => {
     const now = new Date().toISOString();
@@ -370,6 +374,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_step`);
       sessionStorage.removeItem(`${CURRENT_SESSION_KEY}_gabinete`);
+      sessionStorage.removeItem('currentAssignmentId');
       // Update localStorage with new empty session
       localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newData));
     }
@@ -451,6 +456,7 @@ export function ChecklistProvider({ children }: { children: React.ReactNode }) {
     const found = checklists.find(c => c.id === id);
     
     if (found) {
+      setEditingReportId(null);
       setData(found);
       setCurrentStep(0);
       setCurrentGabinete(0);

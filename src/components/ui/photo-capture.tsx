@@ -30,7 +30,7 @@ export function PhotoCapture({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
 
-  const { uploadPhotoFile, deletePhoto, isUploading, uploadProgress } = usePhotoUpload({
+  const { uploadPhotoFile, isUploading, uploadProgress } = usePhotoUpload({
     siteCode,
     category,
   });
@@ -96,11 +96,8 @@ export function PhotoCapture({
     }
   };
 
-  const handleRemove = async () => {
-    if (value) {
-      // Try to delete from storage if it's a URL
-      await deletePhoto(value);
-    }
+  const handleRemove = () => {
+    // A photo may still belong to a saved report. Remove only the draft reference.
     onChange(null);
     if (inputRef.current) {
       inputRef.current.value = '';

@@ -381,7 +381,7 @@ export function ChecklistWizard() {
         <Button
           className="flex-1 h-12"
           onClick={handleNext}
-          disabled={currentStep === STEPS.length - 1 && currentGabinete === maxGabinetes - 1}
+          disabled={currentStep === STEPS.length - 1}
         >
           Próximo
           <ChevronRight className="w-5 h-5 ml-1" />

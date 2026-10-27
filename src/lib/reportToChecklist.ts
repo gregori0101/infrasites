@@ -234,7 +234,7 @@ export function reportToChecklist(report: ReportRow): ChecklistData {
         temPlcLeadLag: report[`${prefix}_plc_status`]?.startsWith('SIM') || false,
         plcLeadLagStatus: report[`${prefix}_plc_status`]?.includes('/OK') ? 'OK' : 
                           report[`${prefix}_plc_status`]?.includes('/NOK') ? 'NOK' : null,
-        fotoPlcLeadLag: null, // Photo field - would need DB column to restore
+        fotoPlcLeadLag: parseFotosExtras(report.fotos_extras)[`${prefix}_plc_foto`]?.[0] || null,
         alarmistica: (report[`${prefix}_alarme_status`] || '') as any,
         fotoAR1: report[`${prefix}_clima_foto_ar1`] || null,
         fotoAR2: report[`${prefix}_clima_foto_ar2`] || null,
