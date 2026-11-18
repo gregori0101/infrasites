@@ -11,3 +11,7 @@
 - [x] Corrigir restauração do alvo de edição, mistura de dados ao iniciar atribuição e navegação na última etapa.
 - [x] Validar todos os gabinetes antes do envio, proteger confirmação concorrente e preservar foto do PLC e evidências ao remover do formulário.
 - [x] Executar nove testes de regressão; conferir checklist autenticado, recuperação após recarregar e bloqueio de envio incompleto. Não foi criada uma vistoria real para testar o envio completo.
+
+# Bloqueio de segurança durante suspensão
+- [x] Corrigir as três permissões críticas e bloquear gravações de todas as contas nas vistorias e no vandalismo, inclusive pelos serviços internos.
+- [x] Testar criação, edição e exclusão pela API em quatro tabelas como anônimo, conta pendente e administrador aprovado; testes de comandos privilegiados também foram bloqueados. Nova verificação sem falhas críticas; páginas continuam suspensas.
