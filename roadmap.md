@@ -1,4 +1,8 @@
 # Monitoramento EPS
+# Retirada dos buscadores
+- [x] Confirmar no endereço publicado vivonorte.com a instrução noindex para todos os buscadores, mantendo a plataforma suspensa.
+- [ ] Aplicar e verificar a retirada de vivonorteapp.com e vivonorte.fun: aguarda acesso à hospedagem dos sites externos ou ação de seu administrador; ambos inacessíveis nas consultas HTTP e HTTPS.
+
 - [x] Criar entrada separada com validação segura da senha e registro de acessos.
 - [x] Reutilizar o painel completo com carregamento protegido e manter o original.
 - [x] Testar entrada, bloqueio de acesso e navegação.
