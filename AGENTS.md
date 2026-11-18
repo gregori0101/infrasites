@@ -1,4 +1,5 @@
 # Architecture rules
+- Keep sitewide noindex in the static HTML head and permit crawling in robots.txt so search engines can discover removal directives on all SPA routes.
 - Validate every applicable checklist step and cabinet before submission; progress percentages are not a substitute for required-field validation.
 - Removing a photo from a form only removes its draft reference; never delete shared storage evidence before a report edit is committed.
 - Persist the report editing target alongside the checklist draft so reloads cannot turn an edit into a new report.

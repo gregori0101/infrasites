@@ -1,3 +1,5 @@
+# Crawling stays allowed so search engines can read the sitewide noindex
+# directive and remove previously indexed URLs. Do not use Disallow: /.
 User-agent: Googlebot
 Allow: /
 
