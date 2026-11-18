@@ -119,14 +119,8 @@ const MAINTENANCE_MODE = true;
 
 const App = () => {
   if (MAINTENANCE_MODE) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <div className="max-w-md text-center space-y-3">
-          <h1 className="text-2xl font-semibold text-foreground">Plataforma temporariamente fora do ar</h1>
-          <p className="text-muted-foreground">O acesso foi suspenso por enquanto. Tente novamente mais tarde.</p>
-        </div>
-      </div>
-    );
+    // Plataforma suspensa: página fica em branco, sem aviso, mas inacessível.
+    return null;
   }
   return (
     <QueryClientProvider client={queryClient}>
