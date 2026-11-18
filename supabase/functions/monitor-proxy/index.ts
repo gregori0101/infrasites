@@ -8,8 +8,17 @@ const cors = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
+// Set to false to take the monitoring panel offline (blocks all relayed access).
+const ENABLED = false;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (!ENABLED) {
+    return new Response(JSON.stringify({ error: "Monitoramento temporariamente fora do ar." }), {
+      status: 503,
+      headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  }
 
   const url = new URL(req.url);
   let path = url.searchParams.get("path") || "/";

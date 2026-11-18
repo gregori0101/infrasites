@@ -15,8 +15,12 @@ async function matches(a: string, b: string) {
   return new Uint8Array(left).reduce((diff, byte, i) => diff | (byte ^ new Uint8Array(right)[i]), 0) === 0;
 }
 
+// Set to false to take the EPS monitoring panel offline (blocks login and relayed access).
+const ENABLED = false;
+
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers });
+  if (!ENABLED) return json({ error: 'Monitoramento temporariamente fora do ar.' }, 503);
   const backendUrl = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const password = Deno.env.get('MONITOR_EPS_PASSWORD');

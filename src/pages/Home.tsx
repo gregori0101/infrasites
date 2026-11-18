@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, Radar, ShieldAlert, MessageSquare, Network, ChevronRight } from "lucide-react";
+import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, ShieldAlert, MessageSquare, Network, ChevronRight } from "lucide-react";
 import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -84,19 +84,6 @@ const tools: Tool[] = [
 ],
   },
   {
-    id: "painel-monitoramento",
-    title: "Painel de Monitoramento",
-    description: "Monitoramento da rede Norte — ERBs, backbone, riscos e indisponibilidades",
-    icon: Radar,
-    iconColor: "text-purple-600",
-    iconBg: "bg-purple-100",
-    hoverBorder: "hover:border-purple-500/50",
-    path: "/monitoramento",
-    actions: [
-      { label: "Abrir Painel", path: "/monitoramento" },
-    ],
-  },
-  {
     id: "backbone",
     title: "Backbone Norte",
     description: "Visualização e acompanhamento do backbone da rede Norte",
@@ -125,7 +112,7 @@ const sections: { title: string; subtitle: string; toolIds: string[] }[] = [
   {
     title: "Painéis & Monitoramento",
     subtitle: "Acompanhamento da rede",
-    toolIds: ["painel-monitoramento", "backbone"],
+    toolIds: ["backbone"],
   },
 ];
 
