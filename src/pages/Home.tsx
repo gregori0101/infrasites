@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClipboardCheck, FileSearch, UserCircle, LayoutDashboard, Cable, ShieldAlert, MessageSquare, Network, ChevronRight } from "lucide-react";
-import { VivoLogo } from "@/components/ui/vivo-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -130,8 +129,7 @@ export default function Home() {
 
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <header className="border-b bg-card px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-          <VivoLogo className="h-8 w-auto" />
+        <header className="border-b bg-card px-4 py-3 flex items-center justify-end sticky top-0 z-40">
           <div className="flex items-center gap-2">
             {isManager && (
               <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
