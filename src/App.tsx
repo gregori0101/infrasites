@@ -30,8 +30,6 @@ const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Install = lazy(() => import("./pages/Install"));
 const AuditoriaTA = lazy(() => import("./pages/AuditoriaTA"));
-const PainelMonitoramento = lazy(() => import("./pages/PainelMonitoramento"));
-const MonitoramentoEPS = lazy(() => import("./pages/MonitoramentoEPS"));
 const Backbone = lazy(() => import("./pages/Backbone"));
 const CheckVandalismo = lazy(() => import("./pages/CheckVandalismo"));
 const VandalismoPainelGestor = lazy(() => import("./pages/VandalismoPainelGestor"));
@@ -115,7 +113,11 @@ function GlobalErrorHandlers() {
   return null;
 }
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
+const CANONICAL_HOST = 'vivonorte.com';
+if (typeof window !== 'undefined' && window.location.hostname.endsWith('.lovable.app') && !window.location.hostname.includes('preview')) {
+  window.location.replace(`https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`);
+}
 
 const App = () => {
   if (MAINTENANCE_MODE) {
@@ -138,7 +140,6 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/login" element={<Login />} />
-                  <Route path="/monitoramento-eps" element={<MonitoramentoEPS />} />
                   <Route path="/pending-approval" element={<PendingApproval />} />
                   
                   {/* Protected routes */}
@@ -203,11 +204,6 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
-                  <Route path="/monitoramento" element={
-                    <ProtectedRoute>
-                      <PainelMonitoramento />
-                    </ProtectedRoute>
-                  } />
                   <Route path="/backbone" element={
                     <ProtectedRoute>
                       <Backbone />
