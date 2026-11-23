@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { VivoLogo } from '@/components/ui/vivo-logo';
 import { Loader2, LogIn, UserPlus, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -156,9 +155,6 @@ export default function Login() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <VivoLogo className="h-12 w-auto" />
-            </div>
             <CardTitle className="text-xl">{getTitle()}</CardTitle>
             <CardDescription>{getDescription()}</CardDescription>
           </CardHeader>

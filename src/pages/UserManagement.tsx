@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { VivoLogo } from '@/components/ui/vivo-logo';
 import { PaginationControls, usePagination } from '@/components/ui/pagination-controls';
 import { 
   ArrowLeft, 
@@ -403,7 +402,6 @@ export default function UserManagement() {
               <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <VivoLogo className="h-8 w-auto" />
             </div>
             <Button variant="outline" size="sm" onClick={fetchUsers} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />

@@ -34,7 +34,6 @@ import { toast } from "sonner";
 import { fetchSites, insertSites, deleteSite, Site } from "@/lib/siteDatabase";
 import { parseSpreadsheet, generateTemplateSpreadsheet } from "@/lib/parseSpreadsheet";
 import * as XLSX from "xlsx";
-import vivoLogo from "@/assets/vivo-logo.png";
 
 export default function SiteManagement() {
   const navigate = useNavigate();
@@ -234,7 +233,6 @@ export default function SiteManagement() {
             <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <img src={vivoLogo} alt="Vivo" className="h-6" />
             <h1 className="text-lg font-semibold">Gestão de Sites</h1>
           </div>
         </div>

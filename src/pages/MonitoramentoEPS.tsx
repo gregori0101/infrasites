@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { VivoLogo } from '@/components/ui/vivo-logo';
 import { monitorEpsEntrySchema } from '@/lib/monitorEpsValidation';
 import PainelMonitoramento from './PainelMonitoramento';
 
@@ -89,7 +88,7 @@ export default function MonitoramentoEPS() {
     <Helmet><title>Monitoramento EPS | InfraSites Vivo</title><meta name="description" content="Acesso restrito EPS ao monitoramento da rede Norte." /></Helmet>
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="items-center space-y-4"><VivoLogo className="h-12 w-auto" /><CardTitle className="text-xl">Monitoramento EPS</CardTitle></CardHeader>
+        <CardHeader className="items-center space-y-4"><CardTitle className="text-xl">Monitoramento EPS</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="eps-name">Nome e sobrenome</Label><Input id="eps-name" value={fullName} onChange={e => setFullName(e.target.value)} autoComplete="name" maxLength={120} required /></div>

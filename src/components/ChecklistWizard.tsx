@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import vivoLogo from "@/assets/vivo-logo.png";
 import { useStepValidation } from "@/hooks/use-validation";
 import { toast } from "sonner";
 
@@ -182,11 +181,7 @@ export function ChecklistWizard() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 shadow-sm">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-3">
-            <img src={vivoLogo} alt="Vivo" className="h-6 w-auto shrink-0 object-contain" />
-          </div>
-
+        <div className="flex items-center justify-end mb-1">
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"

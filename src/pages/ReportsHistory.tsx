@@ -26,7 +26,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsSummary, fetchReportByIdWithPhotos, fetchReportsForExcel, ReportRow, deleteReportById } from "@/lib/reportDatabase";
 import { clearReportLinkFromAssignments } from "@/lib/assignmentDatabase";
 import { deletePhotosByPublicUrls } from "@/lib/photoStorage";
@@ -295,7 +294,6 @@ export default function ReportsHistory() {
           <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <VivoLogo className="h-6" />
           <div className="flex-1">
             <h1 className="font-bold text-foreground">Histórico de Relatórios</h1>
           </div>

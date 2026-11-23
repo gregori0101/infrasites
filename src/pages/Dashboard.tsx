@@ -29,7 +29,6 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { VivoLogo } from "@/components/ui/vivo-logo";
 import { fetchReportsForDashboard } from "@/lib/reportDatabase";
 import { cn } from "@/lib/utils";
 
@@ -590,7 +589,6 @@ export default function Dashboard() {
         {/* Header Mobile */}
         <header className="lg:hidden sticky top-0 z-50 bg-gradient-to-r from-primary to-primary/85 text-primary-foreground shadow-md">
           <div className="px-4 py-3 flex items-center gap-3">
-            <VivoLogo className="h-6" />
             <div className="flex-1">
               <h1 className="font-bold text-lg tracking-tight">Dashboard</h1>
             </div>

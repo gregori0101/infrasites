@@ -67,7 +67,6 @@ import {
   SiteAssignment,
   AssignmentStatus
 } from "@/lib/assignmentDatabase";
-import vivoLogo from "@/assets/vivo-logo.png";
 import { logActivity } from "@/lib/activityLogger";
 
 interface Technician {
@@ -250,7 +249,6 @@ export default function AssignmentManagement() {
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <img src={vivoLogo} alt="Vivo" className="h-6" />
             <h1 className="text-lg font-semibold">Atribuir Vistorias</h1>
           </div>
           <Button onClick={() => setAssignDialogOpen(true)}>

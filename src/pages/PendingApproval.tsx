@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { VivoLogo } from '@/components/ui/vivo-logo';
 import { Clock, LogOut, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -36,9 +35,6 @@ export default function PendingApproval() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">
           <CardHeader className="space-y-4">
-            <div className="flex justify-center">
-              <VivoLogo className="h-12 w-auto" />
-            </div>
             <div className="flex justify-center">
               <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                 <Clock className="w-8 h-8 text-amber-600" />

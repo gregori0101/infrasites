@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { FGBottomNav } from './FGBottomNav';
 import { ConnectionStatus } from '@/fiber-guardian/components/ui/connection-status';
-import { VivoLogo } from '@/components/ui/vivo-logo';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -60,7 +59,6 @@ export function FGLayout({
           <div className="flex items-center gap-2 shrink-0">
             {headerRight}
             <ConnectionStatus />
-            <VivoLogo className="h-7 w-auto" />
           </div>
         </header>
 
