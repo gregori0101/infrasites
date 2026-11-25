@@ -1,5 +1,5 @@
 // Secure relay for the monitoring panel (netops-console.com).
-// - Only approved platform users can load pages/data (JWT + user_roles.approved).
+// - Public relay: no platform login; the upstream console has its own operator login.
 // - Static files (css/js/images/fonts) are relayed without login so <img>/<link> tags work.
 // - The upstream session cookie lives only in the user's tab and is sent via x-mon-cookie.
 // - Redirects are returned as x-mon-location so navigation stays inside the app.
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
   }
   const pathname = path.split("?")[0];
   const isStatic = req.method === "GET" && STATIC.test(pathname);
-  if (!isStatic && !(await isApproved(req))) return json(401, { error: "unauthorized" });
+  void isStatic; // Public relay: the upstream console enforces its own operator login.
 
   try {
     const headers: Record<string, string> = { "User-Agent": "Mozilla/5.0 (InfraSites-Monitor-Proxy)", Accept: req.headers.get("accept") || "*/*" };

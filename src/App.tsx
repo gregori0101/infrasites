@@ -205,11 +205,7 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/privacidade" element={<PrivacyPolicy />} />
-                  <Route path="/monitoramento" element={
-                    <ProtectedRoute>
-                      <PainelMonitoramento />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/monitoramento" element={<PainelMonitoramento />} />
                   <Route path="/backbone" element={
                     <ProtectedRoute>
                       <Backbone />
