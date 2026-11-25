@@ -393,7 +393,7 @@ export default function UserManagement() {
   return (
     <>
       <Helmet>
-        <title>Gerenciar Usuários | InfraSites Vivo</title>
+        <title>Gerenciar Usuários | InfraSites</title>
       </Helmet>
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b px-4 py-3">
@@ -586,7 +586,7 @@ export default function UserManagement() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="VIVO">VIVO</SelectItem>
+                                  <SelectItem value="VIVO">Principal</SelectItem>
                                   <SelectItem value="TEL">TEL</SelectItem>
                                 </SelectContent>
                               </Select>

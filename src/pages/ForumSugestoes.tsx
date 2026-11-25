@@ -185,7 +185,7 @@ export default function ForumSugestoes() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <Helmet>
-        <title>Fórum de Melhorias | InfraSites Vivo</title>
+        <title>Fórum de Melhorias | InfraSites</title>
       </Helmet>
 
       <header className="sticky top-0 z-30 bg-card border-b px-4 py-4 flex items-center gap-4">

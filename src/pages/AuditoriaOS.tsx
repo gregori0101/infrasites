@@ -13,7 +13,7 @@ export default function AuditoriaOS() {
   return (
     <>
       <Helmet>
-        <title>Auditoria OS | InfraSites Vivo</title>
+        <title>Auditoria OS | InfraSites</title>
       </Helmet>
 
       <div className="min-h-screen bg-background flex flex-col">

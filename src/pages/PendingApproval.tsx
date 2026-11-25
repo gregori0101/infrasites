@@ -30,7 +30,7 @@ export default function PendingApproval() {
   return (
     <>
       <Helmet>
-        <title>Aguardando Aprovação | InfraSites Vivo</title>
+        <title>Aguardando Aprovação | InfraSites</title>
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">

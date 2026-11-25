@@ -105,7 +105,7 @@ export async function generateAuditPDF(
     doc.setTextColor(...WHITE);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('vivo', margin, 13);
+    doc.text('InfraSites', margin, 13);
 
     doc.setFillColor(...VIVO_ORANGE);
     doc.circle(margin + 22, 9, 2.5, 'F');

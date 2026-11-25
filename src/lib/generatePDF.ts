@@ -40,7 +40,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.setTextColor(...WHITE);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('vivo', margin, 13);
+    doc.text('InfraSites', margin, 13);
 
     // Orange accent dot
     doc.setFillColor(...VIVO_ORANGE);
@@ -67,7 +67,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
     doc.setTextColor(...GRAY_MEDIUM);
     doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, margin, pageHeight - 5);
     doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth - margin, pageHeight - 5, { align: 'right' });
-    doc.text('VIVO - Checklist Técnico', pageWidth / 2, pageHeight - 5, { align: 'center' });
+    doc.text('Checklist Técnico', pageWidth / 2, pageHeight - 5, { align: 'center' });
   };
 
   const checkNewPage = (neededSpace: number = 30) => {
@@ -394,7 +394,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
   doc.setTextColor(...WHITE);
   doc.setFontSize(48);
   doc.setFont('helvetica', 'bold');
-  doc.text('vivo', pageWidth / 2 - 10, 60, { align: 'center' });
+  doc.text('InfraSites', pageWidth / 2 - 10, 60, { align: 'center' });
   doc.setFillColor(...VIVO_ORANGE);
   doc.circle(pageWidth / 2 + 38, 48, 6, 'F');
 
@@ -437,7 +437,7 @@ export async function generatePDF(data: ChecklistData, userOperadora?: string): 
 
   // Footer
   doc.setFontSize(8);
-  doc.text('Documento gerado automaticamente pelo sistema de checklist Vivo', pageWidth / 2, pageHeight - 15, { align: 'center' });
+  doc.text('Documento gerado automaticamente pelo sistema de checklist InfraSites', pageWidth / 2, pageHeight - 15, { align: 'center' });
 
   // ===== SITE OVERVIEW PAGE =====
   doc.addPage();

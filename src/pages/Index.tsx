@@ -50,7 +50,7 @@ const IndexInner = () => {
     return (
       <>
         <Helmet>
-          <title>Checklist Sites Telecom | Vivo</title>
+          <title>Checklist Sites Telecom | InfraSites</title>
           <meta name="description" content="Aplicativo de checklist para inspeção de sites e gabinetes de telecomunicações." />
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
           <meta name="theme-color" content="#005DAA" />
@@ -104,7 +104,7 @@ const IndexInner = () => {
   return (
     <>
       <Helmet>
-        <title>Checklist Sites Telecom | Vivo</title>
+        <title>Checklist Sites Telecom | InfraSites</title>
         <meta name="description" content="Aplicativo de checklist para inspeção de sites e gabinetes de telecomunicações. Capture fotos, valide dados e gere relatórios PDF/Excel." />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="theme-color" content="#005DAA" />

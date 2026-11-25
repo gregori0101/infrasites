@@ -58,7 +58,7 @@ export default function Backbone() {
   return (
     <>
       <Helmet>
-        <title>Backbone Norte | InfraSites Vivo</title>
+        <title>Backbone Norte | InfraSites</title>
         <meta name="description" content="Painel Backbone Norte — visualização integrada em tempo real." />
       </Helmet>
 

@@ -54,7 +54,7 @@ export async function generateVandalismoPDF(data: VandalismoVistoriaCompleta): P
     doc.setTextColor(...WHITE);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('vivo', margin, 13);
+    doc.text('InfraSites', margin, 13);
     doc.setFillColor(...ORANGE);
     doc.circle(margin + 22, 9, 2.5, 'F');
     doc.setFontSize(11);

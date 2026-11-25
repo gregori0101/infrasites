@@ -29,7 +29,7 @@ function buildRowFromChecklist(data: ChecklistData, userOperadora?: string): Rec
   
   // GRUPO 1: IDENTIFICAÇÃO
   row['ID_Relatorio'] = data.id;
-  row['Operadora'] = userOperadora || data.operadora || 'VIVO';
+  { const op = userOperadora || data.operadora || 'VIVO'; row['Operadora'] = op === 'VIVO' ? 'Principal' : op; }
   row['Data_Preenchimento'] = format(new Date(data.createdAt), 'dd/MM/yyyy');
   row['Hora_Preenchimento'] = format(new Date(data.createdAt), 'HH:mm');
   row['Tecnico'] = data.tecnico || '';

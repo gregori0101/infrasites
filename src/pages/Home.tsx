@@ -136,7 +136,7 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Início | InfraSites Vivo</title>
+        <title>Início | InfraSites</title>
         <meta name="description" content="Central de ferramentas: vistorias, auditorias e monitoramento da rede Norte." />
       </Helmet>
 

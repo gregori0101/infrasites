@@ -85,7 +85,7 @@ export default function MonitoramentoEPS() {
   </>;
 
   return <>
-    <Helmet><title>Monitoramento EPS | InfraSites Vivo</title><meta name="description" content="Acesso restrito EPS ao monitoramento da rede Norte." /></Helmet>
+    <Helmet><title>Monitoramento EPS | InfraSites</title><meta name="description" content="Acesso restrito EPS ao monitoramento da rede Norte." /></Helmet>
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center space-y-4"><CardTitle className="text-xl">Monitoramento EPS</CardTitle></CardHeader>

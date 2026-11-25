@@ -371,7 +371,7 @@ export default function ReportsHistory() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas</SelectItem>
-                    <SelectItem value="VIVO">VIVO</SelectItem>
+                    <SelectItem value="VIVO">Principal</SelectItem>
                     <SelectItem value="TEL">TEL</SelectItem>
                   </SelectContent>
                 </Select>

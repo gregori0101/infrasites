@@ -150,7 +150,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>{isLogin ? 'Login' : 'Cadastro'} | InfraSites Vivo</title>
+        <title>{isLogin ? 'Login' : 'Cadastro'} | InfraSites</title>
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -208,7 +208,7 @@ export default function Login() {
                         <SelectValue placeholder="Selecione a empresa" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="VIVO">VIVO</SelectItem>
+                        <SelectItem value="VIVO">Principal</SelectItem>
                         <SelectItem value="TEL">TEL</SelectItem>
                       </SelectContent>
                     </Select>

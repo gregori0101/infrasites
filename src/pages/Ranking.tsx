@@ -50,7 +50,7 @@ export default function Ranking() {
   return (
     <>
       <Helmet>
-        <title>Ranking de Técnicos | Vivo</title>
+        <title>Ranking de Técnicos | InfraSites</title>
         <meta name="description" content="Ranking completo dos técnicos de vistoria." />
       </Helmet>
 

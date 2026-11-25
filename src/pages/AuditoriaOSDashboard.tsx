@@ -229,7 +229,7 @@ export default function AuditoriaOSDashboard() {
   return (
     <>
       <Helmet>
-        <title>Dashboard Auditoria OS | InfraSites Vivo</title>
+        <title>Dashboard Auditoria OS | InfraSites</title>
       </Helmet>
 
       <div className="min-h-screen bg-background flex flex-col">
