@@ -1,9 +1,61 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
+import { supabase } from "@/integrations/supabase/client";
 
 // The panel is served through our own backend relay, so devices that block
 // the original address (or show a blank screen) can still load it.
 const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/monitor-proxy`;
+
+// ---- Secure relay client: platform login token + per-tab upstream session cookie ----
+let accessToken: string | null = null;
+supabase.auth.getSession().then(({ data }) => { accessToken = data.session?.access_token ?? null; });
+supabase.auth.onAuthStateChange((_e, session) => { accessToken = session?.access_token ?? null; });
+
+const JAR_KEY = "mon_jar";
+function readJar(): Record<string, string> {
+  try { return JSON.parse(sessionStorage.getItem(JAR_KEY) || "{}"); } catch { return {}; }
+}
+function cookieHeader() {
+  return Object.entries(readJar()).map(([k, v]) => `${k}=${v}`).join("; ");
+}
+function storeCookies(res: Response) {
+  const raw = res.headers.get("x-mon-set-cookie");
+  if (!raw) return;
+  const jar = readJar();
+  for (const line of raw.split("\n")) {
+    const i = line.indexOf("=");
+    if (i <= 0) continue;
+    const k = line.slice(0, i).trim(), v = line.slice(i + 1).trim();
+    if (v) jar[k] = v; else delete jar[k];
+  }
+  sessionStorage.setItem(JAR_KEY, JSON.stringify(jar));
+}
+export function proxied(proxyUrl: string, path: string) {
+  return `${proxyUrl}${proxyUrl.includes("?") ? "&" : "?"}path=${encodeURIComponent(path)}`;
+}
+function relayHeaders(extra?: HeadersInit) {
+  const h = new Headers(extra);
+  if (accessToken) h.set("Authorization", `Bearer ${accessToken}`);
+  const c = cookieHeader();
+  if (c) h.set("x-mon-cookie", c);
+  return h;
+}
+/** Fetch an upstream path through the relay. Follows relay redirects unless follow=false. */
+async function relayFetch(proxyUrl: string, path: string, init: RequestInit = {}, follow = true): Promise<Response> {
+  if (!accessToken) accessToken = (await supabase.auth.getSession()).data.session?.access_token ?? null;
+  let res = await fetch(proxied(proxyUrl, path), { ...init, headers: relayHeaders(init.headers), cache: "no-store", referrerPolicy: "no-referrer" });
+  storeCookies(res);
+  let hops = 0;
+  while (follow && res.headers.get("x-mon-location") && hops++ < 5) {
+    res = await fetch(proxied(proxyUrl, res.headers.get("x-mon-location")!), { headers: relayHeaders(), cache: "no-store", referrerPolicy: "no-referrer" });
+    storeCookies(res);
+  }
+  return res;
+}
+const w = window as unknown as Record<string, unknown>;
+w.__monFetch = (proxyUrl: string, path: string, init?: RequestInit) => relayFetch(proxyUrl, path, init);
+w.__monHeaders = () => { const o: Record<string, string> = {}; relayHeaders().forEach((v, k) => { o[k] = v; }); return o; };
+w.__monStore = (getHeader: (n: string) => string | null) => storeCookies({ headers: { get: getHeader } } as unknown as Response);
 
 export function buildDocument(html: string, proxyUrl = PROXY_URL) {
   // Pages that declare an external <base> (mirrors of other systems) must keep
@@ -20,14 +72,30 @@ export function buildDocument(html: string, proxyUrl = PROXY_URL) {
     if(u.charAt(0)!=='/') u='/'+u;
     return P+(P.indexOf('?')>=0?'&':'?')+'path='+encodeURIComponent(u);
   }
+  var T=window.top;
   var of=window.fetch.bind(window);
+  function rel(u){ if(B||typeof u!=='string') return null; if(u.indexOf(location.origin)===0) u=u.slice(location.origin.length);
+    if(/^https?:\\/\\//i.test(u)||u.indexOf('data:')===0||u.indexOf('blob:')===0) return null; return u.charAt(0)==='/'?u:'/'+u; }
+  function rf(u,o){ return T.__monFetch(P,u,o); }
   window.fetch=function(i,o){
-    if(typeof i==='string') return of(px(i),o);
-    if(i&&i.url&&i.url.indexOf(location.origin)===0){return of(px(i.url.slice(location.origin.length)),o);}
+    var u=rel(typeof i==='string'?i:(i&&i.url));
+    if(u!==null) return rf(u,o||(typeof i!=='string'?{method:i.method,body:i.body,headers:i.headers}:undefined));
     return of(i,o);
   };
-  var oo=XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open=function(m,u){arguments[1]=px(u);return oo.apply(this,arguments);};
+  var oo=XMLHttpRequest.prototype.open, os=XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open=function(m,u){var r=rel(u); this.__mon=r!==null; if(r!==null) arguments[1]=px(r); return oo.apply(this,arguments);};
+  XMLHttpRequest.prototype.send=function(){ if(this.__mon){ var h=T.__monHeaders(); for(var k in h) this.setRequestHeader(k,h[k]);
+    var x=this; this.addEventListener('load',function(){ T.__monStore(function(n){return x.getResponseHeader(n);}); }); }
+    return os.apply(this,arguments); };
+  document.addEventListener('submit',function(e){
+    var f=e.target; if(!f||f.tagName!=='FORM') return;
+    var a=f.getAttribute('action')||location.pathname||'/'; var r=rel(a); if(r===null) return;
+    e.preventDefault();
+    var m=(f.getAttribute('method')||'GET').toUpperCase();
+    var data=new URLSearchParams(new FormData(f)).toString();
+    if(m==='GET'){ window.__monNav(r+(r.indexOf('?')>=0?'&':'?')+data); return; }
+    T.postMessage({type:'monitor-submit',path:r,body:data},'*');
+  },true);
   var nested = window.parent !== window.top;
   window.__monNav=function(p){ if(nested){ loadSelf(p); return; } parent.postMessage({type:'monitor-nav',path:p},'*');};
   function loadSelf(p){ var fe=window.frameElement; if(fe) frameLoad(fe,p); }
@@ -35,7 +103,7 @@ export function buildDocument(html: string, proxyUrl = PROXY_URL) {
   var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'src');
   function frameLoad(f,u){
     f.setAttribute('data-mon-src',u);
-    of(px(u),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+    rf(u).then(function(r){return r.text();}).then(function(t){
       f.srcdoc=window.top.__monBuild(t,P);
     }).catch(function(){});
   }
@@ -85,24 +153,27 @@ export default function PainelMonitoramento({ proxyUrl = PROXY_URL, onUnauthoriz
   const requestId = useRef(0);
   const frame = useRef<HTMLIFrameElement>(null);
 
-  const load = useCallback(async (p: string) => {
+  const load = useCallback(async (p: string, init?: RequestInit) => {
     const id = ++requestId.current;
     setError(null);
     try {
-      const res = await fetch(`${proxyUrl}${proxyUrl.includes('?') ? '&' : '?'}path=${encodeURIComponent(p)}`, { cache: "no-store", referrerPolicy: "no-referrer" });
+      const res = await relayFetch(proxyUrl, p, init, false);
       if (id !== requestId.current) return;
       if (res.status === 401 && onUnauthorized) { onUnauthorized(); return; }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const next = res.headers.get("x-mon-location");
+      if (next) { if (next === path) load(next); else setPath(next); return; }
+      if (res.status >= 500) throw new Error(`HTTP ${res.status}`);
       const html = await res.text();
       if (id === requestId.current) setDoc(buildDocument(html, proxyUrl));
     } catch (e) {
       if (id === requestId.current) setError("Não foi possível carregar o painel. Tentando novamente...");
     }
-  }, [proxyUrl, onUnauthorized]);
+  }, [proxyUrl, onUnauthorized, path]);
 
   useEffect(() => {
     load(path);
-  }, [path, reloadKey, load]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, reloadKey]);
 
   // Retry automatically on error
   useEffect(() => {
@@ -110,6 +181,9 @@ export default function PainelMonitoramento({ proxyUrl = PROXY_URL, onUnauthoriz
     const t = setTimeout(() => setReloadKey((k) => k + 1), 10000);
     return () => clearTimeout(t);
   }, [error]);
+
+  const loadRef = useRef(load);
+  loadRef.current = load;
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -119,7 +193,10 @@ export default function PainelMonitoramento({ proxyUrl = PROXY_URL, onUnauthoriz
         try { for (let i = 0; i < w.frames.length; i++) if (ownsSource(w.frames[i])) return true; } catch { return false; }
         return false;
       };
-      if (ownsSource(frame.current?.contentWindow ?? null) && e.data?.type === "monitor-nav" && typeof e.data.path === "string" && e.data.path.startsWith('/') && !e.data.path.startsWith('//')) setPath(e.data.path);
+      if (ownsSource(frame.current?.contentWindow ?? null) && (e.data?.type === "monitor-nav" || e.data?.type === "monitor-submit") && typeof e.data.path === "string" && e.data.path.startsWith('/') && !e.data.path.startsWith('//')) {
+        if (e.data.type === "monitor-submit") loadRef.current(e.data.path, { method: "POST", body: String(e.data.body ?? ""), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+        else setPath(e.data.path);
+      }
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
@@ -128,7 +205,8 @@ export default function PainelMonitoramento({ proxyUrl = PROXY_URL, onUnauthoriz
   return (
     <>
       <Helmet>
-        <title>Painel de Monitoramento | InfraSites Vivo</title>
+        <title>Painel de Monitoramento | InfraSites</title>
+        <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
         <meta name="description" content="Painel de monitoramento da rede Norte — visualização integrada em tempo real." />
       </Helmet>
 
